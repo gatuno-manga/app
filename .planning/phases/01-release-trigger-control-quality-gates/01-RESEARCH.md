@@ -220,17 +220,15 @@ Source: `jobs.<job_id>.needs` behavior [CITED: https://raw.githubusercontent.com
 | A1 | Using `on.push.tags: ['v*']` is preferable to stricter glob because D-02 requires explicit invalid-tag failure messaging | Architecture Patterns | Medium (workflow could miss some invalid tags if trigger too narrow) |
 | A2 | Repository owners can practically enforce `v*` protection via rulesets in their GitHub plan/tier | Open Questions / Security | Medium (org plan limitations may require alternative governance) |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should invalid tags fail as a visible failed run, or be ignored at trigger level?**  
-   - What we know: D-02 asks immediate failure with clear message [VERIFIED: CONTEXT].  
-   - What's unclear: team preference if non-`v*` tags should even trigger release workflow.  
-   - Recommendation: keep trigger at `v*`, fail non-semver in first step for observability.
+1. **Invalid tags: fail visibly or ignore at trigger level?**  
+   - **Resolution:** Fail visibly in `validate_and_gate` with explicit message, keeping trigger as `v*` and enforcing strict regex in job step.  
+   - **Why:** Aligns directly with D-02 and preserves auditability in run history.
 
-2. **How strict should “reachable by main” be for hotfix workflows?**  
-   - What we know: D-09 requires reachability from `main` [VERIFIED: CONTEXT].  
-   - What's unclear: whether release branches will exist later.  
-   - Recommendation: implement strict main ancestry now; revisit in phase update if release-branch policy appears.
+2. **Main reachability strictness for hotfix workflows?**  
+   - **Resolution:** Enforce strict ancestry to `origin/main` in this phase.  
+   - **Why:** Aligns with D-09 and current governance model; if a release-branch model is adopted later, this rule will be revisited in a future phase.
 
 ## Environment Availability
 
