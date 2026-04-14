@@ -1,10 +1,11 @@
 ---
 phase: 1
 slug: release-trigger-control-quality-gates
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-04-14
+reviewed_at: 2026-04-14T00:00:00Z
 ---
 
 # Phase 1 — UI Design Contract
@@ -89,6 +90,16 @@ Source: `01-CONTEXT.md` decisions D-01..D-07 + phase defaults.
 
 ---
 
+## Visual Hierarchy
+
+- **Primary focal point:** Card/section with CTA **"Validate Release Tag"**.
+- **Secondary focal point:** Validation status timeline/result states (pass/fail and reason).
+- **Tertiary elements:** Concurrency policy details and safety notes.
+
+This ordering ensures users first understand whether release can proceed, then why it failed/succeeded, then what governance rules apply.
+
+---
+
 ## Registry Safety
 
 | Registry | Blocks Used | Safety Gate |
@@ -100,11 +111,11 @@ Source: `01-CONTEXT.md` decisions D-01..D-07 + phase defaults.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: FLAG (approved with recommendation applied)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-14
