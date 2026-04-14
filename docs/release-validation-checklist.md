@@ -40,12 +40,17 @@ Use this checklist to collect objective evidence for Phase 1 requirements: **TRI
 
 ## TRIG-03 — Only one active run per tag
 
-1. Push a valid tag and immediately re-push the same tag to a newer commit:
+1. Push the first run for a valid tag on commit A:
    ```bash
-   git tag -f v1.2.4
+   git tag v1.2.4 <commit-A>
+   git push origin v1.2.4
+   ```
+2. Move the same tag to commit B and push again:
+   ```bash
+   git tag -f v1.2.4 <commit-B>
    git push origin -f v1.2.4
    ```
-2. Check **Actions → Release** run list.
+3. Check **Actions → Release** run list.
 
 **Expected evidence**
 - Older run for `v1.2.4` is canceled.
