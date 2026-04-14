@@ -63,25 +63,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRIG-01 | TBD | Pending |
-| TRIG-02 | TBD | Pending |
-| TRIG-03 | TBD | Pending |
-| TRIG-04 | TBD | Pending |
-| BLD-01 | TBD | Pending |
-| BLD-02 | TBD | Pending |
-| BLD-03 | TBD | Pending |
-| BLD-04 | TBD | Pending |
-| REL-01 | TBD | Pending |
-| REL-02 | TBD | Pending |
-| REL-03 | TBD | Pending |
-| INT-01 | TBD | Pending |
-| INT-02 | TBD | Pending |
+| TRIG-01 | Phase 1 | Pending |
+| TRIG-02 | Phase 1 | Pending |
+| TRIG-03 | Phase 1 | Pending |
+| TRIG-04 | Phase 1 | Pending |
+| BLD-01 | Phase 2 | Pending |
+| BLD-02 | Phase 2 | Pending |
+| BLD-03 | Phase 2 | Pending |
+| BLD-04 | Phase 2 | Pending |
+| REL-01 | Phase 3 | Pending |
+| REL-02 | Phase 3 | Pending |
+| REL-03 | Phase 3 | Pending |
+| INT-01 | Phase 4 | Pending |
+| INT-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-14*  
-*Last updated: 2026-04-14 after initial definition*
+*Last updated: 2026-04-14 after roadmap mapping*
