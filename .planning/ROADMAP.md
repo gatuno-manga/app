@@ -28,7 +28,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Ao publicar tag invalida, a execucao falha antes de iniciar jobs de build.
   3. Para a mesma tag de versao, apenas uma execucao ativa de release permanece em andamento.
   4. Se `flutter analyze` ou `flutter test` falhar, nenhum artefato de release e gerado.
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 01-01-PLAN.md — Implementar workflow de release com trigger semver, concurrency guard, validação de ancestralidade em main e quality gate obrigatório.
 
 ### Phase 2: Unsigned Multi-Platform Artifact Builds
 **Goal**: Time consegue gerar artefatos de release unsigned para Android e iOS em toda tag valida, com nomes estaveis e versionados.
