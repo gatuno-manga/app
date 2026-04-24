@@ -10,11 +10,7 @@ class ImageReader extends StatelessWidget {
   final ReadingChapter chapter;
   final int initialIndex;
 
-  const ImageReader({
-    super.key,
-    required this.chapter,
-    this.initialIndex = 0,
-  });
+  const ImageReader({super.key, required this.chapter, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +23,21 @@ class ImageReader extends StatelessWidget {
       },
       itemBuilder: (context, index) {
         final page = chapter.pages[index];
-        return AppImage(
-          imageUrl: page.url,
-          fit: BoxFit.contain,
-          width: double.infinity,
-          placeholder: const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 64.0),
-              child: CircularProgressIndicator(),
-            ),
+        final aspectRatio =
+            (page.width != null &&
+                page.height != null &&
+                page.width! > 0 &&
+                page.height! > 0)
+            ? page.width! / page.height!
+            : 0.7;
+
+        return AspectRatio(
+          aspectRatio: aspectRatio,
+          child: AppImage(
+            imageUrl: page.url,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            placeholder: const Center(child: CircularProgressIndicator()),
           ),
         );
       },

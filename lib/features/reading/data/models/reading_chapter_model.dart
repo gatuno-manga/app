@@ -7,6 +7,8 @@ class ReadingPageModel extends ReadingPage {
     required super.id,
     required super.url,
     required super.index,
+    super.width,
+    super.height,
   });
 
   factory ReadingPageModel.fromJson(Map<String, dynamic> json) {
@@ -14,6 +16,8 @@ class ReadingPageModel extends ReadingPage {
       id: json['id']?.toString() ?? '',
       url: (json['path'] ?? json['url'])?.toString() ?? '',
       index: int.tryParse(json['index']?.toString() ?? '0') ?? 0,
+      width: double.tryParse(json['width']?.toString() ?? ''),
+      height: double.tryParse(json['height']?.toString() ?? ''),
     );
   }
 }
