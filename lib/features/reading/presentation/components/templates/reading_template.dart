@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../organisms/reading_overlay.dart';
+import '../organisms/reading_top_overlay.dart';
+import '../organisms/reading_bottom_overlay.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../../../../shared/components/molecules/app_error_view.dart';
 
@@ -46,26 +47,13 @@ class ReadingTemplate extends StatelessWidget {
             onTap: onToggleOverlay,
             child: readerBuilder(chapter!),
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            reverseDuration: const Duration(milliseconds: 200),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              final offsetAnimation = Tween<Offset>(
-                begin: const Offset(0, 0.02),
-                end: Offset.zero,
-              ).animate(animation);
-
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(position: offsetAnimation, child: child),
-              );
-            },
-            child: showOverlay
-                ? ReadingOverlay(
-                    key: const ValueKey('reading_overlay'),
-                    chapter: chapter!,
-                  )
-                : const SizedBox.shrink(),
+          ReadingTopOverlay(
+            showOverlay: showOverlay,
+            chapter: chapter!,
+          ),
+          ReadingBottomOverlay(
+            showOverlay: showOverlay,
+            chapter: chapter!,
           ),
         ],
       ),
