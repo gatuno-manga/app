@@ -530,6 +530,30 @@ abstract class AppLocalizations {
   /// **'Error updating API URL'**
   String get settingsApiUrlError;
 
+  /// No description provided for @settingsAllowedUrlsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed Bad Certificates'**
+  String get settingsAllowedUrlsSection;
+
+  /// No description provided for @settingsAddUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add URL'**
+  String get settingsAddUrlLabel;
+
+  /// No description provided for @settingsAddUrlHint.
+  ///
+  /// In en, this message translates to:
+  /// **'https://example.com'**
+  String get settingsAddUrlHint;
+
+  /// No description provided for @settingsRemoveUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get settingsRemoveUrl;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:

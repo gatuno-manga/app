@@ -90,5 +90,29 @@ void main() {
       ).called(1);
       verifyNever(() => mockSettingsService.setApiUrl(any()));
     });
+
+    test('addAllowedBadCertificateUrl should call service', () async {
+      when(
+        () => mockSettingsService.addAllowedBadCertificateUrl(any()),
+      ).thenAnswer((_) async {});
+
+      await viewModel.addAllowedBadCertificateUrl('https://storage.com');
+
+      verify(
+        () => mockSettingsService.addAllowedBadCertificateUrl('https://storage.com'),
+      ).called(1);
+    });
+
+    test('removeAllowedBadCertificateUrl should call service', () async {
+      when(
+        () => mockSettingsService.removeAllowedBadCertificateUrl(any()),
+      ).thenAnswer((_) async {});
+
+      await viewModel.removeAllowedBadCertificateUrl('https://storage.com');
+
+      verify(
+        () => mockSettingsService.removeAllowedBadCertificateUrl('https://storage.com'),
+      ).called(1);
+    });
   });
 }

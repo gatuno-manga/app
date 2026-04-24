@@ -7,6 +7,7 @@ import '../../../../shared/components/atoms/app_switch.dart';
 import '../components/molecules/settings_profile_card.dart';
 import '../components/molecules/settings_section_header.dart';
 import '../components/organisms/settings_api_form.dart';
+import '../components/organisms/settings_allowed_urls_section.dart';
 import '../components/templates/settings_template.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -67,6 +68,11 @@ class SettingsPage extends StatelessWidget {
         initialUrl: viewModel.apiUrl ?? '',
         isLoading: viewModel.isLoading,
         onSave: (url) => _handleApiSave(context, viewModel, url),
+      ),
+      allowedUrlsSection: SettingsAllowedUrlsSection(
+        urls: viewModel.allowedBadCertificateUrls,
+        onAdd: (url) => viewModel.addAllowedBadCertificateUrl(url),
+        onRemove: (url) => viewModel.removeAllowedBadCertificateUrl(url),
       ),
     );
   }

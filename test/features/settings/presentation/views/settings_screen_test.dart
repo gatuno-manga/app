@@ -34,6 +34,7 @@ void main() {
 
     when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
     when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
+    when(() => mockSettingsService.allowedBadCertificateUrls).thenReturn([]);
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.currentUser).thenReturn(null);
   });
@@ -70,5 +71,77 @@ void main() {
     verify(
       () => mockSettingsService.setSensitiveContentEnabled(true),
     ).called(1);
+  });
+
+  testWidgets('SettingsPage can add and remove allowed bad certificate URLs', (tester) async {
+    when(
+      () => mockSettingsService.allowedBadCertificateUrls,
+    ).thenReturn(['https://storage.com']);
+    when(
+      () => mockSettingsService.addAllowedBadCertificateUrl(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockSettingsService.removeAllowedBadCertificateUrl(any()),
+    ).thenAnswer((_) async {});
+
+    await tester.pumpApp(
+      ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+
+    // Verify existing URL is rendered
+    expect(find.text('https://storage.com'), findsOneWidget);
+
+    // Add a new URL
+    final addField = find.byType(TextField).last;
+    await tester.dragUntilVisible(addField, find.byType(ListView), const Offset(0, -100));
+    await tester.enterText(addField, 'https://new.com');
+    
+    final addButton = find.byIcon(Icons.add);
+    await tester.tap(addButton);
+    await tester.pump();
+
+    verify(
+      () => mockSettingsService.addAllowedBadCertificateUrl('https://new.com'),
+    ).called(1);
+
+    // Remove the URL
+    final deleteButton = find.byIcon(Icons.delete_outline);
+    await tester.dragUntilVisible(deleteButton, find.byType(ListView), const Offset(0, -100));
+    await tester.tap(deleteButton);
+    await tester.pump();
+
+    verify(
+      () => mockSettingsService.removeAllowedBadCertificateUrl('https://storage.com'),
+    ).called(1);
+  });
+
+  testWidgets('SettingsPage can update API URL', (tester) async {
+    when(
+      () => mockSettingsService.validateApiUrl(any()),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockSettingsService.setApiUrl(any()),
+    ).thenAnswer((_) async {});
+
+    await tester.pumpApp(
+      ChangeNotifierProvider.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField).first, 'https://new-api.com');
+    await tester.tap(find.text('Connect'));
+    await tester.pump(); // Start loading
+    await tester.pump(); // Finish loading
+
+    verify(() => mockSettingsService.validateApiUrl('https://new-api.com')).called(1);
+    verify(() => mockSettingsService.setApiUrl('https://new-api.com')).called(1);
+    
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.text('API URL updated successfully'), findsOneWidget);
   });
 }

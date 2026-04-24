@@ -63,6 +63,7 @@ Future<void> initTestDI({
   if (settingsService == null) {
     when(() => sService.sensitiveContentEnabled).thenReturn(false);
     when(() => sService.apiUrl).thenReturn(null);
+    when(() => sService.allowedBadCertificateUrls).thenReturn([]);
   }
   sl.registerLazySingleton<SettingsService>(() => sService);
 

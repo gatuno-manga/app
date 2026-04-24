@@ -53,6 +53,36 @@ void main() {
       },
     );
 
+    test('updateAllowedBadCertificateUrls updates the allowed hosts list', () {
+      const baseUrl = 'https://api.test.com/api';
+      final mockHttpClient = MockHttpClient();
+
+      final client = DioClient(baseUrl: baseUrl, httpClient: mockHttpClient);
+      client.updateAllowedBadCertificateUrls(['https://storage.test.com'], httpClient: mockHttpClient);
+
+      final adapter = client.dio.httpClientAdapter as IOHttpClientAdapter;
+      final httpClient = adapter.createHttpClient!();
+      expect(httpClient, mockHttpClient);
+
+      final cert = MockX509Certificate();
+
+      // Get the latest callback set
+      final capturedCallback =
+          verify(
+                () => mockHttpClient.badCertificateCallback = captureAny(),
+              ).captured.last
+              as bool Function(X509Certificate, String, int);
+
+      // Should allow base host
+      expect(capturedCallback(cert, 'api.test.com', 443), isTrue);
+
+      // Should allow storage host
+      expect(capturedCallback(cert, 'storage.test.com', 443), isTrue);
+
+      // Should deny others
+      expect(capturedCallback(cert, 'other.com', 443), isFalse);
+    });
+
     test('setupLoggingInterceptor adds LoggingInterceptor', () {
       final client = DioClient();
       setupLoggingInterceptor(client);

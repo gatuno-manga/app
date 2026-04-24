@@ -231,6 +231,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsApiUrlError => 'Erro ao atualizar a URL da API';
 
   @override
+  String get settingsAllowedUrlsSection => 'Certificados Inválidos Permitidos';
+
+  @override
+  String get settingsAddUrlLabel => 'Adicionar URL';
+
+  @override
+  String get settingsAddUrlHint => 'https://exemplo.com';
+
+  @override
+  String get settingsRemoveUrl => 'Remover';
+
+  @override
   String get welcomeTitle => 'Bem-vindo ao Gatuno';
 
   @override
