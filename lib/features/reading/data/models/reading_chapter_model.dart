@@ -11,9 +11,9 @@ class ReadingPageModel extends ReadingPage {
 
   factory ReadingPageModel.fromJson(Map<String, dynamic> json) {
     return ReadingPageModel(
-      id: json['id'] as String,
-      url: json['url'] as String,
-      index: (json['index'] as num).toInt(),
+      id: json['id']?.toString() ?? '',
+      url: (json['path'] ?? json['url'])?.toString() ?? '',
+      index: int.tryParse(json['index']?.toString() ?? '0') ?? 0,
     );
   }
 }
@@ -29,11 +29,11 @@ class ChapterCommentModel extends ChapterComment {
 
   factory ChapterCommentModel.fromJson(Map<String, dynamic> json) {
     return ChapterCommentModel(
-      id: json['id'] as String,
-      content: json['content'] as String,
+      id: json['id']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
       createdAt: DateTime.parse(json['createdAt'] as String),
-      userId: json['userId'] as String,
-      userName: json['userName'] as String,
+      userId: json['userId']?.toString() ?? '',
+      userName: json['userName']?.toString() ?? '',
     );
   }
 }
@@ -64,30 +64,31 @@ class ReadingChapterModel extends ReadingChapter {
 
   factory ReadingChapterModel.fromJson(Map<String, dynamic> json) {
     return ReadingChapterModel(
-      id: json['id'] as String,
-      title: json['title'] as String?,
-      originalUrl: json['originalUrl'] as String,
-      index: (json['index'] as num).toDouble(),
-      contentType: ContentType.fromString(json['contentType'] as String),
-      content: json['content'] as String?,
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString(),
+      originalUrl: json['originalUrl']?.toString() ?? '',
+      index: double.tryParse(json['index']?.toString() ?? '0') ?? 0.0,
+      contentType: ContentType.fromString(json['contentType']?.toString() ?? ''),
+      content: json['content']?.toString(),
       contentFormat: json['contentFormat'] != null
-          ? ContentFormat.fromString(json['contentFormat'] as String)
+          ? ContentFormat.fromString(json['contentFormat']?.toString() ?? '')
           : null,
-      documentPath: json['documentPath'] as String?,
+      documentPath: json['documentPath']?.toString(),
       documentFormat: json['documentFormat'] != null
-          ? DocumentFormat.fromString(json['documentFormat'] as String)
+          ? DocumentFormat.fromString(json['documentFormat']?.toString() ?? '')
           : null,
-      scrapingStatus: _parseScrapingStatus(json['scrapingStatus'] as String?),
-      retries: (json['retries'] as num? ?? 0).toInt(),
+      scrapingStatus: _parseScrapingStatus(json['scrapingStatus']?.toString()),
+      retries: int.tryParse(json['retries']?.toString() ?? '0') ?? 0,
       isFinal: json['isFinal'] as bool? ?? false,
       deletedAt: json['deletedAt'] != null
           ? DateTime.parse(json['deletedAt'] as String)
           : null,
-      previous: json['previous'] as String?,
-      next: json['next'] as String?,
-      bookId: json['bookId'] as String,
-      bookTitle: json['bookTitle'] as String,
-      totalChapters: (json['totalChapters'] as num? ?? 0).toInt(),
+      previous: json['previous']?.toString(),
+      next: json['next']?.toString(),
+      bookId: json['bookId']?.toString() ?? '',
+      bookTitle: json['bookTitle']?.toString() ?? '',
+      totalChapters:
+          int.tryParse(json['totalChapters']?.toString() ?? '0') ?? 0,
       pages: (json['pages'] as List<dynamic>? ?? [])
           .map((e) => ReadingPageModel.fromJson(e as Map<String, dynamic>))
           .toList(),
