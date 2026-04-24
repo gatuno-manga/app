@@ -40,11 +40,7 @@ class SettingsAddUrlField extends StatelessWidget {
         const SizedBox(width: 8),
         Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: AppIconButton(
-            icon: Icons.add,
-            filled: true,
-            onPressed: onAdd,
-          ),
+          child: AppIconButton(icon: Icons.add, filled: true, onPressed: onAdd),
         ),
       ],
     );

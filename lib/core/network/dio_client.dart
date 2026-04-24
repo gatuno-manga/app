@@ -27,7 +27,10 @@ class DioClient {
     _setupCertificatePinning(baseUrl, httpClient);
   }
 
-  void updateAllowedBadCertificateUrls(List<String> urls, {HttpClient? httpClient}) {
+  void updateAllowedBadCertificateUrls(
+    List<String> urls, {
+    HttpClient? httpClient,
+  }) {
     _allowedBadCertificateUrls = urls;
     _setupCertificatePinning(dio.options.baseUrl, httpClient);
   }

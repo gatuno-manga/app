@@ -44,9 +44,7 @@ class TextReader extends StatelessWidget {
       default:
         return Text(
           content,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            height: 1.6,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
         );
     }
   }

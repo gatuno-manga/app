@@ -26,7 +26,8 @@ class SettingsViewModel extends SafeChangeNotifier {
 
   String? get apiUrl => _settingsService.apiUrl;
   bool get sensitiveContentEnabled => _settingsService.sensitiveContentEnabled;
-  List<String> get allowedBadCertificateUrls => _settingsService.allowedBadCertificateUrls;
+  List<String> get allowedBadCertificateUrls =>
+      _settingsService.allowedBadCertificateUrls;
   bool get isAuthenticated => _authService.authenticated;
   UserModel? get user => _authService.currentUser;
 

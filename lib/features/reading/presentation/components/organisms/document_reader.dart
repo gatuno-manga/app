@@ -27,7 +27,9 @@ class DocumentReader extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Format: ${chapter.documentFormat?.value.toUpperCase() ?? 'Unknown'}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
             ),
             const SizedBox(height: 24),
             ElevatedButton(

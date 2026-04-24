@@ -99,7 +99,9 @@ void main() {
       await viewModel.addAllowedBadCertificateUrl('https://storage.com');
 
       verify(
-        () => mockSettingsService.addAllowedBadCertificateUrl('https://storage.com'),
+        () => mockSettingsService.addAllowedBadCertificateUrl(
+          'https://storage.com',
+        ),
       ).called(1);
     });
 
@@ -111,7 +113,9 @@ void main() {
       await viewModel.removeAllowedBadCertificateUrl('https://storage.com');
 
       verify(
-        () => mockSettingsService.removeAllowedBadCertificateUrl('https://storage.com'),
+        () => mockSettingsService.removeAllowedBadCertificateUrl(
+          'https://storage.com',
+        ),
       ).called(1);
     });
   });

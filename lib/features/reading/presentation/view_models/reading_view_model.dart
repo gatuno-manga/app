@@ -22,7 +22,10 @@ class ReadingViewModel extends SafeChangeNotifier {
   int get currentPageIndex => _currentPageIndex;
 
   Future<void> loadChapter(String chapterId, {int initialPage = 0}) async {
-    AppLogger.i('Loading chapter: $chapterId, initialPage: $initialPage', _logTag);
+    AppLogger.i(
+      'Loading chapter: $chapterId, initialPage: $initialPage',
+      _logTag,
+    );
     _isLoading = true;
     _error = null;
     _currentPageIndex = initialPage;

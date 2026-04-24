@@ -10,7 +10,5 @@ void initReadingDI(GetIt sl) {
   );
 
   // ViewModels
-  sl.registerFactory(
-    () => ReadingViewModel(sl()),
-  );
+  sl.registerFactory(() => ReadingViewModel(sl()));
 }

@@ -7,7 +7,7 @@ import '../../domain/entities/reading_enums.dart';
 import '../components/organisms/image_reader.dart';
 import '../components/organisms/text_reader.dart';
 import '../components/organisms/document_reader.dart';
-import '../components/organisms/reading_overlay.dart';
+import '../components/templates/reading_template.dart';
 
 class ReadingScreen extends StatefulWidget {
   final String chapterId;
@@ -52,48 +52,18 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: _viewModel,
-      child: Scaffold(
-        body: Consumer<ReadingViewModel>(
-          builder: (context, viewModel, child) {
-            if (viewModel.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (viewModel.error != null) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(viewModel.error!),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () => viewModel.loadChapter(widget.chapterId),
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            final chapter = viewModel.chapter;
-            if (chapter == null) {
-              return const Center(child: Text('No chapter found'));
-            }
-
-            return Stack(
-              children: [
-                GestureDetector(
-                  onTap: _toggleOverlay,
-                  child: _buildReader(chapter),
-                ),
-                if (_showOverlay) ReadingOverlay(chapter: chapter),
-              ],
-            );
-          },
-        ),
+      child: Consumer<ReadingViewModel>(
+        builder: (context, viewModel, child) {
+          return ReadingTemplate(
+            isLoading: viewModel.isLoading,
+            error: viewModel.error,
+            chapter: viewModel.chapter,
+            showOverlay: _showOverlay,
+            onToggleOverlay: _toggleOverlay,
+            onRetry: () => viewModel.loadChapter(widget.chapterId),
+            readerBuilder: _buildReader,
+          );
+        },
       ),
     );
   }
@@ -101,10 +71,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Widget _buildReader(ReadingChapter chapter) {
     switch (chapter.contentType) {
       case ContentType.image:
-        return ImageReader(
-          chapter: chapter,
-          initialIndex: widget.initialPage,
-        );
+        return ImageReader(chapter: chapter, initialIndex: widget.initialPage);
       case ContentType.text:
         return TextReader(chapter: chapter);
       case ContentType.document:

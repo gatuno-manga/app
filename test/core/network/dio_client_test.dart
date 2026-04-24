@@ -58,7 +58,9 @@ void main() {
       final mockHttpClient = MockHttpClient();
 
       final client = DioClient(baseUrl: baseUrl, httpClient: mockHttpClient);
-      client.updateAllowedBadCertificateUrls(['https://storage.test.com'], httpClient: mockHttpClient);
+      client.updateAllowedBadCertificateUrls([
+        'https://storage.test.com',
+      ], httpClient: mockHttpClient);
 
       final adapter = client.dio.httpClientAdapter as IOHttpClientAdapter;
       final httpClient = adapter.createHttpClient!();

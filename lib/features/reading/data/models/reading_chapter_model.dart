@@ -72,7 +72,9 @@ class ReadingChapterModel extends ReadingChapter {
       title: json['title']?.toString(),
       originalUrl: json['originalUrl']?.toString() ?? '',
       index: double.tryParse(json['index']?.toString() ?? '0') ?? 0.0,
-      contentType: ContentType.fromString(json['contentType']?.toString() ?? ''),
+      contentType: ContentType.fromString(
+        json['contentType']?.toString() ?? '',
+      ),
       content: json['content']?.toString(),
       contentFormat: json['contentFormat'] != null
           ? ContentFormat.fromString(json['contentFormat']?.toString() ?? '')

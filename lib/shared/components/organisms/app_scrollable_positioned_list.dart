@@ -32,7 +32,7 @@ class _AppScrollablePositionedListState
     super.initState();
     _scrollController = widget.controller ?? ScrollController();
     _lastReportedIndex = widget.initialIndex;
-    
+
     if (widget.initialIndex > 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToIndex(widget.initialIndex);
@@ -78,7 +78,10 @@ class _AppScrollablePositionedListState
       final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
 
       if (renderBox != null && renderBox.attached) {
-        final offset = renderBox.localToGlobal(Offset.zero, ancestor: scrollBox);
+        final offset = renderBox.localToGlobal(
+          Offset.zero,
+          ancestor: scrollBox,
+        );
         final itemBounds = offset & renderBox.size;
         final intersection = scrollBounds.intersect(itemBounds);
 

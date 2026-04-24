@@ -23,11 +23,7 @@ void main() {
             'width': 800,
             'height': 1200,
           },
-          {
-            'id': 'page-2',
-            'url': 'http://example.com/p2.jpg',
-            'index': 2,
-          }
+          {'id': 'page-2', 'url': 'http://example.com/p2.jpg', 'index': 2},
         ],
         'comments': <Map<String, dynamic>>[],
       };
@@ -58,7 +54,7 @@ void main() {
             'index': 1,
             'width': '1024',
             'height': '768',
-          }
+          },
         ],
         'comments': <Map<String, dynamic>>[],
       };

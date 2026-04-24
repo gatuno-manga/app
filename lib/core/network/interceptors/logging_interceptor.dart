@@ -52,12 +52,7 @@ class LoggingInterceptor extends Interceptor {
         AppLogger.d('Headers: ${err.response?.headers}', _tag);
       }
       if (err.response?.data != null) {
-        AppLogger.e(
-          _formatData(err.response?.data),
-          err,
-          err.stackTrace,
-          _tag,
-        );
+        AppLogger.e(_formatData(err.response?.data), err, err.stackTrace, _tag);
       }
     }
     return super.onError(err, handler);
