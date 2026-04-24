@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../../core/di/injection.dart';
@@ -12,6 +13,7 @@ class AppImage extends StatefulWidget {
   final BoxFit fit;
   final Widget? placeholder;
   final Widget? errorWidget;
+  final void Function(Size)? onImageLoaded;
 
   const AppImage({
     super.key,
@@ -21,6 +23,7 @@ class AppImage extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.placeholder,
     this.errorWidget,
+    this.onImageLoaded,
   });
 
   @override
@@ -55,7 +58,19 @@ class _AppImageState extends State<AppImage> {
       );
 
       if (response.data != null) {
-        return Uint8List.fromList(response.data!);
+        final bytes = Uint8List.fromList(response.data!);
+        
+        if (widget.onImageLoaded != null) {
+          final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+          final descriptor = await ui.ImageDescriptor.encoded(buffer);
+          widget.onImageLoaded!(
+            Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
+          );
+          descriptor.dispose();
+          buffer.dispose();
+        }
+
+        return bytes;
       }
     } catch (e) {
       debugPrint('Error fetching image (${widget.imageUrl}): $e');

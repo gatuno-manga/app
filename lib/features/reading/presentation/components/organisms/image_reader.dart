@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../shared/components/organisms/app_scrollable_positioned_list.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../view_models/reading_view_model.dart';
+import '../molecules/image_reader_item.dart';
 
 class ImageReader extends StatelessWidget {
   final ReadingChapter chapter;
@@ -22,24 +22,7 @@ class ImageReader extends StatelessWidget {
         context.replace('/chapters/${chapter.id}/page/$index');
       },
       itemBuilder: (context, index) {
-        final page = chapter.pages[index];
-        final aspectRatio =
-            (page.width != null &&
-                page.height != null &&
-                page.width! > 0 &&
-                page.height! > 0)
-            ? page.width! / page.height!
-            : 0.7;
-
-        return AspectRatio(
-          aspectRatio: aspectRatio,
-          child: AppImage(
-            imageUrl: page.url,
-            fit: BoxFit.contain,
-            width: double.infinity,
-            placeholder: const Center(child: CircularProgressIndicator()),
-          ),
-        );
+        return ImageReaderItem(page: chapter.pages[index]);
       },
     );
   }
