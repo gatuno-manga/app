@@ -232,6 +232,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsApiUrlError => 'Error updating API URL';
 
   @override
+  String get settingsAllowedUrlsSection => 'Allowed Bad Certificates';
+
+  @override
+  String get settingsAddUrlLabel => 'Add URL';
+
+  @override
+  String get settingsAddUrlHint => 'https://example.com';
+
+  @override
+  String get settingsRemoveUrl => 'Remove';
+
+  @override
   String get welcomeTitle => 'Welcome to Gatuno';
 
   @override

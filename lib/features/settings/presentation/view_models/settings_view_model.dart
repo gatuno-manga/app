@@ -26,6 +26,7 @@ class SettingsViewModel extends SafeChangeNotifier {
 
   String? get apiUrl => _settingsService.apiUrl;
   bool get sensitiveContentEnabled => _settingsService.sensitiveContentEnabled;
+  List<String> get allowedBadCertificateUrls => _settingsService.allowedBadCertificateUrls;
   bool get isAuthenticated => _authService.authenticated;
   UserModel? get user => _authService.currentUser;
 
@@ -34,6 +35,16 @@ class SettingsViewModel extends SafeChangeNotifier {
 
   Future<void> setSensitiveContentEnabled(bool enabled) async {
     await _settingsService.setSensitiveContentEnabled(enabled);
+    notifyListeners();
+  }
+
+  Future<void> addAllowedBadCertificateUrl(String url) async {
+    await _settingsService.addAllowedBadCertificateUrl(url);
+    notifyListeners();
+  }
+
+  Future<void> removeAllowedBadCertificateUrl(String url) async {
+    await _settingsService.removeAllowedBadCertificateUrl(url);
     notifyListeners();
   }
 

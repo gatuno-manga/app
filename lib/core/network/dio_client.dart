@@ -4,6 +4,7 @@ import 'package:dio/io.dart';
 
 class DioClient {
   late final Dio dio;
+  List<String> _allowedBadCertificateUrls = [];
 
   DioClient({String baseUrl = '', HttpClient? httpClient}) {
     dio = Dio(
@@ -26,6 +27,11 @@ class DioClient {
     _setupCertificatePinning(baseUrl, httpClient);
   }
 
+  void updateAllowedBadCertificateUrls(List<String> urls, {HttpClient? httpClient}) {
+    _allowedBadCertificateUrls = urls;
+    _setupCertificatePinning(dio.options.baseUrl, httpClient);
+  }
+
   void _setupCertificatePinning(String baseUrl, HttpClient? httpClient) {
     if (baseUrl.isEmpty) return;
 
@@ -37,7 +43,11 @@ class DioClient {
       createHttpClient: () {
         final client = httpClient ?? HttpClient();
         client.badCertificateCallback = (cert, host, port) {
-          return host == baseUri.host;
+          if (host == baseUri.host) return true;
+          return _allowedBadCertificateUrls.any((url) {
+            final uri = Uri.tryParse(url);
+            return uri != null && uri.host == host;
+          });
         };
         return client;
       },

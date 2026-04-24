@@ -13,12 +13,14 @@ class SettingsService extends ChangeNotifier {
 
   String? _apiUrl;
   bool _sensitiveContentEnabled = false;
+  List<String> _allowedBadCertificateUrls = [];
   bool _isInitialized = false;
 
   SettingsService(this._storage, this._dioClient);
 
   String? get apiUrl => _apiUrl;
   bool get sensitiveContentEnabled => _sensitiveContentEnabled;
+  List<String> get allowedBadCertificateUrls => _allowedBadCertificateUrls;
   bool get isInitialized => _isInitialized;
 
   Future<void> init() async {
@@ -27,10 +29,12 @@ class SettingsService extends ChangeNotifier {
     try {
       _apiUrl = await _storage.getApiUrl();
       _sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
+      _allowedBadCertificateUrls = await _storage.getAllowedBadCertificateUrls();
 
       if (_apiUrl != null) {
         _dioClient.updateBaseUrl(_apiUrl!);
       }
+      _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
 
       _isInitialized = true;
       notifyListeners();
@@ -63,6 +67,33 @@ class SettingsService extends ChangeNotifier {
         stackTrace,
         _logTag,
       );
+      rethrow;
+    }
+  }
+
+  Future<void> addAllowedBadCertificateUrl(String url) async {
+    if (url.isEmpty || _allowedBadCertificateUrls.contains(url)) return;
+
+    try {
+      _allowedBadCertificateUrls.add(url);
+      await _storage.setAllowedBadCertificateUrls(_allowedBadCertificateUrls);
+      _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
+      notifyListeners();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error adding allowed bad certificate URL', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
+  Future<void> removeAllowedBadCertificateUrl(String url) async {
+    try {
+      if (_allowedBadCertificateUrls.remove(url)) {
+        await _storage.setAllowedBadCertificateUrls(_allowedBadCertificateUrls);
+        _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
+        notifyListeners();
+      }
+    } catch (e, stackTrace) {
+      AppLogger.e('Error removing allowed bad certificate URL', e, stackTrace, _logTag);
       rethrow;
     }
   }
