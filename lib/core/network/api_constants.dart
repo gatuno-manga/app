@@ -7,4 +7,7 @@ class ApiConstants {
 
   // Books Routes
   static const String books = '/books';
+
+  // Chapters Routes
+  static const String chapters = '/chapters';
 }

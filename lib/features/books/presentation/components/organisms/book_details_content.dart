@@ -42,7 +42,10 @@ class BookDetailsContent extends StatelessWidget {
       ),
       actionButtons: BookActionButtons(
         onStartReading: () {
-          // TODO: Implement start reading
+          final chapters = viewModel.chapterList?.data;
+          if (chapters != null && chapters.isNotEmpty) {
+            context.push('/chapters/${chapters.first.id}');
+          }
         },
       ),
       tags: BookTagsList(tags: book.tags),
@@ -52,7 +55,7 @@ class BookDetailsContent extends StatelessWidget {
         isLoading: viewModel.isLoadingChapters,
         hasNextPage: viewModel.chapterList?.hasNextPage ?? false,
         onChapterTap: (chapter) {
-          // TODO: Navigate to reader
+          context.push('/chapters/${chapter.id}');
         },
         error: viewModel.chaptersError,
         onRetry: viewModel.fetchChapters,

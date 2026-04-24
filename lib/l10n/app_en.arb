@@ -113,5 +113,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "readingDeferredDocumentMessage": "PDF and EPUB support is coming soon.",
+  "readingNextChapter": "Next Chapter",
+  "readingPreviousChapter": "Previous Chapter",
+  "readingFinished": "You've reached the end of this chapter."
 }

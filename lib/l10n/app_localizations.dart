@@ -637,6 +637,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page {current} of {total}'**
   String commonPageOf(int current, int total);
+
+  /// No description provided for @readingDeferredDocumentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF and EPUB support is coming soon.'**
+  String get readingDeferredDocumentMessage;
+
+  /// No description provided for @readingNextChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Chapter'**
+  String get readingNextChapter;
+
+  /// No description provided for @readingPreviousChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Chapter'**
+  String get readingPreviousChapter;
+
+  /// No description provided for @readingFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the end of this chapter.'**
+  String get readingFinished;
 }
 
 class _AppLocalizationsDelegate
