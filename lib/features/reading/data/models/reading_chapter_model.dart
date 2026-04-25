@@ -16,8 +16,8 @@ class ReadingPageModel extends ReadingPage {
       id: json['id']?.toString() ?? '',
       url: (json['path'] ?? json['url'])?.toString() ?? '',
       index: int.tryParse(json['index']?.toString() ?? '0') ?? 0,
-      width: double.tryParse(json['width']?.toString() ?? ''),
-      height: double.tryParse(json['height']?.toString() ?? ''),
+      width: double.tryParse(json['metadata']?['width']?.toString() ?? ''),
+      height: double.tryParse(json['metadata']?['height']?.toString() ?? ''),
     );
   }
 }
