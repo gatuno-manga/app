@@ -16,8 +16,8 @@ void main() {
         bookId: 'b1',
         bookTitle: 'Book',
         totalChapters: 10,
-        pages: [],
-        comments: [],
+        pages: <ReadingPage>[],
+        comments: <ChapterComment>[],
       );
 
       expect(chapter.id, '1');

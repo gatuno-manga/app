@@ -39,7 +39,7 @@ void main() {
         'pages': [
           {'id': 'p1', 'url': 'p1.jpg', 'index': 0}
         ],
-        'comments': []
+        'comments': <Map<String, dynamic>>[]
       };
 
       when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer(
