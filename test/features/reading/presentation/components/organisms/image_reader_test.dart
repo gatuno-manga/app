@@ -57,26 +57,30 @@ void main() {
 
   group('ImageReader', () {
     testWidgets('renders pages and toggles overlay on tap', (tester) async {
-      final chapter = _MockChapter(pages: [
-        _MockPage(id: '1', url: 'p1.png', index: 0),
-        _MockPage(id: '2', url: 'p2.png', index: 1),
-      ]);
+      final chapter = _MockChapter(
+        pages: [
+          _MockPage(id: '1', url: 'p1.png', index: 0),
+          _MockPage(id: '2', url: 'p2.png', index: 1),
+        ],
+      );
 
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
-          child: Scaffold(
-            body: ImageReader(chapter: chapter),
-          ),
+          child: Scaffold(body: ImageReader(chapter: chapter)),
         ),
       );
 
       // Verify readers are present
       expect(find.byType(ListView), findsOneWidget);
-      
+
       // Overlays should be hidden initially
-      final topOverlay = tester.widget<ReadingTopOverlay>(find.byType(ReadingTopOverlay));
-      final bottomOverlay = tester.widget<ReadingBottomOverlay>(find.byType(ReadingBottomOverlay));
+      final topOverlay = tester.widget<ReadingTopOverlay>(
+        find.byType(ReadingTopOverlay),
+      );
+      final bottomOverlay = tester.widget<ReadingBottomOverlay>(
+        find.byType(ReadingBottomOverlay),
+      );
       expect(topOverlay.showOverlay, isFalse);
       expect(bottomOverlay.showOverlay, isFalse);
 
@@ -85,8 +89,12 @@ void main() {
       await tester.pump();
 
       // Overlays should now be shown
-      final topOverlayShown = tester.widget<ReadingTopOverlay>(find.byType(ReadingTopOverlay));
-      final bottomOverlayShown = tester.widget<ReadingBottomOverlay>(find.byType(ReadingBottomOverlay));
+      final topOverlayShown = tester.widget<ReadingTopOverlay>(
+        find.byType(ReadingTopOverlay),
+      );
+      final bottomOverlayShown = tester.widget<ReadingBottomOverlay>(
+        find.byType(ReadingBottomOverlay),
+      );
       expect(topOverlayShown.showOverlay, isTrue);
       expect(bottomOverlayShown.showOverlay, isTrue);
     });

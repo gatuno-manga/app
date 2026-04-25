@@ -15,7 +15,7 @@ void main() {
 
   test('initReadingDI registers expected types', () {
     sl.registerSingleton<DioClient>(MockDioClient());
-    
+
     initReadingDI(sl);
 
     expect(sl.isRegistered<ReadingRepository>(), isTrue);

@@ -47,8 +47,12 @@ void main() {
 
   setUp(() async {
     mockViewModel = MockReadingViewModel();
-    when(() => mockViewModel.loadChapter(any(), initialPage: any(named: 'initialPage')))
-        .thenAnswer((_) async {});
+    when(
+      () => mockViewModel.loadChapter(
+        any(),
+        initialPage: any(named: 'initialPage'),
+      ),
+    ).thenAnswer((_) async {});
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chapter).thenReturn(null);
@@ -85,10 +89,15 @@ void main() {
       );
 
       expect(find.text('Error'), findsOneWidget);
-      
+
       await tester.tap(find.text('Retry'));
       // 1st call in initState, 2nd call on retry
-      verify(() => mockViewModel.loadChapter('123', initialPage: any(named: 'initialPage'))).called(2);
+      verify(
+        () => mockViewModel.loadChapter(
+          '123',
+          initialPage: any(named: 'initialPage'),
+        ),
+      ).called(2);
     });
 
     testWidgets('renders correct reader for image content', (tester) async {

@@ -35,10 +35,7 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
           behavior: HitTestBehavior.opaque,
           child: widget.child,
         ),
-        ReadingTopOverlay(
-          showOverlay: _showOverlay,
-          chapter: widget.chapter,
-        ),
+        ReadingTopOverlay(showOverlay: _showOverlay, chapter: widget.chapter),
         ReadingBottomOverlay(
           showOverlay: _showOverlay,
           chapter: widget.chapter,

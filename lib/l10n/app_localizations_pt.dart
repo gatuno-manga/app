@@ -301,4 +301,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get readingFinished => 'Você chegou ao fim deste capítulo.';
+
+  @override
+  String booksDocumentFormat(String format) {
+    return 'Formato: $format';
+  }
+
+  @override
+  String get booksUnknownFormat => 'Desconhecido';
 }

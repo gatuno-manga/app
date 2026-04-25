@@ -29,9 +29,9 @@ void main() {
     test('clear removes all entries', () {
       ImageAspectRatioCache.set('url1', 1.0);
       ImageAspectRatioCache.set('url2', 2.0);
-      
+
       ImageAspectRatioCache.clear();
-      
+
       expect(ImageAspectRatioCache.get('url1'), isNull);
       expect(ImageAspectRatioCache.get('url2'), isNull);
     });

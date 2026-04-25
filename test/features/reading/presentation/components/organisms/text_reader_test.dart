@@ -54,9 +54,7 @@ void main() {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
-          child: Scaffold(
-            body: TextReader(chapter: chapter),
-          ),
+          child: Scaffold(body: TextReader(chapter: chapter)),
         ),
       );
 
@@ -74,9 +72,7 @@ void main() {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
-          child: Scaffold(
-            body: TextReader(chapter: chapter),
-          ),
+          child: Scaffold(body: TextReader(chapter: chapter)),
         ),
       );
 
@@ -93,9 +89,7 @@ void main() {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
-          child: Scaffold(
-            body: TextReader(chapter: chapter),
-          ),
+          child: Scaffold(body: TextReader(chapter: chapter)),
         ),
       );
 

@@ -661,6 +661,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve reached the end of this chapter.'**
   String get readingFinished;
+
+  /// No description provided for @booksDocumentFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format: {format}'**
+  String booksDocumentFormat(String format);
+
+  /// No description provided for @booksUnknownFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get booksUnknownFormat;
 }
 
 class _AppLocalizationsDelegate

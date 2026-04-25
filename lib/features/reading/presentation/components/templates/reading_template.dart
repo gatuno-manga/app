@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../../../../shared/components/molecules/app_error_view.dart';
 
@@ -20,6 +21,8 @@ class ReadingTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -31,11 +34,9 @@ class ReadingTemplate extends StatelessWidget {
     }
 
     if (chapter == null) {
-      return const Scaffold(body: Center(child: Text('No chapter found')));
+      return Scaffold(body: Center(child: Text(l10n.booksNoChaptersFound)));
     }
 
-    return Scaffold(
-      body: readerBuilder(chapter!),
-    );
+    return Scaffold(body: readerBuilder(chapter!));
   }
 }

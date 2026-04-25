@@ -17,14 +17,13 @@ class _MockChapter extends Fake implements ReadingChapter {
 
 void main() {
   group('ReadingTopOverlay', () {
-    testWidgets('renders ReadingTopBar when showOverlay is true', (tester) async {
+    testWidgets('renders ReadingTopBar when showOverlay is true', (
+      tester,
+    ) async {
       await tester.pumpApp(
         Stack(
           children: [
-            ReadingTopOverlay(
-              showOverlay: true,
-              chapter: _MockChapter(),
-            ),
+            ReadingTopOverlay(showOverlay: true, chapter: _MockChapter()),
           ],
         ),
       );
@@ -32,14 +31,13 @@ void main() {
       expect(find.byType(ReadingTopBar), findsOneWidget);
     });
 
-    testWidgets('renders SizedBox.shrink when showOverlay is false', (tester) async {
+    testWidgets('renders SizedBox.shrink when showOverlay is false', (
+      tester,
+    ) async {
       await tester.pumpApp(
         Stack(
           children: [
-            ReadingTopOverlay(
-              showOverlay: false,
-              chapter: _MockChapter(),
-            ),
+            ReadingTopOverlay(showOverlay: false, chapter: _MockChapter()),
           ],
         ),
       );

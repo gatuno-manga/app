@@ -88,8 +88,8 @@ void main() {
             'content': 'comment',
             'createdAt': '2023-01-01T10:00:00Z',
             'userId': 'u1',
-            'userName': 'User'
-          }
+            'userName': 'User',
+          },
         ],
       };
 

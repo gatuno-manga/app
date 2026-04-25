@@ -9,7 +9,7 @@ import '../components/organisms/text_reader.dart';
 import '../components/organisms/document_reader.dart';
 import '../components/templates/reading_template.dart';
 
-class ReadingScreen extends StatefulWidget {
+class ReadingScreen extends StatelessWidget {
   final String chapterId;
   final int initialPage;
 
@@ -20,42 +20,56 @@ class ReadingScreen extends StatefulWidget {
   });
 
   @override
-  State<ReadingScreen> createState() => _ReadingScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) =>
+          sl<ReadingViewModel>()
+            ..loadChapter(chapterId, initialPage: initialPage),
+      child: _ReadingScreenContent(
+        chapterId: chapterId,
+        initialPage: initialPage,
+      ),
+    );
+  }
 }
 
-class _ReadingScreenState extends State<ReadingScreen> {
-  late final ReadingViewModel _viewModel;
+class _ReadingScreenContent extends StatefulWidget {
+  final String chapterId;
+  final int initialPage;
+
+  const _ReadingScreenContent({
+    required this.chapterId,
+    required this.initialPage,
+  });
 
   @override
-  void initState() {
-    super.initState();
-    _viewModel = sl<ReadingViewModel>();
-    _viewModel.loadChapter(widget.chapterId, initialPage: widget.initialPage);
-  }
+  State<_ReadingScreenContent> createState() => _ReadingScreenContentState();
+}
 
+class _ReadingScreenContentState extends State<_ReadingScreenContent> {
   @override
-  void didUpdateWidget(ReadingScreen oldWidget) {
+  void didUpdateWidget(_ReadingScreenContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.chapterId != widget.chapterId) {
-      _viewModel.loadChapter(widget.chapterId, initialPage: widget.initialPage);
+      context.read<ReadingViewModel>().loadChapter(
+        widget.chapterId,
+        initialPage: widget.initialPage,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _viewModel,
-      child: Consumer<ReadingViewModel>(
-        builder: (context, viewModel, child) {
-          return ReadingTemplate(
-            isLoading: viewModel.isLoading,
-            error: viewModel.error,
-            chapter: viewModel.chapter,
-            onRetry: () => viewModel.loadChapter(widget.chapterId),
-            readerBuilder: _buildReader,
-          );
-        },
-      ),
+    return Consumer<ReadingViewModel>(
+      builder: (context, viewModel, child) {
+        return ReadingTemplate(
+          isLoading: viewModel.isLoading,
+          error: viewModel.error,
+          chapter: viewModel.chapter,
+          onRetry: () => viewModel.loadChapter(widget.chapterId),
+          readerBuilder: _buildReader,
+        );
+      },
     );
   }
 

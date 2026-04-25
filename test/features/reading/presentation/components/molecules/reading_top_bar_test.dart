@@ -19,14 +19,13 @@ class _MockChapter extends Fake implements ReadingChapter {
 void main() {
   group('ReadingTopBar', () {
     testWidgets('renders chapter and book information', (tester) async {
-      final chapter = _MockChapter(title: 'Chapter 1', index: 1.0, bookTitle: 'My Book');
+      final chapter = _MockChapter(
+        title: 'Chapter 1',
+        index: 1.0,
+        bookTitle: 'My Book',
+      );
       await tester.pumpApp(
-        Scaffold(
-          body: ReadingTopBar(
-            chapter: chapter,
-            topPadding: 20.0,
-          ),
-        ),
+        Scaffold(body: ReadingTopBar(chapter: chapter, topPadding: 20.0)),
       );
 
       expect(find.text('My Book'), findsOneWidget);
@@ -34,15 +33,12 @@ void main() {
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
-    testWidgets('renders default chapter title if title is null', (tester) async {
+    testWidgets('renders default chapter title if title is null', (
+      tester,
+    ) async {
       final chapter = _MockChapter(title: null, index: 2.0);
       await tester.pumpApp(
-        Scaffold(
-          body: ReadingTopBar(
-            chapter: chapter,
-            topPadding: 20.0,
-          ),
-        ),
+        Scaffold(body: ReadingTopBar(chapter: chapter, topPadding: 20.0)),
       );
 
       expect(find.text('Chapter 2.0'), findsOneWidget);

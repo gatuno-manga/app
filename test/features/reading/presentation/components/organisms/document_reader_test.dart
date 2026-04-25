@@ -46,9 +46,7 @@ void main() {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
-          child: Scaffold(
-            body: DocumentReader(chapter: chapter),
-          ),
+          child: Scaffold(body: DocumentReader(chapter: chapter)),
         ),
       );
 

@@ -40,14 +40,20 @@ class ReadingBottomBar extends StatelessWidget {
                   viewModel.currentPageIndex + 1,
                   chapter.pages.length,
                 ),
-                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
+                style: TextStyle(
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 14,
+                ),
               ),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: Icon(Icons.skip_previous, color: theme.colorScheme.onSurface),
+                icon: Icon(
+                  Icons.skip_previous,
+                  color: theme.colorScheme.onSurface,
+                ),
                 onPressed: chapter.previous != null
                     ? () => context.pushReplacement(
                         '/chapters/${chapter.previous}',

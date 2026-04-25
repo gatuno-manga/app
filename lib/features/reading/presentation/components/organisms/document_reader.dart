@@ -21,7 +21,11 @@ class DocumentReader extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.picture_as_pdf, size: 64, color: theme.colorScheme.outline),
+              Icon(
+                Icons.picture_as_pdf,
+                size: 64,
+                color: theme.colorScheme.outline,
+              ),
               const SizedBox(height: 16),
               Text(
                 l10n.readingDeferredDocumentMessage,
@@ -30,8 +34,13 @@ class DocumentReader extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Format: ${chapter.documentFormat?.value.toUpperCase() ?? 'Unknown'}',
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
+                l10n.booksDocumentFormat(
+                  chapter.documentFormat?.value.toUpperCase() ??
+                      l10n.booksUnknownFormat,
+                ),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

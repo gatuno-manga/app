@@ -59,7 +59,7 @@ class _AppImageState extends State<AppImage> {
 
       if (response.data != null) {
         final bytes = Uint8List.fromList(response.data!);
-        
+
         if (widget.onImageLoaded != null) {
           final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
           final descriptor = await ui.ImageDescriptor.encoded(buffer);

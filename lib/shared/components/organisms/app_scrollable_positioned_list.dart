@@ -25,6 +25,7 @@ class _AppScrollablePositionedListState
     extends State<AppScrollablePositionedList> {
   late final ScrollController _scrollController;
   final Map<int, GlobalKey> _itemKeys = {};
+  final Set<int> _mountedIndices = {};
   int _lastReportedIndex = -1;
 
   @override
@@ -72,10 +73,9 @@ class _AppScrollablePositionedListState
 
     final scrollBounds = Offset.zero & scrollBox.size;
 
-    for (final entry in _itemKeys.entries) {
-      final index = entry.key;
-      final key = entry.value;
-      final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    for (final index in _mountedIndices) {
+      final key = _itemKeys[index];
+      final renderBox = key?.currentContext?.findRenderObject() as RenderBox?;
 
       if (renderBox != null && renderBox.attached) {
         final offset = renderBox.localToGlobal(
@@ -119,12 +119,54 @@ class _AppScrollablePositionedListState
         controller: _scrollController,
         itemCount: widget.itemCount,
         itemBuilder: (context, index) {
-          return Container(
-            key: _getKey(index),
-            child: widget.itemBuilder(context, index),
+          return _ItemVisibilityTracker(
+            index: index,
+            onMounted: (i) => _mountedIndices.add(i),
+            onUnmounted: (i) {
+              _mountedIndices.remove(i);
+              _itemKeys.remove(i);
+            },
+            child: Container(
+              key: _getKey(index),
+              child: widget.itemBuilder(context, index),
+            ),
           );
         },
       ),
     );
   }
+}
+
+class _ItemVisibilityTracker extends StatefulWidget {
+  final int index;
+  final Widget child;
+  final void Function(int index) onMounted;
+  final void Function(int index) onUnmounted;
+
+  const _ItemVisibilityTracker({
+    required this.index,
+    required this.child,
+    required this.onMounted,
+    required this.onUnmounted,
+  });
+
+  @override
+  State<_ItemVisibilityTracker> createState() => _ItemVisibilityTrackerState();
+}
+
+class _ItemVisibilityTrackerState extends State<_ItemVisibilityTracker> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMounted(widget.index);
+  }
+
+  @override
+  void dispose() {
+    widget.onUnmounted(widget.index);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

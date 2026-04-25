@@ -28,16 +28,15 @@ void main() {
   });
 
   group('ReadingBottomOverlay', () {
-    testWidgets('renders ReadingBottomBar when showOverlay is true', (tester) async {
+    testWidgets('renders ReadingBottomBar when showOverlay is true', (
+      tester,
+    ) async {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Stack(
             children: [
-              ReadingBottomOverlay(
-                showOverlay: true,
-                chapter: _MockChapter(),
-              ),
+              ReadingBottomOverlay(showOverlay: true, chapter: _MockChapter()),
             ],
           ),
         ),
@@ -46,16 +45,15 @@ void main() {
       expect(find.byType(ReadingBottomBar), findsOneWidget);
     });
 
-    testWidgets('renders SizedBox.shrink when showOverlay is false', (tester) async {
+    testWidgets('renders SizedBox.shrink when showOverlay is false', (
+      tester,
+    ) async {
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Stack(
             children: [
-              ReadingBottomOverlay(
-                showOverlay: false,
-                chapter: _MockChapter(),
-              ),
+              ReadingBottomOverlay(showOverlay: false, chapter: _MockChapter()),
             ],
           ),
         ),

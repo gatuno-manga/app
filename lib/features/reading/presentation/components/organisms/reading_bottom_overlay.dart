@@ -22,19 +22,19 @@ class ReadingBottomOverlay extends StatelessWidget {
         duration: const Duration(milliseconds: 250),
         reverseDuration: const Duration(milliseconds: 200),
         transitionBuilder: (Widget child, Animation<double> animation) {
-          final offsetAnimation = Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-            reverseCurve: Curves.easeIn,
-          ));
+          final offsetAnimation =
+              Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).animate(
+                CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                  reverseCurve: Curves.easeIn,
+                ),
+              );
 
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
+          return SlideTransition(position: offsetAnimation, child: child);
         },
         child: showOverlay
             ? ReadingBottomBar(

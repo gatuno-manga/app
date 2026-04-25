@@ -10,7 +10,9 @@ class _MockChapter extends Fake implements ReadingChapter {}
 
 void main() {
   group('ReadingTemplate', () {
-    testWidgets('renders loading indicator when isLoading is true', (tester) async {
+    testWidgets('renders loading indicator when isLoading is true', (
+      tester,
+    ) async {
       await tester.pumpApp(
         ReadingTemplate(
           isLoading: true,
@@ -36,7 +38,9 @@ void main() {
       expect(find.text('Something went wrong'), findsOneWidget);
     });
 
-    testWidgets('renders readerBuilder when chapter is present', (tester) async {
+    testWidgets('renders readerBuilder when chapter is present', (
+      tester,
+    ) async {
       final chapter = _MockChapter();
       await tester.pumpApp(
         ReadingTemplate(

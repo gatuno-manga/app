@@ -31,7 +31,9 @@ void main() {
   });
 
   group('ReadingBottomBar', () {
-    testWidgets('renders page indicator and navigation buttons', (tester) async {
+    testWidgets('renders page indicator and navigation buttons', (
+      tester,
+    ) async {
       final chapter = _MockChapter(
         pages: [FakeReadingPage(), FakeReadingPage()],
         previous: 'prev-id',
@@ -42,10 +44,7 @@ void main() {
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(
-            body: ReadingBottomBar(
-              chapter: chapter,
-              bottomPadding: 20.0,
-            ),
+            body: ReadingBottomBar(chapter: chapter, bottomPadding: 20.0),
           ),
         ),
       );
@@ -55,17 +54,16 @@ void main() {
       expect(find.byIcon(Icons.skip_next), findsOneWidget);
     });
 
-    testWidgets('disables previous button when no previous chapter', (tester) async {
+    testWidgets('disables previous button when no previous chapter', (
+      tester,
+    ) async {
       final chapter = _MockChapter(pages: [], previous: null);
 
       await tester.pumpApp(
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(
-            body: ReadingBottomBar(
-              chapter: chapter,
-              bottomPadding: 0.0,
-            ),
+            body: ReadingBottomBar(chapter: chapter, bottomPadding: 0.0),
           ),
         ),
       );
@@ -83,10 +81,7 @@ void main() {
         ChangeNotifierProvider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(
-            body: ReadingBottomBar(
-              chapter: chapter,
-              bottomPadding: 0.0,
-            ),
+            body: ReadingBottomBar(chapter: chapter, bottomPadding: 0.0),
           ),
         ),
       );

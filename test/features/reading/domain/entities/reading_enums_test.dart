@@ -12,7 +12,10 @@ void main() {
       });
 
       test('fromString throws MappingException for unknown value', () {
-        expect(() => ContentType.fromString('unknown'), throwsA(isA<MappingException>()));
+        expect(
+          () => ContentType.fromString('unknown'),
+          throwsA(isA<MappingException>()),
+        );
       });
     });
 
@@ -23,7 +26,10 @@ void main() {
       });
 
       test('fromString throws MappingException for unknown value', () {
-        expect(() => DocumentFormat.fromString('unknown'), throwsA(isA<MappingException>()));
+        expect(
+          () => DocumentFormat.fromString('unknown'),
+          throwsA(isA<MappingException>()),
+        );
       });
     });
 
@@ -35,7 +41,10 @@ void main() {
       });
 
       test('fromString throws MappingException for unknown value', () {
-        expect(() => ContentFormat.fromString('unknown'), throwsA(isA<MappingException>()));
+        expect(
+          () => ContentFormat.fromString('unknown'),
+          throwsA(isA<MappingException>()),
+        );
       });
     });
 
@@ -49,7 +58,10 @@ void main() {
       });
 
       test('fromString throws MappingException for unknown value', () {
-        expect(() => BookType.fromString('unknown'), throwsA(isA<MappingException>()));
+        expect(
+          () => BookType.fromString('unknown'),
+          throwsA(isA<MappingException>()),
+        );
       });
     });
   });

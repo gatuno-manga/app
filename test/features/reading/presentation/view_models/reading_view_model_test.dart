@@ -33,8 +33,9 @@ void main() {
 
     test('loadChapter success updates state correctly', () async {
       final mockChapter = FakeReadingChapter();
-      when(() => mockRepository.getChapter(chapterId))
-          .thenAnswer((_) async => mockChapter);
+      when(
+        () => mockRepository.getChapter(chapterId),
+      ).thenAnswer((_) async => mockChapter);
 
       final future = viewModel.loadChapter(chapterId);
 
@@ -49,19 +50,24 @@ void main() {
       verify(() => mockRepository.getChapter(chapterId)).called(1);
     });
 
-    test('loadChapter success with initialPage updates currentPageIndex', () async {
-      final mockChapter = FakeReadingChapter();
-      when(() => mockRepository.getChapter(chapterId))
-          .thenAnswer((_) async => mockChapter);
+    test(
+      'loadChapter success with initialPage updates currentPageIndex',
+      () async {
+        final mockChapter = FakeReadingChapter();
+        when(
+          () => mockRepository.getChapter(chapterId),
+        ).thenAnswer((_) async => mockChapter);
 
-      await viewModel.loadChapter(chapterId, initialPage: 5);
+        await viewModel.loadChapter(chapterId, initialPage: 5);
 
-      expect(viewModel.currentPageIndex, 5);
-    });
+        expect(viewModel.currentPageIndex, 5);
+      },
+    );
 
     test('loadChapter failure updates error state', () async {
-      when(() => mockRepository.getChapter(chapterId))
-          .thenThrow(Exception('Failed to load'));
+      when(
+        () => mockRepository.getChapter(chapterId),
+      ).thenThrow(Exception('Failed to load'));
 
       await viewModel.loadChapter(chapterId);
 
