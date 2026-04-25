@@ -57,12 +57,9 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
       size,
     );
 
-    // Only trigger rebuild if the change is significant to avoid jitter
-    if ((_aspectRatio - newAspectRatio).abs() > 0.01) {
-      setState(() {
-        _aspectRatio = newAspectRatio;
-      });
-    }
+    setState(() {
+      _aspectRatio = newAspectRatio;
+    });
   }
 
   @override

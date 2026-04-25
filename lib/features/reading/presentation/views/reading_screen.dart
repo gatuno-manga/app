@@ -25,7 +25,6 @@ class ReadingScreen extends StatefulWidget {
 
 class _ReadingScreenState extends State<ReadingScreen> {
   late final ReadingViewModel _viewModel;
-  bool _showOverlay = false;
 
   @override
   void initState() {
@@ -42,12 +41,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
     }
   }
 
-  void _toggleOverlay() {
-    setState(() {
-      _showOverlay = !_showOverlay;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
@@ -58,8 +51,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
             isLoading: viewModel.isLoading,
             error: viewModel.error,
             chapter: viewModel.chapter,
-            showOverlay: _showOverlay,
-            onToggleOverlay: _toggleOverlay,
             onRetry: () => viewModel.loadChapter(widget.chapterId),
             readerBuilder: _buildReader,
           );

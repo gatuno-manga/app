@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
+import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
+import 'package:gatuno/features/books/domain/entities/chapter.dart';
 
 void main() {
   group('ReadingChapterModel', () {
@@ -63,6 +65,60 @@ void main() {
 
       expect(model.pages[0].width, 1024.0);
       expect(model.pages[0].height, 768.0);
+    });
+
+    test('fromJson handles different scraping statuses and formats', () {
+      final json = {
+        'id': '1',
+        'originalUrl': 'url',
+        'index': '1',
+        'contentType': 'document',
+        'retries': '0',
+        'bookId': 'b1',
+        'bookTitle': 'Book',
+        'totalChapters': '1',
+        'scrapingStatus': 'ready',
+        'documentPath': '/path/to/doc',
+        'documentFormat': 'pdf',
+        'contentFormat': 'markdown',
+        'deletedAt': '2023-01-01T10:00:00Z',
+        'comments': [
+          {
+            'id': 'c1',
+            'content': 'comment',
+            'createdAt': '2023-01-01T10:00:00Z',
+            'userId': 'u1',
+            'userName': 'User'
+          }
+        ],
+      };
+
+      final model = ReadingChapterModel.fromJson(json);
+
+      expect(model.scrapingStatus, ScrapingStatus.ready);
+      expect(model.documentPath, '/path/to/doc');
+      expect(model.documentFormat, DocumentFormat.pdf);
+      expect(model.contentFormat, ContentFormat.markdown);
+      expect(model.deletedAt, isA<DateTime>());
+      expect(model.comments.length, 1);
+      expect(model.comments[0].userName, 'User');
+    });
+
+    test('fromJson handles null scraping status', () {
+      final json = {
+        'id': '1',
+        'originalUrl': 'url',
+        'index': '1',
+        'contentType': 'image',
+        'retries': '0',
+        'bookId': 'b1',
+        'bookTitle': 'Book',
+        'totalChapters': '1',
+        'scrapingStatus': null,
+      };
+
+      final model = ReadingChapterModel.fromJson(json);
+      expect(model.scrapingStatus, isNull);
     });
   });
 }

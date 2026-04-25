@@ -5,6 +5,7 @@ import '../../../../../shared/components/organisms/app_scrollable_positioned_lis
 import '../../../domain/entities/reading_chapter.dart';
 import '../../view_models/reading_view_model.dart';
 import '../molecules/image_reader_item.dart';
+import 'reader_overlay_wrapper.dart';
 
 class ImageReader extends StatelessWidget {
   final ReadingChapter chapter;
@@ -14,16 +15,19 @@ class ImageReader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScrollablePositionedList(
-      initialIndex: initialIndex,
-      itemCount: chapter.pages.length,
-      onVisibleIndexChanged: (index) {
-        context.read<ReadingViewModel>().setCurrentPage(index);
-        context.replace('/chapters/${chapter.id}/page/$index');
-      },
-      itemBuilder: (context, index) {
-        return ImageReaderItem(page: chapter.pages[index]);
-      },
+    return ReaderOverlayWrapper(
+      chapter: chapter,
+      child: AppScrollablePositionedList(
+        initialIndex: initialIndex,
+        itemCount: chapter.pages.length,
+        onVisibleIndexChanged: (index) {
+          context.read<ReadingViewModel>().setCurrentPage(index);
+          context.replace('/chapters/${chapter.id}/page/$index');
+        },
+        itemBuilder: (context, index) {
+          return ImageReaderItem(page: chapter.pages[index]);
+        },
+      ),
     );
   }
 }

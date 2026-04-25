@@ -88,9 +88,14 @@
   - Adopted Atomic Design for UI components in `shared/components/`.
   - **Atoms:** Low-level components like `AppButton`, `AppAvatar`, `AppSwitch`, `AppClickableAction`.
   - **Molecules:** Groups of atoms like `UserProfileHeader`, `UserProfileIcon`, `LoginIcon`.
-  - **Organisms:** Complex UI sections like `MeSettingsList`, `SignInForm`, `HomeAppBar`.
+  - **Organisms:** Complex UI sections like `MeSettingsList`, `SignInForm`, `HomeAppBar`, `ReaderOverlayWrapper`.
   - **Templates:** Page layouts like `ProfileTemplate`, `AuthTemplate`, `HomeTemplate`.
   - **Pages:** Feature-specific views that wire view models to templates, like `MePage` and `HomePage`.
+
+- **Reader Overlay Refactor:**
+  - Extracted the common overlay toggle mechanism from `TextReader`, `ImageReader`, and `DocumentReader` into a reusable `ReaderOverlayWrapper` (organism).
+  - Centralized state management for overlays and composed the UI using a shared `Stack` and `GestureDetector` structure.
+  - Simplified individual reader components by removing redundant state and logic.
 
 ## Infrastructure & Quality
 
