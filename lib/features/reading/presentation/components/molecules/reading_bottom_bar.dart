@@ -19,6 +19,7 @@ class ReadingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final viewModel = context.watch<ReadingViewModel>();
+    final theme = Theme.of(context);
 
     return Container(
       padding: EdgeInsets.only(
@@ -27,7 +28,7 @@ class ReadingBottomBar extends StatelessWidget {
         right: 16,
         top: 16,
       ),
-      color: Colors.black.withValues(alpha: 0.8),
+      color: theme.colorScheme.surface.withValues(alpha: 0.9),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -39,14 +40,14 @@ class ReadingBottomBar extends StatelessWidget {
                   viewModel.currentPageIndex + 1,
                   chapter.pages.length,
                 ),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 14),
               ),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(Icons.skip_previous, color: Colors.white),
+                icon: Icon(Icons.skip_previous, color: theme.colorScheme.onSurface),
                 onPressed: chapter.previous != null
                     ? () => context.pushReplacement(
                         '/chapters/${chapter.previous}',
@@ -55,7 +56,7 @@ class ReadingBottomBar extends StatelessWidget {
                 tooltip: l10n.readingPreviousChapter,
               ),
               IconButton(
-                icon: const Icon(Icons.skip_next, color: Colors.white),
+                icon: Icon(Icons.skip_next, color: theme.colorScheme.onSurface),
                 onPressed: chapter.next != null
                     ? () => context.pushReplacement('/chapters/${chapter.next}')
                     : null,

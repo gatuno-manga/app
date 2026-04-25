@@ -12,6 +12,7 @@ class DocumentReader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return ReaderOverlayWrapper(
       chapter: chapter,
       child: Center(
@@ -20,19 +21,17 @@ class DocumentReader extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.picture_as_pdf, size: 64, color: Colors.grey),
+              Icon(Icons.picture_as_pdf, size: 64, color: theme.colorScheme.outline),
               const SizedBox(height: 16),
               Text(
                 l10n.readingDeferredDocumentMessage,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 8),
               Text(
                 'Format: ${chapter.documentFormat?.value.toUpperCase() ?? 'Unknown'}',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.outline),
               ),
               const SizedBox(height: 24),
               ElevatedButton(

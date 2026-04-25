@@ -14,13 +14,14 @@ class ReadingTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.only(top: topPadding, left: 8, right: 8, bottom: 8),
-      color: Colors.black.withValues(alpha: 0.8),
+      color: theme.colorScheme.surface.withValues(alpha: 0.9),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
             onPressed: () => context.pop(),
           ),
           Expanded(
@@ -29,15 +30,18 @@ class ReadingTopBar extends StatelessWidget {
               children: [
                 Text(
                   chapter.bookTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   chapter.title ?? 'Chapter ${chapter.index}',
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontSize: 12,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
