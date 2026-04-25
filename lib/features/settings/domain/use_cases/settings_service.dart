@@ -29,7 +29,8 @@ class SettingsService extends ChangeNotifier {
     try {
       _apiUrl = await _storage.getApiUrl();
       _sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
-      _allowedBadCertificateUrls = await _storage.getAllowedBadCertificateUrls();
+      _allowedBadCertificateUrls = await _storage
+          .getAllowedBadCertificateUrls();
 
       if (_apiUrl != null) {
         _dioClient.updateBaseUrl(_apiUrl!);
@@ -80,7 +81,12 @@ class SettingsService extends ChangeNotifier {
       _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
       notifyListeners();
     } catch (e, stackTrace) {
-      AppLogger.e('Error adding allowed bad certificate URL', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error adding allowed bad certificate URL',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }
@@ -93,7 +99,12 @@ class SettingsService extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e, stackTrace) {
-      AppLogger.e('Error removing allowed bad certificate URL', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error removing allowed bad certificate URL',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }

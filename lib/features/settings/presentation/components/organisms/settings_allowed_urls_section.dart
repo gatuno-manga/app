@@ -17,10 +17,12 @@ class SettingsAllowedUrlsSection extends StatefulWidget {
   });
 
   @override
-  State<SettingsAllowedUrlsSection> createState() => _SettingsAllowedUrlsSectionState();
+  State<SettingsAllowedUrlsSection> createState() =>
+      _SettingsAllowedUrlsSectionState();
 }
 
-class _SettingsAllowedUrlsSectionState extends State<SettingsAllowedUrlsSection> {
+class _SettingsAllowedUrlsSectionState
+    extends State<SettingsAllowedUrlsSection> {
   final _urlController = TextEditingController();
 
   @override
@@ -60,9 +62,9 @@ class _SettingsAllowedUrlsSectionState extends State<SettingsAllowedUrlsSection>
               'No URLs allowed yet.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+                fontStyle: FontStyle.italic,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ),
           )
         else

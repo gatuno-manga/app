@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'features/authentication/auth_router.dart';
 import 'features/home/home_router.dart';
 import 'features/books/books_router.dart';
+import 'features/reading/reading_router.dart';
 import 'features/settings/settings_router.dart';
 import 'features/welcome/welcome_router.dart';
 import 'shared/presentation/error_screen.dart';
@@ -22,6 +23,7 @@ GoRouter createAppRouter(String initialLocation) {
       ),
       ...authRoutes,
       ...welcomeRoutes,
+      ...readingRoutes,
     ],
     errorBuilder: (context, state) {
       AppLogger.e('Router Error: ${state.uri}', state.error, null, 'ROUTER');

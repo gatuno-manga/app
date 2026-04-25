@@ -48,11 +48,15 @@ void main() {
 
       expect(settingsService.apiUrl, 'http://test.com');
       expect(settingsService.sensitiveContentEnabled, isTrue);
-      expect(settingsService.allowedBadCertificateUrls, ['https://storage.com']);
+      expect(settingsService.allowedBadCertificateUrls, [
+        'https://storage.com',
+      ]);
       expect(settingsService.isInitialized, isTrue);
       verify(() => mockDioClient.updateBaseUrl('http://test.com')).called(1);
       verify(
-        () => mockDioClient.updateAllowedBadCertificateUrls(['https://storage.com']),
+        () => mockDioClient.updateAllowedBadCertificateUrls([
+          'https://storage.com',
+        ]),
       ).called(1);
     });
 
@@ -78,46 +82,62 @@ void main() {
       verify(() => mockStorage.setSensitiveContentEnabled(true)).called(1);
     });
 
-    test('addAllowedBadCertificateUrl should update storage and dio client', () async {
-      when(
-        () => mockStorage.setAllowedBadCertificateUrls(any()),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-      ).thenAnswer((_) {});
+    test(
+      'addAllowedBadCertificateUrl should update storage and dio client',
+      () async {
+        when(
+          () => mockStorage.setAllowedBadCertificateUrls(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
+        ).thenAnswer((_) {});
 
-      await settingsService.addAllowedBadCertificateUrl('https://new-storage.com');
+        await settingsService.addAllowedBadCertificateUrl(
+          'https://new-storage.com',
+        );
 
-      expect(settingsService.allowedBadCertificateUrls, ['https://new-storage.com']);
-      verify(
-        () => mockStorage.setAllowedBadCertificateUrls(['https://new-storage.com']),
-      ).called(1);
-      verify(
-        () => mockDioClient.updateAllowedBadCertificateUrls(['https://new-storage.com']),
-      ).called(1);
-    });
+        expect(settingsService.allowedBadCertificateUrls, [
+          'https://new-storage.com',
+        ]);
+        verify(
+          () => mockStorage.setAllowedBadCertificateUrls([
+            'https://new-storage.com',
+          ]),
+        ).called(1);
+        verify(
+          () => mockDioClient.updateAllowedBadCertificateUrls([
+            'https://new-storage.com',
+          ]),
+        ).called(1);
+      },
+    );
 
-    test('removeAllowedBadCertificateUrl should update storage and dio client', () async {
-      when(
-        () => mockStorage.setAllowedBadCertificateUrls(any()),
-      ).thenAnswer((_) async {});
-      when(
-        () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-      ).thenAnswer((_) {});
+    test(
+      'removeAllowedBadCertificateUrl should update storage and dio client',
+      () async {
+        when(
+          () => mockStorage.setAllowedBadCertificateUrls(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
+        ).thenAnswer((_) {});
 
-      // Add one first
-      await settingsService.addAllowedBadCertificateUrl('https://to-remove.com');
-      
-      await settingsService.removeAllowedBadCertificateUrl('https://to-remove.com');
+        // Add one first
+        await settingsService.addAllowedBadCertificateUrl(
+          'https://to-remove.com',
+        );
 
-      expect(settingsService.allowedBadCertificateUrls, isEmpty);
-      verify(
-        () => mockStorage.setAllowedBadCertificateUrls(any()),
-      ).called(2);
-      verify(
-        () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-      ).called(2);
-    });
+        await settingsService.removeAllowedBadCertificateUrl(
+          'https://to-remove.com',
+        );
+
+        expect(settingsService.allowedBadCertificateUrls, isEmpty);
+        verify(() => mockStorage.setAllowedBadCertificateUrls(any())).called(2);
+        verify(
+          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
+        ).called(2);
+      },
+    );
 
     test('init should handle errors gracefully', () async {
       when(() => mockStorage.getApiUrl()).thenThrow(Exception('Storage error'));
@@ -128,17 +148,26 @@ void main() {
     });
 
     group('Edge Cases', () {
-      test('addAllowedBadCertificateUrl should ignore empty or duplicate URL', () async {
-        await settingsService.addAllowedBadCertificateUrl('');
-        expect(settingsService.allowedBadCertificateUrls, isEmpty);
+      test(
+        'addAllowedBadCertificateUrl should ignore empty or duplicate URL',
+        () async {
+          await settingsService.addAllowedBadCertificateUrl('');
+          expect(settingsService.allowedBadCertificateUrls, isEmpty);
 
-        when(() => mockStorage.setAllowedBadCertificateUrls(any())).thenAnswer((_) async {});
-        when(() => mockDioClient.updateAllowedBadCertificateUrls(any())).thenAnswer((_) {});
+          when(
+            () => mockStorage.setAllowedBadCertificateUrls(any()),
+          ).thenAnswer((_) async {});
+          when(
+            () => mockDioClient.updateAllowedBadCertificateUrls(any()),
+          ).thenAnswer((_) {});
 
-        await settingsService.addAllowedBadCertificateUrl('https://test.com');
-        await settingsService.addAllowedBadCertificateUrl('https://test.com');
-        expect(settingsService.allowedBadCertificateUrls, ['https://test.com']);
-      });
+          await settingsService.addAllowedBadCertificateUrl('https://test.com');
+          await settingsService.addAllowedBadCertificateUrl('https://test.com');
+          expect(settingsService.allowedBadCertificateUrls, [
+            'https://test.com',
+          ]);
+        },
+      );
     });
   });
 }

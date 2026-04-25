@@ -14,10 +14,7 @@ class SettingsAllowedUrlItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(
-        url,
-        style: Theme.of(context).textTheme.bodyMedium,
-      ),
+      title: Text(url, style: Theme.of(context).textTheme.bodyMedium),
       contentPadding: EdgeInsets.zero,
       trailing: AppIconButton(
         icon: Icons.delete_outline,

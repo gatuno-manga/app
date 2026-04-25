@@ -113,5 +113,18 @@
         "type": "int"
       }
     }
-  }
+  },
+  "readingDeferredDocumentMessage": "O suporte para PDF e EPUB estará disponível em breve.",
+  "readingNextChapter": "Próximo Capítulo",
+  "readingPreviousChapter": "Capítulo Anterior",
+  "readingFinished": "Você chegou ao fim deste capítulo.",
+  "booksDocumentFormat": "Formato: {format}",
+  "@booksDocumentFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "booksUnknownFormat": "Desconhecido"
 }

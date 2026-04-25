@@ -289,4 +289,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String commonPageOf(int current, int total) {
     return 'Page $current of $total';
   }
+
+  @override
+  String get readingDeferredDocumentMessage =>
+      'PDF and EPUB support is coming soon.';
+
+  @override
+  String get readingNextChapter => 'Next Chapter';
+
+  @override
+  String get readingPreviousChapter => 'Previous Chapter';
+
+  @override
+  String get readingFinished => 'You\'ve reached the end of this chapter.';
+
+  @override
+  String booksDocumentFormat(String format) {
+    return 'Format: $format';
+  }
+
+  @override
+  String get booksUnknownFormat => 'Unknown';
 }

@@ -1,30 +1,45 @@
 name: Run Tests
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    test-app:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  test-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
 
-            - name: Set up Flutter
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: 'stable'
-                  cache: true
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
 
-            - name: Install Dependencies
-              run: flutter pub get
+      - name: Restore LFS cache
+        uses: actions/cache@v5
+        id: lfs-cache
+        with:
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
 
-            - name: Run Static Analysis
-              run: flutter analyze
+      - name: Git LFS Pull
+        run: git lfs pull
 
-            - name: Run Tests
-              run: flutter test
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Static Analysis
+        run: flutter analyze
+
+      - name: Run Tests
+        run: flutter test
