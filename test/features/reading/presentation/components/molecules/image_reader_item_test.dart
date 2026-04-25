@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/image_reader_item.dart';
-import 'package:gatuno/shared/components/atoms/app_image.dart';
 import 'package:gatuno/shared/utils/image_aspect_ratio_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/test_injection.dart';

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reading_top_bar.dart';
-import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/pump_app.dart';
 
 class _MockChapter extends Fake implements ReadingChapter {

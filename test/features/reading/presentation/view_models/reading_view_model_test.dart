@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
-import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/templates/reading_template.dart';
 import 'package:gatuno/shared/components/molecules/app_error_view.dart';
-import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/pump_app.dart';
 
 class _MockChapter extends Fake implements ReadingChapter {}
