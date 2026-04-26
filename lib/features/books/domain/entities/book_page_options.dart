@@ -1,5 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:optional/optional.dart';
 import 'book_type.dart';
+
+part 'book_page_options.g.dart';
 
 enum SortOrder { asc, desc }
 
@@ -9,14 +12,17 @@ class SortOption {
   const SortOption(this.orderBy, this.order);
 }
 
+@JsonSerializable(includeIfNull: false)
 class BookPageOptions {
   final int page;
   final int limit;
   final String orderBy;
+  @JsonKey(toJson: _orderToJson)
   final SortOrder order;
   final String? search;
   final int? publication;
   final String? publicationOperator; // 'eq', 'gt', 'lt', 'gte', 'lte'
+  @JsonKey(toJson: _typeToJson)
   final List<TypeBook>? type;
   final List<String>? sensitiveContent;
   final List<String>? tags;
@@ -44,29 +50,11 @@ class BookPageOptions {
     this.authorsLogic,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'page': page,
-      'limit': limit,
-      'orderBy': orderBy,
-      'order': order.name.toUpperCase(),
-      if (search != null && search!.isNotEmpty) 'search': search,
-      if (publication != null) 'publication': publication,
-      if (publicationOperator != null)
-        'publicationOperator': publicationOperator,
-      if (type != null && type!.isNotEmpty)
-        'type': type!.map((e) => e.name.toLowerCase()).toList(),
-      if (sensitiveContent != null && sensitiveContent!.isNotEmpty)
-        'sensitiveContent': sensitiveContent,
-      if (tags != null && tags!.isNotEmpty) 'tags': tags,
-      if (tagsLogic != null) 'tagsLogic': tagsLogic,
-      if (excludeTags != null && excludeTags!.isNotEmpty)
-        'excludeTags': excludeTags,
-      if (excludeTagsLogic != null) 'excludeTagsLogic': excludeTagsLogic,
-      if (authors != null && authors!.isNotEmpty) 'authors': authors,
-      if (authorsLogic != null) 'authorsLogic': authorsLogic,
-    };
-  }
+  Map<String, dynamic> toJson() => _$BookPageOptionsToJson(this);
+
+  static String _orderToJson(SortOrder order) => order.name.toUpperCase();
+  static List<String>? _typeToJson(List<TypeBook>? type) =>
+      type?.map((e) => e.name.toLowerCase()).toList();
 
   BookPageOptions copyWith({
     int? page,
