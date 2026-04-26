@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/network/dio_client.dart';
+import 'package:gatuno/core/network/token_provider.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
+import 'package:gatuno/features/authentication/domain/use_cases/token_manager.dart';
 import 'package:gatuno/features/authentication/data/data_sources/auth_local_data_source.dart';
 import 'package:gatuno/features/users/data/data_sources/user_local_data_source.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
@@ -12,6 +14,8 @@ import 'package:gatuno/features/settings/data/data_sources/settings_local_data_s
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
+
+class MockTokenManager extends Mock implements TokenManager {}
 
 class MockAuthStorage extends Mock implements AuthStorage {}
 
@@ -25,7 +29,20 @@ class MockHomeViewModel extends Mock implements HomeViewModel {}
 
 class MockNavigationViewModel extends Mock implements NavigationViewModel {}
 
-class MockDio extends Mock implements Dio {}
+class MockDio extends Mock implements Dio {
+  MockDio() {
+    when(() => interceptors).thenReturn(Interceptors());
+    // Default stub for get to return a Future, avoiding: type 'Null' is not a subtype of type 'Future<Response<List<int>>>'
+    when(
+      () => get<List<int>>(any(), options: any(named: 'options')),
+    ).thenAnswer(
+      (_) async => Response<List<int>>(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 200,
+      ),
+    );
+  }
+}
 
 class MockDioClient extends Mock implements DioClient {
   @override
@@ -34,6 +51,7 @@ class MockDioClient extends Mock implements DioClient {
 
 Future<void> initTestDI({
   AuthService? authService,
+  TokenManager? tokenManager,
   AuthStorage? authStorage,
   UserStorage? userStorage,
   SettingsService? settingsService,
@@ -66,6 +84,18 @@ Future<void> initTestDI({
     when(() => sService.allowedBadCertificateUrls).thenReturn([]);
   }
   sl.registerLazySingleton<SettingsService>(() => sService);
+
+  final tm = tokenManager ?? MockTokenManager();
+  if (tokenManager == null) {
+    when(() => tm.initialize()).thenAnswer((_) async {});
+    when(() => tm.getToken()).thenAnswer((_) async => null);
+    when(
+      () => tm.getValidToken(forceRefresh: any(named: 'forceRefresh')),
+    ).thenAnswer((_) async => null);
+    when(() => tm.currentToken).thenReturn(null);
+  }
+  sl.registerLazySingleton<TokenManager>(() => tm);
+  sl.registerLazySingleton<TokenProvider>(() => tm);
 
   sl.registerLazySingleton<AuthService>(() => authService ?? MockAuthService());
 

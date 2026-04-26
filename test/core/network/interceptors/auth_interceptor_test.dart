@@ -1,14 +1,13 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/interceptors/auth_interceptor.dart';
-import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
+import 'package:gatuno/core/network/token_provider.dart';
 
 class MockDioClient extends Mock implements DioClient {}
 
-class MockAuthService extends Mock implements AuthService {}
+class MockTokenProvider extends Mock implements TokenProvider {}
 
 class MockDio extends Mock implements Dio {}
 
@@ -26,11 +25,9 @@ class FakeInterceptor extends Fake implements Interceptor {}
 
 class FakeResponse extends Fake implements Response<dynamic> {}
 
-class FakeDioException extends Fake implements DioException {}
-
 void main() {
   late DioClient dioClient;
-  late AuthService authService;
+  late TokenProvider tokenProvider;
   late Dio dio;
   late Interceptors interceptors;
   late MockRequestInterceptorHandler requestHandler;
@@ -48,7 +45,7 @@ void main() {
 
   setUp(() {
     dioClient = MockDioClient();
-    authService = MockAuthService();
+    tokenProvider = MockTokenProvider();
     dio = MockDio();
     interceptors = MockInterceptors();
     requestHandler = MockRequestInterceptorHandler();
@@ -59,51 +56,13 @@ void main() {
   });
 
   AuthInterceptor getInterceptor() {
-    return AuthInterceptor(dioClient: dioClient, authService: authService);
+    return AuthInterceptor(dioClient: dioClient, tokenProvider: tokenProvider);
   }
 
   group('onRequest', () {
-    test(
-      'should NOT add Authorization header when token is empty string',
-      () async {
-        final options = RequestOptions(path: '/test', baseUrl: testBaseUrl);
-        when(() => authService.getToken()).thenAnswer((_) async => '');
-        when(() => requestHandler.next(any())).thenAnswer((_) {});
-
-        getInterceptor().onRequest(options, requestHandler);
-
-        await Future<void>.delayed(Duration.zero);
-        expect(options.headers['Authorization'], isNull);
-      },
-    );
-
-    test('should add Authorization header when token is valid', () async {
+    test('should NOT add Authorization header when token is null', () async {
       final options = RequestOptions(path: '/test', baseUrl: testBaseUrl);
-
-      // Create a non-expired valid-looking token (3 parts)
-      final exp = (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600;
-      final payload = base64Url
-          .encode(utf8.encode('{"exp": $exp}'))
-          .replaceAll('=', '');
-      final token = 'header.$payload.signature';
-
-      when(() => authService.getToken()).thenAnswer((_) async => token);
-      when(() => requestHandler.next(any())).thenAnswer((_) {});
-
-      getInterceptor().onRequest(options, requestHandler);
-
-      await Future<void>.delayed(Duration.zero);
-      expect(options.headers['Authorization'], 'Bearer $token');
-      // Should NOT call performTokenRefresh because it's not near expiry
-      verifyNever(() => authService.performTokenRefresh());
-    });
-
-    test('should NOT add Authorization header for external URLs', () async {
-      final options = RequestOptions(
-        path: 'https://other-api.com/data',
-        baseUrl: testBaseUrl,
-      );
-      when(() => authService.getToken()).thenAnswer((_) async => 'token');
+      when(() => tokenProvider.getValidToken()).thenAnswer((_) async => null);
       when(() => requestHandler.next(any())).thenAnswer((_) {});
 
       getInterceptor().onRequest(options, requestHandler);
@@ -112,43 +71,32 @@ void main() {
       expect(options.headers['Authorization'], isNull);
     });
 
-    test(
-      'should NOT add Authorization header for excluded paths (signin)',
-      () async {
-        final options = RequestOptions(
-          path: '/auth/signin',
-          baseUrl: testBaseUrl,
-        );
-        when(() => authService.getToken()).thenAnswer((_) async => 'token');
-        when(() => requestHandler.next(any())).thenAnswer((_) {});
-
-        getInterceptor().onRequest(options, requestHandler);
-
-        await Future<void>.delayed(Duration.zero);
-        expect(options.headers['Authorization'], isNull);
-      },
-    );
-
-    test('should trigger eager refresh when token is near expiry', () async {
+    test('should add Authorization header when token is valid', () async {
       final options = RequestOptions(path: '/test', baseUrl: testBaseUrl);
+      const token = 'valid_token';
 
-      // Create a token that expires in 1 minute (within the 2-minute threshold)
-      final exp = (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 60;
-      final payload = base64Url
-          .encode(utf8.encode('{"exp": $exp}'))
-          .replaceAll('=', '');
-      final token = 'header.$payload.signature';
-
-      when(() => authService.getToken()).thenAnswer((_) async => token);
-      when(() => authService.performTokenRefresh()).thenAnswer((_) async {});
+      when(() => tokenProvider.getValidToken()).thenAnswer((_) async => token);
       when(() => requestHandler.next(any())).thenAnswer((_) {});
 
       getInterceptor().onRequest(options, requestHandler);
 
       await Future<void>.delayed(Duration.zero);
       expect(options.headers['Authorization'], 'Bearer $token');
-      // Should call performTokenRefresh in the background
-      verify(() => authService.performTokenRefresh()).called(1);
+      verify(() => tokenProvider.getValidToken()).called(1);
+    });
+
+    test('should NOT add Authorization header for external URLs', () async {
+      final options = RequestOptions(
+        path: 'https://other-api.com/data',
+        baseUrl: testBaseUrl,
+      );
+      when(() => requestHandler.next(any())).thenAnswer((_) {});
+
+      getInterceptor().onRequest(options, requestHandler);
+
+      await Future<void>.delayed(Duration.zero);
+      expect(options.headers['Authorization'], isNull);
+      verifyNever(() => tokenProvider.getValidToken());
     });
   });
 
@@ -166,7 +114,10 @@ void main() {
           response: Response<dynamic>(requestOptions: options, statusCode: 401),
         );
 
-        when(() => authService.getToken()).thenAnswer((_) async => 'new_token');
+        // currentToken (refreshed by A) is different from requestToken (old_token)
+        when(
+          () => tokenProvider.getValidToken(),
+        ).thenAnswer((_) async => 'new_token');
 
         final response = Response<dynamic>(
           requestOptions: options,
@@ -180,57 +131,47 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         verify(() => dio.fetch<dynamic>(options)).called(1);
         verify(() => errorHandler.resolve(response)).called(1);
+        // Should NOT call force refresh
+        verifyNever(() => tokenProvider.getValidToken(forceRefresh: true));
       },
     );
 
-    test('should NOT perform refresh for external URL 401', () async {
-      final options = RequestOptions(
-        path: 'https://other-api.com/data',
-        baseUrl: testBaseUrl,
-        headers: {'Authorization': 'Bearer some_token'},
-      );
-      final error = DioException(
-        requestOptions: options,
-        response: Response<dynamic>(requestOptions: options, statusCode: 401),
-      );
+    test(
+      'should perform force refresh and retry if token is the same',
+      () async {
+        final options = RequestOptions(
+          path: '/test',
+          baseUrl: testBaseUrl,
+          headers: {'Authorization': 'Bearer old_token'},
+        );
+        final error = DioException(
+          requestOptions: options,
+          response: Response<dynamic>(requestOptions: options, statusCode: 401),
+        );
 
-      when(() => errorHandler.next(any())).thenAnswer((_) {});
+        // currentToken is still old_token
+        when(
+          () => tokenProvider.getValidToken(),
+        ).thenAnswer((_) async => 'old_token');
+        when(
+          () => tokenProvider.getValidToken(forceRefresh: true),
+        ).thenAnswer((_) async => 'refreshed_token');
 
-      getInterceptor().onError(error, errorHandler);
+        final response = Response<dynamic>(
+          requestOptions: options,
+          statusCode: 200,
+        );
+        when(() => dio.fetch<dynamic>(any())).thenAnswer((_) async => response);
+        when(() => errorHandler.resolve(any())).thenAnswer((_) {});
 
-      await Future<void>.delayed(Duration.zero);
-      verifyNever(() => authService.performTokenRefresh());
-      verify(() => errorHandler.next(error)).called(1);
-    });
+        getInterceptor().onError(error, errorHandler);
 
-    test('should perform refresh and retry if token is the same', () async {
-      final options = RequestOptions(
-        path: '/test',
-        baseUrl: testBaseUrl,
-        headers: {'Authorization': 'Bearer old_token'},
-      );
-      final error = DioException(
-        requestOptions: options,
-        response: Response<dynamic>(requestOptions: options, statusCode: 401),
-      );
-
-      when(() => authService.getToken()).thenAnswer((_) async => 'old_token');
-      when(() => authService.performTokenRefresh()).thenAnswer((_) async {});
-
-      final response = Response<dynamic>(
-        requestOptions: options,
-        statusCode: 200,
-      );
-      when(() => dio.fetch<dynamic>(any())).thenAnswer((_) async => response);
-      when(() => errorHandler.resolve(any())).thenAnswer((_) {});
-
-      getInterceptor().onError(error, errorHandler);
-
-      await Future<void>.delayed(Duration.zero);
-      verify(() => authService.performTokenRefresh()).called(1);
-      verify(() => dio.fetch<dynamic>(options)).called(1);
-      verify(() => errorHandler.resolve(response)).called(1);
-    });
+        await Future<void>.delayed(Duration.zero);
+        verify(() => tokenProvider.getValidToken(forceRefresh: true)).called(1);
+        verify(() => dio.fetch<dynamic>(any())).called(1);
+        verify(() => errorHandler.resolve(response)).called(1);
+      },
+    );
 
     test('should forward refresh error when refresh fails', () async {
       final options = RequestOptions(
@@ -243,14 +184,12 @@ void main() {
         response: Response<dynamic>(requestOptions: options, statusCode: 401),
       );
 
-      final refreshError = DioException(
-        requestOptions: RequestOptions(path: '/refresh'),
-        message: 'Refresh failed',
-        type: DioExceptionType.badResponse,
-      );
-
-      when(() => authService.getToken()).thenAnswer((_) async => 'old_token');
-      when(() => authService.performTokenRefresh()).thenThrow(refreshError);
+      when(
+        () => tokenProvider.getValidToken(),
+      ).thenAnswer((_) async => 'old_token');
+      when(
+        () => tokenProvider.getValidToken(forceRefresh: true),
+      ).thenThrow(Exception('Refresh failed'));
       when(() => errorHandler.next(any())).thenAnswer((_) {});
 
       getInterceptor().onError(error, errorHandler);
@@ -260,7 +199,7 @@ void main() {
       final captured =
           verify(() => errorHandler.next(captureAny())).captured.first
               as DioException;
-      expect(captured.message, contains('Refresh failed'));
+      expect(captured.message, contains('Token refresh failed'));
     });
   });
 }

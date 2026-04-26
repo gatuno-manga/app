@@ -16,7 +16,8 @@ class IndexConverter implements JsonConverter<double, dynamic> {
   dynamic toJson(double object) => object;
 }
 
-class ScrapingStatusConverter implements JsonConverter<ScrapingStatus?, dynamic> {
+class ScrapingStatusConverter
+    implements JsonConverter<ScrapingStatus?, dynamic> {
   const ScrapingStatusConverter();
   @override
   ScrapingStatus? fromJson(dynamic json) {
@@ -52,11 +53,7 @@ class StringNullableConverter implements JsonConverter<String?, dynamic> {
 }
 
 @JsonSerializable(
-  converters: [
-    IndexConverter(),
-    ScrapingStatusConverter(),
-    StringConverter(),
-  ],
+  converters: [IndexConverter(), ScrapingStatusConverter(), StringConverter()],
 )
 class ChapterModel extends Chapter {
   const ChapterModel({
@@ -73,7 +70,8 @@ class ChapterModel extends Chapter {
   Map<String, dynamic> toJson() => _$ChapterModelToJson(this);
 }
 
-class ChapterListConverter implements JsonConverter<List<Chapter>, List<dynamic>?> {
+class ChapterListConverter
+    implements JsonConverter<List<Chapter>, List<dynamic>?> {
   const ChapterListConverter();
   @override
   List<Chapter> fromJson(List<dynamic>? json) {
@@ -81,6 +79,7 @@ class ChapterListConverter implements JsonConverter<List<Chapter>, List<dynamic>
         .map((e) => ChapterModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<Chapter> object) {
     return object.map((e) => (e as ChapterModel).toJson()).toList();
@@ -88,10 +87,7 @@ class ChapterListConverter implements JsonConverter<List<Chapter>, List<dynamic>
 }
 
 @JsonSerializable(
-  converters: [
-    ChapterListConverter(),
-    StringNullableConverter(),
-  ],
+  converters: [ChapterListConverter(), StringNullableConverter()],
 )
 class ChapterListModel extends ChapterList {
   const ChapterListModel({

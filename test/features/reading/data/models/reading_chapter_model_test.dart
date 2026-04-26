@@ -22,10 +22,7 @@ void main() {
             'id': 'page-1',
             'url': 'http://example.com/p1.jpg',
             'index': 1,
-            'metadata': {
-              'width': 800,
-              'height': 1200,
-            },
+            'metadata': {'width': 800, 'height': 1200},
           },
           {'id': 'page-2', 'url': 'http://example.com/p2.jpg', 'index': 2},
         ],
@@ -56,10 +53,7 @@ void main() {
             'id': 'page-1',
             'url': 'http://example.com/p1.jpg',
             'index': 1,
-            'metadata': {
-              'width': '1024',
-              'height': '768',
-            },
+            'metadata': {'width': '1024', 'height': '768'},
           },
         ],
         'comments': <Map<String, dynamic>>[],
