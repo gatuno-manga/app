@@ -1,13 +1,12 @@
 import 'package:dio/dio.dart';
 import '../dio_client.dart';
 import '../api_constants.dart';
-import '../../../features/authentication/domain/use_cases/auth_service.dart';
-import '../../utils/jwt_decoder.dart';
+import '../token_provider.dart';
 import '../../logging/logger.dart';
 
-class AuthInterceptor extends Interceptor {
+class AuthInterceptor extends QueuedInterceptor {
   final DioClient dioClient;
-  final AuthService authService;
+  final TokenProvider tokenProvider;
   static const String _logTag = 'AuthInterceptor';
 
   final List<String> _excludedPaths = [
@@ -16,7 +15,7 @@ class AuthInterceptor extends Interceptor {
     ApiConstants.authRefresh,
   ];
 
-  AuthInterceptor({required this.dioClient, required this.authService});
+  AuthInterceptor({required this.dioClient, required this.tokenProvider});
 
   bool _shouldIntercept(RequestOptions options) {
     // 1. Check if the request is targeting the API origin
@@ -49,23 +48,11 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (_shouldIntercept(options)) {
-      final token = await authService.getToken();
+      // getValidToken handles both expired and near-expiry logic
+      final token = await tokenProvider.getValidToken();
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
         AppLogger.d('Token attached to request: ${options.path}', _logTag);
-
-        // Eager refresh if token expires in less than 2 minutes.
-        // We don't wait for the result to not block the current request.
-        if (JwtDecoder.isExpired(
-          token,
-          threshold: const Duration(minutes: 2),
-        )) {
-          AppLogger.i('Eager token refresh triggered in background', _logTag);
-          authService.performTokenRefresh().catchError((Object e) {
-            // Log error but don't fail the current request
-            AppLogger.w('Background token refresh failed: $e', _logTag);
-          });
-        }
       } else {
         AppLogger.d('No token available for request: ${options.path}', _logTag);
       }
@@ -79,22 +66,21 @@ class AuthInterceptor extends Interceptor {
         _shouldIntercept(err.requestOptions)) {
       AppLogger.i('Intercepted 401 for: ${err.requestOptions.path}', _logTag);
 
-      final currentToken = await authService.getToken();
+      // Check if the token was already refreshed by another concurrent request
+      final currentToken = await tokenProvider.getValidToken();
       final authHeader = err.requestOptions.headers['Authorization']
           ?.toString();
       final requestToken = authHeader?.replaceFirst('Bearer ', '');
 
-      // If we have a new token already (refreshed by another concurrent request),
-      // just retry the original request.
       if (currentToken != null && currentToken != requestToken) {
         AppLogger.i(
           'Concurrent refresh detected, retrying original request',
           _logTag,
         );
         try {
-          final response = await dioClient.dio.fetch<dynamic>(
-            err.requestOptions,
-          );
+          final options = err.requestOptions;
+          options.headers['Authorization'] = 'Bearer $currentToken';
+          final response = await dioClient.dio.fetch<dynamic>(options);
           return handler.resolve(response);
         } catch (e) {
           AppLogger.e(
@@ -107,24 +93,28 @@ class AuthInterceptor extends Interceptor {
         }
       }
 
+      // If we are still using the current token and got a 401, force a refresh
       try {
-        AppLogger.i('Triggering atomic token refresh after 401', _logTag);
-        // Atomic refresh handled by AuthService
-        await authService.performTokenRefresh();
+        AppLogger.i('Triggering forced token refresh after 401', _logTag);
+        final newToken = await tokenProvider.getValidToken(forceRefresh: true);
 
-        // Retry the original request with the new token
-        final options = err.requestOptions;
-
-        AppLogger.i('Retrying original request with new token', _logTag);
-        // Fetch original request again.
-        // The onRequest will be called again and will add the new token.
-        final response = await dioClient.dio.fetch<dynamic>(options);
-        return handler.resolve(response);
+        if (newToken != null && newToken.isNotEmpty) {
+          AppLogger.i('Retrying original request with new token', _logTag);
+          final options = err.requestOptions;
+          options.headers['Authorization'] = 'Bearer $newToken';
+          final response = await dioClient.dio.fetch<dynamic>(options);
+          return handler.resolve(response);
+        } else {
+          AppLogger.e(
+            'Token refresh returned null, failing',
+            null,
+            null,
+            _logTag,
+          );
+          return handler.next(err);
+        }
       } catch (e) {
         AppLogger.e('Token refresh or retry failed', e, null, _logTag);
-        // If refresh fails, the AuthService.performTokenRefresh already handles logout.
-        // We forward the refresh failure (if it's a DioException) or a new DioException wrapping the error,
-        // so callers can see the real reason why refresh failed.
         final forwardError = e is DioException
             ? e
             : DioException(
@@ -140,8 +130,8 @@ class AuthInterceptor extends Interceptor {
   }
 }
 
-void setupAuthInterceptor(DioClient dioClient, AuthService authService) {
+void setupAuthInterceptor(DioClient dioClient, TokenProvider tokenProvider) {
   dioClient.dio.interceptors.add(
-    AuthInterceptor(dioClient: dioClient, authService: authService),
+    AuthInterceptor(dioClient: dioClient, tokenProvider: tokenProvider),
   );
 }

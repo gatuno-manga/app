@@ -8,7 +8,8 @@ import 'tag_model.dart';
 
 part 'book_model.g.dart';
 
-class AuthorListConverter implements JsonConverter<List<Author>, List<dynamic>?> {
+class AuthorListConverter
+    implements JsonConverter<List<Author>, List<dynamic>?> {
   const AuthorListConverter();
   @override
   List<Author> fromJson(List<dynamic>? json) {
@@ -16,6 +17,7 @@ class AuthorListConverter implements JsonConverter<List<Author>, List<dynamic>?>
         .map((e) => AuthorModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<Author> object) {
     return object.map((e) => (e as AuthorModel).toJson()).toList();
@@ -30,6 +32,7 @@ class TagListConverter implements JsonConverter<List<Tag>, List<dynamic>?> {
         .map((e) => TagModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<Tag> object) {
     return object.map((e) => (e as TagModel).toJson()).toList();
@@ -88,16 +91,14 @@ class BookListConverter implements JsonConverter<List<Book>, List<dynamic>?> {
         .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<Book> object) {
     return object.map((e) => (e as BookModel).toJson()).toList();
   }
 }
 
-@JsonSerializable(
-  explicitToJson: true,
-  converters: [BookListConverter()],
-)
+@JsonSerializable(explicitToJson: true, converters: [BookListConverter()])
 class BookListModel extends BookList {
   const BookListModel({
     required super.data,

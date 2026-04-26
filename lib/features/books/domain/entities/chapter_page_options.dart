@@ -31,5 +31,6 @@ class ChapterPageOptions {
     );
   }
 
-  static String _orderToJson(ChapterSortOrder order) => order.name.toUpperCase();
+  static String _orderToJson(ChapterSortOrder order) =>
+      order.name.toUpperCase();
 }

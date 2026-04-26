@@ -16,7 +16,8 @@ class IntConverter implements JsonConverter<int, dynamic> {
 class DoubleConverter implements JsonConverter<double, dynamic> {
   const DoubleConverter();
   @override
-  double fromJson(dynamic json) => double.tryParse(json?.toString() ?? '0') ?? 0.0;
+  double fromJson(dynamic json) =>
+      double.tryParse(json?.toString() ?? '0') ?? 0.0;
   @override
   dynamic toJson(double object) => object;
 }
@@ -32,7 +33,8 @@ class StringConverter implements JsonConverter<String, dynamic> {
 class ContentTypeConverter implements JsonConverter<ContentType, dynamic> {
   const ContentTypeConverter();
   @override
-  ContentType fromJson(dynamic json) => ContentType.fromString(json?.toString() ?? '');
+  ContentType fromJson(dynamic json) =>
+      ContentType.fromString(json?.toString() ?? '');
   @override
   dynamic toJson(ContentType object) => object.value;
 }
@@ -46,7 +48,8 @@ class ContentFormatConverter implements JsonConverter<ContentFormat?, dynamic> {
   dynamic toJson(ContentFormat? object) => object?.value;
 }
 
-class DocumentFormatConverter implements JsonConverter<DocumentFormat?, dynamic> {
+class DocumentFormatConverter
+    implements JsonConverter<DocumentFormat?, dynamic> {
   const DocumentFormatConverter();
   @override
   DocumentFormat? fromJson(dynamic json) =>
@@ -55,7 +58,8 @@ class DocumentFormatConverter implements JsonConverter<DocumentFormat?, dynamic>
   dynamic toJson(DocumentFormat? object) => object?.value;
 }
 
-class ScrapingStatusConverter implements JsonConverter<ScrapingStatus?, dynamic> {
+class ScrapingStatusConverter
+    implements JsonConverter<ScrapingStatus?, dynamic> {
   const ScrapingStatusConverter();
   @override
   ScrapingStatus? fromJson(dynamic json) {
@@ -84,10 +88,7 @@ class ReadingPageModel extends ReadingPage {
     @JsonKey(readValue: _readUrl) required super.url,
     required super.index,
     this.pageMetadata,
-  }) : super(
-          width: pageMetadata?.width,
-          height: pageMetadata?.height,
-        );
+  }) : super(width: pageMetadata?.width, height: pageMetadata?.height);
 
   factory ReadingPageModel.fromJson(Map<String, dynamic> json) =>
       _$ReadingPageModelFromJson(json);
@@ -103,10 +104,7 @@ class PageMetadataModel {
   final double width;
   final double height;
 
-  const PageMetadataModel({
-    required this.width,
-    required this.height,
-  });
+  const PageMetadataModel({required this.width, required this.height});
 
   factory PageMetadataModel.fromJson(Map<String, dynamic> json) =>
       _$PageMetadataModelFromJson(json);
@@ -130,7 +128,8 @@ class ChapterCommentModel extends ChapterComment {
   Map<String, dynamic> toJson() => _$ChapterCommentModelToJson(this);
 }
 
-class ReadingPageListConverter implements JsonConverter<List<ReadingPage>, List<dynamic>?> {
+class ReadingPageListConverter
+    implements JsonConverter<List<ReadingPage>, List<dynamic>?> {
   const ReadingPageListConverter();
   @override
   List<ReadingPage> fromJson(List<dynamic>? json) {
@@ -138,13 +137,15 @@ class ReadingPageListConverter implements JsonConverter<List<ReadingPage>, List<
         .map((e) => ReadingPageModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<ReadingPage> object) {
     return object.map((e) => (e as ReadingPageModel).toJson()).toList();
   }
 }
 
-class ChapterCommentListConverter implements JsonConverter<List<ChapterComment>, List<dynamic>?> {
+class ChapterCommentListConverter
+    implements JsonConverter<List<ChapterComment>, List<dynamic>?> {
   const ChapterCommentListConverter();
   @override
   List<ChapterComment> fromJson(List<dynamic>? json) {
@@ -152,6 +153,7 @@ class ChapterCommentListConverter implements JsonConverter<List<ChapterComment>,
         .map((e) => ChapterCommentModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+
   @override
   List<dynamic> toJson(List<ChapterComment> object) {
     return object.map((e) => (e as ChapterCommentModel).toJson()).toList();

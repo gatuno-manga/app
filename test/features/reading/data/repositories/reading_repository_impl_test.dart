@@ -7,6 +7,7 @@ import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDioClient extends Mock implements DioClient {}
+
 class MockDio extends Mock implements Dio {}
 
 void main() {
@@ -37,9 +38,9 @@ void main() {
         'bookTitle': 'Book 1',
         'totalChapters': 10,
         'pages': [
-          {'id': 'p1', 'url': 'p1.jpg', 'index': 0}
+          {'id': 'p1', 'url': 'p1.jpg', 'index': 0},
         ],
-        'comments': <Map<String, dynamic>>[]
+        'comments': <Map<String, dynamic>>[],
       };
 
       when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer(
@@ -58,20 +59,23 @@ void main() {
       verify(() => mockDio.get<Map<String, dynamic>>(any())).called(1);
     });
 
-    test('getChapter throws ServerException when response is not 200', () async {
-      when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer(
-        (_) async => Response(
-          data: {},
-          statusCode: 404,
-          requestOptions: RequestOptions(path: ''),
-        ),
-      );
+    test(
+      'getChapter throws ServerException when response is not 200',
+      () async {
+        when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer(
+          (_) async => Response(
+            data: {},
+            statusCode: 404,
+            requestOptions: RequestOptions(path: ''),
+          ),
+        );
 
-      expect(
-        () => repository.getChapter(chapterId),
-        throwsA(isA<ServerException>()),
-      );
-    });
+        expect(
+          () => repository.getChapter(chapterId),
+          throwsA(isA<ServerException>()),
+        );
+      },
+    );
 
     test('getChapter throws ServerException when data is not Map', () async {
       when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer(
@@ -103,9 +107,9 @@ void main() {
     });
 
     test('getChapter rethrows ServerException', () async {
-      when(() => mockDio.get<Map<String, dynamic>>(any())).thenThrow(
-        ServerException(message: 'Server Error'),
-      );
+      when(
+        () => mockDio.get<Map<String, dynamic>>(any()),
+      ).thenThrow(ServerException(message: 'Server Error'));
 
       expect(
         () => repository.getChapter(chapterId),
@@ -114,14 +118,11 @@ void main() {
     });
 
     test('getChapter throws generic Exception on unexpected error', () async {
-      when(() => mockDio.get<Map<String, dynamic>>(any())).thenThrow(
-        Exception('Unexpected'),
-      );
+      when(
+        () => mockDio.get<Map<String, dynamic>>(any()),
+      ).thenThrow(Exception('Unexpected'));
 
-      expect(
-        () => repository.getChapter(chapterId),
-        throwsA(isA<Exception>()),
-      );
+      expect(() => repository.getChapter(chapterId), throwsA(isA<Exception>()));
     });
   });
 }

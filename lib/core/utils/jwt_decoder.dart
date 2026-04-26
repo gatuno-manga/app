@@ -30,6 +30,19 @@ class JwtDecoder {
     }
   }
 
+  static DateTime? getExpirationDate(String token) {
+    try {
+      final payload = decode(token);
+      if (payload['exp'] == null) {
+        return null;
+      }
+      final int exp = payload['exp'] as int;
+      return DateTime.fromMillisecondsSinceEpoch(exp * 1000);
+    } catch (e) {
+      return null;
+    }
+  }
+
   static bool isExpired(String token, {Duration threshold = Duration.zero}) {
     try {
       final payload = decode(token);
