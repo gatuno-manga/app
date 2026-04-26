@@ -1,108 +1,187 @@
+import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
 import '../../../books/domain/entities/chapter.dart';
 
-class ReadingPageModel extends ReadingPage {
-  const ReadingPageModel({
-    required super.id,
-    required super.url,
-    required super.index,
-    super.width,
-    super.height,
-  });
+part 'reading_chapter_model.g.dart';
 
-  factory ReadingPageModel.fromJson(Map<String, dynamic> json) {
-    return ReadingPageModel(
-      id: json['id']?.toString() ?? '',
-      url: (json['path'] ?? json['url'])?.toString() ?? '',
-      index: int.tryParse(json['index']?.toString() ?? '0') ?? 0,
-      width: double.tryParse(json['metadata']?['width']?.toString() ?? ''),
-      height: double.tryParse(json['metadata']?['height']?.toString() ?? ''),
-    );
-  }
+@JsonSerializable()
+class ReadingPageModel extends ReadingPage {
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String id;
+
+  @override
+  @JsonKey(fromJson: _parseInt)
+  final int index;
+
+  @JsonKey(name: 'metadata')
+  final PageMetadataModel? pageMetadata;
+
+  ReadingPageModel({
+    required this.id,
+    @JsonKey(readValue: _readUrl) required super.url,
+    required this.index,
+    this.pageMetadata,
+  }) : super(
+          id: id,
+          index: index,
+          width: pageMetadata?.width,
+          height: pageMetadata?.height,
+        );
+
+  factory ReadingPageModel.fromJson(Map<String, dynamic> json) =>
+      _$ReadingPageModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ReadingPageModelToJson(this);
+
+  static Object? _readUrl(Map json, String key) =>
+      json['path'] ?? json['url'] ?? '';
+
+  static int _parseInt(dynamic value) =>
+      int.tryParse(value?.toString() ?? '0') ?? 0;
+
+  static String _parseString(dynamic value) => value?.toString() ?? '';
 }
 
+@JsonSerializable()
+class PageMetadataModel {
+  @JsonKey(fromJson: _parseDouble)
+  final double width;
+  @JsonKey(fromJson: _parseDouble)
+  final double height;
+
+  PageMetadataModel({
+    required this.width,
+    required this.height,
+  });
+
+  factory PageMetadataModel.fromJson(Map<String, dynamic> json) =>
+      _$PageMetadataModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PageMetadataModelToJson(this);
+
+  static double _parseDouble(dynamic value) =>
+      double.tryParse(value?.toString() ?? '0') ?? 0.0;
+}
+
+@JsonSerializable()
 class ChapterCommentModel extends ChapterComment {
-  const ChapterCommentModel({
-    required super.id,
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String id;
+
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String userId;
+
+  ChapterCommentModel({
+    required this.id,
     required super.content,
     required super.createdAt,
-    required super.userId,
+    required this.userId,
     required super.userName,
-  });
+  }) : super(id: id, userId: userId);
 
-  factory ChapterCommentModel.fromJson(Map<String, dynamic> json) {
-    return ChapterCommentModel(
-      id: json['id']?.toString() ?? '',
-      content: json['content']?.toString() ?? '',
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      userId: json['userId']?.toString() ?? '',
-      userName: json['userName']?.toString() ?? '',
-    );
-  }
+  factory ChapterCommentModel.fromJson(Map<String, dynamic> json) =>
+      _$ChapterCommentModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChapterCommentModelToJson(this);
+
+  static String _parseString(dynamic value) => value?.toString() ?? '';
 }
 
+@JsonSerializable()
 class ReadingChapterModel extends ReadingChapter {
-  const ReadingChapterModel({
-    required super.id,
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String id;
+
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String bookId;
+
+  @override
+  @JsonKey(defaultValue: [])
+  final List<ReadingPageModel> pages;
+
+  @override
+  @JsonKey(defaultValue: [])
+  final List<ChapterCommentModel> comments;
+
+  @override
+  @JsonKey(fromJson: _parseDouble)
+  final double index;
+
+  @override
+  @JsonKey(fromJson: ContentType.fromString)
+  final ContentType contentType;
+
+  @override
+  @JsonKey(fromJson: _parseContentFormat)
+  final ContentFormat? contentFormat;
+
+  @override
+  @JsonKey(fromJson: _parseDocumentFormat)
+  final DocumentFormat? documentFormat;
+
+  @override
+  @JsonKey(fromJson: _parseScrapingStatus)
+  final ScrapingStatus? scrapingStatus;
+
+  @override
+  @JsonKey(fromJson: _parseInt)
+  final int retries;
+
+  @override
+  @JsonKey(fromJson: _parseInt)
+  final int totalChapters;
+
+  ReadingChapterModel({
+    required this.id,
     super.title,
     required super.originalUrl,
-    required super.index,
-    required super.contentType,
+    required this.index,
+    required this.contentType,
     super.content,
-    super.contentFormat,
+    this.contentFormat,
     super.documentPath,
-    super.documentFormat,
-    super.scrapingStatus,
-    required super.retries,
-    required super.isFinal,
+    this.documentFormat,
+    this.scrapingStatus,
+    required this.retries,
+    @JsonKey(defaultValue: false) required super.isFinal,
     super.deletedAt,
     super.previous,
     super.next,
-    required super.bookId,
+    required this.bookId,
     required super.bookTitle,
-    required super.totalChapters,
-    required super.pages,
-    required super.comments,
-  });
+    required this.totalChapters,
+    required this.pages,
+    required this.comments,
+  }) : super(
+          id: id,
+          bookId: bookId,
+          index: index,
+          contentType: contentType,
+          contentFormat: contentFormat,
+          documentFormat: documentFormat,
+          scrapingStatus: scrapingStatus,
+          retries: retries,
+          totalChapters: totalChapters,
+          pages: pages,
+          comments: comments,
+        );
 
-  factory ReadingChapterModel.fromJson(Map<String, dynamic> json) {
-    return ReadingChapterModel(
-      id: json['id']?.toString() ?? '',
-      title: json['title']?.toString(),
-      originalUrl: json['originalUrl']?.toString() ?? '',
-      index: double.tryParse(json['index']?.toString() ?? '0') ?? 0.0,
-      contentType: ContentType.fromString(
-        json['contentType']?.toString() ?? '',
-      ),
-      content: json['content']?.toString(),
-      contentFormat: json['contentFormat'] != null
-          ? ContentFormat.fromString(json['contentFormat']?.toString() ?? '')
-          : null,
-      documentPath: json['documentPath']?.toString(),
-      documentFormat: json['documentFormat'] != null
-          ? DocumentFormat.fromString(json['documentFormat']?.toString() ?? '')
-          : null,
-      scrapingStatus: _parseScrapingStatus(json['scrapingStatus']?.toString()),
-      retries: int.tryParse(json['retries']?.toString() ?? '0') ?? 0,
-      isFinal: json['isFinal'] as bool? ?? false,
-      deletedAt: json['deletedAt'] != null
-          ? DateTime.parse(json['deletedAt'] as String)
-          : null,
-      previous: json['previous']?.toString(),
-      next: json['next']?.toString(),
-      bookId: json['bookId']?.toString() ?? '',
-      bookTitle: json['bookTitle']?.toString() ?? '',
-      totalChapters:
-          int.tryParse(json['totalChapters']?.toString() ?? '0') ?? 0,
-      pages: (json['pages'] as List<dynamic>? ?? [])
-          .map((e) => ReadingPageModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      comments: (json['comments'] as List<dynamic>? ?? [])
-          .map((e) => ChapterCommentModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
+  factory ReadingChapterModel.fromJson(Map<String, dynamic> json) =>
+      _$ReadingChapterModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ReadingChapterModelToJson(this);
+
+  static ContentFormat? _parseContentFormat(String? value) =>
+      value != null ? ContentFormat.fromString(value) : null;
+
+  static DocumentFormat? _parseDocumentFormat(String? value) =>
+      value != null ? DocumentFormat.fromString(value) : null;
 
   static ScrapingStatus? _parseScrapingStatus(String? status) {
     if (status == null) return null;
@@ -114,4 +193,12 @@ class ReadingChapterModel extends ReadingChapter {
       return ScrapingStatus.process;
     }
   }
+
+  static double _parseDouble(dynamic value) =>
+      double.tryParse(value?.toString() ?? '0') ?? 0.0;
+
+  static int _parseInt(dynamic value) =>
+      int.tryParse(value?.toString() ?? '0') ?? 0;
+
+  static String _parseString(dynamic value) => value?.toString() ?? '';
 }

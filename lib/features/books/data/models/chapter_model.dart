@@ -1,23 +1,40 @@
+import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/chapter.dart';
 
-class ChapterModel extends Chapter {
-  const ChapterModel({
-    required super.id,
-    super.title,
-    required super.index,
-    super.scrapingStatus,
-    super.read = false,
-  });
+part 'chapter_model.g.dart';
 
-  factory ChapterModel.fromJson(Map<String, dynamic> json) {
-    return ChapterModel(
-      id: json['id'] as String,
-      title: json['title'] as String?,
-      index: _parseIndex(json['index']),
-      scrapingStatus: _parseScrapingStatus(json['scrapingStatus'] as String?),
-      read: json['read'] as bool? ?? false,
-    );
-  }
+@JsonSerializable()
+class ChapterModel extends Chapter {
+  @override
+  @JsonKey(fromJson: _parseString)
+  final String id;
+
+  @override
+  @JsonKey(fromJson: _parseIndex)
+  final double index;
+
+  @override
+  @JsonKey(fromJson: _parseScrapingStatus)
+  final ScrapingStatus? scrapingStatus;
+
+  const ChapterModel({
+    required this.id,
+    super.title,
+    required this.index,
+    this.scrapingStatus,
+    super.read = false,
+  }) : super(
+          id: id,
+          index: index,
+          scrapingStatus: scrapingStatus,
+        );
+
+  factory ChapterModel.fromJson(Map<String, dynamic> json) =>
+      _$ChapterModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChapterModelToJson(this);
+
+  static String _parseString(dynamic value) => value?.toString() ?? '';
 
   static double _parseIndex(dynamic index) {
     if (index == null) return 0.0;
@@ -25,11 +42,12 @@ class ChapterModel extends Chapter {
     return double.tryParse(index.toString()) ?? 0.0;
   }
 
-  static ScrapingStatus? _parseScrapingStatus(String? status) {
+  static ScrapingStatus? _parseScrapingStatus(dynamic status) {
     if (status == null) return null;
+    final statusStr = status.toString();
     try {
       return ScrapingStatus.values.firstWhere(
-        (e) => e.name.toLowerCase() == status.toLowerCase(),
+        (e) => e.name.toLowerCase() == statusStr.toLowerCase(),
       );
     } catch (_) {
       return ScrapingStatus.process;
@@ -37,22 +55,29 @@ class ChapterModel extends Chapter {
   }
 }
 
+@JsonSerializable()
 class ChapterListModel extends ChapterList {
+  @override
+  final List<ChapterModel> data;
+
+  @override
+  @JsonKey(fromJson: _parseStringNullable)
+  final String? nextCursor;
+
   const ChapterListModel({
-    required super.data,
-    super.nextCursor,
+    required this.data,
+    this.nextCursor,
     required super.hasNextPage,
-  });
+  }) : super(
+          data: data,
+          nextCursor: nextCursor,
+        );
 
-  factory ChapterListModel.fromJson(Map<String, dynamic> json) {
-    final items = (json['data'] as List<dynamic>? ?? [])
-        .map((e) => ChapterModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+  factory ChapterListModel.fromJson(Map<String, dynamic> json) =>
+      _$ChapterListModelFromJson(json);
 
-    return ChapterListModel(
-      data: items,
-      nextCursor: json['nextCursor'] as String?,
-      hasNextPage: json['hasNextPage'] as bool? ?? false,
-    );
-  }
+  Map<String, dynamic> toJson() => _$ChapterListModelToJson(this);
+
+  static String? _parseStringNullable(dynamic value) => value?.toString();
+  static String _parseString(dynamic value) => value?.toString() ?? '';
 }

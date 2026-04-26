@@ -131,3 +131,11 @@
 - **Enhanced Localization (i18n):**
   - Expanded ARB translations to cover all new book-related screens.
   - Improved multi-language support (EN, PT) for better accessibility.
+
+## Serialization
+
+- **`json_serializable` Implementation:**
+  - Migrated all manual JSON parsing in data models (`BookModel`, `UserModel`, `AuthResponse`, etc.) to use `json_serializable`.
+  - Established a project-wide standard: **ALL future data models requiring JSON serialization MUST use `json_serializable`** to ensure type safety and reduce boilerplate.
+  - Configured `explicitToJson: true` for models with nested custom objects to maintain deep serialization support.
+

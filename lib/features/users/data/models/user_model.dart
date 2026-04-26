@@ -1,9 +1,17 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'user_model.g.dart';
+
+@JsonSerializable()
 class UserModel {
+  @JsonKey(name: 'sub')
   final String id;
   final String email;
+  @JsonKey(name: 'username')
   final String? userName;
   final String? name;
   final List<String> roles;
+  @JsonKey(defaultValue: 0)
   final int maxWeightSensitiveContent;
 
   UserModel({
@@ -14,6 +22,11 @@ class UserModel {
     required this.roles,
     required this.maxWeightSensitiveContent,
   });
+
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   factory UserModel.fromJwt(Map<String, dynamic> payload) {
     final sub = payload['sub'] as String? ?? '';
@@ -26,15 +39,7 @@ class UserModel {
       );
     }
 
-    return UserModel(
-      id: sub,
-      email: email,
-      userName: payload['username'] as String?,
-      name: payload['name'] as String?,
-      roles: List<String>.from(roles),
-      maxWeightSensitiveContent:
-          payload['maxWeightSensitiveContent'] as int? ?? 0,
-    );
+    return UserModel.fromJson(payload);
   }
 
   String get displayName => name ?? userName ?? email.split('@')[0];

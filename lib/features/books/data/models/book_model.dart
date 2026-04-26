@@ -1,62 +1,50 @@
+import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_type.dart';
 import 'author_model.dart';
 import 'tag_model.dart';
 
+part 'book_model.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class BookModel extends Book {
+  @override
+  @JsonKey(defaultValue: [])
+  final List<AuthorModel> authors;
+
+  @override
+  @JsonKey(defaultValue: [])
+  final List<TagModel> tags;
+
+  @override
+  @JsonKey(name: 'type', fromJson: _parseType)
+  final TypeBook? type;
+
   const BookModel({
     required super.id,
     required super.title,
-    super.authors,
-    super.tags,
+    this.authors = const [],
+    this.tags = const [],
     super.description,
     super.cover,
-    super.type,
+    this.type,
     super.publication,
     super.totalChapters,
     super.createdAt,
     super.updatedAt,
   });
 
-  factory BookModel.fromJson(Map<String, dynamic> json) {
-    return BookModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      authors: _parseAuthors(json['authors']),
-      tags: _parseTags(json['tags']),
-      description: json['description'] as String?,
-      cover: json['cover'] as String?,
-      type: _parseType(json['type'] as String?),
-      publication: json['publication'] as int?,
-      totalChapters: json['totalChapters'] as int?,
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
-          : null,
-      updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
-    );
-  }
+  factory BookModel.fromJson(Map<String, dynamic> json) =>
+      _$BookModelFromJson(json);
 
-  static List<AuthorModel> _parseAuthors(dynamic authors) {
-    if (authors == null) return const [];
-    return (authors as List<dynamic>)
-        .map((e) => AuthorModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
+  Map<String, dynamic> toJson() => _$BookModelToJson(this);
 
-  static List<TagModel> _parseTags(dynamic tags) {
-    if (tags == null) return const [];
-    return (tags as List<dynamic>)
-        .map((e) => TagModel.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  static TypeBook? _parseType(String? type) {
+  static TypeBook? _parseType(dynamic type) {
     if (type == null) return null;
+    final typeStr = type.toString();
     try {
       return TypeBook.values.firstWhere(
-        (e) => e.name.toLowerCase() == type.toLowerCase(),
+        (e) => e.name.toLowerCase() == typeStr.toLowerCase(),
       );
     } catch (_) {
       return TypeBook.other;
@@ -64,27 +52,31 @@ class BookModel extends Book {
   }
 }
 
+@JsonSerializable()
 class BookListModel extends BookList {
+  @override
+  @JsonKey(defaultValue: [])
+  final List<BookModel> data;
+
   const BookListModel({
-    required super.data,
-    required super.total,
-    required super.page,
-    required super.limit,
-    required super.totalPages,
-  });
+    required this.data,
+    @JsonKey(readValue: _readTotal) required super.total,
+    @JsonKey(readValue: _readPage) required super.page,
+    @JsonKey(readValue: _readLimit) required super.limit,
+    @JsonKey(readValue: _readTotalPages) required super.totalPages,
+  }) : super(data: data);
 
-  factory BookListModel.fromJson(Map<String, dynamic> json) {
-    final meta = json['metadata'] as Map<String, dynamic>? ?? {};
-    final items = (json['data'] as List<dynamic>? ?? [])
-        .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+  factory BookListModel.fromJson(Map<String, dynamic> json) =>
+      _$BookListModelFromJson(json);
 
-    return BookListModel(
-      data: items,
-      total: meta['total'] as int? ?? 0,
-      page: meta['page'] as int? ?? 1,
-      limit: meta['limit'] as int? ?? 20,
-      totalPages: meta['lastPage'] as int? ?? 0,
-    );
-  }
+  Map<String, dynamic> toJson() => _$BookListModelToJson(this);
+
+  static Object? _readTotal(Map json, String key) =>
+      json['metadata']?['total'] ?? 0;
+  static Object? _readPage(Map json, String key) =>
+      json['metadata']?['page'] ?? 1;
+  static Object? _readLimit(Map json, String key) =>
+      json['metadata']?['limit'] ?? 20;
+  static Object? _readTotalPages(Map json, String key) =>
+      json['metadata']?['lastPage'] ?? 0;
 }

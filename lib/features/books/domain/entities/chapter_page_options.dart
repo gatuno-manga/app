@@ -1,8 +1,14 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'chapter_page_options.g.dart';
+
 enum ChapterSortOrder { asc, desc }
 
+@JsonSerializable(includeIfNull: false)
 class ChapterPageOptions {
   final String? cursor;
   final int limit;
+  @JsonKey(toJson: _orderToJson)
   final ChapterSortOrder order;
 
   const ChapterPageOptions({
@@ -11,13 +17,7 @@ class ChapterPageOptions {
     this.order = ChapterSortOrder.asc,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      if (cursor != null) 'cursor': cursor,
-      'limit': limit,
-      'order': order.name.toUpperCase(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$ChapterPageOptionsToJson(this);
 
   ChapterPageOptions copyWith({
     String? cursor,
@@ -30,4 +30,6 @@ class ChapterPageOptions {
       order: order ?? this.order,
     );
   }
+
+  static String _orderToJson(ChapterSortOrder order) => order.name.toUpperCase();
 }
