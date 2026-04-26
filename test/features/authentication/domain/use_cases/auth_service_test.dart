@@ -11,6 +11,7 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 class MockTokenManager extends Mock implements TokenManager {}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late AuthService authService;
   late MockAuthRepository mockAuthRepository;
   late MockTokenManager mockTokenManager;

@@ -7,6 +7,7 @@ import 'core/theme/theme.dart';
 import 'core/di/injection.dart';
 import 'features/authentication/domain/use_cases/auth_service.dart';
 import 'features/settings/domain/use_cases/settings_service.dart';
+import 'shared/utils/app_activity_observer.dart';
 import 'router.dart';
 
 void main() async {
@@ -34,19 +35,23 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Gatuno',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: router,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('pt')],
+    return AppActivityObserver(
+      onIdle: () => context.read<AuthService>().pauseRefresh(),
+      onInteraction: () => context.read<AuthService>().evaluateTokenState(),
+      child: MaterialApp.router(
+        title: 'Gatuno',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        routerConfig: router,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('en'), Locale('pt')],
+      ),
     );
   }
 }

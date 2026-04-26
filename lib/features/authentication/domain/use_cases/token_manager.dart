@@ -11,6 +11,8 @@ class TokenManager implements TokenProvider {
   static const String _logTag = 'TokenManager';
 
   Future<void>? _refreshFuture;
+  Timer? _refreshTimer;
+  bool _isPaused = false;
 
   String? _token;
   String? get currentToken => _token;
@@ -22,16 +24,21 @@ class TokenManager implements TokenProvider {
 
   Future<void> initialize() async {
     _token = await _authStorage.getToken();
+    if (_token != null) {
+      scheduleRefresh();
+    }
   }
 
   Future<void> saveToken(String token) async {
     _token = token;
     await _authStorage.saveToken(token);
+    scheduleRefresh();
     onTokenChanged?.call();
   }
 
   Future<void> clearToken() async {
     _token = null;
+    _refreshTimer?.cancel();
     await _authStorage.clearToken();
     onTokenChanged?.call();
   }
@@ -105,6 +112,75 @@ class TokenManager implements TokenProvider {
         await onRefreshFailed!();
       }
       rethrow;
+    }
+  }
+
+  void scheduleRefresh() {
+    _refreshTimer?.cancel();
+    if (_token == null || _isPaused) return;
+
+    final expiryDate = JwtDecoder.getExpirationDate(_token!);
+    if (expiryDate == null) return;
+
+    final now = DateTime.now();
+    // Safety buffer: refresh 1 minute before expiry
+    const buffer = Duration(minutes: 1);
+    final timeUntilExpiry = expiryDate.difference(now);
+    final delay = timeUntilExpiry - buffer;
+
+    if (delay <= Duration.zero) {
+      AppLogger.i(
+        'Token expires soon or already expired, refreshing now',
+        _logTag,
+      );
+      performTokenRefresh().catchError((Object e) {
+        AppLogger.w('Scheduled refresh failed: $e', _logTag);
+      });
+    } else {
+      AppLogger.d(
+        'Scheduling proactive refresh in ${delay.inMinutes} minutes',
+        _logTag,
+      );
+      _refreshTimer = Timer(delay, () {
+        performTokenRefresh().catchError((Object e) {
+          AppLogger.w('Scheduled refresh failed: $e', _logTag);
+        });
+      });
+    }
+  }
+
+  void pauseRefresh() {
+    if (!_isPaused) {
+      AppLogger.d('Pausing proactive token refresh', _logTag);
+      _isPaused = true;
+      _refreshTimer?.cancel();
+    }
+  }
+
+  void resumeRefresh() {
+    if (_isPaused) {
+      AppLogger.d('Resuming proactive token refresh', _logTag);
+      _isPaused = false;
+      scheduleRefresh();
+    }
+  }
+
+  Future<void> evaluateTokenState() async {
+    _isPaused = false;
+    final token = await getToken();
+    if (token != null &&
+        JwtDecoder.isExpired(token, threshold: const Duration(minutes: 1))) {
+      AppLogger.i(
+        'Token expired or near expiry on wake-up, refreshing',
+        _logTag,
+      );
+      try {
+        await performTokenRefresh();
+      } catch (e) {
+        AppLogger.w('Refresh on wake-up failed: $e', _logTag);
+      }
+    } else {
+      scheduleRefresh();
     }
   }
 }

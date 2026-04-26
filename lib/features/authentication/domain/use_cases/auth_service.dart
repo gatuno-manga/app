@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import '../repositories/auth_repository.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../core/utils/jwt_decoder.dart';
 import '../../../users/data/models/user_model.dart';
 import 'token_manager.dart';
 
-class AuthService extends ChangeNotifier {
+class AuthService extends ChangeNotifier with WidgetsBindingObserver {
   final AuthRepository _authRepository;
   final TokenManager _tokenManager;
   static const String _logTag = 'AuthService';
@@ -20,7 +20,23 @@ class AuthService extends ChangeNotifier {
     _tokenManager.onTokenChanged = () {
       notifyListeners();
     };
+    WidgetsBinding.instance.addObserver(this);
     _initAuth();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _tokenManager.pauseRefresh();
+    } else if (state == AppLifecycleState.resumed) {
+      _tokenManager.evaluateTokenState();
+    }
   }
 
   bool get isInitialized => _isInitialized;
@@ -158,5 +174,13 @@ class AuthService extends ChangeNotifier {
 
   Future<void> performTokenRefresh() async {
     await _tokenManager.performTokenRefresh();
+  }
+
+  void pauseRefresh() {
+    _tokenManager.pauseRefresh();
+  }
+
+  void evaluateTokenState() {
+    _tokenManager.evaluateTokenState();
   }
 }
