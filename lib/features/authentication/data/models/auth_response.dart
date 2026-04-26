@@ -22,6 +22,6 @@ class AuthResponse extends AuthToken {
 
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 
-  static Object? _readToken(Map json, String key) =>
+  static Object? _readToken(Map<dynamic, dynamic> json, String key) =>
       json['access_token'] ?? json['accessToken'];
 }

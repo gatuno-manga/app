@@ -6,140 +6,137 @@ part of 'reading_chapter_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ReadingPageModel _$ReadingPageModelFromJson(Map<String, dynamic> json) =>
-    ReadingPageModel(
-      id: ReadingPageModel._parseString(json['id']),
-      url: ReadingPageModel._readUrl(json, 'url') as String,
-      index: ReadingPageModel._parseInt(json['index']),
-      pageMetadata: json['metadata'] == null
-          ? null
-          : PageMetadataModel.fromJson(
-              json['metadata'] as Map<String, dynamic>,
-            ),
-    );
+ReadingPageModel _$ReadingPageModelFromJson(
+  Map<String, dynamic> json,
+) => ReadingPageModel(
+  id: const StringConverter().fromJson(json['id']),
+  url: const StringConverter().fromJson(ReadingPageModel._readUrl(json, 'url')),
+  index: const IntConverter().fromJson(json['index']),
+  pageMetadata: json['metadata'] == null
+      ? null
+      : PageMetadataModel.fromJson(json['metadata'] as Map<String, dynamic>),
+);
 
 Map<String, dynamic> _$ReadingPageModelToJson(ReadingPageModel instance) =>
     <String, dynamic>{
-      'url': instance.url,
-      'id': instance.id,
-      'index': instance.index,
+      'id': const StringConverter().toJson(instance.id),
+      'url': const StringConverter().toJson(instance.url),
+      'index': const IntConverter().toJson(instance.index),
       'metadata': instance.pageMetadata,
     };
 
 PageMetadataModel _$PageMetadataModelFromJson(Map<String, dynamic> json) =>
     PageMetadataModel(
-      width: PageMetadataModel._parseDouble(json['width']),
-      height: PageMetadataModel._parseDouble(json['height']),
+      width: const DoubleConverter().fromJson(json['width']),
+      height: const DoubleConverter().fromJson(json['height']),
     );
 
 Map<String, dynamic> _$PageMetadataModelToJson(PageMetadataModel instance) =>
-    <String, dynamic>{'width': instance.width, 'height': instance.height};
+    <String, dynamic>{
+      'width': const DoubleConverter().toJson(instance.width),
+      'height': const DoubleConverter().toJson(instance.height),
+    };
 
 ChapterCommentModel _$ChapterCommentModelFromJson(Map<String, dynamic> json) =>
     ChapterCommentModel(
-      id: ChapterCommentModel._parseString(json['id']),
-      content: json['content'] as String,
+      id: const StringConverter().fromJson(json['id']),
+      content: const StringConverter().fromJson(json['content']),
       createdAt: DateTime.parse(json['createdAt'] as String),
-      userId: ChapterCommentModel._parseString(json['userId']),
-      userName: json['userName'] as String,
+      userId: const StringConverter().fromJson(json['userId']),
+      userName: const StringConverter().fromJson(json['userName']),
     );
 
 Map<String, dynamic> _$ChapterCommentModelToJson(
   ChapterCommentModel instance,
 ) => <String, dynamic>{
-  'content': instance.content,
+  'id': const StringConverter().toJson(instance.id),
+  'content': const StringConverter().toJson(instance.content),
   'createdAt': instance.createdAt.toIso8601String(),
-  'userName': instance.userName,
-  'id': instance.id,
-  'userId': instance.userId,
+  'userId': const StringConverter().toJson(instance.userId),
+  'userName': const StringConverter().toJson(instance.userName),
 };
 
 ReadingChapterModel _$ReadingChapterModelFromJson(Map<String, dynamic> json) =>
     ReadingChapterModel(
-      id: ReadingChapterModel._parseString(json['id']),
-      title: json['title'] as String?,
-      originalUrl: json['originalUrl'] as String,
-      index: ReadingChapterModel._parseDouble(json['index']),
-      contentType: ContentType.fromString(json['contentType'] as String),
-      content: json['content'] as String?,
-      contentFormat: ReadingChapterModel._parseContentFormat(
-        json['contentFormat'] as String?,
+      id: const StringConverter().fromJson(json['id']),
+      title: const StringConverter().fromJson(json['title']),
+      originalUrl: const StringConverter().fromJson(json['originalUrl']),
+      index: const DoubleConverter().fromJson(json['index']),
+      contentType: const ContentTypeConverter().fromJson(json['contentType']),
+      content: const StringConverter().fromJson(json['content']),
+      contentFormat: const ContentFormatConverter().fromJson(
+        json['contentFormat'],
       ),
-      documentPath: json['documentPath'] as String?,
-      documentFormat: ReadingChapterModel._parseDocumentFormat(
-        json['documentFormat'] as String?,
+      documentPath: const StringConverter().fromJson(json['documentPath']),
+      documentFormat: const DocumentFormatConverter().fromJson(
+        json['documentFormat'],
       ),
-      scrapingStatus: ReadingChapterModel._parseScrapingStatus(
-        json['scrapingStatus'] as String?,
+      scrapingStatus: const ScrapingStatusConverter().fromJson(
+        json['scrapingStatus'],
       ),
-      retries: ReadingChapterModel._parseInt(json['retries']),
+      retries: const IntConverter().fromJson(json['retries']),
       isFinal: json['isFinal'] as bool? ?? false,
       deletedAt: json['deletedAt'] == null
           ? null
           : DateTime.parse(json['deletedAt'] as String),
-      previous: json['previous'] as String?,
-      next: json['next'] as String?,
-      bookId: ReadingChapterModel._parseString(json['bookId']),
-      bookTitle: json['bookTitle'] as String,
-      totalChapters: ReadingChapterModel._parseInt(json['totalChapters']),
-      pages:
-          (json['pages'] as List<dynamic>?)
-              ?.map((e) => ReadingPageModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      comments:
-          (json['comments'] as List<dynamic>?)
-              ?.map(
-                (e) => ChapterCommentModel.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          [],
+      previous: const StringConverter().fromJson(json['previous']),
+      next: const StringConverter().fromJson(json['next']),
+      bookId: const StringConverter().fromJson(json['bookId']),
+      bookTitle: const StringConverter().fromJson(json['bookTitle']),
+      totalChapters: const IntConverter().fromJson(json['totalChapters']),
+      pages: const ReadingPageListConverter().fromJson(json['pages'] as List?),
+      comments: const ChapterCommentListConverter().fromJson(
+        json['comments'] as List?,
+      ),
     );
 
 Map<String, dynamic> _$ReadingChapterModelToJson(
   ReadingChapterModel instance,
 ) => <String, dynamic>{
-  'title': instance.title,
-  'originalUrl': instance.originalUrl,
-  'content': instance.content,
-  'documentPath': instance.documentPath,
+  'id': const StringConverter().toJson(instance.id),
+  'title': _$JsonConverterToJson<dynamic, String>(
+    instance.title,
+    const StringConverter().toJson,
+  ),
+  'originalUrl': const StringConverter().toJson(instance.originalUrl),
+  'index': const DoubleConverter().toJson(instance.index),
+  'contentType': const ContentTypeConverter().toJson(instance.contentType),
+  'content': _$JsonConverterToJson<dynamic, String>(
+    instance.content,
+    const StringConverter().toJson,
+  ),
+  'contentFormat': const ContentFormatConverter().toJson(
+    instance.contentFormat,
+  ),
+  'documentPath': _$JsonConverterToJson<dynamic, String>(
+    instance.documentPath,
+    const StringConverter().toJson,
+  ),
+  'documentFormat': const DocumentFormatConverter().toJson(
+    instance.documentFormat,
+  ),
+  'scrapingStatus': const ScrapingStatusConverter().toJson(
+    instance.scrapingStatus,
+  ),
+  'retries': const IntConverter().toJson(instance.retries),
   'isFinal': instance.isFinal,
   'deletedAt': instance.deletedAt?.toIso8601String(),
-  'previous': instance.previous,
-  'next': instance.next,
-  'bookTitle': instance.bookTitle,
-  'id': instance.id,
-  'bookId': instance.bookId,
-  'pages': instance.pages,
-  'comments': instance.comments,
-  'index': instance.index,
-  'contentType': _$ContentTypeEnumMap[instance.contentType]!,
-  'contentFormat': _$ContentFormatEnumMap[instance.contentFormat],
-  'documentFormat': _$DocumentFormatEnumMap[instance.documentFormat],
-  'scrapingStatus': _$ScrapingStatusEnumMap[instance.scrapingStatus],
-  'retries': instance.retries,
-  'totalChapters': instance.totalChapters,
+  'previous': _$JsonConverterToJson<dynamic, String>(
+    instance.previous,
+    const StringConverter().toJson,
+  ),
+  'next': _$JsonConverterToJson<dynamic, String>(
+    instance.next,
+    const StringConverter().toJson,
+  ),
+  'bookId': const StringConverter().toJson(instance.bookId),
+  'bookTitle': const StringConverter().toJson(instance.bookTitle),
+  'totalChapters': const IntConverter().toJson(instance.totalChapters),
+  'pages': const ReadingPageListConverter().toJson(instance.pages),
+  'comments': const ChapterCommentListConverter().toJson(instance.comments),
 };
 
-const _$ContentTypeEnumMap = {
-  ContentType.image: 'image',
-  ContentType.text: 'text',
-  ContentType.document: 'document',
-};
-
-const _$ContentFormatEnumMap = {
-  ContentFormat.markdown: 'markdown',
-  ContentFormat.html: 'html',
-  ContentFormat.plain: 'plain',
-};
-
-const _$DocumentFormatEnumMap = {
-  DocumentFormat.pdf: 'pdf',
-  DocumentFormat.epub: 'epub',
-};
-
-const _$ScrapingStatusEnumMap = {
-  ScrapingStatus.process: 'process',
-  ScrapingStatus.ready: 'ready',
-  ScrapingStatus.error: 'error',
-};
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

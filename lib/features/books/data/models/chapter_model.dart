@@ -3,48 +3,25 @@ import '../../domain/entities/chapter.dart';
 
 part 'chapter_model.g.dart';
 
-@JsonSerializable()
-class ChapterModel extends Chapter {
+class IndexConverter implements JsonConverter<double, dynamic> {
+  const IndexConverter();
   @override
-  @JsonKey(fromJson: _parseString)
-  final String id;
-
-  @override
-  @JsonKey(fromJson: _parseIndex)
-  final double index;
-
-  @override
-  @JsonKey(fromJson: _parseScrapingStatus)
-  final ScrapingStatus? scrapingStatus;
-
-  const ChapterModel({
-    required this.id,
-    super.title,
-    required this.index,
-    this.scrapingStatus,
-    super.read = false,
-  }) : super(
-          id: id,
-          index: index,
-          scrapingStatus: scrapingStatus,
-        );
-
-  factory ChapterModel.fromJson(Map<String, dynamic> json) =>
-      _$ChapterModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ChapterModelToJson(this);
-
-  static String _parseString(dynamic value) => value?.toString() ?? '';
-
-  static double _parseIndex(dynamic index) {
-    if (index == null) return 0.0;
-    if (index is num) return index.toDouble();
-    return double.tryParse(index.toString()) ?? 0.0;
+  double fromJson(dynamic json) {
+    if (json == null) return 0.0;
+    if (json is num) return json.toDouble();
+    return double.tryParse(json.toString()) ?? 0.0;
   }
 
-  static ScrapingStatus? _parseScrapingStatus(dynamic status) {
-    if (status == null) return null;
-    final statusStr = status.toString();
+  @override
+  dynamic toJson(double object) => object;
+}
+
+class ScrapingStatusConverter implements JsonConverter<ScrapingStatus?, dynamic> {
+  const ScrapingStatusConverter();
+  @override
+  ScrapingStatus? fromJson(dynamic json) {
+    if (json == null) return null;
+    final statusStr = json.toString();
     try {
       return ScrapingStatus.values.firstWhere(
         (e) => e.name.toLowerCase() == statusStr.toLowerCase(),
@@ -53,31 +30,78 @@ class ChapterModel extends Chapter {
       return ScrapingStatus.process;
     }
   }
+
+  @override
+  dynamic toJson(ScrapingStatus? object) => object?.name;
 }
 
-@JsonSerializable()
+class StringConverter implements JsonConverter<String, dynamic> {
+  const StringConverter();
+  @override
+  String fromJson(dynamic json) => json?.toString() ?? '';
+  @override
+  dynamic toJson(String object) => object;
+}
+
+class StringNullableConverter implements JsonConverter<String?, dynamic> {
+  const StringNullableConverter();
+  @override
+  String? fromJson(dynamic json) => json?.toString();
+  @override
+  dynamic toJson(String? object) => object;
+}
+
+@JsonSerializable(
+  converters: [
+    IndexConverter(),
+    ScrapingStatusConverter(),
+    StringConverter(),
+  ],
+)
+class ChapterModel extends Chapter {
+  const ChapterModel({
+    required super.id,
+    super.title,
+    required super.index,
+    super.scrapingStatus,
+    super.read = false,
+  });
+
+  factory ChapterModel.fromJson(Map<String, dynamic> json) =>
+      _$ChapterModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChapterModelToJson(this);
+}
+
+class ChapterListConverter implements JsonConverter<List<Chapter>, List<dynamic>?> {
+  const ChapterListConverter();
+  @override
+  List<Chapter> fromJson(List<dynamic>? json) {
+    return (json ?? [])
+        .map((e) => ChapterModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+  @override
+  List<dynamic> toJson(List<Chapter> object) {
+    return object.map((e) => (e as ChapterModel).toJson()).toList();
+  }
+}
+
+@JsonSerializable(
+  converters: [
+    ChapterListConverter(),
+    StringNullableConverter(),
+  ],
+)
 class ChapterListModel extends ChapterList {
-  @override
-  final List<ChapterModel> data;
-
-  @override
-  @JsonKey(fromJson: _parseStringNullable)
-  final String? nextCursor;
-
   const ChapterListModel({
-    required this.data,
-    this.nextCursor,
+    required super.data,
+    super.nextCursor,
     required super.hasNextPage,
-  }) : super(
-          data: data,
-          nextCursor: nextCursor,
-        );
+  });
 
   factory ChapterListModel.fromJson(Map<String, dynamic> json) =>
       _$ChapterListModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ChapterListModelToJson(this);
-
-  static String? _parseStringNullable(dynamic value) => value?.toString();
-  static String _parseString(dynamic value) => value?.toString() ?? '';
 }

@@ -7,40 +7,44 @@ part of 'chapter_model.dart';
 // **************************************************************************
 
 ChapterModel _$ChapterModelFromJson(Map<String, dynamic> json) => ChapterModel(
-  id: ChapterModel._parseString(json['id']),
-  title: json['title'] as String?,
-  index: ChapterModel._parseIndex(json['index']),
-  scrapingStatus: ChapterModel._parseScrapingStatus(json['scrapingStatus']),
+  id: const StringConverter().fromJson(json['id']),
+  title: const StringConverter().fromJson(json['title']),
+  index: const IndexConverter().fromJson(json['index']),
+  scrapingStatus: const ScrapingStatusConverter().fromJson(
+    json['scrapingStatus'],
+  ),
   read: json['read'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$ChapterModelToJson(ChapterModel instance) =>
     <String, dynamic>{
-      'title': instance.title,
+      'id': const StringConverter().toJson(instance.id),
+      'title': _$JsonConverterToJson<dynamic, String>(
+        instance.title,
+        const StringConverter().toJson,
+      ),
+      'index': const IndexConverter().toJson(instance.index),
+      'scrapingStatus': const ScrapingStatusConverter().toJson(
+        instance.scrapingStatus,
+      ),
       'read': instance.read,
-      'id': instance.id,
-      'index': instance.index,
-      'scrapingStatus': _$ScrapingStatusEnumMap[instance.scrapingStatus],
     };
 
-const _$ScrapingStatusEnumMap = {
-  ScrapingStatus.process: 'process',
-  ScrapingStatus.ready: 'ready',
-  ScrapingStatus.error: 'error',
-};
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 ChapterListModel _$ChapterListModelFromJson(Map<String, dynamic> json) =>
     ChapterListModel(
-      data: (json['data'] as List<dynamic>)
-          .map((e) => ChapterModel.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      nextCursor: ChapterListModel._parseStringNullable(json['nextCursor']),
+      data: const ChapterListConverter().fromJson(json['data'] as List?),
+      nextCursor: const StringNullableConverter().fromJson(json['nextCursor']),
       hasNextPage: json['hasNextPage'] as bool,
     );
 
 Map<String, dynamic> _$ChapterListModelToJson(ChapterListModel instance) =>
     <String, dynamic>{
+      'data': const ChapterListConverter().toJson(instance.data),
+      'nextCursor': const StringNullableConverter().toJson(instance.nextCursor),
       'hasNextPage': instance.hasNextPage,
-      'data': instance.data,
-      'nextCursor': instance.nextCursor,
     };
