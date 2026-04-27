@@ -50,7 +50,7 @@ void main() {
     expect(find.byType(SettingsProfileCard), findsOneWidget);
     expect(find.text('Guest'), findsOneWidget);
     expect(find.text('API Base URL'), findsOneWidget);
-    expect(find.text('Certificates'), findsOneWidget);
+    expect(find.text('Certificates'), findsNWidgets(2));
   });
 
   testWidgets('SettingsPage updates sensitive content toggle', (tester) async {
