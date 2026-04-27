@@ -243,6 +243,58 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsRemoveUrl => 'Remover';
 
   @override
+  String get settingsCertificatesSection => 'Certificados';
+
+  @override
+  String get settingsCertificatesDesc =>
+      'Gerenciar certificados confiáveis e ignorados';
+
+  @override
+  String get certTrustDialogTitle => 'Certificado não confiável';
+
+  @override
+  String certTrustDialogMessage(String host) {
+    return 'O servidor em $host está usando um certificado não confiável. Deseja confiar nele e continuar?';
+  }
+
+  @override
+  String get certTrustDialogTrust => 'Confiar';
+
+  @override
+  String get certTrustDialogIgnore => 'Ignorar';
+
+  @override
+  String get certTrustedTab => 'Confiáveis';
+
+  @override
+  String get certIgnoredTab => 'Ignorados';
+
+  @override
+  String get certAddTitle => 'Adicionar Certificado';
+
+  @override
+  String get certAddLabel => 'Host';
+
+  @override
+  String get certAddHint => 'api.exemplo.com';
+
+  @override
+  String get certAddPemLabel => 'Certificado (PEM)';
+
+  @override
+  String get certAddFileButton => 'Selecionar Arquivo PEM';
+
+  @override
+  String get certEmptyTrusted => 'Nenhum certificado confiável ainda.';
+
+  @override
+  String get certEmptyIgnored => 'Nenhum certificado ignorado ainda.';
+
+  @override
+  String get certDeleteConfirm =>
+      'Tem certeza que deseja remover este certificado?';
+
+  @override
   String get welcomeTitle => 'Bem-vindo ao Gatuno';
 
   @override
@@ -260,6 +312,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get commonGuest => 'Visitante';
+
+  @override
+  String get commonDelete => 'Excluir';
+
+  @override
+  String get commonCancel => 'Cancelar';
 
   @override
   String get errorTitle => 'Algo deu errado';

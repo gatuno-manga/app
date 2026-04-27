@@ -1,12 +1,17 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import '../../features/certificates/domain/use_cases/certificates_service.dart';
 
 class DioClient {
   late final Dio dio;
-  List<String> _allowedBadCertificateUrls = [];
+  final CertificatesService _certificatesService;
 
-  DioClient({String baseUrl = '', HttpClient? httpClient}) {
+  DioClient({
+    required CertificatesService certificatesService,
+    String baseUrl = '',
+    HttpClient? httpClient,
+  }) : _certificatesService = certificatesService {
     dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
@@ -17,40 +22,30 @@ class DioClient {
       ),
     );
 
-    if (baseUrl.isNotEmpty) {
-      _setupCertificatePinning(baseUrl, httpClient);
-    }
+    _setupHttpClientAdapter(httpClient);
   }
 
   void updateBaseUrl(String baseUrl, {HttpClient? httpClient}) {
     dio.options.baseUrl = baseUrl;
-    _setupCertificatePinning(baseUrl, httpClient);
+    _setupHttpClientAdapter(httpClient);
   }
 
-  void updateAllowedBadCertificateUrls(
-    List<String> urls, {
-    HttpClient? httpClient,
-  }) {
-    _allowedBadCertificateUrls = urls;
-    _setupCertificatePinning(dio.options.baseUrl, httpClient);
-  }
-
-  void _setupCertificatePinning(String baseUrl, HttpClient? httpClient) {
-    if (baseUrl.isEmpty) return;
-
-    // Support self-signed certificates for the configured API host
-    final baseUri = Uri.tryParse(baseUrl);
-    if (baseUri == null) return;
-
+  void _setupHttpClientAdapter(HttpClient? httpClient) {
     dio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = httpClient ?? HttpClient();
         client.badCertificateCallback = (cert, host, port) {
-          if (host == baseUri.host) return true;
-          return _allowedBadCertificateUrls.any((url) {
-            final uri = Uri.tryParse(url);
-            return uri != null && uri.host == host;
-          });
+          final status = _certificatesService.checkStatus(cert, host);
+          
+          if (status == CertificateStatus.trusted) {
+            return true;
+          }
+          
+          if (status == CertificateStatus.unknown) {
+            _certificatesService.addPending(host, cert);
+          }
+          
+          return false;
         };
         return client;
       },

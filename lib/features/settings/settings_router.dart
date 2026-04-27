@@ -7,6 +7,7 @@ import '../authentication/domain/use_cases/auth_service.dart';
 import '../settings/domain/use_cases/settings_service.dart';
 import '../users/presentation/views/me_screen.dart';
 import '../users/presentation/view_models/me_view_model.dart';
+import '../certificates/certificates_router.dart';
 import '../../../core/di/injection.dart';
 
 final GlobalKey<NavigatorState> settingsNavigatorKey =
@@ -25,6 +26,7 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
         child: const SettingsPage(),
       ),
       routes: [
+        ...certificatesRoutes,
         GoRoute(
           path:
               'profile', // Full path will be /settings/profile or use /users/me

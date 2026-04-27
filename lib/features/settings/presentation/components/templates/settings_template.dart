@@ -7,7 +7,8 @@ class SettingsTemplate extends StatelessWidget {
   final Widget sensitiveContentToggle;
   final Widget apiSectionHeader;
   final Widget apiForm;
-  final Widget allowedUrlsSection;
+  final Widget certificatesSectionHeader;
+  final Widget certificatesTile;
 
   const SettingsTemplate({
     super.key,
@@ -17,7 +18,8 @@ class SettingsTemplate extends StatelessWidget {
     required this.sensitiveContentToggle,
     required this.apiSectionHeader,
     required this.apiForm,
-    required this.allowedUrlsSection,
+    required this.certificatesSectionHeader,
+    required this.certificatesTile,
   });
 
   @override
@@ -36,7 +38,9 @@ class SettingsTemplate extends StatelessWidget {
           const SizedBox(height: 8),
           apiForm,
           const Divider(height: 32),
-          allowedUrlsSection,
+          certificatesSectionHeader,
+          const SizedBox(height: 8),
+          certificatesTile,
         ],
       ),
     );

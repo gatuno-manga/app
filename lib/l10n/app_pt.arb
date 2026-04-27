@@ -83,12 +83,37 @@
   "settingsAddUrlLabel": "Adicionar URL",
   "settingsAddUrlHint": "https://exemplo.com",
   "settingsRemoveUrl": "Remover",
+  "settingsCertificatesSection": "Certificados",
+  "settingsCertificatesDesc": "Gerenciar certificados confiáveis e ignorados",
+  "certTrustDialogTitle": "Certificado não confiável",
+  "certTrustDialogMessage": "O servidor em {host} está usando um certificado não confiável. Deseja confiar nele e continuar?",
+  "@certTrustDialogMessage": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "certTrustDialogTrust": "Confiar",
+  "certTrustDialogIgnore": "Ignorar",
+  "certTrustedTab": "Confiáveis",
+  "certIgnoredTab": "Ignorados",
+  "certAddTitle": "Adicionar Certificado",
+  "certAddLabel": "Host",
+  "certAddHint": "api.exemplo.com",
+  "certAddPemLabel": "Certificado (PEM)",
+  "certAddFileButton": "Selecionar Arquivo PEM",
+  "certEmptyTrusted": "Nenhum certificado confiável ainda.",
+  "certEmptyIgnored": "Nenhum certificado ignorado ainda.",
+  "certDeleteConfirm": "Tem certeza que deseja remover este certificado?",
   "welcomeTitle": "Bem-vindo ao Gatuno",
   "welcomeInstructions": "Por favor, insira a URL da API do seu servidor para continuar.",
   "welcomeConnect": "Conectar",
   "commonLogout": "Sair",
   "commonLoading": "Carregando...",
   "commonGuest": "Visitante",
+  "commonDelete": "Excluir",
+  "commonCancel": "Cancelar",
   "errorTitle": "Algo deu errado",
   "errorMessage": "Ocorreu um erro inesperado.",
   "errorRetry": "Tentar novamente",

@@ -83,12 +83,37 @@
   "settingsAddUrlLabel": "Add URL",
   "settingsAddUrlHint": "https://example.com",
   "settingsRemoveUrl": "Remove",
+  "settingsCertificatesSection": "Certificates",
+  "settingsCertificatesDesc": "Manage trusted and ignored certificates",
+  "certTrustDialogTitle": "Untrusted Certificate",
+  "certTrustDialogMessage": "The server at {host} is using an untrusted certificate. Do you want to trust it and continue?",
+  "@certTrustDialogMessage": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "certTrustDialogTrust": "Trust",
+  "certTrustDialogIgnore": "Ignore",
+  "certTrustedTab": "Trusted",
+  "certIgnoredTab": "Ignored",
+  "certAddTitle": "Add Certificate",
+  "certAddLabel": "Host",
+  "certAddHint": "api.example.com",
+  "certAddPemLabel": "Certificate (PEM)",
+  "certAddFileButton": "Select PEM File",
+  "certEmptyTrusted": "No trusted certificates yet.",
+  "certEmptyIgnored": "No ignored certificates yet.",
+  "certDeleteConfirm": "Are you sure you want to remove this certificate?",
   "welcomeTitle": "Welcome to Gatuno",
   "welcomeInstructions": "Please enter your server API URL to continue.",
   "welcomeConnect": "Connect",
   "commonLogout": "Sign Out",
   "commonLoading": "Loading...",
   "commonGuest": "Guest",
+  "commonDelete": "Delete",
+  "commonCancel": "Cancel",
   "errorTitle": "Something went wrong",
   "errorMessage": "An unexpected error occurred.",
   "errorRetry": "Retry",
