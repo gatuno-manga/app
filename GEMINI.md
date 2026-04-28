@@ -131,6 +131,11 @@
   - Updated the bad certificate interception flow to prompt for a custom name when choosing to "Trust" a certificate.
   - Implemented `CertificateTrustResult` and `CertificateTrustAction` to robustly handle user decisions during network security exceptions.
   - Localized all certificate-related labels (EN: Name, PT: Nome).
+- **Certificates - Error Handling & Loading:**
+  - Implemented robust error handling using custom `CertificateException` classes.
+  - Added visual feedback for certificate operations via SnackBars and loading indicators in the `CertificateAddDialog`.
+  - Enhanced `CertificatesViewModel` to track loading and error states reactively.
+  - Improved `BadCertificateInterceptor` to propagate `DioException` during retry logic.
 - **Navigation & Guarding:**
   - Enhanced `GoRouter` configuration to support state-based redirection.
   - Implemented granular route guards for protected features like User Profile and Saved Pages.
