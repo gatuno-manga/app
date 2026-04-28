@@ -644,6 +644,12 @@ abstract class AppLocalizations {
   /// **'No ignored certificates yet.'**
   String get certEmptyIgnored;
 
+  /// No description provided for @certFingerprintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint: {fingerprint}'**
+  String certFingerprintLabel(String fingerprint);
+
   /// No description provided for @certDeleteConfirm.
   ///
   /// In en, this message translates to:

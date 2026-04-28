@@ -12,7 +12,10 @@ class CertificatesTemplate extends StatelessWidget {
     required this.tabs,
     required this.tabViews,
     required this.onAddPressed,
-  });
+  }) : assert(
+         tabs.length == tabViews.length,
+         'The number of tabs must match the number of tabViews.',
+       );
 
   @override
   Widget build(BuildContext context) {

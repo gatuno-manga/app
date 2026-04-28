@@ -105,7 +105,20 @@
   "certAddFileButton": "Selecionar Arquivo PEM",
   "certEmptyTrusted": "Nenhum certificado confiável ainda.",
   "certEmptyIgnored": "Nenhum certificado ignorado ainda.",
+  "certFingerprintLabel": "Impressão digital: {fingerprint}",
+  "@certFingerprintLabel": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
   "certDeleteConfirm": "Tem certeza que deseja remover este certificado?",
+  "certErrorInvalidFormat": "Formato de certificado inválido.",
+  "certErrorFileMissing": "Arquivo de certificado ausente ou ilegível.",
+  "certErrorDecoding": "Falha ao decodificar o arquivo de certificado.",
+  "certErrorEmptyFingerprint": "Falha ao calcular a impressão digital do certificado.",
+  "certErrorUnknown": "Ocorreu um erro inesperado ao adicionar o certificado.",
   "welcomeTitle": "Bem-vindo ao Gatuno",
   "welcomeInstructions": "Por favor, insira a URL da API do seu servidor para continuar.",
   "welcomeConnect": "Conectar",

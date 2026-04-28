@@ -6,6 +6,7 @@ import '../entities/certificate_item.dart';
 import '../../data/data_sources/certificates_local_data_source.dart';
 import '../../../../core/network/http_overrides.dart';
 import '../../../../core/logging/logger.dart';
+import '../../exceptions/certificates_exceptions.dart';
 
 enum CertificateStatus { trusted, ignored, unknown }
 
@@ -116,6 +117,11 @@ class CertificatesService extends ChangeNotifier {
   Future<void> addManualCertificate(String name, String pem) async {
     AppLogger.i('Adding manual certificate for host: $name', _logTag);
     final fingerprint = _calculateFingerprintFromPem(pem);
+
+    if (fingerprint.isEmpty) {
+      throw CertificateEmptyFingerprintException();
+    }
+
     final newItem = CertificateItem(
       name: name,
       fingerprint: fingerprint,

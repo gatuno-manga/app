@@ -40,6 +40,7 @@ class CertificateItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return ListTile(
@@ -55,7 +56,9 @@ class CertificateItemTile extends StatelessWidget {
           ),
           if (certificate.fingerprint.isNotEmpty)
             Text(
-              'Fingerprint: ${certificate.fingerprint.substring(0, 12)}...',
+              l10n.certFingerprintLabel(
+                '${certificate.fingerprint.substring(0, 12)}...',
+              ),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.outline,
               ),

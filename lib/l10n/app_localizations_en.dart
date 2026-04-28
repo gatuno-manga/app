@@ -292,6 +292,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get certEmptyIgnored => 'No ignored certificates yet.';
 
   @override
+  String certFingerprintLabel(String fingerprint) {
+    return 'Fingerprint: $fingerprint';
+  }
+
+  @override
   String get certDeleteConfirm =>
       'Are you sure you want to remove this certificate?';
 

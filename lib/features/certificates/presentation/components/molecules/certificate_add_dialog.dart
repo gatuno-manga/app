@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import '../../../../shared/components/atoms/app_text_skeleton.dart';
 
 class CertificateAddDialog extends StatefulWidget {
-  final void Function(String name) onAddFromFile;
+  final Future<bool> Function(String name) onAddFromFile;
 
   const CertificateAddDialog({super.key, required this.onAddFromFile});
 
@@ -11,7 +12,7 @@ class CertificateAddDialog extends StatefulWidget {
 
   static Future<void> show(
     BuildContext context,
-    void Function(String name) onAddFromFile,
+    Future<bool> Function(String name) onAddFromFile,
   ) {
     return showDialog(
       context: context,
@@ -23,6 +24,7 @@ class CertificateAddDialog extends StatefulWidget {
 class _CertificateAddDialogState extends State<CertificateAddDialog> {
   final _nameController = TextEditingController();
   bool _isValid = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -45,6 +47,7 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
       content: TextField(
         controller: _nameController,
         onChanged: (_) => _validate(),
+        enabled: !_isLoading,
         decoration: InputDecoration(
           labelText: l10n.certAddLabel,
           hintText: l10n.certAddHint,
@@ -52,18 +55,28 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
           child: Text(l10n.commonCancel),
         ),
         ElevatedButton(
-          onPressed: _isValid
-              ? () {
+          onPressed: _isValid && !_isLoading
+              ? () async {
                   final name = _nameController.text.trim();
-                  Navigator.pop(context);
-                  widget.onAddFromFile(name);
+                  setState(() => _isLoading = true);
+                  final success = await widget.onAddFromFile(name);
+                  if (mounted) {
+                    setState(() => _isLoading = false);
+                    if (success) {
+                      Navigator.pop(context);
+                    }
+                  }
                 }
               : null,
-          child: Text(l10n.certAddFileButton),
+          child: AppTextSkeleton(
+            text: _isLoading ? null : l10n.certAddFileButton,
+            width: 120,
+            height: 16,
+          ),
         ),
       ],
     );

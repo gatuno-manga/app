@@ -64,6 +64,8 @@ class BadCertificateInterceptor extends Interceptor {
       try {
         final response = await _dio.fetch<dynamic>(err.requestOptions);
         return handler.resolve(response);
+      } on DioException catch (e) {
+        return handler.next(e);
       } catch (e) {
         return handler.next(err);
       }

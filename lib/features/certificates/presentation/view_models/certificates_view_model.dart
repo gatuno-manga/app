@@ -4,6 +4,8 @@ import '../../../../core/base/safe_change_notifier.dart';
 import '../../domain/entities/certificate_item.dart';
 import '../../domain/use_cases/certificates_service.dart';
 
+import '../../exceptions/certificates_exceptions.dart';
+
 class CertificatesViewModel extends SafeChangeNotifier {
   final CertificatesService _certificatesService;
 
@@ -17,33 +19,85 @@ class CertificatesViewModel extends SafeChangeNotifier {
     super.dispose();
   }
 
+  CertificateException? _error;
+  CertificateException? get error => _error;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
   List<CertificateItem> get trustedCertificates =>
       _certificatesService.trustedCertificates;
 
   List<CertificateItem> get ignoredCertificates =>
       _certificatesService.ignoredCertificates;
 
-  Future<void> addCertificateFromFile(String name) async {
-    final result = await FilePicker.pickFiles(type: FileType.any);
+  Future<bool> addCertificateFromFile(String name) async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pem', 'crt', 'cer'],
+    );
 
-    if (result == null || result.files.isEmpty) return;
+    if (result == null || result.files.isEmpty) return false;
 
     final file = result.files.single;
     String fileContent;
 
-    if (file.bytes != null) {
-      fileContent = String.fromCharCodes(file.bytes!);
-    } else if (file.path != null) {
-      fileContent = await File(file.path!).readAsString();
-    } else {
-      return;
-    }
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
-    await _certificatesService.addManualCertificate(name, fileContent);
+    try {
+      if (file.bytes != null) {
+        fileContent = String.fromCharCodes(file.bytes!);
+      } else if (file.path != null) {
+        fileContent = await File(file.path!).readAsString();
+      } else {
+        throw CertificateFileMissingException();
+      }
+
+      await _certificatesService.addManualCertificate(name, fileContent);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on CertificateException catch (e) {
+      _error = e;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = CertificateDecodingException();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
-  Future<void> addManualCertificate(String name, String pem) async {
-    await _certificatesService.addManualCertificate(name, pem);
+  Future<bool> addManualCertificate(String name, String pem) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _certificatesService.addManualCertificate(name, pem);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on CertificateException catch (e) {
+      _error = e;
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = CertificateDecodingException();
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> deleteCertificate(String fingerprint) async {
