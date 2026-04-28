@@ -656,6 +656,36 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to remove this certificate?'**
   String get certDeleteConfirm;
 
+  /// No description provided for @certErrorInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid certificate format.'**
+  String get certErrorInvalidFormat;
+
+  /// No description provided for @certErrorFileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate file is missing or unreadable.'**
+  String get certErrorFileMissing;
+
+  /// No description provided for @certErrorDecoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to decode certificate file.'**
+  String get certErrorDecoding;
+
+  /// No description provided for @certErrorEmptyFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to calculate certificate fingerprint.'**
+  String get certErrorEmptyFingerprint;
+
+  /// No description provided for @certErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while adding the certificate.'**
+  String get certErrorUnknown;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:

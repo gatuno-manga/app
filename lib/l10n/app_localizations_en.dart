@@ -301,6 +301,24 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to remove this certificate?';
 
   @override
+  String get certErrorInvalidFormat => 'Invalid certificate format.';
+
+  @override
+  String get certErrorFileMissing =>
+      'Certificate file is missing or unreadable.';
+
+  @override
+  String get certErrorDecoding => 'Failed to decode certificate file.';
+
+  @override
+  String get certErrorEmptyFingerprint =>
+      'Failed to calculate certificate fingerprint.';
+
+  @override
+  String get certErrorUnknown =>
+      'An unexpected error occurred while adding the certificate.';
+
+  @override
   String get welcomeTitle => 'Welcome to Gatuno';
 
   @override

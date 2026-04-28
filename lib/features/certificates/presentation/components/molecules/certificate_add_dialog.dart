@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import '../../../../shared/components/atoms/app_text_skeleton.dart';
+import 'package:gatuno/shared/components/atoms/app_text_skeleton.dart';
 
 class CertificateAddDialog extends StatefulWidget {
   final Future<bool> Function(String name) onAddFromFile;
@@ -64,7 +64,7 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
                   final name = _nameController.text.trim();
                   setState(() => _isLoading = true);
                   final success = await widget.onAddFromFile(name);
-                  if (mounted) {
+                  if (context.mounted) {
                     setState(() => _isLoading = false);
                     if (success) {
                       Navigator.pop(context);

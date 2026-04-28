@@ -300,6 +300,25 @@ class AppLocalizationsPt extends AppLocalizations {
       'Tem certeza que deseja remover este certificado?';
 
   @override
+  String get certErrorInvalidFormat => 'Formato de certificado inválido.';
+
+  @override
+  String get certErrorFileMissing =>
+      'Arquivo de certificado ausente ou ilegível.';
+
+  @override
+  String get certErrorDecoding =>
+      'Falha ao decodificar o arquivo de certificado.';
+
+  @override
+  String get certErrorEmptyFingerprint =>
+      'Falha ao calcular a impressão digital do certificado.';
+
+  @override
+  String get certErrorUnknown =>
+      'Ocorreu um erro inesperado ao adicionar o certificado.';
+
+  @override
   String get welcomeTitle => 'Bem-vindo ao Gatuno';
 
   @override

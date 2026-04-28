@@ -52,34 +52,41 @@ void main() {
       verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
     });
 
-    test('addManualCertificate returns false and sets error on CertificateException', () async {
-      when(
-        () => mockService.addManualCertificate(any(), any()),
-      ).thenThrow(CertificateEmptyFingerprintException());
+    test(
+      'addManualCertificate returns false and sets error on CertificateException',
+      () async {
+        when(
+          () => mockService.addManualCertificate(any(), any()),
+        ).thenThrow(CertificateEmptyFingerprintException());
 
-      final result = await viewModel.addManualCertificate('name', 'pem');
+        final result = await viewModel.addManualCertificate('name', 'pem');
 
-      expect(result, isFalse);
-      expect(viewModel.error, isA<CertificateEmptyFingerprintException>());
-      verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
-    });
+        expect(result, isFalse);
+        expect(viewModel.error, isA<CertificateEmptyFingerprintException>());
+        verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
+      },
+    );
 
-    test('addManualCertificate returns false and sets DecodingException on unknown error', () async {
-      when(
-        () => mockService.addManualCertificate(any(), any()),
-      ).thenThrow(Exception('unknown'));
+    test(
+      'addManualCertificate returns false and sets DecodingException on unknown error',
+      () async {
+        when(
+          () => mockService.addManualCertificate(any(), any()),
+        ).thenThrow(Exception('unknown'));
 
-      final result = await viewModel.addManualCertificate('name', 'pem');
+        final result = await viewModel.addManualCertificate('name', 'pem');
 
-      expect(result, isFalse);
-      expect(viewModel.error, isA<CertificateDecodingException>());
-    });
+        expect(result, isFalse);
+        expect(viewModel.error, isA<CertificateDecodingException>());
+      },
+    );
 
     test('clearError resets error state', () {
       // Manual trigger to set error (if possible, or just set it via a failed call)
-      when(() => mockService.addManualCertificate(any(), any()))
-          .thenThrow(CertificateDecodingException());
-      
+      when(
+        () => mockService.addManualCertificate(any(), any()),
+      ).thenThrow(CertificateDecodingException());
+
       viewModel.addManualCertificate('n', 'p');
       expect(viewModel.error, isNotNull);
 
