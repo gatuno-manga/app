@@ -36,28 +36,14 @@ void main() {
       when(
         () => mockStorage.isSensitiveContentEnabled(),
       ).thenAnswer((_) async => true);
-      when(
-        () => mockStorage.getAllowedBadCertificateUrls(),
-      ).thenAnswer((_) async => ['https://storage.com']);
       when(() => mockDioClient.updateBaseUrl(any())).thenAnswer((_) {});
-      when(
-        () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-      ).thenAnswer((_) {});
 
       await settingsService.init();
 
       expect(settingsService.apiUrl, 'http://test.com');
       expect(settingsService.sensitiveContentEnabled, isTrue);
-      expect(settingsService.allowedBadCertificateUrls, [
-        'https://storage.com',
-      ]);
       expect(settingsService.isInitialized, isTrue);
       verify(() => mockDioClient.updateBaseUrl('http://test.com')).called(1);
-      verify(
-        () => mockDioClient.updateAllowedBadCertificateUrls([
-          'https://storage.com',
-        ]),
-      ).called(1);
     });
 
     test('setApiUrl should update storage and dio client', () async {
@@ -82,63 +68,6 @@ void main() {
       verify(() => mockStorage.setSensitiveContentEnabled(true)).called(1);
     });
 
-    test(
-      'addAllowedBadCertificateUrl should update storage and dio client',
-      () async {
-        when(
-          () => mockStorage.setAllowedBadCertificateUrls(any()),
-        ).thenAnswer((_) async {});
-        when(
-          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-        ).thenAnswer((_) {});
-
-        await settingsService.addAllowedBadCertificateUrl(
-          'https://new-storage.com',
-        );
-
-        expect(settingsService.allowedBadCertificateUrls, [
-          'https://new-storage.com',
-        ]);
-        verify(
-          () => mockStorage.setAllowedBadCertificateUrls([
-            'https://new-storage.com',
-          ]),
-        ).called(1);
-        verify(
-          () => mockDioClient.updateAllowedBadCertificateUrls([
-            'https://new-storage.com',
-          ]),
-        ).called(1);
-      },
-    );
-
-    test(
-      'removeAllowedBadCertificateUrl should update storage and dio client',
-      () async {
-        when(
-          () => mockStorage.setAllowedBadCertificateUrls(any()),
-        ).thenAnswer((_) async {});
-        when(
-          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-        ).thenAnswer((_) {});
-
-        // Add one first
-        await settingsService.addAllowedBadCertificateUrl(
-          'https://to-remove.com',
-        );
-
-        await settingsService.removeAllowedBadCertificateUrl(
-          'https://to-remove.com',
-        );
-
-        expect(settingsService.allowedBadCertificateUrls, isEmpty);
-        verify(() => mockStorage.setAllowedBadCertificateUrls(any())).called(2);
-        verify(
-          () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-        ).called(2);
-      },
-    );
-
     test('init should handle errors gracefully', () async {
       when(() => mockStorage.getApiUrl()).thenThrow(Exception('Storage error'));
 
@@ -147,27 +76,49 @@ void main() {
       expect(settingsService.isInitialized, isFalse);
     });
 
-    group('Edge Cases', () {
-      test(
-        'addAllowedBadCertificateUrl should ignore empty or duplicate URL',
-        () async {
-          await settingsService.addAllowedBadCertificateUrl('');
-          expect(settingsService.allowedBadCertificateUrls, isEmpty);
+    group('validateApiUrl', () {
+      test('should return true when health check returns 200', () async {
+        final response = Response<Map<String, dynamic>>(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 200,
+        );
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenAnswer((_) async => response);
 
-          when(
-            () => mockStorage.setAllowedBadCertificateUrls(any()),
-          ).thenAnswer((_) async {});
-          when(
-            () => mockDioClient.updateAllowedBadCertificateUrls(any()),
-          ).thenAnswer((_) {});
+        final result = await settingsService.validateApiUrl('http://test.com');
 
-          await settingsService.addAllowedBadCertificateUrl('https://test.com');
-          await settingsService.addAllowedBadCertificateUrl('https://test.com');
-          expect(settingsService.allowedBadCertificateUrls, [
-            'https://test.com',
-          ]);
-        },
-      );
+        expect(result, isTrue);
+        verify(
+          () => mockDio.get<Map<String, dynamic>>(
+            'http://test.com/health/liveness',
+          ),
+        ).called(1);
+      });
+
+      test('should return false when health check returns non-200', () async {
+        final response = Response<Map<String, dynamic>>(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 500,
+        );
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenAnswer((_) async => response);
+
+        final result = await settingsService.validateApiUrl('http://test.com');
+
+        expect(result, isFalse);
+      });
+
+      test('should return false when dio throws exception', () async {
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+
+        final result = await settingsService.validateApiUrl('http://test.com');
+
+        expect(result, isFalse);
+      });
     });
   });
 }

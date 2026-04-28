@@ -6,16 +6,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/interceptors/logging_interceptor.dart';
 import 'package:gatuno/core/network/interceptors/cache_interceptor.dart';
+import 'package:gatuno/features/certificates/domain/use_cases/certificates_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockX509Certificate extends Mock implements X509Certificate {}
 
 class MockHttpClient extends Mock implements HttpClient {}
 
+class MockCertificatesService extends Mock implements CertificatesService {}
+
 void main() {
+  late MockCertificatesService mockCertificatesService;
+
+  setUp(() {
+    mockCertificatesService = MockCertificatesService();
+    registerFallbackValue(MockX509Certificate());
+  });
+
   group('DioClient', () {
     test('provides a Dio instance with correct base options', () {
-      final client = DioClient(baseUrl: 'https://api.test.com');
+      final client = DioClient(
+        certificatesService: mockCertificatesService,
+        baseUrl: 'https://api.test.com',
+      );
       expect(client.dio, isA<Dio>());
       expect(client.dio.options.baseUrl, 'https://api.test.com');
       expect(client.dio.options.contentType, 'application/json');
@@ -27,66 +40,37 @@ void main() {
         const baseUrl = 'https://api.test.com/api';
         final mockHttpClient = MockHttpClient();
 
-        // DioClient will call _setupCertificatePinning which sets httpClientAdapter
-        final client = DioClient(baseUrl: baseUrl, httpClient: mockHttpClient);
+        when(
+          () => mockCertificatesService.checkStatus(any(), any()),
+        ).thenReturn(CertificateStatus.trusted);
+
+        final client = DioClient(
+          certificatesService: mockCertificatesService,
+          baseUrl: baseUrl,
+          httpClient: mockHttpClient,
+        );
 
         final adapter = client.dio.httpClientAdapter as IOHttpClientAdapter;
-
-        // Capturing the callback
         final httpClient = adapter.createHttpClient!();
         expect(httpClient, mockHttpClient);
 
         final cert = MockX509Certificate();
 
-        // Access the callback that was set on the mock
         final capturedCallback =
             verify(
                   () => mockHttpClient.badCertificateCallback = captureAny(),
                 ).captured.single
                 as bool Function(X509Certificate, String, int);
 
-        // Should allow matching host
         expect(capturedCallback(cert, 'api.test.com', 443), isTrue);
-
-        // Should deny different host
-        expect(capturedCallback(cert, 'malicious.com', 443), isFalse);
+        verify(
+          () => mockCertificatesService.checkStatus(cert, 'api.test.com'),
+        ).called(1);
       },
     );
 
-    test('updateAllowedBadCertificateUrls updates the allowed hosts list', () {
-      const baseUrl = 'https://api.test.com/api';
-      final mockHttpClient = MockHttpClient();
-
-      final client = DioClient(baseUrl: baseUrl, httpClient: mockHttpClient);
-      client.updateAllowedBadCertificateUrls([
-        'https://storage.test.com',
-      ], httpClient: mockHttpClient);
-
-      final adapter = client.dio.httpClientAdapter as IOHttpClientAdapter;
-      final httpClient = adapter.createHttpClient!();
-      expect(httpClient, mockHttpClient);
-
-      final cert = MockX509Certificate();
-
-      // Get the latest callback set
-      final capturedCallback =
-          verify(
-                () => mockHttpClient.badCertificateCallback = captureAny(),
-              ).captured.last
-              as bool Function(X509Certificate, String, int);
-
-      // Should allow base host
-      expect(capturedCallback(cert, 'api.test.com', 443), isTrue);
-
-      // Should allow storage host
-      expect(capturedCallback(cert, 'storage.test.com', 443), isTrue);
-
-      // Should deny others
-      expect(capturedCallback(cert, 'other.com', 443), isFalse);
-    });
-
     test('setupLoggingInterceptor adds LoggingInterceptor', () {
-      final client = DioClient();
+      final client = DioClient(certificatesService: mockCertificatesService);
       setupLoggingInterceptor(client);
 
       final loggingInterceptors = client.dio.interceptors
@@ -95,8 +79,7 @@ void main() {
     });
 
     test('setupCacheInterceptor adds DioCacheInterceptor', () async {
-      final client = DioClient();
-      // Use a MemCacheStore for testing to avoid disk I/O
+      final client = DioClient(certificatesService: mockCertificatesService);
       await setupCacheInterceptor(client, store: MemCacheStore());
 
       final cacheInterceptors = client.dio.interceptors

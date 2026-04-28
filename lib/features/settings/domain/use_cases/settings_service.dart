@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 import '../../data/data_sources/settings_local_data_source.dart';
 import '../../../../core/network/dio_client.dart';
@@ -13,14 +10,12 @@ class SettingsService extends ChangeNotifier {
 
   String? _apiUrl;
   bool _sensitiveContentEnabled = false;
-  List<String> _allowedBadCertificateUrls = [];
   bool _isInitialized = false;
 
   SettingsService(this._storage, this._dioClient);
 
   String? get apiUrl => _apiUrl;
   bool get sensitiveContentEnabled => _sensitiveContentEnabled;
-  List<String> get allowedBadCertificateUrls => _allowedBadCertificateUrls;
   bool get isInitialized => _isInitialized;
 
   Future<void> init() async {
@@ -29,13 +24,10 @@ class SettingsService extends ChangeNotifier {
     try {
       _apiUrl = await _storage.getApiUrl();
       _sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
-      _allowedBadCertificateUrls = await _storage
-          .getAllowedBadCertificateUrls();
 
       if (_apiUrl != null) {
         _dioClient.updateBaseUrl(_apiUrl!);
       }
-      _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
 
       _isInitialized = true;
       notifyListeners();
@@ -72,43 +64,6 @@ class SettingsService extends ChangeNotifier {
     }
   }
 
-  Future<void> addAllowedBadCertificateUrl(String url) async {
-    if (url.isEmpty || _allowedBadCertificateUrls.contains(url)) return;
-
-    try {
-      _allowedBadCertificateUrls.add(url);
-      await _storage.setAllowedBadCertificateUrls(_allowedBadCertificateUrls);
-      _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
-      notifyListeners();
-    } catch (e, stackTrace) {
-      AppLogger.e(
-        'Error adding allowed bad certificate URL',
-        e,
-        stackTrace,
-        _logTag,
-      );
-      rethrow;
-    }
-  }
-
-  Future<void> removeAllowedBadCertificateUrl(String url) async {
-    try {
-      if (_allowedBadCertificateUrls.remove(url)) {
-        await _storage.setAllowedBadCertificateUrls(_allowedBadCertificateUrls);
-        _dioClient.updateAllowedBadCertificateUrls(_allowedBadCertificateUrls);
-        notifyListeners();
-      }
-    } catch (e, stackTrace) {
-      AppLogger.e(
-        'Error removing allowed bad certificate URL',
-        e,
-        stackTrace,
-        _logTag,
-      );
-      rethrow;
-    }
-  }
-
   Future<bool> validateApiUrl(String url) async {
     if (url.isEmpty) return false;
 
@@ -120,24 +75,7 @@ class SettingsService extends ChangeNotifier {
       final uri = Uri.tryParse(formattedUrl);
       if (uri == null) return false;
 
-      final dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 3),
-        ),
-      );
-
-      dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          final client = HttpClient();
-          client.badCertificateCallback = (cert, host, port) {
-            return host == uri.host;
-          };
-          return client;
-        },
-      );
-
-      final response = await dio.get<Map<String, dynamic>>(
+      final response = await _dioClient.dio.get<Map<String, dynamic>>(
         '$formattedUrl/health/liveness',
       );
       return response.statusCode == 200;

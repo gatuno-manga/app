@@ -83,12 +83,50 @@
   "settingsAddUrlLabel": "Adicionar URL",
   "settingsAddUrlHint": "https://exemplo.com",
   "settingsRemoveUrl": "Remover",
+  "settingsCertificatesSection": "Certificados",
+  "settingsCertificatesDesc": "Gerenciar certificados confiáveis e ignorados",
+  "certTrustDialogTitle": "Certificado não confiável",
+  "certTrustDialogMessage": "O servidor em {name} está usando um certificado não confiável. Deseja confiar nele e continuar?",
+  "@certTrustDialogMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "certTrustDialogTrust": "Confiar",
+  "certTrustDialogIgnore": "Ignorar",
+  "certTrustedTab": "Confiáveis",
+  "certIgnoredTab": "Ignorados",
+  "certAddTitle": "Adicionar Certificado",
+  "certAddLabel": "Nome",
+  "certAddHint": "api.exemplo.com",
+  "certAddPemLabel": "Certificado (PEM)",
+  "certAddFileButton": "Selecionar Arquivo PEM",
+  "certEmptyTrusted": "Nenhum certificado confiável ainda.",
+  "certEmptyIgnored": "Nenhum certificado ignorado ainda.",
+  "certFingerprintLabel": "Impressão digital: {fingerprint}",
+  "@certFingerprintLabel": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "certDeleteConfirm": "Tem certeza que deseja remover este certificado?",
+  "certErrorInvalidFormat": "Formato de certificado inválido.",
+  "certErrorFileMissing": "Arquivo de certificado ausente ou ilegível.",
+  "certErrorDecoding": "Falha ao decodificar o arquivo de certificado.",
+  "certErrorEmptyFingerprint": "Falha ao calcular a impressão digital do certificado.",
+  "certErrorUnknown": "Ocorreu um erro inesperado ao adicionar o certificado.",
   "welcomeTitle": "Bem-vindo ao Gatuno",
   "welcomeInstructions": "Por favor, insira a URL da API do seu servidor para continuar.",
   "welcomeConnect": "Conectar",
   "commonLogout": "Sair",
   "commonLoading": "Carregando...",
   "commonGuest": "Visitante",
+  "commonDelete": "Excluir",
+  "commonCancel": "Cancelar",
   "errorTitle": "Algo deu errado",
   "errorMessage": "Ocorreu um erro inesperado.",
   "errorRetry": "Tentar novamente",

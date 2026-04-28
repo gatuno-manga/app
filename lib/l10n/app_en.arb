@@ -83,12 +83,50 @@
   "settingsAddUrlLabel": "Add URL",
   "settingsAddUrlHint": "https://example.com",
   "settingsRemoveUrl": "Remove",
+  "settingsCertificatesSection": "Certificates",
+  "settingsCertificatesDesc": "Manage trusted and ignored certificates",
+  "certTrustDialogTitle": "Untrusted Certificate",
+  "certTrustDialogMessage": "The server at {name} is using an untrusted certificate. Do you want to trust it and continue?",
+  "@certTrustDialogMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "certTrustDialogTrust": "Trust",
+  "certTrustDialogIgnore": "Ignore",
+  "certTrustedTab": "Trusted",
+  "certIgnoredTab": "Ignored",
+  "certAddTitle": "Add Certificate",
+  "certAddLabel": "Name",
+  "certAddHint": "api.example.com",
+  "certAddPemLabel": "Certificate (PEM)",
+  "certAddFileButton": "Select PEM File",
+  "certEmptyTrusted": "No trusted certificates yet.",
+  "certEmptyIgnored": "No ignored certificates yet.",
+  "certFingerprintLabel": "Fingerprint: {fingerprint}",
+  "@certFingerprintLabel": {
+    "placeholders": {
+      "fingerprint": {
+        "type": "String"
+      }
+    }
+  },
+  "certDeleteConfirm": "Are you sure you want to remove this certificate?",
+  "certErrorInvalidFormat": "Invalid certificate format.",
+  "certErrorFileMissing": "Certificate file is missing or unreadable.",
+  "certErrorDecoding": "Failed to decode certificate file.",
+  "certErrorEmptyFingerprint": "Failed to calculate certificate fingerprint.",
+  "certErrorUnknown": "An unexpected error occurred while adding the certificate.",
   "welcomeTitle": "Welcome to Gatuno",
   "welcomeInstructions": "Please enter your server API URL to continue.",
   "welcomeConnect": "Connect",
   "commonLogout": "Sign Out",
   "commonLoading": "Loading...",
   "commonGuest": "Guest",
+  "commonDelete": "Delete",
+  "commonCancel": "Cancel",
   "errorTitle": "Something went wrong",
   "errorMessage": "An unexpected error occurred.",
   "errorRetry": "Retry",

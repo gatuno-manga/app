@@ -11,6 +11,8 @@ import 'package:gatuno/features/users/presentation/view_models/me_view_model.dar
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
 import 'package:gatuno/features/settings/data/data_sources/settings_local_data_source.dart';
+import 'package:gatuno/features/certificates/domain/use_cases/certificates_service.dart';
+import 'package:gatuno/features/certificates/data/data_sources/certificates_local_data_source.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
@@ -24,6 +26,10 @@ class MockUserStorage extends Mock implements UserStorage {}
 class MockSettingsService extends Mock implements SettingsService {}
 
 class MockSettingsStorage extends Mock implements SettingsStorage {}
+
+class MockCertificatesService extends Mock implements CertificatesService {}
+
+class MockCertificatesStorage extends Mock implements CertificatesStorage {}
 
 class MockHomeViewModel extends Mock implements HomeViewModel {}
 
@@ -56,12 +62,23 @@ Future<void> initTestDI({
   UserStorage? userStorage,
   SettingsService? settingsService,
   SettingsStorage? settingsStorage,
+  CertificatesService? certificatesService,
+  CertificatesStorage? certificatesStorage,
   HomeViewModel? homeViewModel,
   MeViewModel? meViewModel,
   NavigationViewModel? navigationViewModel,
   DioClient? dioClient,
 }) async {
   await sl.reset();
+
+  final certsService = certificatesService ?? MockCertificatesService();
+  if (certificatesService == null) {
+    when(() => certsService.init()).thenAnswer((_) async {});
+  }
+  sl.registerLazySingleton<CertificatesService>(() => certsService);
+  sl.registerLazySingleton<CertificatesStorage>(
+    () => certificatesStorage ?? MockCertificatesStorage(),
+  );
 
   final dc = dioClient ?? MockDioClient();
   sl.registerLazySingleton<DioClient>(() => dc);
@@ -81,7 +98,6 @@ Future<void> initTestDI({
   if (settingsService == null) {
     when(() => sService.sensitiveContentEnabled).thenReturn(false);
     when(() => sService.apiUrl).thenReturn(null);
-    when(() => sService.allowedBadCertificateUrls).thenReturn([]);
   }
   sl.registerLazySingleton<SettingsService>(() => sService);
 

@@ -554,6 +554,138 @@ abstract class AppLocalizations {
   /// **'Remove'**
   String get settingsRemoveUrl;
 
+  /// No description provided for @settingsCertificatesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificates'**
+  String get settingsCertificatesSection;
+
+  /// No description provided for @settingsCertificatesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage trusted and ignored certificates'**
+  String get settingsCertificatesDesc;
+
+  /// No description provided for @certTrustDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Untrusted Certificate'**
+  String get certTrustDialogTitle;
+
+  /// No description provided for @certTrustDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The server at {name} is using an untrusted certificate. Do you want to trust it and continue?'**
+  String certTrustDialogMessage(String name);
+
+  /// No description provided for @certTrustDialogTrust.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust'**
+  String get certTrustDialogTrust;
+
+  /// No description provided for @certTrustDialogIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get certTrustDialogIgnore;
+
+  /// No description provided for @certTrustedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted'**
+  String get certTrustedTab;
+
+  /// No description provided for @certIgnoredTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignored'**
+  String get certIgnoredTab;
+
+  /// No description provided for @certAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Certificate'**
+  String get certAddTitle;
+
+  /// No description provided for @certAddLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get certAddLabel;
+
+  /// No description provided for @certAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'api.example.com'**
+  String get certAddHint;
+
+  /// No description provided for @certAddPemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate (PEM)'**
+  String get certAddPemLabel;
+
+  /// No description provided for @certAddFileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Select PEM File'**
+  String get certAddFileButton;
+
+  /// No description provided for @certEmptyTrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'No trusted certificates yet.'**
+  String get certEmptyTrusted;
+
+  /// No description provided for @certEmptyIgnored.
+  ///
+  /// In en, this message translates to:
+  /// **'No ignored certificates yet.'**
+  String get certEmptyIgnored;
+
+  /// No description provided for @certFingerprintLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint: {fingerprint}'**
+  String certFingerprintLabel(String fingerprint);
+
+  /// No description provided for @certDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this certificate?'**
+  String get certDeleteConfirm;
+
+  /// No description provided for @certErrorInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid certificate format.'**
+  String get certErrorInvalidFormat;
+
+  /// No description provided for @certErrorFileMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate file is missing or unreadable.'**
+  String get certErrorFileMissing;
+
+  /// No description provided for @certErrorDecoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to decode certificate file.'**
+  String get certErrorDecoding;
+
+  /// No description provided for @certErrorEmptyFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to calculate certificate fingerprint.'**
+  String get certErrorEmptyFingerprint;
+
+  /// No description provided for @certErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred while adding the certificate.'**
+  String get certErrorUnknown;
+
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
@@ -589,6 +721,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Guest'**
   String get commonGuest;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
 
   /// No description provided for @errorTitle.
   ///
