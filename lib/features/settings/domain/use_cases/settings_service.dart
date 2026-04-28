@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../../data/data_sources/settings_local_data_source.dart';
 import '../../../../core/network/dio_client.dart';
@@ -76,14 +75,7 @@ class SettingsService extends ChangeNotifier {
       final uri = Uri.tryParse(formattedUrl);
       if (uri == null) return false;
 
-      final dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 5),
-          receiveTimeout: const Duration(seconds: 3),
-        ),
-      );
-      
-      final response = await dio.get<Map<String, dynamic>>(
+      final response = await _dioClient.dio.get<Map<String, dynamic>>(
         '$formattedUrl/health/liveness',
       );
       return response.statusCode == 200;

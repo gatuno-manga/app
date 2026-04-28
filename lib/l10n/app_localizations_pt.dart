@@ -253,8 +253,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get certTrustDialogTitle => 'Certificado não confiável';
 
   @override
-  String certTrustDialogMessage(String host) {
-    return 'O servidor em $host está usando um certificado não confiável. Deseja confiar nele e continuar?';
+  String certTrustDialogMessage(String name) {
+    return 'O servidor em $name está usando um certificado não confiável. Deseja confiar nele e continuar?';
   }
 
   @override
@@ -273,7 +273,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get certAddTitle => 'Adicionar Certificado';
 
   @override
-  String get certAddLabel => 'Host';
+  String get certAddLabel => 'Nome';
 
   @override
   String get certAddHint => 'api.exemplo.com';

@@ -34,7 +34,7 @@ class CertificatesPage extends StatelessWidget {
       ],
       onAddPressed: () => CertificateAddDialog.show(
         context,
-        (String host) => viewModel.addCertificateFromFile(host),
+        (String name) => viewModel.addCertificateFromFile(name),
       ),
     );
   }

@@ -86,10 +86,10 @@
   "settingsCertificatesSection": "Certificados",
   "settingsCertificatesDesc": "Gerenciar certificados confiáveis e ignorados",
   "certTrustDialogTitle": "Certificado não confiável",
-  "certTrustDialogMessage": "O servidor em {host} está usando um certificado não confiável. Deseja confiar nele e continuar?",
+  "certTrustDialogMessage": "O servidor em {name} está usando um certificado não confiável. Deseja confiar nele e continuar?",
   "@certTrustDialogMessage": {
     "placeholders": {
-      "host": {
+      "name": {
         "type": "String"
       }
     }
@@ -99,7 +99,7 @@
   "certTrustedTab": "Confiáveis",
   "certIgnoredTab": "Ignorados",
   "certAddTitle": "Adicionar Certificado",
-  "certAddLabel": "Host",
+  "certAddLabel": "Nome",
   "certAddHint": "api.exemplo.com",
   "certAddPemLabel": "Certificado (PEM)",
   "certAddFileButton": "Selecionar Arquivo PEM",

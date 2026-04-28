@@ -9,7 +9,8 @@ class MockCertificatesService extends Mock implements CertificatesService {}
 
 class MockDio extends Mock implements Dio {}
 
-class MockErrorInterceptorHandler extends Mock implements ErrorInterceptorHandler {}
+class MockErrorInterceptorHandler extends Mock
+    implements ErrorInterceptorHandler {}
 
 class MockX509Certificate extends Mock implements X509Certificate {}
 
@@ -22,6 +23,7 @@ void main() {
   late MockErrorInterceptorHandler mockHandler;
 
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     registerFallbackValue(FakeDioException());
     registerFallbackValue(RequestOptions(path: ''));
   });
@@ -39,11 +41,11 @@ void main() {
         requestOptions: RequestOptions(path: ''),
         type: DioExceptionType.connectionTimeout,
       );
-      
+
       when(() => mockHandler.next(any())).thenAnswer((_) {});
 
       await interceptor.onError(err, mockHandler);
-      
+
       verify(() => mockHandler.next(err)).called(1);
     });
 
@@ -53,13 +55,39 @@ void main() {
         requestOptions: options,
         type: DioExceptionType.badCertificate,
       );
-      
+
       when(() => mockService.getPending('test.com')).thenReturn(null);
       when(() => mockHandler.next(any())).thenAnswer((_) {});
 
       await interceptor.onError(err, mockHandler);
-      
+
       verify(() => mockHandler.next(err)).called(1);
     });
+
+    test(
+      'intercepts and handles HandshakeException wrapped in DioExceptionType.unknown',
+      () async {
+        final options = RequestOptions(path: 'https://test.com');
+        final cert = MockX509Certificate();
+        final handshakeException = HandshakeException(
+          'Handshake error in client (OS Error: CERTIFICATE_VERIFY_FAILED: self signed certificate in certificate chain)',
+        );
+        final err = DioException(
+          requestOptions: options,
+          type: DioExceptionType.unknown,
+          error: handshakeException,
+        );
+
+        when(() => mockService.getPending('test.com')).thenReturn(cert);
+        when(() => mockHandler.next(any())).thenAnswer((_) {});
+
+        // Note: This test will attempt to show a dialog which requires context.
+        // In unit tests, rootNavigatorKey.currentContext is null, so it should log and pass to next.
+        await interceptor.onError(err, mockHandler);
+
+        verify(() => mockService.getPending('test.com')).called(1);
+        verify(() => mockHandler.next(err)).called(1);
+      },
+    );
   });
 }

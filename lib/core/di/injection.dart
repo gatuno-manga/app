@@ -23,7 +23,9 @@ Future<void> initDI() async {
   initCertificatesInjection(sl);
   await sl<CertificatesService>().init();
 
-  sl.registerLazySingleton<DioClient>(() => DioClient(certificatesService: sl<CertificatesService>()));
+  sl.registerLazySingleton<DioClient>(
+    () => DioClient(certificatesService: sl<CertificatesService>()),
+  );
   sl.registerLazySingleton<SettingsStorage>(() => SettingsStorage());
   sl.registerLazySingleton<SettingsService>(
     () => SettingsService(sl<SettingsStorage>(), sl<DioClient>()),

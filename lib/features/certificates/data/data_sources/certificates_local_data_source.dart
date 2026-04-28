@@ -19,7 +19,9 @@ class CertificatesStorage {
       final decoded = jsonDecode(value);
       if (decoded is List) {
         return decoded
-            .map((item) => CertificateItem.fromJson(item as Map<String, dynamic>))
+            .map(
+              (item) => CertificateItem.fromJson(item as Map<String, dynamic>),
+            )
             .toList();
       }
       return [];

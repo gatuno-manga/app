@@ -26,10 +26,7 @@ class CertificateList extends StatelessWidget {
       separatorBuilder: (context, index) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final cert = certificates[index];
-        return CertificateItemTile(
-          certificate: cert,
-          onDelete: onDelete,
-        );
+        return CertificateItemTile(certificate: cert, onDelete: onDelete);
       },
     );
   }

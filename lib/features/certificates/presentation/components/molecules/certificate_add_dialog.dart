@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
 class CertificateAddDialog extends StatefulWidget {
-  final void Function(String host) onAddFromFile;
+  final void Function(String name) onAddFromFile;
 
-  const CertificateAddDialog({
-    super.key,
-    required this.onAddFromFile,
-  });
+  const CertificateAddDialog({super.key, required this.onAddFromFile});
 
   @override
   State<CertificateAddDialog> createState() => _CertificateAddDialogState();
 
-  static Future<void> show(BuildContext context, void Function(String host) onAddFromFile) {
+  static Future<void> show(
+    BuildContext context,
+    void Function(String name) onAddFromFile,
+  ) {
     return showDialog(
       context: context,
       builder: (context) => CertificateAddDialog(onAddFromFile: onAddFromFile),
@@ -21,18 +21,18 @@ class CertificateAddDialog extends StatefulWidget {
 }
 
 class _CertificateAddDialogState extends State<CertificateAddDialog> {
-  final _hostController = TextEditingController();
+  final _nameController = TextEditingController();
   bool _isValid = false;
 
   @override
   void dispose() {
-    _hostController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
   void _validate() {
     setState(() {
-      _isValid = _hostController.text.trim().isNotEmpty;
+      _isValid = _nameController.text.trim().isNotEmpty;
     });
   }
 
@@ -43,7 +43,7 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
     return AlertDialog(
       title: Text(l10n.certAddTitle),
       content: TextField(
-        controller: _hostController,
+        controller: _nameController,
         onChanged: (_) => _validate(),
         decoration: InputDecoration(
           labelText: l10n.certAddLabel,
@@ -58,9 +58,9 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
         ElevatedButton(
           onPressed: _isValid
               ? () {
-                  final host = _hostController.text.trim();
+                  final name = _nameController.text.trim();
                   Navigator.pop(context);
-                  widget.onAddFromFile(host);
+                  widget.onAddFromFile(name);
                 }
               : null,
           child: Text(l10n.certAddFileButton),

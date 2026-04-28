@@ -125,6 +125,12 @@
   - Implemented comprehensive UI for Book Details and Book Listing.
   - Added support for displaying relationships (sequences, spin-offs) between works.
   - Improved listing performance with optimized pagination and lazy loading.
+
+- **Certificates - Identity & Rename:**
+  - Renamed the internal and UI concept of "Host" to "Name" for certificates, allowing users to provide custom labels for their trusted servers.
+  - Updated the bad certificate interception flow to prompt for a custom name when choosing to "Trust" a certificate.
+  - Implemented `CertificateTrustResult` and `CertificateTrustAction` to robustly handle user decisions during network security exceptions.
+  - Localized all certificate-related labels (EN: Name, PT: Nome).
 - **Navigation & Guarding:**
   - Enhanced `GoRouter` configuration to support state-based redirection.
   - Implemented granular route guards for protected features like User Profile and Saved Pages.

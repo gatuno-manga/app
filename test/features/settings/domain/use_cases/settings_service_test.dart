@@ -75,5 +75,50 @@ void main() {
 
       expect(settingsService.isInitialized, isFalse);
     });
+
+    group('validateApiUrl', () {
+      test('should return true when health check returns 200', () async {
+        final response = Response<Map<String, dynamic>>(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 200,
+        );
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenAnswer((_) async => response);
+
+        final result = await settingsService.validateApiUrl('http://test.com');
+
+        expect(result, isTrue);
+        verify(
+          () => mockDio.get<Map<String, dynamic>>(
+            'http://test.com/health/liveness',
+          ),
+        ).called(1);
+      });
+
+      test('should return false when health check returns non-200', () async {
+        final response = Response<Map<String, dynamic>>(
+          requestOptions: RequestOptions(path: ''),
+          statusCode: 500,
+        );
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenAnswer((_) async => response);
+
+        final result = await settingsService.validateApiUrl('http://test.com');
+
+        expect(result, isFalse);
+      });
+
+      test('should return false when dio throws exception', () async {
+        when(
+          () => mockDio.get<Map<String, dynamic>>(any()),
+        ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+
+        final result = await settingsService.validateApiUrl('http://test.com');
+
+        expect(result, isFalse);
+      });
+    });
   });
 }

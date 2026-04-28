@@ -575,8 +575,8 @@ abstract class AppLocalizations {
   /// No description provided for @certTrustDialogMessage.
   ///
   /// In en, this message translates to:
-  /// **'The server at {host} is using an untrusted certificate. Do you want to trust it and continue?'**
-  String certTrustDialogMessage(String host);
+  /// **'The server at {name} is using an untrusted certificate. Do you want to trust it and continue?'**
+  String certTrustDialogMessage(String name);
 
   /// No description provided for @certTrustDialogTrust.
   ///
@@ -611,7 +611,7 @@ abstract class AppLocalizations {
   /// No description provided for @certAddLabel.
   ///
   /// In en, this message translates to:
-  /// **'Host'**
+  /// **'Name'**
   String get certAddLabel;
 
   /// No description provided for @certAddHint.

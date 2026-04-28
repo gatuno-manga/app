@@ -21,13 +21,9 @@ class CertificatesTemplate extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: title,
-          bottom: TabBar(
-            tabs: tabs,
-          ),
+          bottom: TabBar(tabs: tabs),
         ),
-        body: TabBarView(
-          children: tabViews,
-        ),
+        body: TabBarView(children: tabViews),
         floatingActionButton: FloatingActionButton(
           onPressed: onAddPressed,
           child: const Icon(Icons.add),

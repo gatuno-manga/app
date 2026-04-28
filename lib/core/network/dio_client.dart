@@ -36,15 +36,15 @@ class DioClient {
         final client = httpClient ?? HttpClient();
         client.badCertificateCallback = (cert, host, port) {
           final status = _certificatesService.checkStatus(cert, host);
-          
+
           if (status == CertificateStatus.trusted) {
             return true;
           }
-          
+
           if (status == CertificateStatus.unknown) {
             _certificatesService.addPending(host, cert);
           }
-          
+
           return false;
         };
         return client;

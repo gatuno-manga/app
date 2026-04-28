@@ -254,8 +254,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get certTrustDialogTitle => 'Untrusted Certificate';
 
   @override
-  String certTrustDialogMessage(String host) {
-    return 'The server at $host is using an untrusted certificate. Do you want to trust it and continue?';
+  String certTrustDialogMessage(String name) {
+    return 'The server at $name is using an untrusted certificate. Do you want to trust it and continue?';
   }
 
   @override
@@ -274,7 +274,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get certAddTitle => 'Add Certificate';
 
   @override
-  String get certAddLabel => 'Host';
+  String get certAddLabel => 'Name';
 
   @override
   String get certAddHint => 'api.example.com';

@@ -86,10 +86,10 @@
   "settingsCertificatesSection": "Certificates",
   "settingsCertificatesDesc": "Manage trusted and ignored certificates",
   "certTrustDialogTitle": "Untrusted Certificate",
-  "certTrustDialogMessage": "The server at {host} is using an untrusted certificate. Do you want to trust it and continue?",
+  "certTrustDialogMessage": "The server at {name} is using an untrusted certificate. Do you want to trust it and continue?",
   "@certTrustDialogMessage": {
     "placeholders": {
-      "host": {
+      "name": {
         "type": "String"
       }
     }
@@ -99,7 +99,7 @@
   "certTrustedTab": "Trusted",
   "certIgnoredTab": "Ignored",
   "certAddTitle": "Add Certificate",
-  "certAddLabel": "Host",
+  "certAddLabel": "Name",
   "certAddHint": "api.example.com",
   "certAddPemLabel": "Certificate (PEM)",
   "certAddFileButton": "Select PEM File",

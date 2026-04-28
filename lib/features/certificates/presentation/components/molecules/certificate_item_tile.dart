@@ -15,7 +15,7 @@ class CertificateItemTile extends StatelessWidget {
   Future<bool?> _showDeleteConfirmation(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    
+
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -43,10 +43,7 @@ class CertificateItemTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListTile(
-      title: Text(
-        certificate.host,
-        style: theme.textTheme.titleMedium,
-      ),
+      title: Text(certificate.name, style: theme.textTheme.titleMedium),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

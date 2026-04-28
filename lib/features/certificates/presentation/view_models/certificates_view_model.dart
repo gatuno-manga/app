@@ -23,16 +23,14 @@ class CertificatesViewModel extends SafeChangeNotifier {
   List<CertificateItem> get ignoredCertificates =>
       _certificatesService.ignoredCertificates;
 
-  Future<void> addCertificateFromFile(String host) async {
-    final result = await FilePicker.pickFiles(
-      type: FileType.any,
-    );
+  Future<void> addCertificateFromFile(String name) async {
+    final result = await FilePicker.pickFiles(type: FileType.any);
 
     if (result == null || result.files.isEmpty) return;
 
     final file = result.files.single;
     String fileContent;
-    
+
     if (file.bytes != null) {
       fileContent = String.fromCharCodes(file.bytes!);
     } else if (file.path != null) {
@@ -40,12 +38,12 @@ class CertificatesViewModel extends SafeChangeNotifier {
     } else {
       return;
     }
-    
-    await _certificatesService.addManualCertificate(host, fileContent);
+
+    await _certificatesService.addManualCertificate(name, fileContent);
   }
-  
-  Future<void> addManualCertificate(String host, String pem) async {
-    await _certificatesService.addManualCertificate(host, pem);
+
+  Future<void> addManualCertificate(String name, String pem) async {
+    await _certificatesService.addManualCertificate(name, pem);
   }
 
   Future<void> deleteCertificate(String fingerprint) async {

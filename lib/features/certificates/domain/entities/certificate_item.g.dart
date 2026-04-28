@@ -8,7 +8,7 @@ part of 'certificate_item.dart';
 
 CertificateItem _$CertificateItemFromJson(Map<String, dynamic> json) =>
     CertificateItem(
-      host: json['host'] as String,
+      name: json['name'] as String,
       fingerprint: json['fingerprint'] as String,
       pem: json['pem'] as String,
       subject: json['subject'] as String,
@@ -19,7 +19,7 @@ CertificateItem _$CertificateItemFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CertificateItemToJson(CertificateItem instance) =>
     <String, dynamic>{
-      'host': instance.host,
+      'name': instance.name,
       'fingerprint': instance.fingerprint,
       'pem': instance.pem,
       'subject': instance.subject,

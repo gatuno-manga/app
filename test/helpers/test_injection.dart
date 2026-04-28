@@ -76,7 +76,9 @@ Future<void> initTestDI({
     when(() => certsService.init()).thenAnswer((_) async {});
   }
   sl.registerLazySingleton<CertificatesService>(() => certsService);
-  sl.registerLazySingleton<CertificatesStorage>(() => certificatesStorage ?? MockCertificatesStorage());
+  sl.registerLazySingleton<CertificatesStorage>(
+    () => certificatesStorage ?? MockCertificatesStorage(),
+  );
 
   final dc = dioClient ?? MockDioClient();
   sl.registerLazySingleton<DioClient>(() => dc);

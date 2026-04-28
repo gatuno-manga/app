@@ -4,7 +4,7 @@ part 'certificate_item.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class CertificateItem {
-  final String host;
+  final String name;
   final String fingerprint; // SHA256 of DER
   final String pem;
   final String subject;
@@ -13,7 +13,7 @@ class CertificateItem {
   final DateTime addedAt;
 
   CertificateItem({
-    required this.host,
+    required this.name,
     required this.fingerprint,
     required this.pem,
     required this.subject,
@@ -28,7 +28,7 @@ class CertificateItem {
   Map<String, dynamic> toJson() => _$CertificateItemToJson(this);
 
   CertificateItem copyWith({
-    String? host,
+    String? name,
     String? fingerprint,
     String? pem,
     String? subject,
@@ -37,7 +37,7 @@ class CertificateItem {
     DateTime? addedAt,
   }) {
     return CertificateItem(
-      host: host ?? this.host,
+      name: name ?? this.name,
       fingerprint: fingerprint ?? this.fingerprint,
       pem: pem ?? this.pem,
       subject: subject ?? this.subject,

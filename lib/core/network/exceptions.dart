@@ -1,9 +1,20 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../features/authentication/exceptions/exceptions.dart';
 import '../exceptions/exceptions.dart';
 
 export '../../features/authentication/exceptions/exceptions.dart';
 export '../exceptions/exceptions.dart';
+
+extension DioExceptionCertificateExtension on DioException {
+  bool get isBadCertificate {
+    if (type == DioExceptionType.badCertificate) return true;
+    if (type == DioExceptionType.unknown && error is HandshakeException) {
+      return error.toString().contains('CERTIFICATE_VERIFY_FAILED');
+    }
+    return false;
+  }
+}
 
 class NetworkException extends AppExceptions {
   NetworkException({String? message})

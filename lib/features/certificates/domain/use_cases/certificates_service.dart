@@ -31,15 +31,17 @@ class CertificatesService extends ChangeNotifier {
 
   CertificateStatus checkStatus(X509Certificate cert, String host) {
     final fingerprint = _calculateFingerprint(cert.der);
-    
+
     final index = _certificates.indexWhere((c) => c.fingerprint == fingerprint);
     if (index == -1) {
       AppLogger.d('Certificate status unknown for host: $host', _logTag);
       return CertificateStatus.unknown;
     }
-    
+
     final item = _certificates[index];
-    final status = item.isIgnored ? CertificateStatus.ignored : CertificateStatus.trusted;
+    final status = item.isIgnored
+        ? CertificateStatus.ignored
+        : CertificateStatus.trusted;
     AppLogger.d('Certificate status for host $host: $status', _logTag);
     return status;
   }
@@ -52,14 +54,21 @@ class CertificatesService extends ChangeNotifier {
     try {
       final lines = pem.split('\n');
       final base64String = lines
-          .where((line) =>
-              !line.startsWith('-----BEGIN') && !line.startsWith('-----END'))
+          .where(
+            (line) =>
+                !line.startsWith('-----BEGIN') && !line.startsWith('-----END'),
+          )
           .join('')
           .trim();
       final der = base64.decode(base64String);
       return _calculateFingerprint(der);
     } catch (e, stackTrace) {
-      AppLogger.e('Error calculating fingerprint from PEM', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error calculating fingerprint from PEM',
+        e,
+        stackTrace,
+        _logTag,
+      );
       return '';
     }
   }
@@ -69,15 +78,15 @@ class CertificatesService extends ChangeNotifier {
   }
 
   X509Certificate? getPending(String host) => _pendingCerts[host];
-  
+
   void removePending(String host) {
     _pendingCerts.remove(host);
   }
 
-  Future<void> trustCertificate(String host, X509Certificate cert) async {
-    AppLogger.i('Trusting certificate for host: $host', _logTag);
+  Future<void> trustCertificate(String name, X509Certificate cert) async {
+    AppLogger.i('Trusting certificate for host: $name', _logTag);
     final newItem = CertificateItem(
-      host: host,
+      name: name,
       fingerprint: _calculateFingerprint(cert.der),
       pem: cert.pem,
       subject: cert.subject,
@@ -86,13 +95,13 @@ class CertificatesService extends ChangeNotifier {
       addedAt: DateTime.now(),
     );
     await _addOrUpdate(newItem);
-    removePending(host);
+    removePending(name);
   }
 
   Future<void> ignoreCertificate(String host, X509Certificate cert) async {
     AppLogger.i('Ignoring certificate for host: $host', _logTag);
     final newItem = CertificateItem(
-      host: host,
+      name: host,
       fingerprint: _calculateFingerprint(cert.der),
       pem: cert.pem,
       subject: cert.subject,
@@ -104,15 +113,15 @@ class CertificatesService extends ChangeNotifier {
     removePending(host);
   }
 
-  Future<void> addManualCertificate(String host, String pem) async {
-    AppLogger.i('Adding manual certificate for host: $host', _logTag);
+  Future<void> addManualCertificate(String name, String pem) async {
+    AppLogger.i('Adding manual certificate for host: $name', _logTag);
     final fingerprint = _calculateFingerprintFromPem(pem);
     final newItem = CertificateItem(
-      host: host,
+      name: name,
       fingerprint: fingerprint,
       pem: pem,
-      subject: 'Manual: $host',
-      issuer: 'Manual: $host',
+      subject: 'Manual: $name',
+      issuer: 'Manual: $name',
       isIgnored: false,
       addedAt: DateTime.now(),
     );
@@ -128,9 +137,10 @@ class CertificatesService extends ChangeNotifier {
   }
 
   Future<void> _addOrUpdate(CertificateItem item) async {
-    _certificates.removeWhere((c) => 
-      (item.fingerprint.isNotEmpty && c.fingerprint == item.fingerprint) ||
-      (item.fingerprint.isEmpty && c.host == item.host)
+    _certificates.removeWhere(
+      (c) =>
+          (item.fingerprint.isNotEmpty && c.fingerprint == item.fingerprint) ||
+          (item.fingerprint.isEmpty && c.name == item.name),
     );
     _certificates.add(item);
     await _storage.setCertificates(_certificates);
@@ -139,14 +149,22 @@ class CertificatesService extends ChangeNotifier {
   }
 
   void _applyOverrides() {
-    AppLogger.d('Applying HttpOverrides with ${trustedCertificates.length} trusted certificates', _logTag);
+    AppLogger.d(
+      'Applying HttpOverrides with ${trustedCertificates.length} trusted certificates',
+      _logTag,
+    );
     final context = SecurityContext(withTrustedRoots: true);
     for (final cert in trustedCertificates) {
       if (cert.pem.isNotEmpty) {
         try {
           context.setTrustedCertificatesBytes(utf8.encode(cert.pem));
         } catch (e, stackTrace) {
-          AppLogger.e('Error loading certificate for ${cert.host}', e, stackTrace, _logTag);
+          AppLogger.e(
+            'Error loading certificate for ${cert.name}',
+            e,
+            stackTrace,
+            _logTag,
+          );
         }
       }
     }

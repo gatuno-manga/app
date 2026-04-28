@@ -15,13 +15,13 @@ void main() {
     // Stub the listeners
     when(() => mockService.addListener(any())).thenAnswer((_) {});
     when(() => mockService.removeListener(any())).thenAnswer((_) {});
-    
+
     viewModel = CertificatesViewModel(mockService);
   });
 
   group('CertificatesViewModel', () {
     final certItem = CertificateItem(
-      host: 'test.com',
+      name: 'test.com',
       fingerprint: 'abc',
       pem: 'pem',
       subject: 'sub',
@@ -33,25 +33,27 @@ void main() {
     test('exposes trusted and ignored certificates from service', () {
       when(() => mockService.trustedCertificates).thenReturn([certItem]);
       when(() => mockService.ignoredCertificates).thenReturn([]);
-      
+
       expect(viewModel.trustedCertificates.length, 1);
-      expect(viewModel.trustedCertificates.first.host, 'test.com');
+      expect(viewModel.trustedCertificates.first.name, 'test.com');
       expect(viewModel.ignoredCertificates, isEmpty);
     });
 
     test('addManualCertificate calls service', () async {
-      when(() => mockService.addManualCertificate(any(), any())).thenAnswer((_) async {});
-      
-      await viewModel.addManualCertificate('host', 'pem');
-      
-      verify(() => mockService.addManualCertificate('host', 'pem')).called(1);
+      when(
+        () => mockService.addManualCertificate(any(), any()),
+      ).thenAnswer((_) async {});
+
+      await viewModel.addManualCertificate('name', 'pem');
+
+      verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
     });
 
     test('deleteCertificate calls service', () async {
       when(() => mockService.deleteCertificate(any())).thenAnswer((_) async {});
-      
+
       await viewModel.deleteCertificate('fingerprint');
-      
+
       verify(() => mockService.deleteCertificate('fingerprint')).called(1);
     });
   });

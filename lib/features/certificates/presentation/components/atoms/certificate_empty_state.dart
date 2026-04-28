@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 class CertificateEmptyState extends StatelessWidget {
   final String message;
 
-  const CertificateEmptyState({
-    super.key,
-    required this.message,
-  });
+  const CertificateEmptyState({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +14,9 @@ class CertificateEmptyState extends StatelessWidget {
           message,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-                fontStyle: FontStyle.italic,
-              ),
+            color: Theme.of(context).colorScheme.outline,
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ),
     );

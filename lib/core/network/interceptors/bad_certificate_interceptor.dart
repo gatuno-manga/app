@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../../features/certificates/domain/use_cases/certificates_service.dart';
 import '../dio_client.dart';
+import '../exceptions.dart';
 import '../../router/router_keys.dart';
 import '../../logging/logger.dart';
 import '../../../shared/components/organisms/certificate_trust_dialog.dart';
@@ -18,7 +19,7 @@ class BadCertificateInterceptor extends Interceptor {
     DioException err,
     ErrorInterceptorHandler handler,
   ) async {
-    if (err.type != DioExceptionType.badCertificate) {
+    if (!err.isBadCertificate) {
       return handler.next(err);
     }
 
@@ -27,8 +28,9 @@ class BadCertificateInterceptor extends Interceptor {
 
     if (cert == null) {
       AppLogger.w(
-          'Bad certificate detected for $host but no pending certificate found',
-          _logTag);
+        'Bad certificate detected for $host but no pending certificate found',
+        _logTag,
+      );
       return handler.next(err);
     }
 
@@ -38,22 +40,26 @@ class BadCertificateInterceptor extends Interceptor {
 
     _isShowingDialog = true;
     final context = rootNavigatorKey.currentContext;
-    bool? result;
-    
+    CertificateTrustResult? result;
+
     if (context != null) {
       result = await CertificateTrustDialog.show(context, host);
     } else {
       AppLogger.w(
-          'Could not show trust dialog: rootNavigatorKey.currentContext is null',
-          _logTag);
+        'Could not show trust dialog: rootNavigatorKey.currentContext is null',
+        _logTag,
+      );
     }
-    
+
     _isShowingDialog = false;
 
-    if (result == true) {
+    if (result?.action == CertificateTrustAction.trust) {
+      final name = result?.name ?? host;
       AppLogger.i(
-          'User trusted certificate for $host. Retrying request...', _logTag);
-      await _certificatesService.trustCertificate(host, cert);
+        'User trusted certificate for $host as "$name". Retrying request...',
+        _logTag,
+      );
+      await _certificatesService.trustCertificate(name, cert);
 
       try {
         final response = await _dio.fetch<dynamic>(err.requestOptions);
@@ -63,7 +69,7 @@ class BadCertificateInterceptor extends Interceptor {
       }
     }
 
-    if (result == false) {
+    if (result?.action == CertificateTrustAction.ignore) {
       AppLogger.i('User ignored certificate for $host', _logTag);
       await _certificatesService.ignoreCertificate(host, cert);
     }
@@ -73,7 +79,10 @@ class BadCertificateInterceptor extends Interceptor {
 }
 
 void setupBadCertificateInterceptor(
-    DioClient dioClient, CertificatesService certificatesService) {
-  dioClient.dio.interceptors
-      .add(BadCertificateInterceptor(certificatesService, dioClient.dio));
+  DioClient dioClient,
+  CertificatesService certificatesService,
+) {
+  dioClient.dio.interceptors.add(
+    BadCertificateInterceptor(certificatesService, dioClient.dio),
+  );
 }

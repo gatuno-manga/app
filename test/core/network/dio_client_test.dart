@@ -40,8 +40,9 @@ void main() {
         const baseUrl = 'https://api.test.com/api';
         final mockHttpClient = MockHttpClient();
 
-        when(() => mockCertificatesService.checkStatus(any(), any()))
-            .thenReturn(CertificateStatus.trusted);
+        when(
+          () => mockCertificatesService.checkStatus(any(), any()),
+        ).thenReturn(CertificateStatus.trusted);
 
         final client = DioClient(
           certificatesService: mockCertificatesService,
@@ -62,8 +63,9 @@ void main() {
                 as bool Function(X509Certificate, String, int);
 
         expect(capturedCallback(cert, 'api.test.com', 443), isTrue);
-        verify(() => mockCertificatesService.checkStatus(cert, 'api.test.com'))
-            .called(1);
+        verify(
+          () => mockCertificatesService.checkStatus(cert, 'api.test.com'),
+        ).called(1);
       },
     );
 
