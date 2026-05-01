@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/image/image_loading_strategy.dart';
 import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../shared/components/atoms/app_skeleton.dart';
 
@@ -31,6 +34,7 @@ class BookCover extends StatelessWidget {
     if (imageUrl != null) {
       content = AppImage(
         imageUrl: imageUrl!,
+        strategy: sl<ImageLoadingStrategy>(),
         blurHash: blurHash,
         width: width,
         height: height,

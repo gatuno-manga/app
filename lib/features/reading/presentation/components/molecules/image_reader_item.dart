@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/image/image_loading_strategy.dart';
 import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../shared/utils/image_aspect_ratio_cache.dart';
 import '../../../domain/entities/reading_chapter.dart';
@@ -68,6 +71,7 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
       aspectRatio: _aspectRatio,
       child: AppImage(
         imageUrl: widget.page.url,
+        strategy: sl<ImageLoadingStrategy>(),
         blurHash: widget.page.metadata?.blurHash,
         fit: BoxFit.fill,
         width: double.infinity,

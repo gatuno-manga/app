@@ -1,11 +1,9 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui;
-import 'package:dio/dio.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
-import '../../../core/di/injection.dart';
-import '../../../core/network/dio_client.dart';
-import 'app_skeleton.dart';
+
+import '../../../../core/image/image_loading_strategy.dart';
+import 'app_image_placeholder.dart';
 
 class AppImage extends StatefulWidget {
   final String imageUrl;
@@ -16,10 +14,12 @@ class AppImage extends StatefulWidget {
   final Widget? placeholder;
   final Widget? errorWidget;
   final void Function(Size)? onImageLoaded;
+  final ImageLoadingStrategy strategy;
 
   const AppImage({
     super.key,
     required this.imageUrl,
+    required this.strategy,
     this.blurHash,
     this.width,
     this.height,
@@ -35,7 +35,6 @@ class AppImage extends StatefulWidget {
 
 class _AppImageState extends State<AppImage> {
   late Future<Uint8List?> _fetchFuture;
-  final _dioClient = sl<DioClient>();
 
   @override
   void initState() {
@@ -46,67 +45,18 @@ class _AppImageState extends State<AppImage> {
   @override
   void didUpdateWidget(AppImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
+    if (oldWidget.imageUrl != widget.imageUrl ||
+        oldWidget.strategy != widget.strategy) {
       setState(() {
         _fetchFuture = _fetchImage();
       });
     }
   }
 
-  Future<Uint8List?> _fetchImage() async {
-    try {
-      final response = await _dioClient.dio.get<List<int>>(
-        widget.imageUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
-
-      if (response.data != null) {
-        final bytes = Uint8List.fromList(response.data!);
-
-        if (widget.onImageLoaded != null) {
-          final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          final descriptor = await ui.ImageDescriptor.encoded(buffer);
-          widget.onImageLoaded!(
-            Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
-          );
-          descriptor.dispose();
-          buffer.dispose();
-        }
-
-        return bytes;
-      }
-    } catch (e) {
-      debugPrint('Error fetching image (${widget.imageUrl}): $e');
-    }
-    return null;
-  }
-
-  Widget _buildPlaceholder({Key? key}) {
-    if (widget.blurHash != null) {
-      final blurHashWidget = BlurHash(
-        hash: widget.blurHash!,
-        imageFit: BoxFit.fill,
-      );
-
-      if (widget.width != null || widget.height != null) {
-        return SizedBox(
-          key: key,
-          width: widget.width,
-          height: widget.height,
-          child: blurHashWidget,
-        );
-      }
-
-      return KeyedSubtree(key: key, child: blurHashWidget);
-    }
-
-    return SizedBox(
-      key: key,
-      width: widget.width,
-      height: widget.height,
-      child:
-          widget.placeholder ??
-          AppSkeleton(width: widget.width, height: widget.height),
+  Future<Uint8List?> _fetchImage() {
+    return widget.strategy.loadImage(
+      widget.imageUrl,
+      onImageLoaded: widget.onImageLoaded,
     );
   }
 
@@ -116,12 +66,24 @@ class _AppImageState extends State<AppImage> {
       future: _fetchFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildPlaceholder(key: const ValueKey('waiting'));
+          return AppImagePlaceholder(
+            key: const ValueKey('waiting'),
+            blurHash: widget.blurHash,
+            width: widget.width,
+            height: widget.height,
+            placeholder: widget.placeholder,
+          );
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
           if (widget.blurHash != null && widget.errorWidget == null) {
-            return _buildPlaceholder(key: const ValueKey('error'));
+            return AppImagePlaceholder(
+              key: const ValueKey('error'),
+              blurHash: widget.blurHash,
+              width: widget.width,
+              height: widget.height,
+              placeholder: widget.placeholder,
+            );
           }
 
           return SizedBox(
@@ -153,7 +115,13 @@ class _AppImageState extends State<AppImage> {
                   opacity: frame == null ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 600),
                   curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-                  child: _buildPlaceholder(key: const ValueKey('placeholder')),
+                  child: AppImagePlaceholder(
+                    key: const ValueKey('placeholder'),
+                    blurHash: widget.blurHash,
+                    width: widget.width,
+                    height: widget.height,
+                    placeholder: widget.placeholder,
+                  ),
                 ),
                 AnimatedOpacity(
                   opacity: frame == null ? 0.0 : 1.0,
@@ -165,7 +133,13 @@ class _AppImageState extends State<AppImage> {
             );
           },
           errorBuilder: (context, error, stackTrace) {
-            return _buildPlaceholder(key: const ValueKey('error'));
+            return AppImagePlaceholder(
+              key: const ValueKey('error'),
+              blurHash: widget.blurHash,
+              width: widget.width,
+              height: widget.height,
+              placeholder: widget.placeholder,
+            );
           },
         );
       },

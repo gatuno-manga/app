@@ -86,7 +86,7 @@
 
 - **Atomic Design:**
   - Adopted Atomic Design for UI components in `shared/components/`.
-  - **Atoms:** Low-level components like `AppButton`, `AppAvatar`, `AppSwitch`, `AppClickableAction`.
+  - **Atoms:** Low-level components like `AppButton`, `AppAvatar`, `AppSwitch`, `AppClickableAction`, `AppImagePlaceholder`.
   - **Molecules:** Groups of atoms like `UserProfileHeader`, `UserProfileIcon`, `LoginIcon`.
   - **Organisms:** Complex UI sections like `MeSettingsList`, `SignInForm`, `HomeAppBar`, `ReaderOverlayWrapper`.
   - **Templates:** Page layouts like `ProfileTemplate`, `AuthTemplate`, `HomeTemplate`.

@@ -1,29 +1,28 @@
 import 'dart:typed_data';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_image.dart';
 import 'package:gatuno/shared/components/atoms/app_skeleton.dart';
 import 'package:mocktail/mocktail.dart';
 import '../../../helpers/test_injection.dart';
 
+class MockImageLoadingStrategy extends Mock implements ImageLoadingStrategy {}
+
 void main() {
-  late MockDioClient mockDioClient;
-  late MockDio mockDio;
+  late MockImageLoadingStrategy mockStrategy;
 
   setUp(() async {
-    mockDioClient = MockDioClient();
-    mockDio = mockDioClient.dio as MockDio;
-
-    await initTestDI(dioClient: mockDioClient);
-
-    registerFallbackValue(RequestOptions(path: ''));
+    mockStrategy = MockImageLoadingStrategy();
+    await initTestDI();
   });
 
-  Widget createWidget(String url) {
+  Widget createWidget(String url, {ImageLoadingStrategy? strategy}) {
     return MaterialApp(
-      home: Scaffold(body: AppImage(imageUrl: url)),
+      home: Scaffold(
+        body: AppImage(imageUrl: url, strategy: strategy ?? mockStrategy),
+      ),
     );
   }
 
@@ -32,14 +31,13 @@ void main() {
       WidgetTester tester,
     ) async {
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
+        ),
       ).thenAnswer((_) async {
         await Future<void>.delayed(const Duration(milliseconds: 100));
-        return Response<List<int>>(
-          data: [1, 2, 3],
-          statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
-        );
+        return Uint8List.fromList([1, 2, 3]);
       });
 
       await tester.pumpWidget(createWidget('http://example.com/image.png'));
@@ -52,14 +50,13 @@ void main() {
       WidgetTester tester,
     ) async {
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
+        ),
       ).thenAnswer((_) async {
         await Future<void>.delayed(const Duration(milliseconds: 100));
-        return Response<List<int>>(
-          data: [1, 2, 3],
-          statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
-        );
+        return Uint8List.fromList([1, 2, 3]);
       });
 
       const blurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
@@ -69,6 +66,7 @@ void main() {
           home: Scaffold(
             body: AppImage(
               imageUrl: 'http://example.com/image.png',
+              strategy: mockStrategy,
               blurHash: blurHash,
             ),
           ),
@@ -83,8 +81,11 @@ void main() {
       WidgetTester tester,
     ) async {
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-      ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
+        ),
+      ).thenAnswer((_) async => null);
 
       await tester.pumpWidget(createWidget('http://example.com/image.png'));
       await tester.pumpAndSettle();
@@ -96,8 +97,11 @@ void main() {
       WidgetTester tester,
     ) async {
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-      ).thenThrow(DioException(requestOptions: RequestOptions(path: '')));
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
+        ),
+      ).thenAnswer((_) async => null);
 
       const placeholderKey = Key('placeholder');
       const errorKey = Key('error');
@@ -107,6 +111,7 @@ void main() {
           home: Scaffold(
             body: AppImage(
               imageUrl: 'http://example.com/image.png',
+              strategy: mockStrategy,
               placeholder: const SizedBox(key: placeholderKey),
               errorWidget: const SizedBox(key: errorKey),
             ),
@@ -117,25 +122,6 @@ void main() {
 
       expect(find.byKey(errorKey), findsOneWidget);
       expect(find.byKey(placeholderKey), findsNothing);
-    });
-
-    testWidgets('shows error widget when data is null', (
-      WidgetTester tester,
-    ) async {
-      when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-      ).thenAnswer(
-        (_) async => Response<List<int>>(
-          data: null,
-          statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
-        ),
-      );
-
-      await tester.pumpWidget(createWidget('http://example.com/image.png'));
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Icons.broken_image), findsOneWidget);
     });
 
     testWidgets('renders Image.memory when fetch is successful', (
@@ -213,14 +199,11 @@ void main() {
       ]);
 
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-      ).thenAnswer(
-        (_) async => Response<List<int>>(
-          data: transparentPng,
-          statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
         ),
-      );
+      ).thenAnswer((_) async => transparentPng);
 
       await tester.pumpWidget(createWidget('http://example.com/image.png'));
       await tester.pumpAndSettle();
@@ -231,86 +214,17 @@ void main() {
     testWidgets('calls onImageLoaded with correct dimensions', (
       WidgetTester tester,
     ) async {
-      // 1x1 transparent PNG
-      final transparentPng = Uint8List.fromList([
-        0x89,
-        0x50,
-        0x4E,
-        0x47,
-        0x0D,
-        0x0A,
-        0x1A,
-        0x0A,
-        0x00,
-        0x00,
-        0x00,
-        0x0D,
-        0x49,
-        0x48,
-        0x44,
-        0x52,
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        0x08,
-        0x06,
-        0x00,
-        0x00,
-        0x00,
-        0x1F,
-        0x15,
-        0xC4,
-        0x89,
-        0x00,
-        0x00,
-        0x00,
-        0x0A,
-        0x49,
-        0x44,
-        0x41,
-        0x54,
-        0x78,
-        0x9C,
-        0x63,
-        0x00,
-        0x01,
-        0x00,
-        0x00,
-        0x05,
-        0x00,
-        0x01,
-        0x0D,
-        0x0A,
-        0x2D,
-        0xB4,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x49,
-        0x45,
-        0x4E,
-        0x44,
-        0xAE,
-        0x42,
-        0x60,
-        0x82,
-      ]);
-
       when(
-        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-      ).thenAnswer(
-        (_) async => Response<List<int>>(
-          data: transparentPng,
-          statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+        () => mockStrategy.loadImage(
+          any(),
+          onImageLoaded: any(named: 'onImageLoaded'),
         ),
-      );
+      ).thenAnswer((invocation) async {
+        final onImageLoaded =
+            invocation.namedArguments[#onImageLoaded] as void Function(Size)?;
+        onImageLoaded?.call(const Size(1.0, 1.0));
+        return Uint8List(0);
+      });
 
       Size? loadedSize;
       await tester.pumpWidget(
@@ -318,6 +232,7 @@ void main() {
           home: Scaffold(
             body: AppImage(
               imageUrl: 'http://example.com/image.png',
+              strategy: mockStrategy,
               onImageLoaded: (size) => loadedSize = size,
             ),
           ),
@@ -336,32 +251,73 @@ void main() {
         WidgetTester tester,
       ) async {
         when(
-          () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
-        ).thenAnswer(
-          (_) async => Response<List<int>>(
-            data: [1, 2],
-            statusCode: 200,
-            requestOptions: RequestOptions(path: ''),
+          () => mockStrategy.loadImage(
+            any(),
+            onImageLoaded: any(named: 'onImageLoaded'),
           ),
-        );
+        ).thenAnswer((_) async => Uint8List(0));
 
         await tester.pumpWidget(createWidget('http://example.com/image1.png'));
         await tester.pumpAndSettle();
 
         verify(
-          () => mockDio.get<List<int>>(
+          () => mockStrategy.loadImage(
             'http://example.com/image1.png',
-            options: any(named: 'options'),
+            onImageLoaded: any(named: 'onImageLoaded'),
           ),
         ).called(1);
 
         await tester.pumpWidget(createWidget('http://example.com/image2.png'));
-        await tester.pump(); // Start fetching
+        await tester.pump();
 
         verify(
-          () => mockDio.get<List<int>>(
+          () => mockStrategy.loadImage(
             'http://example.com/image2.png',
-            options: any(named: 'options'),
+            onImageLoaded: any(named: 'onImageLoaded'),
+          ),
+        ).called(1);
+      });
+
+      testWidgets('refetches when strategy changes', (
+        WidgetTester tester,
+      ) async {
+        final strategy1 = MockImageLoadingStrategy();
+        final strategy2 = MockImageLoadingStrategy();
+
+        when(
+          () => strategy1.loadImage(
+            any(),
+            onImageLoaded: any(named: 'onImageLoaded'),
+          ),
+        ).thenAnswer((_) async => Uint8List(0));
+        when(
+          () => strategy2.loadImage(
+            any(),
+            onImageLoaded: any(named: 'onImageLoaded'),
+          ),
+        ).thenAnswer((_) async => Uint8List(0));
+
+        await tester.pumpWidget(
+          createWidget('http://example.com/image.png', strategy: strategy1),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => strategy1.loadImage(
+            'http://example.com/image.png',
+            onImageLoaded: any(named: 'onImageLoaded'),
+          ),
+        ).called(1);
+
+        await tester.pumpWidget(
+          createWidget('http://example.com/image.png', strategy: strategy2),
+        );
+        await tester.pump();
+
+        verify(
+          () => strategy2.loadImage(
+            'http://example.com/image.png',
+            onImageLoaded: any(named: 'onImageLoaded'),
           ),
         ).called(1);
       });
