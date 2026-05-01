@@ -20,6 +20,7 @@ class BookCard extends StatelessWidget {
           children: [
             BookCover(
               imageUrl: book.cover,
+              blurHash: book.metadata?.blurHash,
               borderRadius: 0,
               iconSize: 60,
               usePlaceholderIfNull: true,

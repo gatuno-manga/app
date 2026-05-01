@@ -17,6 +17,11 @@ BookModel _$BookModelFromJson(Map<String, dynamic> json) => BookModel(
       : const TagListConverter().fromJson(json['tags'] as List?),
   description: json['description'] as String?,
   cover: json['cover'] as String?,
+  imageMetadata: json['coverMetadata'] == null
+      ? null
+      : ImageMetadataModel.fromJson(
+          json['coverMetadata'] as Map<String, dynamic>,
+        ),
   type: const TypeBookConverter().fromJson(json['type']),
   publication: (json['publication'] as num?)?.toInt(),
   totalChapters: (json['totalChapters'] as num?)?.toInt(),
@@ -40,6 +45,7 @@ Map<String, dynamic> _$BookModelToJson(BookModel instance) => <String, dynamic>{
   'totalChapters': instance.totalChapters,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
+  'coverMetadata': instance.imageMetadata?.toJson(),
 };
 
 BookListModel _$BookListModelFromJson(Map<String, dynamic> json) =>

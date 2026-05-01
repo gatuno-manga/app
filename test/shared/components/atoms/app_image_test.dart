@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/shared/components/atoms/app_image.dart';
 import 'package:gatuno/shared/components/atoms/app_skeleton.dart';
@@ -44,6 +45,37 @@ void main() {
       await tester.pumpWidget(createWidget('http://example.com/image.png'));
 
       expect(find.byType(AppSkeleton), findsOneWidget);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('shows blurHash while loading when provided', (
+      WidgetTester tester,
+    ) async {
+      when(
+        () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
+      ).thenAnswer((_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        return Response<List<int>>(
+          data: [1, 2, 3],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ''),
+        );
+      });
+
+      const blurHash = 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppImage(
+              imageUrl: 'http://example.com/image.png',
+              blurHash: blurHash,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(BlurHash), findsOneWidget);
       await tester.pumpAndSettle();
     });
 

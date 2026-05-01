@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../shared/data/models/image_metadata_model.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_type.dart';
 import '../../domain/entities/author.dart';
@@ -63,6 +64,9 @@ class TypeBookConverter implements JsonConverter<TypeBook?, dynamic> {
   converters: [AuthorListConverter(), TagListConverter(), TypeBookConverter()],
 )
 class BookModel extends Book {
+  @JsonKey(name: 'coverMetadata')
+  final ImageMetadataModel? imageMetadata;
+
   const BookModel({
     required super.id,
     required super.title,
@@ -70,12 +74,13 @@ class BookModel extends Book {
     super.tags = const [],
     super.description,
     super.cover,
+    this.imageMetadata,
     super.type,
     super.publication,
     super.totalChapters,
     super.createdAt,
     super.updatedAt,
-  });
+  }) : super(metadata: imageMetadata);
 
   factory BookModel.fromJson(Map<String, dynamic> json) =>
       _$BookModelFromJson(json);

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
+import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 
 void main() {
   group('ReadingChapter', () {
@@ -31,8 +32,7 @@ void main() {
         id: 'p1',
         url: 'url',
         index: 0,
-        width: 100,
-        height: 200,
+        metadata: const ImageMetadata(width: 100, height: 200),
       );
 
       expect(page.id, 'p1');

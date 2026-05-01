@@ -4,6 +4,7 @@ import '../../../../../shared/components/atoms/app_skeleton.dart';
 
 class BookCover extends StatelessWidget {
   final String? imageUrl;
+  final String? blurHash;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -14,6 +15,7 @@ class BookCover extends StatelessWidget {
   const BookCover({
     super.key,
     this.imageUrl,
+    this.blurHash,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -29,6 +31,7 @@ class BookCover extends StatelessWidget {
     if (imageUrl != null) {
       content = AppImage(
         imageUrl: imageUrl!,
+        blurHash: blurHash,
         width: width,
         height: height,
         fit: fit,

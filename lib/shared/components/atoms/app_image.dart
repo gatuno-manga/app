@@ -2,12 +2,14 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/network/dio_client.dart';
 import 'app_skeleton.dart';
 
 class AppImage extends StatefulWidget {
   final String imageUrl;
+  final String? blurHash;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -18,6 +20,7 @@ class AppImage extends StatefulWidget {
   const AppImage({
     super.key,
     required this.imageUrl,
+    this.blurHash,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -78,17 +81,49 @@ class _AppImageState extends State<AppImage> {
     return null;
   }
 
+  Widget _buildPlaceholder({Key? key}) {
+    if (widget.blurHash != null) {
+      final blurHashWidget = BlurHash(
+        hash: widget.blurHash!,
+        imageFit: BoxFit.fill,
+      );
+
+      if (widget.width != null || widget.height != null) {
+        return SizedBox(
+          key: key,
+          width: widget.width,
+          height: widget.height,
+          child: blurHashWidget,
+        );
+      }
+
+      return KeyedSubtree(key: key, child: blurHashWidget);
+    }
+
+    return SizedBox(
+      key: key,
+      width: widget.width,
+      height: widget.height,
+      child:
+          widget.placeholder ??
+          AppSkeleton(width: widget.width, height: widget.height),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Uint8List?>(
       future: _fetchFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return widget.placeholder ??
-              AppSkeleton(width: widget.width, height: widget.height);
+          return _buildPlaceholder(key: const ValueKey('waiting'));
         }
 
         if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+          if (widget.blurHash != null && widget.errorWidget == null) {
+            return _buildPlaceholder(key: const ValueKey('error'));
+          }
+
           return SizedBox(
             width: widget.width,
             height: widget.height,
@@ -106,12 +141,31 @@ class _AppImageState extends State<AppImage> {
           width: widget.width,
           height: widget.height,
           fit: widget.fit,
-          errorBuilder: (context, error, stackTrace) {
-            return Center(
-              child:
-                  widget.errorWidget ??
-                  const Icon(Icons.broken_image, size: 24.0),
+          gaplessPlayback: true,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (wasSynchronouslyLoaded) return child;
+
+            return Stack(
+              fit: StackFit.passthrough,
+              alignment: Alignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: frame == null ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 600),
+                  curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+                  child: _buildPlaceholder(key: const ValueKey('placeholder')),
+                ),
+                AnimatedOpacity(
+                  opacity: frame == null ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 600),
+                  curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+                  child: child,
+                ),
+              ],
             );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return _buildPlaceholder(key: const ValueKey('error'));
           },
         );
       },

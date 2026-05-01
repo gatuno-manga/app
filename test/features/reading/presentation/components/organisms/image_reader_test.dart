@@ -5,6 +5,7 @@ import 'package:gatuno/features/reading/presentation/components/organisms/image_
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_top_overlay.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
+import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -39,11 +40,14 @@ class _MockPage extends Fake implements ReadingPage {
   @override
   final int index;
   @override
-  final double? width = 100;
-  @override
-  final double? height = 200;
+  final ImageMetadata? metadata = const ImageMetadata(width: 100, height: 200);
 
   _MockPage({required this.id, required this.url, required this.index});
+
+  @override
+  double? get width => metadata?.width;
+  @override
+  double? get height => metadata?.height;
 }
 
 void main() {

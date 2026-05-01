@@ -68,7 +68,8 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
       aspectRatio: _aspectRatio,
       child: AppImage(
         imageUrl: widget.page.url,
-        fit: BoxFit.contain,
+        blurHash: widget.page.metadata?.blurHash,
+        fit: BoxFit.fill,
         width: double.infinity,
         onImageLoaded: _onImageLoaded,
         placeholder: const Center(child: CircularProgressIndicator()),
