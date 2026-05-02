@@ -1,23 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockReadingRepository extends Mock implements ReadingRepository {}
 
+class MockReadingProgressCoordinator extends Mock
+    implements ReadingProgressCoordinator {}
+
 class FakeReadingChapter extends Fake implements ReadingChapter {
   @override
+  String get id => 'chapter-1';
+  @override
+  String get bookId => 'book-1';
+  @override
   String get title => 'Test Chapter';
+  @override
+  List<ReadingPage> get pages => [];
 }
 
 void main() {
   late ReadingViewModel viewModel;
   late MockReadingRepository mockRepository;
+  late MockReadingProgressCoordinator mockCoordinator;
 
   setUp(() {
     mockRepository = MockReadingRepository();
-    viewModel = ReadingViewModel(mockRepository);
+    mockCoordinator = MockReadingProgressCoordinator();
+    viewModel = ReadingViewModel(mockRepository, mockCoordinator);
+
+    registerFallbackValue(false);
   });
 
   group('ReadingViewModel', () {
@@ -79,14 +93,44 @@ void main() {
       int listenerCount = 0;
       viewModel.addListener(() => listenerCount++);
 
-      viewModel.setCurrentPage(3);
+      viewModel.setCurrentPage(3, isAutoSave: false);
 
       expect(viewModel.currentPageIndex, 3);
       expect(listenerCount, 1);
 
       // Setting same page should not notify
-      viewModel.setCurrentPage(3);
+      viewModel.setCurrentPage(3, isAutoSave: false);
       expect(listenerCount, 1);
+    });
+
+    test('setCurrentPage calls saveProgress when isAutoSave is true', () async {
+      final mockChapter = FakeReadingChapter();
+      when(
+        () => mockRepository.getChapter(chapterId),
+      ).thenAnswer((_) async => mockChapter);
+
+      when(
+        () => mockCoordinator.saveProgress(
+          chapterId: any(named: 'chapterId'),
+          bookId: any(named: 'bookId'),
+          pageIndex: any(named: 'pageIndex'),
+          totalPages: any(named: 'totalPages'),
+          completed: any(named: 'completed'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await viewModel.loadChapter(chapterId);
+      viewModel.setCurrentPage(3);
+
+      verify(
+        () => mockCoordinator.saveProgress(
+          chapterId: 'chapter-1',
+          bookId: 'book-1',
+          pageIndex: 3,
+          totalPages: 0,
+          completed: false,
+        ),
+      ).called(1);
     });
   });
 }

@@ -10,4 +10,8 @@ class ApiConstants {
 
   // Chapters Routes
   static const String chapters = '/chapters';
+
+  // Reading Progress Routes
+  static const String readingProgress = '/users/me/reading-progress';
+  static const String readingProgressSync = '/users/me/reading-progress/sync';
 }
