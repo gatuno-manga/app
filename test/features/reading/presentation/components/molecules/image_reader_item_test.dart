@@ -151,7 +151,9 @@ void main() {
         0.5,
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump(); // Start fetch
+      await tester.pump(); // Finish fetch
+      await tester.pump(); // Finish image frame build
 
       // Updated aspect ratio from 1x1 image (1.0)
       expect(

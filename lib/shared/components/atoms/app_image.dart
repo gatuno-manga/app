@@ -35,6 +35,7 @@ class AppImage extends StatefulWidget {
 
 class _AppImageState extends State<AppImage> {
   late Future<Uint8List?> _fetchFuture;
+  static const _placeholderKey = ValueKey('app_image_placeholder');
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _AppImageState extends State<AppImage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return AppImagePlaceholder(
-            key: const ValueKey('waiting'),
+            key: _placeholderKey,
             blurHash: widget.blurHash,
             width: widget.width,
             height: widget.height,
@@ -107,6 +108,19 @@ class _AppImageState extends State<AppImage> {
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
             if (wasSynchronouslyLoaded) return child;
 
+            if (widget.blurHash == null) {
+              if (frame == null) {
+                return AppImagePlaceholder(
+                  key: _placeholderKey,
+                  blurHash: widget.blurHash,
+                  width: widget.width,
+                  height: widget.height,
+                  placeholder: widget.placeholder,
+                );
+              }
+              return child;
+            }
+
             return Stack(
               fit: StackFit.passthrough,
               alignment: Alignment.center,
@@ -116,7 +130,7 @@ class _AppImageState extends State<AppImage> {
                   duration: const Duration(milliseconds: 600),
                   curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
                   child: AppImagePlaceholder(
-                    key: const ValueKey('placeholder'),
+                    key: _placeholderKey,
                     blurHash: widget.blurHash,
                     width: widget.width,
                     height: widget.height,

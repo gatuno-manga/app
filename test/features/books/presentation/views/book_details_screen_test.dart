@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gatuno/core/di/injection.dart';
-import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/features/books/domain/entities/author.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart' as entity;
@@ -11,30 +9,21 @@ import 'package:gatuno/features/books/presentation/views/book_details_screen.dar
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../helpers/pump_app.dart';
+import '../../../../helpers/test_injection.dart';
 
 class MockBookDetailsViewModel extends Mock implements BookDetailsViewModel {}
-
-class MockDioClient extends Mock implements DioClient {}
-
-class MockDio extends Mock implements Dio {}
 
 void main() {
   late MockBookDetailsViewModel mockViewModel;
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUpAll(() {
+  setUp(() async {
     mockDioClient = MockDioClient();
-    mockDio = MockDio();
-    when(() => mockDioClient.dio).thenReturn(mockDio);
+    mockDio = mockDioClient.dio as MockDio;
 
-    sl.registerSingleton<DioClient>(mockDioClient);
+    await initTestDI(dioClient: mockDioClient);
 
-    // Register fallback for any()
-    registerFallbackValue(RequestOptions(path: ''));
-  });
-
-  setUp(() {
     mockViewModel = MockBookDetailsViewModel();
 
     when(() => mockViewModel.isLoading).thenReturn(false);
@@ -51,6 +40,7 @@ void main() {
     when(() => mockViewModel.removeListener(any())).thenReturn(null);
 
     // Mock dio get for images
+    registerFallbackValue(RequestOptions(path: ''));
     when(
       () => mockDio.get<List<int>>(any(), options: any(named: 'options')),
     ).thenAnswer(
