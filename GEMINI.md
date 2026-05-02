@@ -41,6 +41,7 @@
   - Implemented dynamic API endpoint configuration via a new `/welcome` screen for first-time setup.
   - Added a `Settings` feature that allows updating the API URL and toggling "Sensitive Content" preferences.
   - Using `/health/liveness` to validate the user-provided API URL.
+  - Added `IMAGE_REFERER` environment variable for image fetching, defaulting to `https://gatuno.canto.internal/`.
 - **Routing & Navigation:**
   - Refactored `GoRouter` to support dynamic `initialLocation` based on app configuration.
   - Replaced the "Profile" tab with a "Settings" tab in the `BottomNavigationBar`.
