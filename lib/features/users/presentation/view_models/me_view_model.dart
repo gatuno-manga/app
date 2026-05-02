@@ -7,12 +7,12 @@ class MeViewModel extends SafeChangeNotifier {
   final UserService _userService;
   static const String _logTag = 'MeViewModel';
 
-  UserModel? _user;
+  UserModel _user = UserModel.guest;
   bool _isLoading = true;
 
   MeViewModel(this._userService);
 
-  UserModel? get user => _user;
+  UserModel get user => _user;
   bool get isLoading => _isLoading;
 
   Future<void> init() async {
@@ -23,11 +23,12 @@ class MeViewModel extends SafeChangeNotifier {
     try {
       _user = await _userService.getCurrentUser();
       AppLogger.i(
-        'MeViewModel initialized: user=${_user?.displayName}',
+        'MeViewModel initialized: user=${_user.displayName}',
         _logTag,
       );
     } catch (e, stackTrace) {
       AppLogger.e('Error initializing MeViewModel', e, stackTrace, _logTag);
+      _user = UserModel.guest;
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -3,6 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
+import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 import 'package:gatuno/features/users/data/data_sources/user_local_data_source.dart';
 
 class MockAuthService extends Mock implements AuthService {}
@@ -44,12 +49,12 @@ void main() {
 
       final user = await userService.getCurrentUser();
 
-      expect(user, isNotNull);
-      expect(user!.id, equals('123'));
-      expect(user.email, equals('test@example.com'));
+      expect(user.isGuest, isFalse);
+      expect(user.id, equals(const UserId('123')));
+      expect(user.email, equals(const UserEmail('test@example.com')));
     });
 
-    test('getCurrentUser should return null for expired token', () async {
+    test('getCurrentUser should return UserModel.guest for expired token', () async {
       final exp = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - 3600;
       final payload = {
         'sub': '123',
@@ -63,15 +68,15 @@ void main() {
 
       final user = await userService.getCurrentUser();
 
-      expect(user, isNull);
+      expect(user, equals(UserModel.guest));
     });
 
-    test('getCurrentUser should return null for null token', () async {
+    test('getCurrentUser should return UserModel.guest for null token', () async {
       when(() => mockAuthService.getToken()).thenAnswer((_) async => null);
 
       final user = await userService.getCurrentUser();
 
-      expect(user, isNull);
+      expect(user, equals(UserModel.guest));
     });
 
     test('logout should call authService.logout', () async {

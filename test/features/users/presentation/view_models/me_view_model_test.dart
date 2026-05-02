@@ -3,6 +3,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/users/presentation/view_models/me_view_model.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 
 class MockUserService extends Mock implements UserService {}
 
@@ -16,17 +20,17 @@ void main() {
   });
 
   group('MeViewModel', () {
-    test('initial state should be loading', () {
+    test('initial state should be loading and guest', () {
       expect(viewModel.isLoading, isTrue);
-      expect(viewModel.user, isNull);
+      expect(viewModel.user, equals(UserModel.guest));
     });
 
     test('init should load user', () async {
       final user = UserModel(
-        id: '1',
-        email: 'test@example.com',
-        roles: ['user'],
-        maxWeightSensitiveContent: 5,
+        id: const UserId('1'),
+        email: const UserEmail('test@example.com'),
+        roles: const UserRoles(['user']),
+        maxWeightSensitiveContent: const SensitiveContentWeight(5),
       );
 
       when(

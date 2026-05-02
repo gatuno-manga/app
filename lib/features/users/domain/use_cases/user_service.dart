@@ -9,16 +9,16 @@ class UserService {
 
   UserService(this._authService);
 
-  Future<UserModel?> getCurrentUser() async {
+  Future<UserModel> getCurrentUser() async {
     try {
       final token = await _authService.getToken();
       if (token == null || token.isEmpty) {
-        return null;
+        return UserModel.guest;
       }
 
       if (JwtDecoder.isExpired(token)) {
         AppLogger.w('Access token expired while getting current user', _logTag);
-        return null;
+        return UserModel.guest;
       }
 
       final payload = JwtDecoder.decode(token);
@@ -30,7 +30,7 @@ class UserService {
         stackTrace,
         _logTag,
       );
-      return null;
+      return UserModel.guest;
     }
   }
 

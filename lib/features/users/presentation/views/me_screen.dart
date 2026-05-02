@@ -32,8 +32,8 @@ class _MePageState extends State<MePage> {
       title: l10n.userMeTitle,
       isLoading: viewModel.isLoading,
       header: UserProfileHeader(
-        displayName: viewModel.user?.displayName ?? '',
-        email: viewModel.user?.email ?? '',
+        displayName: viewModel.user.displayName,
+        email: viewModel.user.email.value,
       ),
       settings: MeSettingsList(
         logoutButton: SizedBox(
