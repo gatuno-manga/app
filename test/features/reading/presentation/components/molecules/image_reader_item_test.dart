@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/image_reader_item.dart';
+import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:gatuno/shared/utils/image_aspect_ratio_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/test_injection.dart';
@@ -30,8 +31,7 @@ void main() {
     id: '1',
     url: 'http://example.com/image.png',
     index: 0,
-    width: 100,
-    height: 200,
+    metadata: const ImageMetadata(width: 100, height: 200),
   );
 
   group('ImageReaderItem', () {
@@ -151,7 +151,9 @@ void main() {
         0.5,
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump(); // Start fetch
+      await tester.pump(); // Finish fetch
+      await tester.pump(); // Finish image frame build
 
       // Updated aspect ratio from 1x1 image (1.0)
       expect(

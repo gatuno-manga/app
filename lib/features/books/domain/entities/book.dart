@@ -1,3 +1,4 @@
+import '../../../../shared/domain/entities/image_metadata.dart';
 import 'author.dart';
 import 'book_type.dart';
 import 'tag.dart';
@@ -9,6 +10,7 @@ class Book {
   final List<Tag> tags;
   final String? description;
   final String? cover;
+  final ImageMetadata? metadata;
   final TypeBook? type;
   final int? publication;
   final int? totalChapters;
@@ -22,6 +24,7 @@ class Book {
     this.tags = const [],
     this.description,
     this.cover,
+    this.metadata,
     this.type,
     this.publication,
     this.totalChapters,

@@ -4,6 +4,8 @@ import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/presentation/components/organisms/book_list.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:mocktail/mocktail.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -18,11 +20,22 @@ void main() {
     if (sl.isRegistered<DioClient>()) {
       sl.unregister<DioClient>();
     }
+    if (sl.isRegistered<ImageLoadingStrategy>()) {
+      sl.unregister<ImageLoadingStrategy>();
+    }
     sl.registerSingleton<DioClient>(mockDioClient);
+    sl.registerSingleton<ImageLoadingStrategy>(
+      DioImageLoadingStrategy(mockDioClient),
+    );
   });
 
   tearDown(() {
-    sl.unregister<DioClient>();
+    if (sl.isRegistered<DioClient>()) {
+      sl.unregister<DioClient>();
+    }
+    if (sl.isRegistered<ImageLoadingStrategy>()) {
+      sl.unregister<ImageLoadingStrategy>();
+    }
   });
 
   final testBooks = List.generate(

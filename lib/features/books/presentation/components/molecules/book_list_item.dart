@@ -22,7 +22,12 @@ class BookListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BookCover(imageUrl: book.cover, width: 70, height: 100),
+              BookCover(
+                imageUrl: book.cover,
+                blurHash: book.metadata?.blurHash,
+                width: 70,
+                height: 100,
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: BookInfo(

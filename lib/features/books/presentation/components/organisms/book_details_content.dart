@@ -33,7 +33,10 @@ class BookDetailsContent extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      cover: BookCoverLarge(coverUrl: book.cover),
+      cover: BookCoverLarge(
+        coverUrl: book.cover,
+        blurHash: book.metadata?.blurHash,
+      ),
       header: BookDetailsHeader(
         title: book.title,
         authors: book.authors,

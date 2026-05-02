@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/token_provider.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
@@ -82,6 +84,9 @@ Future<void> initTestDI({
 
   final dc = dioClient ?? MockDioClient();
   sl.registerLazySingleton<DioClient>(() => dc);
+  sl.registerLazySingleton<ImageLoadingStrategy>(
+    () => DioImageLoadingStrategy(dc),
+  );
 
   final storage = authStorage ?? MockAuthStorage();
   if (authStorage == null) {
@@ -102,7 +107,7 @@ Future<void> initTestDI({
   sl.registerLazySingleton<SettingsService>(() => sService);
 
   final tm = tokenManager ?? MockTokenManager();
-  if (tokenManager == null) {
+  if (tm is MockTokenManager) {
     when(() => tm.initialize()).thenAnswer((_) async {});
     when(() => tm.getToken()).thenAnswer((_) async => null);
     when(
@@ -124,7 +129,7 @@ Future<void> initTestDI({
   }
 
   final navVM = navigationViewModel ?? MockNavigationViewModel();
-  if (navigationViewModel == null) {
+  if (navVM is MockNavigationViewModel) {
     when(() => navVM.isAuthenticated).thenReturn(false);
     when(() => navVM.user).thenReturn(null);
   }

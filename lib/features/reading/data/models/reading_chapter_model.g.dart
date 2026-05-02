@@ -12,9 +12,9 @@ ReadingPageModel _$ReadingPageModelFromJson(
   id: const StringConverter().fromJson(json['id']),
   url: const StringConverter().fromJson(ReadingPageModel._readUrl(json, 'url')),
   index: const IntConverter().fromJson(json['index']),
-  pageMetadata: json['metadata'] == null
+  imageMetadata: json['metadata'] == null
       ? null
-      : PageMetadataModel.fromJson(json['metadata'] as Map<String, dynamic>),
+      : ImageMetadataModel.fromJson(json['metadata'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ReadingPageModelToJson(ReadingPageModel instance) =>
@@ -22,19 +22,7 @@ Map<String, dynamic> _$ReadingPageModelToJson(ReadingPageModel instance) =>
       'id': const StringConverter().toJson(instance.id),
       'url': const StringConverter().toJson(instance.url),
       'index': const IntConverter().toJson(instance.index),
-      'metadata': instance.pageMetadata,
-    };
-
-PageMetadataModel _$PageMetadataModelFromJson(Map<String, dynamic> json) =>
-    PageMetadataModel(
-      width: const DoubleConverter().fromJson(json['width']),
-      height: const DoubleConverter().fromJson(json['height']),
-    );
-
-Map<String, dynamic> _$PageMetadataModelToJson(PageMetadataModel instance) =>
-    <String, dynamic>{
-      'width': const DoubleConverter().toJson(instance.width),
-      'height': const DoubleConverter().toJson(instance.height),
+      'metadata': instance.imageMetadata,
     };
 
 ChapterCommentModel _$ChapterCommentModelFromJson(Map<String, dynamic> json) =>

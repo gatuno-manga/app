@@ -3,6 +3,8 @@ import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
 import '../../../books/domain/entities/chapter.dart';
 
+import '../../../../shared/data/models/image_metadata_model.dart';
+
 part 'reading_chapter_model.g.dart';
 
 class IntConverter implements JsonConverter<int, dynamic> {
@@ -81,14 +83,14 @@ class ScrapingStatusConverter
 @JsonSerializable(converters: [IntConverter(), StringConverter()])
 class ReadingPageModel extends ReadingPage {
   @JsonKey(name: 'metadata')
-  final PageMetadataModel? pageMetadata;
+  final ImageMetadataModel? imageMetadata;
 
   ReadingPageModel({
     required super.id,
     @JsonKey(readValue: _readUrl) required super.url,
     required super.index,
-    this.pageMetadata,
-  }) : super(width: pageMetadata?.width, height: pageMetadata?.height);
+    this.imageMetadata,
+  }) : super(metadata: imageMetadata);
 
   factory ReadingPageModel.fromJson(Map<String, dynamic> json) =>
       _$ReadingPageModelFromJson(json);
@@ -97,19 +99,6 @@ class ReadingPageModel extends ReadingPage {
 
   static Object? _readUrl(Map<dynamic, dynamic> json, String key) =>
       json['path'] ?? json['url'] ?? '';
-}
-
-@JsonSerializable(converters: [DoubleConverter()])
-class PageMetadataModel {
-  final double width;
-  final double height;
-
-  const PageMetadataModel({required this.width, required this.height});
-
-  factory PageMetadataModel.fromJson(Map<String, dynamic> json) =>
-      _$PageMetadataModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _$PageMetadataModelToJson(this);
 }
 
 @JsonSerializable(converters: [StringConverter()])

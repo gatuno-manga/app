@@ -3,12 +3,14 @@ import 'package:gatuno/features/books/presentation/components/atoms/book_cover.d
 
 class BookCoverLarge extends StatelessWidget {
   final String? coverUrl;
+  final String? blurHash;
   final double width;
   final double height;
 
   const BookCoverLarge({
     super.key,
     this.coverUrl,
+    this.blurHash,
     this.width = 240,
     this.height = 360,
   });
@@ -30,6 +32,7 @@ class BookCoverLarge extends StatelessWidget {
       ),
       child: BookCover(
         imageUrl: coverUrl,
+        blurHash: blurHash,
         width: width,
         height: height,
         borderRadius: 16,

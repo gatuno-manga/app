@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/image/image_loading_strategy.dart';
 import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../shared/components/atoms/app_skeleton.dart';
 
 class BookCover extends StatelessWidget {
   final String? imageUrl;
+  final String? blurHash;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -14,6 +18,7 @@ class BookCover extends StatelessWidget {
   const BookCover({
     super.key,
     this.imageUrl,
+    this.blurHash,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -29,6 +34,8 @@ class BookCover extends StatelessWidget {
     if (imageUrl != null) {
       content = AppImage(
         imageUrl: imageUrl!,
+        strategy: sl<ImageLoadingStrategy>(),
+        blurHash: blurHash,
         width: width,
         height: height,
         fit: fit,

@@ -1,3 +1,4 @@
+import '../../../../shared/domain/entities/image_metadata.dart';
 import 'reading_enums.dart';
 import '../../../../features/books/domain/entities/chapter.dart';
 
@@ -5,16 +6,17 @@ class ReadingPage {
   final String id;
   final String url;
   final int index;
-  final double? width;
-  final double? height;
+  final ImageMetadata? metadata;
 
   const ReadingPage({
     required this.id,
     required this.url,
     required this.index,
-    this.width,
-    this.height,
+    this.metadata,
   });
+
+  double? get width => metadata?.width;
+  double? get height => metadata?.height;
 }
 
 class ChapterComment {
