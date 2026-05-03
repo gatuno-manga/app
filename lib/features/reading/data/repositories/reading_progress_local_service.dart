@@ -32,6 +32,34 @@ class ReadingProgressLocalService {
     }
   }
 
+  Future<ReadingProgressData?> getLastReadChapter(
+    String userId,
+    String bookId,
+  ) async {
+    AppLogger.d('Querying last read chapter: userId=$userId, bookId=$bookId', _logTag);
+    try {
+      final result = await (_database.select(_database.readingProgress)
+            ..where((t) => t.userId.equals(userId) & t.bookId.equals(bookId))
+            ..orderBy([
+              (t) =>
+                  OrderingTerm(expression: t.timestamp, mode: OrderingMode.desc)
+            ])
+            ..limit(1))
+          .getSingleOrNull();
+      
+      AppLogger.d('Last read chapter query result: ${result?.chapterId}', _logTag);
+      return result;
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        'Error getting last read progress locally',
+        e,
+        stackTrace,
+        _logTag,
+      );
+      rethrow;
+    }
+  }
+
   Future<List<ReadingProgressData>> getAllGuestProgress() async {
     try {
       return await (_database.select(_database.readingProgress)

@@ -4,12 +4,14 @@ import 'package:gatuno/shared/components/atoms/app_button.dart';
 
 class BookActionButtons extends StatelessWidget {
   final VoidCallback onStartReading;
+  final bool hasProgress;
   final VoidCallback? onMenuPressed;
   final VoidCallback? onSyncPressed;
 
   const BookActionButtons({
     super.key,
     required this.onStartReading,
+    this.hasProgress = false,
     this.onMenuPressed,
     this.onSyncPressed,
   });
@@ -22,7 +24,7 @@ class BookActionButtons extends StatelessWidget {
       children: [
         Expanded(
           child: AppButton(
-            text: l10n.booksStartReading,
+            text: hasProgress ? l10n.booksContinueReading : l10n.booksStartReading,
             onPressed: onStartReading,
           ),
         ),

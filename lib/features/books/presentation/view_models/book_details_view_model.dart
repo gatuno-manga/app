@@ -1,5 +1,7 @@
 import '../../../../core/base/safe_change_notifier.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../reading/data/database/reading_database.dart';
+import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/chapter.dart';
 import '../../domain/entities/chapter_page_options.dart';
@@ -7,19 +9,25 @@ import '../../domain/repositories/books_repository.dart';
 
 class BookDetailsViewModel extends SafeChangeNotifier {
   final BooksRepository _repository;
+  final ReadingProgressCoordinator _progressCoordinator;
   final String bookId;
   static const String _logTag = 'BookDetailsViewModel';
 
   BookDetailsViewModel({
     required BooksRepository repository,
+    required ReadingProgressCoordinator progressCoordinator,
     required this.bookId,
-  }) : _repository = repository;
+  })  : _repository = repository,
+        _progressCoordinator = progressCoordinator;
 
   Book? _book;
   Book? get book => _book;
 
   ChapterList? _chapterList;
   ChapterList? get chapterList => _chapterList;
+
+  ReadingProgressData? _lastReadChapter;
+  ReadingProgressData? get lastReadChapter => _lastReadChapter;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -36,6 +44,8 @@ class BookDetailsViewModel extends SafeChangeNotifier {
   ChapterPageOptions _options = const ChapterPageOptions();
   ChapterPageOptions get options => _options;
 
+  bool get hasReadingProgress => _lastReadChapter != null;
+
   Future<void> fetchBookDetails() async {
     if (_isLoading) return;
 
@@ -51,12 +61,23 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       notifyListeners();
 
       await fetchChapters();
+      await _fetchLastReadChapter();
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching book details', e, stackTrace, _logTag);
       _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _fetchLastReadChapter() async {
+    try {
+      _lastReadChapter = await _progressCoordinator.getLastReadChapter(bookId);
+      AppLogger.d('Fetched last read chapter: ${_lastReadChapter?.chapterId}, completed: ${_lastReadChapter?.completed}', _logTag);
+      notifyListeners();
+    } catch (e) {
+      AppLogger.w('Error fetching last read chapter: $e', _logTag);
     }
   }
 
@@ -135,5 +156,35 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     AppLogger.d('Clearing book details error', _logTag);
     _error = null;
     notifyListeners();
+  }
+
+  String? getResumeChapterId() {
+    final chapters = _chapterList?.data;
+    if (chapters == null || chapters.isEmpty) {
+      AppLogger.d('getResumeChapterId: No chapters available', _logTag);
+      return null;
+    }
+
+    if (_lastReadChapter == null) {
+      final firstId = chapters.first.id;
+      AppLogger.d('getResumeChapterId: No progress, returning first chapter: $firstId', _logTag);
+      return firstId;
+    }
+
+    final lastChapterId = _lastReadChapter!.chapterId;
+    if (_lastReadChapter!.completed) {
+      // Find next chapter
+      final currentIndex = chapters.indexWhere((c) => c.id == lastChapterId);
+      if (currentIndex != -1 && currentIndex < chapters.length - 1) {
+        final nextId = chapters[currentIndex + 1].id;
+        AppLogger.d('getResumeChapterId: Last chapter completed, returning next chapter: $nextId', _logTag);
+        return nextId;
+      }
+      AppLogger.d('getResumeChapterId: Last chapter completed and it was the last in list, returning current: $lastChapterId', _logTag);
+    } else {
+      AppLogger.d('getResumeChapterId: Returning last read chapter: $lastChapterId', _logTag);
+    }
+
+    return lastChapterId;
   }
 }

@@ -196,6 +196,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksStartReading => 'Start Reading';
 
   @override
+  String get booksContinueReading => 'Continue Reading';
+
+  @override
   String get homeWelcome => 'Welcome to Gatuno!';
 
   @override

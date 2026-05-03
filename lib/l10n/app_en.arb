@@ -67,6 +67,7 @@
   "scrapingStatusProcess": "Processing",
   "scrapingStatusError": "Error",
   "booksStartReading": "Start Reading",
+  "booksContinueReading": "Continue Reading",
   "homeWelcome": "Welcome to Gatuno!",
   "homeProfile": "Profile",
   "userMeTitle": "My Profile",

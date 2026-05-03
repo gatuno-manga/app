@@ -44,10 +44,11 @@ class BookDetailsContent extends StatelessWidget {
         publicationYear: book.publication,
       ),
       actionButtons: BookActionButtons(
+        hasProgress: viewModel.hasReadingProgress,
         onStartReading: () {
-          final chapters = viewModel.chapterList?.data;
-          if (chapters != null && chapters.isNotEmpty) {
-            context.push('/chapters/${chapters.first.id}');
+          final chapterId = viewModel.getResumeChapterId();
+          if (chapterId != null) {
+            context.push('/chapters/$chapterId');
           }
         },
       ),

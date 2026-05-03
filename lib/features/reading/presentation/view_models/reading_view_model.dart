@@ -37,6 +37,7 @@ class ReadingViewModel extends SafeChangeNotifier {
     try {
       _chapter = await _repository.getChapter(chapterId);
       AppLogger.i('Chapter loaded successfully: ${_chapter?.title}', _logTag);
+      saveProgress();
     } catch (e, stackTrace) {
       AppLogger.e('Error loading chapter', e, stackTrace, _logTag);
       _error = e.toString();

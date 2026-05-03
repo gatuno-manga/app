@@ -158,8 +158,8 @@ class ReadingProgressCoordinator {
 
     // 1. Check local state (Highest Page Wins)
     final local = await _localService.getProgress(user.id.value, chapterId);
-    if (local != null && pageIndex <= local.pageIndex && !completed) {
-      return; // No need to update if we haven't progressed
+    if (local != null && pageIndex < local.pageIndex && !completed) {
+      return; // No need to update if we are behind current progress
     }
 
     // 2. Save locally
@@ -194,6 +194,15 @@ class ReadingProgressCoordinator {
         );
       }
     }
+  }
+
+  Future<ReadingProgressData?> getLastReadChapter(String bookId) async {
+    final user = _authService.currentUser;
+    AppLogger.d(
+      'Coordinator: Getting last read chapter for book: $bookId, user: ${user.id.value}',
+      _logTag,
+    );
+    return _localService.getLastReadChapter(user.id.value, bookId);
   }
 
   void dispose() {
