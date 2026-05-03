@@ -24,6 +24,29 @@ class ReadingDatabase extends _$ReadingDatabase {
   @override
   int get schemaVersion => 2;
 
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onUpgrade: (m, from, to) async {
+        if (from < 2) {
+          await transaction(() async {
+            await customStatement(
+              'ALTER TABLE reading_progress RENAME TO reading_progress_old;',
+            );
+            await m.createTable(readingProgress);
+            await customStatement(
+              'INSERT INTO reading_progress '
+              '(user_id, chapter_id, book_id, page_index, timestamp, version, total_pages, completed) '
+              'SELECT user_id, chapter_id, book_id, page_index, timestamp, version, total_pages, completed '
+              'FROM reading_progress_old;',
+            );
+            await customStatement('DROP TABLE reading_progress_old;');
+          });
+        }
+      },
+    );
+  }
+
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'reading_db');
   }

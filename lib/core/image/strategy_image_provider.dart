@@ -48,7 +48,12 @@ class StrategyImageProvider extends ImageProvider<StrategyImageProvider> {
       throw StateError('Failed to load image bytes from $url');
     }
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-    return decode(buffer);
+    try {
+      return await decode(buffer);
+    } catch (e) {
+      buffer.dispose();
+      rethrow;
+    }
   }
 
   @override

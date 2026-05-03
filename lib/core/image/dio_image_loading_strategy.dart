@@ -37,12 +37,16 @@ class DioImageLoadingStrategy implements ImageLoadingStrategy {
 
         if (onImageLoaded != null) {
           final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          final descriptor = await ui.ImageDescriptor.encoded(buffer);
-          onImageLoaded(
-            Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
-          );
-          descriptor.dispose();
-          buffer.dispose();
+          try {
+            final descriptor = await ui.ImageDescriptor.encoded(buffer);
+            onImageLoaded(
+              Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
+            );
+            descriptor.dispose();
+          } catch (e) {
+            buffer.dispose();
+            rethrow;
+          }
         }
 
         return bytes;
