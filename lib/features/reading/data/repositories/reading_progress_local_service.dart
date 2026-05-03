@@ -115,9 +115,32 @@ class ReadingProgressLocalService {
   Future<void> updateProgressUserId(String oldUserId, String newUserId) async {
     AppLogger.i('Migrating progress from $oldUserId to $newUserId', _logTag);
     try {
-      await (_database.update(_database.readingProgress)
-            ..where((t) => t.userId.equals(oldUserId)))
-          .write(ReadingProgressCompanion(userId: Value(newUserId)));
+      await _database.transaction(() async {
+        final items = await (_database.select(_database.readingProgress)
+              ..where((t) => t.userId.equals(oldUserId)))
+            .get();
+
+        for (final item in items) {
+          await _database
+              .into(_database.readingProgress)
+              .insertOnConflictUpdate(
+                ReadingProgressCompanion(
+                  userId: Value(newUserId),
+                  chapterId: Value(item.chapterId),
+                  bookId: Value(item.bookId),
+                  pageIndex: Value(item.pageIndex),
+                  timestamp: Value(item.timestamp),
+                  version: Value(item.version),
+                  totalPages: Value(item.totalPages),
+                  completed: Value(item.completed),
+                ),
+              );
+        }
+
+        await (_database.delete(_database.readingProgress)
+              ..where((t) => t.userId.equals(oldUserId)))
+            .go();
+      });
     } catch (e, stackTrace) {
       AppLogger.e('Error migrating progress userId', e, stackTrace, _logTag);
       rethrow;

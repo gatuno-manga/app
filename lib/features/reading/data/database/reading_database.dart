@@ -4,7 +4,6 @@ import 'package:drift_flutter/drift_flutter.dart';
 part 'reading_database.g.dart';
 
 class ReadingProgress extends Table {
-  TextColumn get id => text()();
   TextColumn get userId => text()();
   TextColumn get chapterId => text()();
   TextColumn get bookId => text()();
@@ -15,10 +14,7 @@ class ReadingProgress extends Table {
   BoolColumn get completed => boolean().withDefault(const Constant(false))();
 
   @override
-  Set<Column> get primaryKey => {id};
-
-  @override
-  List<String> get customConstraints => ['UNIQUE (user_id, chapter_id)'];
+  Set<Column> get primaryKey => {userId, chapterId};
 }
 
 @DriftDatabase(tables: [ReadingProgress])
@@ -26,7 +22,7 @@ class ReadingDatabase extends _$ReadingDatabase {
   ReadingDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   static QueryExecutor _openConnection() {
     return driftDatabase(name: 'reading_db');

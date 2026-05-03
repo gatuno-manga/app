@@ -131,7 +131,6 @@ class ReadingProgressCoordinator {
       );
       await _localService.saveProgress(
         ReadingProgressCompanion(
-          id: Value(remote.id),
           userId: Value(remote.userId),
           chapterId: Value(remote.chapterId),
           bookId: Value(remote.bookId),
@@ -154,7 +153,6 @@ class ReadingProgressCoordinator {
   }) async {
     final user = _authService.currentUser;
     final timestamp = DateTime.now();
-    final id = '${user.id.value}_$chapterId';
 
     // 1. Check local state (Highest Page Wins)
     final local = await _localService.getProgress(user.id.value, chapterId);
@@ -170,7 +168,6 @@ class ReadingProgressCoordinator {
 
     // 2. Save locally (Always update timestamp to mark as most recently accessed)
     final companion = ReadingProgressCompanion(
-      id: Value(id),
       userId: Value(user.id.value),
       chapterId: Value(chapterId),
       bookId: Value(bookId),

@@ -68,12 +68,16 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       _lastReadChapter = results[2] as ReadingProgressData?;
       final localProgress = results[3] as List<ReadingProgressData>;
 
+      final progressMap = {
+        for (var p in localProgress) p.chapterId: p,
+      };
+
       final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = localProgress
-            .where((p) => p.chapterId == chapter.id)
-            .firstOrNull;
+        final progress = progressMap[chapter.id];
+        final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
-          completed: progress?.completed ?? false,
+          completed: isCompleted,
+          read: chapter.read || isCompleted || progress != null,
           lastPage: progress?.pageIndex ?? 0,
         );
       }).toList();
@@ -119,11 +123,13 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         bookId,
       );
 
+      final progressMap = {
+        for (var p in localProgress) p.chapterId: p,
+      };
+
       var changed = false;
       final updatedChapters = _chapterList!.data.map((chapter) {
-        final progress = localProgress
-            .where((p) => p.chapterId == chapter.id)
-            .firstOrNull;
+        final progress = progressMap[chapter.id];
 
         final isCompleted = progress?.completed ?? false;
         final lastPage = progress?.pageIndex ?? 0;
@@ -168,12 +174,16 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         bookId,
       );
 
+      final progressMap = {
+        for (var p in localProgress) p.chapterId: p,
+      };
+
       final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = localProgress
-            .where((p) => p.chapterId == chapter.id)
-            .firstOrNull;
+        final progress = progressMap[chapter.id];
+        final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
-          completed: progress?.completed ?? false,
+          completed: isCompleted,
+          read: chapter.read || isCompleted || progress != null,
           lastPage: progress?.pageIndex ?? 0,
         );
       }).toList();
@@ -212,12 +222,16 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         bookId,
       );
 
+      final progressMap = {
+        for (var p in localProgress) p.chapterId: p,
+      };
+
       final updatedNewChapters = result.data.map((chapter) {
-        final progress = localProgress
-            .where((p) => p.chapterId == chapter.id)
-            .firstOrNull;
+        final progress = progressMap[chapter.id];
+        final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
-          completed: progress?.completed ?? false,
+          completed: isCompleted,
+          read: chapter.read || isCompleted || progress != null,
           lastPage: progress?.pageIndex ?? 0,
         );
       }).toList();

@@ -54,7 +54,7 @@ class BookDetailsContent extends StatelessWidget {
             } else {
               await context.push('/chapters/$chapterId');
             }
-            viewModel.refreshReadStatus();
+            await viewModel.refreshReadStatus();
           }
         },
       ),
@@ -70,7 +70,7 @@ class BookDetailsContent extends StatelessWidget {
           } else {
             await context.push('/chapters/${chapter.id}');
           }
-          viewModel.refreshReadStatus();
+          await viewModel.refreshReadStatus();
         },
         error: viewModel.chaptersError,
         onRetry: viewModel.fetchChapters,

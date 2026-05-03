@@ -9,15 +9,6 @@ class $ReadingProgressTable extends ReadingProgress
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $ReadingProgressTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
   @override
   late final GeneratedColumn<String> userId = GeneratedColumn<String>(
@@ -109,7 +100,6 @@ class $ReadingProgressTable extends ReadingProgress
   );
   @override
   List<GeneratedColumn> get $columns => [
-    id,
     userId,
     chapterId,
     bookId,
@@ -131,11 +121,6 @@ class $ReadingProgressTable extends ReadingProgress
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
     if (data.containsKey('user_id')) {
       context.handle(
         _userIdMeta,
@@ -198,15 +183,11 @@ class $ReadingProgressTable extends ReadingProgress
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {userId, chapterId};
   @override
   ReadingProgressData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return ReadingProgressData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}id'],
-      )!,
       userId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}user_id'],
@@ -250,7 +231,6 @@ class $ReadingProgressTable extends ReadingProgress
 
 class ReadingProgressData extends DataClass
     implements Insertable<ReadingProgressData> {
-  final String id;
   final String userId;
   final String chapterId;
   final String bookId;
@@ -260,7 +240,6 @@ class ReadingProgressData extends DataClass
   final int? totalPages;
   final bool completed;
   const ReadingProgressData({
-    required this.id,
     required this.userId,
     required this.chapterId,
     required this.bookId,
@@ -273,7 +252,6 @@ class ReadingProgressData extends DataClass
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
     map['user_id'] = Variable<String>(userId);
     map['chapter_id'] = Variable<String>(chapterId);
     map['book_id'] = Variable<String>(bookId);
@@ -289,7 +267,6 @@ class ReadingProgressData extends DataClass
 
   ReadingProgressCompanion toCompanion(bool nullToAbsent) {
     return ReadingProgressCompanion(
-      id: Value(id),
       userId: Value(userId),
       chapterId: Value(chapterId),
       bookId: Value(bookId),
@@ -309,7 +286,6 @@ class ReadingProgressData extends DataClass
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ReadingProgressData(
-      id: serializer.fromJson<String>(json['id']),
       userId: serializer.fromJson<String>(json['userId']),
       chapterId: serializer.fromJson<String>(json['chapterId']),
       bookId: serializer.fromJson<String>(json['bookId']),
@@ -324,7 +300,6 @@ class ReadingProgressData extends DataClass
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
       'userId': serializer.toJson<String>(userId),
       'chapterId': serializer.toJson<String>(chapterId),
       'bookId': serializer.toJson<String>(bookId),
@@ -337,7 +312,6 @@ class ReadingProgressData extends DataClass
   }
 
   ReadingProgressData copyWith({
-    String? id,
     String? userId,
     String? chapterId,
     String? bookId,
@@ -347,7 +321,6 @@ class ReadingProgressData extends DataClass
     Value<int?> totalPages = const Value.absent(),
     bool? completed,
   }) => ReadingProgressData(
-    id: id ?? this.id,
     userId: userId ?? this.userId,
     chapterId: chapterId ?? this.chapterId,
     bookId: bookId ?? this.bookId,
@@ -359,7 +332,6 @@ class ReadingProgressData extends DataClass
   );
   ReadingProgressData copyWithCompanion(ReadingProgressCompanion data) {
     return ReadingProgressData(
-      id: data.id.present ? data.id.value : this.id,
       userId: data.userId.present ? data.userId.value : this.userId,
       chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
       bookId: data.bookId.present ? data.bookId.value : this.bookId,
@@ -376,7 +348,6 @@ class ReadingProgressData extends DataClass
   @override
   String toString() {
     return (StringBuffer('ReadingProgressData(')
-          ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('chapterId: $chapterId, ')
           ..write('bookId: $bookId, ')
@@ -391,7 +362,6 @@ class ReadingProgressData extends DataClass
 
   @override
   int get hashCode => Object.hash(
-    id,
     userId,
     chapterId,
     bookId,
@@ -405,7 +375,6 @@ class ReadingProgressData extends DataClass
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ReadingProgressData &&
-          other.id == this.id &&
           other.userId == this.userId &&
           other.chapterId == this.chapterId &&
           other.bookId == this.bookId &&
@@ -417,7 +386,6 @@ class ReadingProgressData extends DataClass
 }
 
 class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
-  final Value<String> id;
   final Value<String> userId;
   final Value<String> chapterId;
   final Value<String> bookId;
@@ -428,7 +396,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   final Value<bool> completed;
   final Value<int> rowid;
   const ReadingProgressCompanion({
-    this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.chapterId = const Value.absent(),
     this.bookId = const Value.absent(),
@@ -440,7 +407,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     this.rowid = const Value.absent(),
   });
   ReadingProgressCompanion.insert({
-    required String id,
     required String userId,
     required String chapterId,
     required String bookId,
@@ -450,14 +416,12 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     this.totalPages = const Value.absent(),
     this.completed = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       userId = Value(userId),
+  }) : userId = Value(userId),
        chapterId = Value(chapterId),
        bookId = Value(bookId),
        pageIndex = Value(pageIndex),
        timestamp = Value(timestamp);
   static Insertable<ReadingProgressData> custom({
-    Expression<String>? id,
     Expression<String>? userId,
     Expression<String>? chapterId,
     Expression<String>? bookId,
@@ -469,7 +433,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (chapterId != null) 'chapter_id': chapterId,
       if (bookId != null) 'book_id': bookId,
@@ -483,7 +446,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   }
 
   ReadingProgressCompanion copyWith({
-    Value<String>? id,
     Value<String>? userId,
     Value<String>? chapterId,
     Value<String>? bookId,
@@ -495,7 +457,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     Value<int>? rowid,
   }) {
     return ReadingProgressCompanion(
-      id: id ?? this.id,
       userId: userId ?? this.userId,
       chapterId: chapterId ?? this.chapterId,
       bookId: bookId ?? this.bookId,
@@ -511,9 +472,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
     }
@@ -547,7 +505,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   @override
   String toString() {
     return (StringBuffer('ReadingProgressCompanion(')
-          ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('chapterId: $chapterId, ')
           ..write('bookId: $bookId, ')
@@ -577,7 +534,6 @@ abstract class _$ReadingDatabase extends GeneratedDatabase {
 
 typedef $$ReadingProgressTableCreateCompanionBuilder =
     ReadingProgressCompanion Function({
-      required String id,
       required String userId,
       required String chapterId,
       required String bookId,
@@ -590,7 +546,6 @@ typedef $$ReadingProgressTableCreateCompanionBuilder =
     });
 typedef $$ReadingProgressTableUpdateCompanionBuilder =
     ReadingProgressCompanion Function({
-      Value<String> id,
       Value<String> userId,
       Value<String> chapterId,
       Value<String> bookId,
@@ -611,11 +566,6 @@ class $$ReadingProgressTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get userId => $composableBuilder(
     column: $table.userId,
     builder: (column) => ColumnFilters(column),
@@ -666,11 +616,6 @@ class $$ReadingProgressTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get userId => $composableBuilder(
     column: $table.userId,
     builder: (column) => ColumnOrderings(column),
@@ -721,9 +666,6 @@ class $$ReadingProgressTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
   GeneratedColumn<String> get userId =>
       $composableBuilder(column: $table.userId, builder: (column) => column);
 
@@ -788,7 +730,6 @@ class $$ReadingProgressTableTableManager
               $$ReadingProgressTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> id = const Value.absent(),
                 Value<String> userId = const Value.absent(),
                 Value<String> chapterId = const Value.absent(),
                 Value<String> bookId = const Value.absent(),
@@ -799,7 +740,6 @@ class $$ReadingProgressTableTableManager
                 Value<bool> completed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingProgressCompanion(
-                id: id,
                 userId: userId,
                 chapterId: chapterId,
                 bookId: bookId,
@@ -812,7 +752,6 @@ class $$ReadingProgressTableTableManager
               ),
           createCompanionCallback:
               ({
-                required String id,
                 required String userId,
                 required String chapterId,
                 required String bookId,
@@ -823,7 +762,6 @@ class $$ReadingProgressTableTableManager
                 Value<bool> completed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ReadingProgressCompanion.insert(
-                id: id,
                 userId: userId,
                 chapterId: chapterId,
                 bookId: bookId,

@@ -117,7 +117,6 @@ void main() {
           hasNextPage: false,
         );
         final progress = ReadingProgressData(
-          id: '1_1',
           userId: '1',
           chapterId: '1',
           bookId: bookId,
@@ -158,7 +157,6 @@ void main() {
           hasNextPage: false,
         );
         final progress = ReadingProgressData(
-          id: '1_1',
           userId: '1',
           chapterId: '1',
           bookId: bookId,
@@ -195,7 +193,6 @@ void main() {
           hasNextPage: false,
         );
         final progress = ReadingProgressData(
-          id: '1_1',
           userId: '1',
           chapterId: '1',
           bookId: bookId,
@@ -348,7 +345,6 @@ void main() {
 
         // Now mock progress updates
         final progress1 = ReadingProgressData(
-          id: '1_1',
           userId: '1',
           chapterId: '1',
           bookId: bookId,
@@ -358,7 +354,6 @@ void main() {
           completed: true,
         );
         final progress2 = ReadingProgressData(
-          id: '1_2',
           userId: '1',
           chapterId: '2',
           bookId: bookId,
