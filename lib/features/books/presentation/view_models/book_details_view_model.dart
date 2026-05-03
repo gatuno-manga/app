@@ -72,7 +72,10 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         final progress = localProgress
             .where((p) => p.chapterId == chapter.id)
             .firstOrNull;
-        return chapter.copyWith(completed: progress?.completed ?? false);
+        return chapter.copyWith(
+          completed: progress?.completed ?? false,
+          lastPage: progress?.pageIndex ?? 0,
+        );
       }).toList();
 
       _chapterList = chaptersResult.copyWith(data: updatedChapters);
@@ -123,12 +126,19 @@ class BookDetailsViewModel extends SafeChangeNotifier {
             .firstOrNull;
 
         final isCompleted = progress?.completed ?? false;
+        final lastPage = progress?.pageIndex ?? 0;
         // Mark as read if it is completed or if there is any progress (even if not completed)
         final isRead = chapter.read || isCompleted || progress != null;
 
-        if (chapter.completed != isCompleted || chapter.read != isRead) {
+        if (chapter.completed != isCompleted ||
+            chapter.read != isRead ||
+            chapter.lastPage != lastPage) {
           changed = true;
-          return chapter.copyWith(completed: isCompleted, read: isRead);
+          return chapter.copyWith(
+            completed: isCompleted,
+            read: isRead,
+            lastPage: lastPage,
+          );
         }
         return chapter;
       }).toList();
@@ -162,7 +172,10 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         final progress = localProgress
             .where((p) => p.chapterId == chapter.id)
             .firstOrNull;
-        return chapter.copyWith(completed: progress?.completed ?? false);
+        return chapter.copyWith(
+          completed: progress?.completed ?? false,
+          lastPage: progress?.pageIndex ?? 0,
+        );
       }).toList();
 
       _chapterList = chaptersResult.copyWith(data: updatedChapters);
@@ -203,7 +216,10 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         final progress = localProgress
             .where((p) => p.chapterId == chapter.id)
             .firstOrNull;
-        return chapter.copyWith(completed: progress?.completed ?? false);
+        return chapter.copyWith(
+          completed: progress?.completed ?? false,
+          lastPage: progress?.pageIndex ?? 0,
+        );
       }).toList();
 
       _chapterList = ChapterList(
@@ -279,5 +295,12 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     }
 
     return lastChapterId;
+  }
+
+  int getResumePageIndex() {
+    if (_lastReadChapter == null || _lastReadChapter!.completed) {
+      return 0;
+    }
+    return _lastReadChapter!.pageIndex;
   }
 }

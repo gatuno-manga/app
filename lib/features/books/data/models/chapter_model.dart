@@ -63,6 +63,7 @@ class ChapterModel extends Chapter {
     super.scrapingStatus,
     super.read = false,
     super.completed = false,
+    super.lastPage = 0,
   });
 
   factory ChapterModel.fromJson(Map<String, dynamic> json) =>

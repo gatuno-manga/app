@@ -48,7 +48,12 @@ class BookDetailsContent extends StatelessWidget {
         onStartReading: () async {
           final chapterId = viewModel.getResumeChapterId();
           if (chapterId != null) {
-            await context.push('/chapters/$chapterId');
+            final pageIndex = viewModel.getResumePageIndex();
+            if (pageIndex > 0) {
+              await context.push('/chapters/$chapterId/page/$pageIndex');
+            } else {
+              await context.push('/chapters/$chapterId');
+            }
             viewModel.refreshReadStatus();
           }
         },
@@ -60,7 +65,11 @@ class BookDetailsContent extends StatelessWidget {
         isLoading: viewModel.isLoadingChapters,
         hasNextPage: viewModel.chapterList?.hasNextPage ?? false,
         onChapterTap: (chapter) async {
-          await context.push('/chapters/${chapter.id}');
+          if (chapter.lastPage > 0 && !chapter.completed) {
+            await context.push('/chapters/${chapter.id}/page/${chapter.lastPage}');
+          } else {
+            await context.push('/chapters/${chapter.id}');
+          }
           viewModel.refreshReadStatus();
         },
         error: viewModel.chaptersError,

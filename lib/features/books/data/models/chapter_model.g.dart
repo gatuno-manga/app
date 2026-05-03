@@ -15,6 +15,7 @@ ChapterModel _$ChapterModelFromJson(Map<String, dynamic> json) => ChapterModel(
   ),
   read: json['read'] as bool? ?? false,
   completed: json['completed'] as bool? ?? false,
+  lastPage: (json['lastPage'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$ChapterModelToJson(ChapterModel instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ChapterModelToJson(ChapterModel instance) =>
       ),
       'read': instance.read,
       'completed': instance.completed,
+      'lastPage': instance.lastPage,
     };
 
 Json? _$JsonConverterToJson<Json, Value>(

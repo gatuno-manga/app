@@ -7,6 +7,7 @@ class Chapter {
   final ScrapingStatus? scrapingStatus;
   final bool read;
   final bool completed;
+  final int lastPage;
 
   const Chapter({
     required this.id,
@@ -15,6 +16,7 @@ class Chapter {
     this.scrapingStatus,
     this.read = false,
     this.completed = false,
+    this.lastPage = 0,
   });
 
   Chapter copyWith({
@@ -24,6 +26,7 @@ class Chapter {
     ScrapingStatus? scrapingStatus,
     bool? read,
     bool? completed,
+    int? lastPage,
   }) {
     return Chapter(
       id: id ?? this.id,
@@ -32,6 +35,7 @@ class Chapter {
       scrapingStatus: scrapingStatus ?? this.scrapingStatus,
       read: read ?? this.read,
       completed: completed ?? this.completed,
+      lastPage: lastPage ?? this.lastPage,
     );
   }
 }
