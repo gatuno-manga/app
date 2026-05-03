@@ -32,11 +32,10 @@ class StrategyImageProvider extends ImageProvider<StrategyImageProvider> {
       codec: _loadAsync(key, decode),
       scale: 1.0,
       debugLabel: key.url,
-      informationCollector:
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<StrategyImageProvider>('Image key', key),
-          ],
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<StrategyImageProvider>('Image key', key),
+      ],
     );
   }
 

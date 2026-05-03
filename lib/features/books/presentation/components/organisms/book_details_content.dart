@@ -45,10 +45,11 @@ class BookDetailsContent extends StatelessWidget {
       ),
       actionButtons: BookActionButtons(
         hasProgress: viewModel.hasReadingProgress,
-        onStartReading: () {
+        onStartReading: () async {
           final chapterId = viewModel.getResumeChapterId();
           if (chapterId != null) {
-            context.push('/chapters/$chapterId');
+            await context.push('/chapters/$chapterId');
+            viewModel.refreshReadStatus();
           }
         },
       ),
@@ -58,8 +59,9 @@ class BookDetailsContent extends StatelessWidget {
         chapters: viewModel.chapterList?.data ?? [],
         isLoading: viewModel.isLoadingChapters,
         hasNextPage: viewModel.chapterList?.hasNextPage ?? false,
-        onChapterTap: (chapter) {
-          context.push('/chapters/${chapter.id}');
+        onChapterTap: (chapter) async {
+          await context.push('/chapters/${chapter.id}');
+          viewModel.refreshReadStatus();
         },
         error: viewModel.chaptersError,
         onRetry: viewModel.fetchChapters,

@@ -14,20 +14,45 @@ class ReadingProgressLocalService {
       _logTag,
     );
     try {
-      await _database.into(_database.readingProgress).insertOnConflictUpdate(progress);
+      await _database
+          .into(_database.readingProgress)
+          .insertOnConflictUpdate(progress);
     } catch (e, stackTrace) {
       AppLogger.e('Error saving progress locally', e, stackTrace, _logTag);
       rethrow;
     }
   }
 
-  Future<ReadingProgressData?> getProgress(String userId, String chapterId) async {
+  Future<ReadingProgressData?> getProgress(
+    String userId,
+    String chapterId,
+  ) async {
     try {
-      return await (_database.select(_database.readingProgress)
-            ..where((t) => t.userId.equals(userId) & t.chapterId.equals(chapterId)))
+      return await (_database.select(_database.readingProgress)..where(
+            (t) => t.userId.equals(userId) & t.chapterId.equals(chapterId),
+          ))
           .getSingleOrNull();
     } catch (e, stackTrace) {
       AppLogger.e('Error getting progress locally', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
+  Future<List<ReadingProgressData>> getAllProgressForBook(
+    String userId,
+    String bookId,
+  ) async {
+    try {
+      return await (_database.select(
+        _database.readingProgress,
+      )..where((t) => t.userId.equals(userId) & t.bookId.equals(bookId))).get();
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        'Error getting all progress for book locally',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }
@@ -36,18 +61,29 @@ class ReadingProgressLocalService {
     String userId,
     String bookId,
   ) async {
-    AppLogger.d('Querying last read chapter: userId=$userId, bookId=$bookId', _logTag);
+    AppLogger.d(
+      'Querying last read chapter: userId=$userId, bookId=$bookId',
+      _logTag,
+    );
     try {
-      final result = await (_database.select(_database.readingProgress)
-            ..where((t) => t.userId.equals(userId) & t.bookId.equals(bookId))
-            ..orderBy([
-              (t) =>
-                  OrderingTerm(expression: t.timestamp, mode: OrderingMode.desc)
-            ])
-            ..limit(1))
-          .getSingleOrNull();
-      
-      AppLogger.d('Last read chapter query result: ${result?.chapterId}', _logTag);
+      final result =
+          await (_database.select(_database.readingProgress)
+                ..where(
+                  (t) => t.userId.equals(userId) & t.bookId.equals(bookId),
+                )
+                ..orderBy([
+                  (t) => OrderingTerm(
+                    expression: t.timestamp,
+                    mode: OrderingMode.desc,
+                  ),
+                ])
+                ..limit(1))
+              .getSingleOrNull();
+
+      AppLogger.d(
+        'Last read chapter query result: ${result?.chapterId}',
+        _logTag,
+      );
       return result;
     } catch (e, stackTrace) {
       AppLogger.e(
@@ -62,11 +98,16 @@ class ReadingProgressLocalService {
 
   Future<List<ReadingProgressData>> getAllGuestProgress() async {
     try {
-      return await (_database.select(_database.readingProgress)
-            ..where((t) => t.userId.equals('guest')))
-          .get();
+      return await (_database.select(
+        _database.readingProgress,
+      )..where((t) => t.userId.equals('guest'))).get();
     } catch (e, stackTrace) {
-      AppLogger.e('Error getting guest progress locally', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error getting guest progress locally',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }

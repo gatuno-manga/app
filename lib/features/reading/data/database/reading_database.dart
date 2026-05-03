@@ -18,9 +18,7 @@ class ReadingProgress extends Table {
   Set<Column> get primaryKey => {id};
 
   @override
-  List<String> get customConstraints => [
-        'UNIQUE (user_id, chapter_id)',
-      ];
+  List<String> get customConstraints => ['UNIQUE (user_id, chapter_id)'];
 }
 
 @DriftDatabase(tables: [ReadingProgress])

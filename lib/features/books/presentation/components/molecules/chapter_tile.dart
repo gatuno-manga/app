@@ -24,8 +24,10 @@ class ChapterTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            chapter.read ? Icons.visibility : Icons.visibility_off,
-            color: chapter.read ? Colors.green : Colors.grey,
+            chapter.completed ? Icons.visibility : Icons.visibility_off,
+            color: chapter.completed
+                ? Colors.green
+                : (chapter.read ? Colors.orange : Colors.grey),
             size: 20,
           ),
           if (chapter.scrapingStatus != null) ...[

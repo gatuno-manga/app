@@ -61,10 +61,7 @@ class SyncReadingProgressDto {
   final List<SaveProgressDto> progress;
   final DateTime? lastSyncAt;
 
-  SyncReadingProgressDto({
-    required this.progress,
-    this.lastSyncAt,
-  });
+  SyncReadingProgressDto({required this.progress, this.lastSyncAt});
 
   factory SyncReadingProgressDto.fromJson(Map<String, dynamic> json) =>
       _$SyncReadingProgressDtoFromJson(json);

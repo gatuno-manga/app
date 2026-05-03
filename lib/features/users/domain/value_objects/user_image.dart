@@ -8,10 +8,7 @@ class UserImage extends Equatable {
   final String path;
   final Map<String, dynamic>? metadata;
 
-  const UserImage({
-    required this.path,
-    this.metadata,
-  });
+  const UserImage({required this.path, this.metadata});
 
   static const guest = UserImage(path: '');
 
@@ -20,7 +17,8 @@ class UserImage extends Equatable {
   @override
   List<Object?> get props => [path, metadata];
 
-  factory UserImage.fromJson(Map<String, dynamic> json) => _$UserImageFromJson(json);
+  factory UserImage.fromJson(Map<String, dynamic> json) =>
+      _$UserImageFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserImageToJson(this);
 }

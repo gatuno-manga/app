@@ -6,11 +6,7 @@ import '../../../../core/utils/jwt_decoder.dart';
 import '../../../users/data/models/user_model.dart';
 import 'token_manager.dart';
 
-enum AuthEvent {
-  authenticated,
-  unauthenticated,
-  initialized,
-}
+enum AuthEvent { authenticated, unauthenticated, initialized }
 
 class AuthService extends ChangeNotifier with WidgetsBindingObserver {
   final AuthRepository _authRepository;

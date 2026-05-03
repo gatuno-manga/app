@@ -15,8 +15,11 @@ class UserDateTime extends Equatable {
   @override
   String toString() => value.toIso8601String();
 
-  factory UserDateTime.fromJson(String? json) =>
-      UserDateTime(json != null ? DateTime.parse(json) : DateTime.fromMillisecondsSinceEpoch(0));
+  factory UserDateTime.fromJson(String? json) => UserDateTime(
+    json != null
+        ? DateTime.parse(json)
+        : DateTime.fromMillisecondsSinceEpoch(0),
+  );
 
   String toJson() => value.toIso8601String();
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
+import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
@@ -19,6 +20,8 @@ class FakeReadingChapter extends Fake implements ReadingChapter {
   String get title => 'Test Chapter';
   @override
   List<ReadingPage> get pages => [];
+  @override
+  ContentType get contentType => ContentType.image;
 }
 
 void main() {

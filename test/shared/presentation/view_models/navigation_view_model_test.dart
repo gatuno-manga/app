@@ -27,7 +27,9 @@ void main() {
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.addListener(any())).thenReturn(null);
     when(() => mockAuthService.removeListener(any())).thenReturn(null);
-    when(() => mockUserService.getCurrentUser()).thenAnswer((_) async => UserModel.guest);
+    when(
+      () => mockUserService.getCurrentUser(),
+    ).thenAnswer((_) async => UserModel.guest);
 
     viewModel = NavigationViewModel(mockUserService, mockAuthService);
   });

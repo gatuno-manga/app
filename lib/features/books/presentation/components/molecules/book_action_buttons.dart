@@ -24,7 +24,9 @@ class BookActionButtons extends StatelessWidget {
       children: [
         Expanded(
           child: AppButton(
-            text: hasProgress ? l10n.booksContinueReading : l10n.booksStartReading,
+            text: hasProgress
+                ? l10n.booksContinueReading
+                : l10n.booksStartReading,
             onPressed: onStartReading,
           ),
         ),

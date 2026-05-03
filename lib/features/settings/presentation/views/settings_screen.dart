@@ -42,9 +42,7 @@ class SettingsPage extends StatelessWidget {
         name: viewModel.isAuthenticated
             ? viewModel.user.displayName
             : l10n.commonGuest,
-        email: viewModel.isAuthenticated
-            ? viewModel.user.email.value
-            : null,
+        email: viewModel.isAuthenticated ? viewModel.user.email.value : null,
         onTap: () {
           if (viewModel.isAuthenticated) {
             context.push('/settings/profile');

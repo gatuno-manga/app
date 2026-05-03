@@ -111,7 +111,17 @@ class _AppScrollablePositionedListState
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (notification is ScrollUpdateNotification) {
-          _checkVisibility();
+          if (notification.metrics.pixels >=
+                  notification.metrics.maxScrollExtent &&
+              widget.itemCount > 0) {
+            final lastIndex = widget.itemCount - 1;
+            if (lastIndex != _lastReportedIndex) {
+              _lastReportedIndex = lastIndex;
+              widget.onVisibleIndexChanged?.call(lastIndex);
+            }
+          } else {
+            _checkVisibility();
+          }
         }
         return false;
       },

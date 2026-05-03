@@ -158,20 +158,26 @@ class ReadingProgressCoordinator {
 
     // 1. Check local state (Highest Page Wins)
     final local = await _localService.getProgress(user.id.value, chapterId);
+
+    int finalPageIndex = pageIndex;
+    bool finalCompleted = completed;
+
     if (local != null && pageIndex < local.pageIndex && !completed) {
-      return; // No need to update if we are behind current progress
+      // Keep the highest page index and completed status to avoid regressing progress
+      finalPageIndex = local.pageIndex;
+      finalCompleted = local.completed;
     }
 
-    // 2. Save locally
+    // 2. Save locally (Always update timestamp to mark as most recently accessed)
     final companion = ReadingProgressCompanion(
       id: Value(id),
       userId: Value(user.id.value),
       chapterId: Value(chapterId),
       bookId: Value(bookId),
-      pageIndex: Value(pageIndex),
+      pageIndex: Value(finalPageIndex),
       timestamp: Value(timestamp),
-      totalPages: Value(totalPages),
-      completed: Value(completed),
+      totalPages: Value(totalPages ?? local?.totalPages),
+      completed: Value(finalCompleted),
     );
     await _localService.saveProgress(companion);
 
@@ -180,10 +186,10 @@ class ReadingProgressCoordinator {
       final dto = SaveProgressDto(
         chapterId: chapterId,
         bookId: bookId,
-        pageIndex: pageIndex,
+        pageIndex: finalPageIndex,
         timestamp: timestamp.millisecondsSinceEpoch,
-        totalPages: totalPages,
-        completed: completed,
+        totalPages: totalPages ?? local?.totalPages,
+        completed: finalCompleted,
       );
       try {
         await _remoteService.saveProgress(dto);
@@ -203,6 +209,11 @@ class ReadingProgressCoordinator {
       _logTag,
     );
     return _localService.getLastReadChapter(user.id.value, bookId);
+  }
+
+  Future<List<ReadingProgressData>> getAllProgressForBook(String bookId) async {
+    final user = _authService.currentUser;
+    return _localService.getAllProgressForBook(user.id.value, bookId);
   }
 
   void dispose() {

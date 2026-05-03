@@ -12,8 +12,10 @@ class ReadingProgressRemoteService {
   static const String _logTag = 'ReadingProgressRemoteService';
 
   io.Socket? _socket;
-  final _syncEventController = StreamController<RemoteReadingProgress>.broadcast();
-  Stream<RemoteReadingProgress> get onRemoteUpdate => _syncEventController.stream;
+  final _syncEventController =
+      StreamController<RemoteReadingProgress>.broadcast();
+  Stream<RemoteReadingProgress> get onRemoteUpdate =>
+      _syncEventController.stream;
 
   ReadingProgressRemoteService(this._dioClient, this._authService);
 
@@ -38,7 +40,9 @@ class ReadingProgressRemoteService {
       syncAll();
     });
 
-    _socket?.onDisconnect((_) => AppLogger.i('WebSocket disconnected', _logTag));
+    _socket?.onDisconnect(
+      (_) => AppLogger.i('WebSocket disconnected', _logTag),
+    );
 
     _socket?.on('progress:updated', (data) {
       AppLogger.d('Received remote progress update', _logTag);
@@ -81,11 +85,22 @@ class ReadingProgressRemoteService {
       AppLogger.d('Sending progress update via WebSocket', _logTag);
       _socket?.emit('progress:update', dto.toJson());
     } else {
-      AppLogger.d('WebSocket disconnected, falling back to HTTP for progress save', _logTag);
+      AppLogger.d(
+        'WebSocket disconnected, falling back to HTTP for progress save',
+        _logTag,
+      );
       try {
-        await _dioClient.dio.post<void>(ApiConstants.readingProgress, data: dto.toJson());
+        await _dioClient.dio.post<void>(
+          ApiConstants.readingProgress,
+          data: dto.toJson(),
+        );
       } catch (e, stackTrace) {
-        AppLogger.e('Error saving progress via HTTP fallback', e, stackTrace, _logTag);
+        AppLogger.e(
+          'Error saving progress via HTTP fallback',
+          e,
+          stackTrace,
+          _logTag,
+        );
         rethrow;
       }
     }
@@ -100,9 +115,17 @@ class ReadingProgressRemoteService {
 
   Future<void> syncBatch(SyncReadingProgressDto dto) async {
     try {
-      await _dioClient.dio.post<void>(ApiConstants.readingProgressSync, data: dto.toJson());
+      await _dioClient.dio.post<void>(
+        ApiConstants.readingProgressSync,
+        data: dto.toJson(),
+      );
     } catch (e, stackTrace) {
-      AppLogger.e('Error performing batch sync via HTTP', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error performing batch sync via HTTP',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }

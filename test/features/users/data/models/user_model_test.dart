@@ -26,7 +26,10 @@ void main() {
       expect(model.userName, equals(const UserName('testuser')));
       expect(model.name, equals(const UserDisplayName('Test User')));
       expect(model.roles, equals(const UserRoles(['user'])));
-      expect(model.maxWeightSensitiveContent, equals(const SensitiveContentWeight(5)));
+      expect(
+        model.maxWeightSensitiveContent,
+        equals(const SensitiveContentWeight(5)),
+      );
       expect(model.displayName, equals('Test User'));
     });
 

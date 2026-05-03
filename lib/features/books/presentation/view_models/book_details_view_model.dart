@@ -17,8 +17,8 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     required BooksRepository repository,
     required ReadingProgressCoordinator progressCoordinator,
     required this.bookId,
-  })  : _repository = repository,
-        _progressCoordinator = progressCoordinator;
+  }) : _repository = repository,
+       _progressCoordinator = progressCoordinator;
 
   Book? _book;
   Book? get book => _book;
@@ -56,12 +56,35 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     notifyListeners();
 
     try {
-      final bookResult = await _repository.getBook(bookId);
-      _book = bookResult;
-      notifyListeners();
+      final results = await Future.wait([
+        _repository.getBook(bookId),
+        _repository.getBookChapters(bookId, _options),
+        _progressCoordinator.getLastReadChapter(bookId),
+        _progressCoordinator.getAllProgressForBook(bookId),
+      ]);
 
-      await fetchChapters();
-      await _fetchLastReadChapter();
+      _book = results[0] as Book;
+      final chaptersResult = results[1] as ChapterList;
+      _lastReadChapter = results[2] as ReadingProgressData?;
+      final localProgress = results[3] as List<ReadingProgressData>;
+
+      final updatedChapters = chaptersResult.data.map((chapter) {
+        final progress = localProgress
+            .where((p) => p.chapterId == chapter.id)
+            .firstOrNull;
+        return chapter.copyWith(completed: progress?.completed ?? false);
+      }).toList();
+
+      _chapterList = chaptersResult.copyWith(data: updatedChapters);
+
+      AppLogger.i(
+        'Chapters fetched successfully: id=$bookId, count=${_chapterList?.data.length}',
+        _logTag,
+      );
+      AppLogger.d(
+        'Fetched last read chapter: ${_lastReadChapter?.chapterId}, completed: ${_lastReadChapter?.completed}',
+        _logTag,
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching book details', e, stackTrace, _logTag);
       _error = e.toString();
@@ -74,10 +97,47 @@ class BookDetailsViewModel extends SafeChangeNotifier {
   Future<void> _fetchLastReadChapter() async {
     try {
       _lastReadChapter = await _progressCoordinator.getLastReadChapter(bookId);
-      AppLogger.d('Fetched last read chapter: ${_lastReadChapter?.chapterId}, completed: ${_lastReadChapter?.completed}', _logTag);
+      AppLogger.d(
+        'Fetched last read chapter: ${_lastReadChapter?.chapterId}, completed: ${_lastReadChapter?.completed}',
+        _logTag,
+      );
       notifyListeners();
     } catch (e) {
       AppLogger.w('Error fetching last read chapter: $e', _logTag);
+    }
+  }
+
+  Future<void> refreshReadStatus() async {
+    AppLogger.i('Refreshing read status for book ID: $bookId', _logTag);
+    await _fetchLastReadChapter();
+
+    if (_chapterList != null) {
+      final localProgress = await _progressCoordinator.getAllProgressForBook(
+        bookId,
+      );
+
+      var changed = false;
+      final updatedChapters = _chapterList!.data.map((chapter) {
+        final progress = localProgress
+            .where((p) => p.chapterId == chapter.id)
+            .firstOrNull;
+
+        final isCompleted = progress?.completed ?? false;
+        // Mark as read if it is completed or if there is any progress (even if not completed)
+        final isRead = chapter.read || isCompleted || progress != null;
+
+        if (chapter.completed != isCompleted || chapter.read != isRead) {
+          changed = true;
+          return chapter.copyWith(completed: isCompleted, read: isRead);
+        }
+        return chapter;
+      }).toList();
+
+      if (changed) {
+        AppLogger.d('Marking chapters as read/completed locally', _logTag);
+        _chapterList = _chapterList!.copyWith(data: updatedChapters);
+        notifyListeners();
+      }
     }
   }
 
@@ -94,7 +154,18 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         bookId,
         _options,
       );
-      _chapterList = chaptersResult;
+      final localProgress = await _progressCoordinator.getAllProgressForBook(
+        bookId,
+      );
+
+      final updatedChapters = chaptersResult.data.map((chapter) {
+        final progress = localProgress
+            .where((p) => p.chapterId == chapter.id)
+            .firstOrNull;
+        return chapter.copyWith(completed: progress?.completed ?? false);
+      }).toList();
+
+      _chapterList = chaptersResult.copyWith(data: updatedChapters);
 
       AppLogger.i(
         'Chapters fetched successfully: id=$bookId, count=${_chapterList?.data.length}',
@@ -124,9 +195,19 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     try {
       _options = _options.copyWith(cursor: _chapterList!.nextCursor);
       final result = await _repository.getBookChapters(bookId, _options);
+      final localProgress = await _progressCoordinator.getAllProgressForBook(
+        bookId,
+      );
+
+      final updatedNewChapters = result.data.map((chapter) {
+        final progress = localProgress
+            .where((p) => p.chapterId == chapter.id)
+            .firstOrNull;
+        return chapter.copyWith(completed: progress?.completed ?? false);
+      }).toList();
 
       _chapterList = ChapterList(
-        data: [..._chapterList!.data, ...result.data],
+        data: [..._chapterList!.data, ...updatedNewChapters],
         nextCursor: result.nextCursor,
         hasNextPage: result.hasNextPage,
       );
@@ -167,7 +248,10 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
     if (_lastReadChapter == null) {
       final firstId = chapters.first.id;
-      AppLogger.d('getResumeChapterId: No progress, returning first chapter: $firstId', _logTag);
+      AppLogger.d(
+        'getResumeChapterId: No progress, returning first chapter: $firstId',
+        _logTag,
+      );
       return firstId;
     }
 
@@ -177,12 +261,21 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       final currentIndex = chapters.indexWhere((c) => c.id == lastChapterId);
       if (currentIndex != -1 && currentIndex < chapters.length - 1) {
         final nextId = chapters[currentIndex + 1].id;
-        AppLogger.d('getResumeChapterId: Last chapter completed, returning next chapter: $nextId', _logTag);
+        AppLogger.d(
+          'getResumeChapterId: Last chapter completed, returning next chapter: $nextId',
+          _logTag,
+        );
         return nextId;
       }
-      AppLogger.d('getResumeChapterId: Last chapter completed and it was the last in list, returning current: $lastChapterId', _logTag);
+      AppLogger.d(
+        'getResumeChapterId: Last chapter completed and it was the last in list, returning current: $lastChapterId',
+        _logTag,
+      );
     } else {
-      AppLogger.d('getResumeChapterId: Returning last read chapter: $lastChapterId', _logTag);
+      AppLogger.d(
+        'getResumeChapterId: Returning last read chapter: $lastChapterId',
+        _logTag,
+      );
     }
 
     return lastChapterId;

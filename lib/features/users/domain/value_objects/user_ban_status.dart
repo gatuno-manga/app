@@ -16,21 +16,19 @@ class UserBanStatus extends Equatable {
     this.suspensionReason,
   });
 
-  static final guest = UserBanStatus(
-    suspendedUntil: UserDateTime.guest,
-  );
+  static final guest = UserBanStatus(suspendedUntil: UserDateTime.guest);
 
   bool get isGuest => this == guest;
 
   bool get isActiveBan =>
       isBanned &&
-      (suspendedUntil.isGuest ||
-          suspendedUntil.value.isAfter(DateTime.now()));
+      (suspendedUntil.isGuest || suspendedUntil.value.isAfter(DateTime.now()));
 
   @override
   List<Object?> get props => [isBanned, suspendedUntil, suspensionReason];
 
-  factory UserBanStatus.fromJson(Map<String, dynamic> json) => _$UserBanStatusFromJson(json);
+  factory UserBanStatus.fromJson(Map<String, dynamic> json) =>
+      _$UserBanStatusFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserBanStatusToJson(this);
 }

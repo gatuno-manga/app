@@ -1,6 +1,7 @@
 import '../../../../core/base/safe_change_notifier.dart';
 import '../../../../core/logging/logger.dart';
 import '../../domain/entities/reading_chapter.dart';
+import '../../domain/entities/reading_enums.dart';
 import '../../domain/repositories/reading_repository.dart';
 import '../../domain/use_cases/reading_progress_coordinator.dart';
 
@@ -37,7 +38,8 @@ class ReadingViewModel extends SafeChangeNotifier {
     try {
       _chapter = await _repository.getChapter(chapterId);
       AppLogger.i('Chapter loaded successfully: ${_chapter?.title}', _logTag);
-      saveProgress();
+      final isTextChapter = _chapter?.contentType == ContentType.text;
+      saveProgress(completed: isTextChapter);
     } catch (e, stackTrace) {
       AppLogger.e('Error loading chapter', e, stackTrace, _logTag);
       _error = e.toString();
@@ -53,7 +55,9 @@ class ReadingViewModel extends SafeChangeNotifier {
       notifyListeners();
 
       if (isAutoSave && _chapter != null) {
-        saveProgress();
+        final totalPages = _chapter!.pages.length;
+        final isLastPage = totalPages > 0 && index == totalPages - 1;
+        saveProgress(completed: isLastPage);
       }
     }
   }
