@@ -9,6 +9,9 @@ class SettingsTemplate extends StatelessWidget {
   final Widget apiForm;
   final Widget certificatesSectionHeader;
   final Widget certificatesTile;
+  final Widget diagnosticsSectionHeader;
+  final Widget exportLogsTile;
+  final Widget openLogsTile;
 
   const SettingsTemplate({
     super.key,
@@ -20,6 +23,9 @@ class SettingsTemplate extends StatelessWidget {
     required this.apiForm,
     required this.certificatesSectionHeader,
     required this.certificatesTile,
+    required this.diagnosticsSectionHeader,
+    required this.exportLogsTile,
+    required this.openLogsTile,
   });
 
   @override
@@ -41,6 +47,11 @@ class SettingsTemplate extends StatelessWidget {
           certificatesSectionHeader,
           const SizedBox(height: 8),
           certificatesTile,
+          const Divider(height: 32),
+          diagnosticsSectionHeader,
+          const SizedBox(height: 8),
+          exportLogsTile,
+          openLogsTile,
         ],
       ),
     );

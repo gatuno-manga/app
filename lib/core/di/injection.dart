@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../logging/logger.dart';
 import '../network/dio_client.dart';
 import '../network/token_provider.dart';
 import '../network/interceptors/auth_interceptor.dart';
@@ -21,6 +22,9 @@ import '../image/dio_image_loading_strategy.dart';
 final GetIt sl = GetIt.instance;
 
 Future<void> initDI() async {
+  // Logger
+  await AppLogger.init();
+
   // Core
   initCertificatesInjection(sl);
   await sl<CertificatesService>().init();

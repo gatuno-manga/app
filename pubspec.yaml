@@ -38,6 +38,8 @@ dependencies:
   socket_io_client: ^3.1.4
   blurhash_dart: ^1.2.1
   image: ^4.8.0
+  share_plus: ^12.0.2
+  open_filex: ^4.7.0
 
 dev_dependencies:
   flutter_test:

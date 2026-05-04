@@ -254,6 +254,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage trusted and ignored certificates';
 
   @override
+  String get settingsDiagnosticsSection => 'Diagnostics';
+
+  @override
+  String get settingsExportLogs => 'Export Logs';
+
+  @override
+  String get settingsExportLogsDesc => 'Share the app log file';
+
+  @override
+  String get settingsOpenLogs => 'Open Logs';
+
+  @override
+  String get settingsOpenLogsDesc => 'View logs on this device';
+
+  @override
   String get certTrustDialogTitle => 'Untrusted Certificate';
 
   @override

@@ -86,6 +86,11 @@
   "settingsRemoveUrl": "Remover",
   "settingsCertificatesSection": "Certificados",
   "settingsCertificatesDesc": "Gerenciar certificados confiáveis e ignorados",
+  "settingsDiagnosticsSection": "Diagnósticos",
+  "settingsExportLogs": "Exportar Logs",
+  "settingsExportLogsDesc": "Compartilhar o arquivo de log do app",
+  "settingsOpenLogs": "Abrir Logs",
+  "settingsOpenLogsDesc": "Visualizar logs neste dispositivo",
   "certTrustDialogTitle": "Certificado não confiável",
   "certTrustDialogMessage": "O servidor em {name} está usando um certificado não confiável. Deseja confiar nele e continuar?",
   "@certTrustDialogMessage": {

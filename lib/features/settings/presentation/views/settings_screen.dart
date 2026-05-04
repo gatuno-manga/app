@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import 'package:gatuno/core/logging/logger.dart';
 import '../view_models/settings_view_model.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
 import '../components/molecules/settings_profile_card.dart';
@@ -29,6 +32,16 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleExportLogs(BuildContext context) async {
+    final path = await AppLogger.getLogFilePath();
+    await Share.shareXFiles([XFile(path)]);
+  }
+
+  Future<void> _handleOpenLogs(BuildContext context) async {
+    final path = await AppLogger.getLogFilePath();
+    await OpenFilex.open(path);
   }
 
   @override
@@ -74,6 +87,21 @@ class SettingsPage extends StatelessWidget {
         subtitle: Text(l10n.settingsCertificatesDesc),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => context.push('/settings/certificates'),
+      ),
+      diagnosticsSectionHeader: SettingsSectionHeader(
+        title: l10n.settingsDiagnosticsSection,
+      ),
+      exportLogsTile: ListTile(
+        title: Text(l10n.settingsExportLogs),
+        subtitle: Text(l10n.settingsExportLogsDesc),
+        leading: const Icon(Icons.share),
+        onTap: () => _handleExportLogs(context),
+      ),
+      openLogsTile: ListTile(
+        title: Text(l10n.settingsOpenLogs),
+        subtitle: Text(l10n.settingsOpenLogsDesc),
+        leading: const Icon(Icons.file_open),
+        onTap: () => _handleOpenLogs(context),
       ),
     );
   }

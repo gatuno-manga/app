@@ -572,6 +572,36 @@ abstract class AppLocalizations {
   /// **'Manage trusted and ignored certificates'**
   String get settingsCertificatesDesc;
 
+  /// No description provided for @settingsDiagnosticsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get settingsDiagnosticsSection;
+
+  /// No description provided for @settingsExportLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Logs'**
+  String get settingsExportLogs;
+
+  /// No description provided for @settingsExportLogsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the app log file'**
+  String get settingsExportLogsDesc;
+
+  /// No description provided for @settingsOpenLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Logs'**
+  String get settingsOpenLogs;
+
+  /// No description provided for @settingsOpenLogsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View logs on this device'**
+  String get settingsOpenLogsDesc;
+
   /// No description provided for @certTrustDialogTitle.
   ///
   /// In en, this message translates to:

@@ -253,6 +253,21 @@ class AppLocalizationsPt extends AppLocalizations {
       'Gerenciar certificados confiáveis e ignorados';
 
   @override
+  String get settingsDiagnosticsSection => 'Diagnósticos';
+
+  @override
+  String get settingsExportLogs => 'Exportar Logs';
+
+  @override
+  String get settingsExportLogsDesc => 'Compartilhar o arquivo de log do app';
+
+  @override
+  String get settingsOpenLogs => 'Abrir Logs';
+
+  @override
+  String get settingsOpenLogsDesc => 'Visualizar logs neste dispositivo';
+
+  @override
   String get certTrustDialogTitle => 'Certificado não confiável';
 
   @override

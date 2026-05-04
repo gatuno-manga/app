@@ -86,6 +86,11 @@
   "settingsRemoveUrl": "Remove",
   "settingsCertificatesSection": "Certificates",
   "settingsCertificatesDesc": "Manage trusted and ignored certificates",
+  "settingsDiagnosticsSection": "Diagnostics",
+  "settingsExportLogs": "Export Logs",
+  "settingsExportLogsDesc": "Share the app log file",
+  "settingsOpenLogs": "Open Logs",
+  "settingsOpenLogsDesc": "View logs on this device",
   "certTrustDialogTitle": "Untrusted Certificate",
   "certTrustDialogMessage": "The server at {name} is using an untrusted certificate. Do you want to trust it and continue?",
   "@certTrustDialogMessage": {
