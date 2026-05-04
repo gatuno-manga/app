@@ -19,17 +19,9 @@ class DioImageLoadingStrategy implements ImageLoadingStrategy {
     void Function(Size)? onImageLoaded,
   }) async {
     try {
-      const referer = String.fromEnvironment(
-        'IMAGE_REFERER',
-        defaultValue: 'https://gatuno.canto.internal/',
-      );
-
       final response = await _dioClient.dio.get<List<int>>(
         url,
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: {'Referer': referer},
-        ),
+        options: Options(responseType: ResponseType.bytes),
       );
 
       if (response.data != null) {
