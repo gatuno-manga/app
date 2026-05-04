@@ -19,9 +19,17 @@ class DioImageLoadingStrategy implements ImageLoadingStrategy {
     void Function(Size)? onImageLoaded,
   }) async {
     try {
+      const referer = String.fromEnvironment(
+        'IMAGE_REFERER',
+        defaultValue: 'https://gatuno.canto.internal/',
+      );
+
       final response = await _dioClient.dio.get<List<int>>(
         url,
-        options: Options(responseType: ResponseType.bytes),
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: {'Referer': referer},
+        ),
       );
 
       if (response.data != null) {
@@ -29,12 +37,16 @@ class DioImageLoadingStrategy implements ImageLoadingStrategy {
 
         if (onImageLoaded != null) {
           final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          final descriptor = await ui.ImageDescriptor.encoded(buffer);
-          onImageLoaded(
-            Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
-          );
-          descriptor.dispose();
-          buffer.dispose();
+          try {
+            final descriptor = await ui.ImageDescriptor.encoded(buffer);
+            onImageLoaded(
+              Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
+            );
+            descriptor.dispose();
+          } catch (e) {
+            buffer.dispose();
+            rethrow;
+          }
         }
 
         return bytes;

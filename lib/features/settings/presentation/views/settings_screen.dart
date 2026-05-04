@@ -39,12 +39,10 @@ class SettingsPage extends StatelessWidget {
     return SettingsTemplate(
       appBarTitle: Text(l10n.settingsTitle),
       profileCard: SettingsProfileCard(
-        name: viewModel.isAuthenticated && viewModel.user != null
-            ? viewModel.user!.displayName
+        name: viewModel.isAuthenticated
+            ? viewModel.user.displayName
             : l10n.commonGuest,
-        email: viewModel.isAuthenticated && viewModel.user != null
-            ? viewModel.user!.email
-            : null,
+        email: viewModel.isAuthenticated ? viewModel.user.email.value : null,
         onTap: () {
           if (viewModel.isAuthenticated) {
             context.push('/settings/profile');

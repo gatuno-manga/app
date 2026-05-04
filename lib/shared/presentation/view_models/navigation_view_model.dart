@@ -8,14 +8,14 @@ class NavigationViewModel extends SafeChangeNotifier {
   final UserService _userService;
   final AuthService _authService;
 
-  UserModel? _user;
+  UserModel _user = UserModel.guest;
 
   NavigationViewModel(this._userService, this._authService) {
     _authService.addListener(_onAuthStateChanged);
     _loadUser();
   }
 
-  UserModel? get user => _user;
+  UserModel get user => _user;
   bool get isAuthenticated => _authService.authenticated;
 
   void _onAuthStateChanged() {
@@ -24,13 +24,9 @@ class NavigationViewModel extends SafeChangeNotifier {
 
   Future<void> _loadUser() async {
     try {
-      if (_authService.authenticated) {
-        _user = await _userService.getCurrentUser();
-      } else {
-        _user = null;
-      }
+      _user = await _userService.getCurrentUser();
     } catch (e) {
-      _user = null;
+      _user = UserModel.guest;
     } finally {
       notifyListeners();
     }

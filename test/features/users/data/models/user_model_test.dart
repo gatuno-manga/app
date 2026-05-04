@@ -1,5 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_name.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 
 void main() {
   group('UserModel', () {
@@ -15,12 +21,15 @@ void main() {
 
       final model = UserModel.fromJwt(payload);
 
-      expect(model.id, equals('123'));
-      expect(model.email, equals('test@example.com'));
-      expect(model.userName, equals('testuser'));
-      expect(model.name, equals('Test User'));
-      expect(model.roles, equals(['user']));
-      expect(model.maxWeightSensitiveContent, equals(5));
+      expect(model.id, equals(const UserId('123')));
+      expect(model.email, equals(const UserEmail('test@example.com')));
+      expect(model.userName, equals(const UserName('testuser')));
+      expect(model.name, equals(const UserDisplayName('Test User')));
+      expect(model.roles, equals(const UserRoles(['user'])));
+      expect(
+        model.maxWeightSensitiveContent,
+        equals(const SensitiveContentWeight(5)),
+      );
       expect(model.displayName, equals('Test User'));
     });
 

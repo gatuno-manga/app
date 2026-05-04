@@ -458,6 +458,12 @@ abstract class AppLocalizations {
   /// **'Start Reading'**
   String get booksStartReading;
 
+  /// No description provided for @booksContinueReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Reading'**
+  String get booksContinueReading;
+
   /// No description provided for @homeWelcome.
   ///
   /// In en, this message translates to:

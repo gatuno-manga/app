@@ -6,7 +6,7 @@ import '../../../users/data/models/user_model.dart';
 class HomeViewModel extends SafeChangeNotifier {
   final AuthService _authService;
   final UserService _userService;
-  UserModel? _user;
+  UserModel _user = UserModel.guest;
 
   HomeViewModel(this._authService, this._userService) {
     _authService.addListener(_onAuthChanged);
@@ -20,12 +20,7 @@ class HomeViewModel extends SafeChangeNotifier {
   Future<void> _loadUser() async {
     if (isDisposed) return;
 
-    if (_authService.authenticated) {
-      _user = await _userService.getCurrentUser();
-    } else {
-      _user = null;
-    }
-
+    _user = await _userService.getCurrentUser();
     notifyListeners();
   }
 
@@ -37,5 +32,5 @@ class HomeViewModel extends SafeChangeNotifier {
 
   bool get isAuthenticated => _authService.authenticated;
   bool get isInitialized => _authService.isInitialized;
-  String? get displayName => _user?.displayName;
+  String? get displayName => _user.isGuest ? null : _user.displayName;
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:gatuno/features/settings/presentation/views/settings_screen.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/presentation/components/molecules/settings_profile_card.dart';
+import 'package:gatuno/features/users/data/models/user_model.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
 
@@ -35,7 +36,7 @@ void main() {
     when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
     when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
     when(() => mockAuthService.authenticated).thenReturn(false);
-    when(() => mockAuthService.currentUser).thenReturn(null);
+    when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
   });
 
   testWidgets('SettingsPage renders correctly for guest', (tester) async {

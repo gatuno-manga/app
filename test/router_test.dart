@@ -6,6 +6,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/di/injection.dart' as di;
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
+import 'package:gatuno/features/users/data/models/user_model.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 
 import 'package:provider/provider.dart';
@@ -43,7 +44,7 @@ void main() {
     when(() => mockHomeViewModel.displayName).thenReturn(null);
 
     when(() => mockNavigationViewModel.isAuthenticated).thenReturn(false);
-    when(() => mockNavigationViewModel.user).thenReturn(null);
+    when(() => mockNavigationViewModel.user).thenReturn(UserModel.guest);
   });
 
   tearDown(() async {

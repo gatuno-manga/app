@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_image.dart';
@@ -73,7 +72,15 @@ void main() {
         ),
       );
 
-      expect(find.byType(BlurHash), findsOneWidget);
+      await tester.pump(); // Start decoding
+      await tester.pumpAndSettle(); // Wait for compute and setState
+
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Image && w.image is MemoryImage,
+        ),
+        findsOneWidget,
+      );
       await tester.pumpAndSettle();
     });
 

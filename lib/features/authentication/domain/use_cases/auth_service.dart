@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 import '../repositories/auth_repository.dart';
 import '../../../../core/logging/logger.dart';
@@ -5,10 +6,15 @@ import '../../../../core/utils/jwt_decoder.dart';
 import '../../../users/data/models/user_model.dart';
 import 'token_manager.dart';
 
+enum AuthEvent { authenticated, unauthenticated, initialized }
+
 class AuthService extends ChangeNotifier with WidgetsBindingObserver {
   final AuthRepository _authRepository;
   final TokenManager _tokenManager;
   static const String _logTag = 'AuthService';
+
+  final _authEventController = StreamController<AuthEvent>.broadcast();
+  Stream<AuthEvent> get onAuthChange => _authEventController.stream;
 
   bool _isInitialized = false;
   bool _isAuthenticated = false;
@@ -26,6 +32,7 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _authEventController.close();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -42,15 +49,15 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
   bool get isInitialized => _isInitialized;
   bool get authenticated => _isAuthenticated;
 
-  UserModel? get currentUser {
+  UserModel get currentUser {
     final token = _tokenManager.currentToken;
-    if (token == null || token.isEmpty) return null;
+    if (token == null || token.isEmpty) return UserModel.guest;
     try {
-      if (JwtDecoder.isExpired(token)) return null;
+      if (JwtDecoder.isExpired(token)) return UserModel.guest;
       final payload = JwtDecoder.decode(token);
       return UserModel.fromJwt(payload);
     } catch (e) {
-      return null;
+      return UserModel.guest;
     }
   }
 
@@ -76,6 +83,12 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
       'AuthService initialized: authenticated = $_isAuthenticated',
       _logTag,
     );
+    _authEventController.add(AuthEvent.initialized);
+    if (_isAuthenticated) {
+      _authEventController.add(AuthEvent.authenticated);
+    } else {
+      _authEventController.add(AuthEvent.unauthenticated);
+    }
     notifyListeners();
   }
 
@@ -92,6 +105,7 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
         _logTag,
       );
       _isAuthenticated = true;
+      _authEventController.add(AuthEvent.authenticated);
       notifyListeners();
       return true;
     } catch (e, stackTrace) {
@@ -141,6 +155,7 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
     }
     await _tokenManager.clearToken();
     _isAuthenticated = false;
+    _authEventController.add(AuthEvent.unauthenticated);
     AppLogger.i('Tokens cleared successfully', _logTag);
     notifyListeners();
   }
@@ -165,6 +180,11 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
 
     if (_isAuthenticated != authenticated) {
       _isAuthenticated = authenticated;
+      if (_isAuthenticated) {
+        _authEventController.add(AuthEvent.authenticated);
+      } else {
+        _authEventController.add(AuthEvent.unauthenticated);
+      }
       notifyListeners();
     }
 

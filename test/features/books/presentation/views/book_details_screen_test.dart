@@ -28,6 +28,7 @@ void main() {
 
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.isLoadingChapters).thenReturn(false);
+    when(() => mockViewModel.hasReadingProgress).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chaptersError).thenReturn(null);
     when(() => mockViewModel.book).thenReturn(null);

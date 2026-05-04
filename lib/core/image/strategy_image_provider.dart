@@ -32,11 +32,10 @@ class StrategyImageProvider extends ImageProvider<StrategyImageProvider> {
       codec: _loadAsync(key, decode),
       scale: 1.0,
       debugLabel: key.url,
-      informationCollector:
-          () => <DiagnosticsNode>[
-            DiagnosticsProperty<ImageProvider>('Image provider', this),
-            DiagnosticsProperty<StrategyImageProvider>('Image key', key),
-          ],
+      informationCollector: () => <DiagnosticsNode>[
+        DiagnosticsProperty<ImageProvider>('Image provider', this),
+        DiagnosticsProperty<StrategyImageProvider>('Image key', key),
+      ],
     );
   }
 
@@ -49,7 +48,12 @@ class StrategyImageProvider extends ImageProvider<StrategyImageProvider> {
       throw StateError('Failed to load image bytes from $url');
     }
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-    return decode(buffer);
+    try {
+      return await decode(buffer);
+    } catch (e) {
+      buffer.dispose();
+      rethrow;
+    }
   }
 
   @override
