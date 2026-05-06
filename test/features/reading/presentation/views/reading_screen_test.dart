@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
@@ -38,6 +39,8 @@ class _MockChapter extends Fake implements ReadingChapter {
   final ContentFormat? contentFormat = ContentFormat.plain;
   @override
   final DocumentFormat? documentFormat = DocumentFormat.pdf;
+  @override
+  final ScrapingStatus? scrapingStatus = ScrapingStatus.ready;
 
   _MockChapter({required this.contentType});
 }

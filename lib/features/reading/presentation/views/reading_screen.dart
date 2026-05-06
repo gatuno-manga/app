@@ -68,7 +68,13 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           error: viewModel.error,
           chapter: viewModel.chapter,
           onRetry: () => viewModel.loadChapter(widget.chapterId),
-          onGoBack: () => context.pop(),
+          onGoBack: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
           readerBuilder: _buildReader,
         );
       },
