@@ -66,6 +66,8 @@
   "scrapingStatusReady": "Ready",
   "scrapingStatusProcess": "Processing",
   "scrapingStatusError": "Error",
+  "scrapingStatusProcessWarning": "This chapter is still being processed and is not yet available for reading.",
+  "scrapingStatusErrorWarning": "This chapter encountered an error during processing and cannot be read.",
   "booksStartReading": "Start Reading",
   "booksContinueReading": "Continue Reading",
   "homeWelcome": "Welcome to Gatuno!",

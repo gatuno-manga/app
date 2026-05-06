@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection.dart';
 import '../view_models/reading_view_model.dart';
@@ -67,6 +68,7 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           error: viewModel.error,
           chapter: viewModel.chapter,
           onRetry: () => viewModel.loadChapter(widget.chapterId),
+          onGoBack: () => context.pop(),
           readerBuilder: _buildReader,
         );
       },

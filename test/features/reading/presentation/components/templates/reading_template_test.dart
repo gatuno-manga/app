@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/templates/reading_template.dart';
 import 'package:gatuno/shared/components/molecules/app_error_view.dart';
 import '../../../../../helpers/pump_app.dart';
 
-class _MockChapter extends Fake implements ReadingChapter {}
+class _MockChapter extends Fake implements ReadingChapter {
+  @override
+  ScrapingStatus? get scrapingStatus => null;
+}
 
 void main() {
   group('ReadingTemplate', () {
@@ -16,6 +20,7 @@ void main() {
         ReadingTemplate(
           isLoading: true,
           onRetry: () {},
+          onGoBack: () {},
           readerBuilder: (_) => const SizedBox(),
         ),
       );
@@ -29,6 +34,7 @@ void main() {
           isLoading: false,
           error: 'Something went wrong',
           onRetry: () {},
+          onGoBack: () {},
           readerBuilder: (_) => const SizedBox(),
         ),
       );
@@ -46,6 +52,7 @@ void main() {
           isLoading: false,
           chapter: chapter,
           onRetry: () {},
+          onGoBack: () {},
           readerBuilder: (chap) => const Text('Reader Content'),
         ),
       );
