@@ -73,11 +73,137 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  # Future build/release jobs must declare: needs: validate_and_gate
-  ready_for_builds:
-    name: Ready for downstream build jobs
-    runs-on: ubuntu-latest
+  build_android:
+    name: Build Android (APK & AAB)
     needs: validate_and_gate
+    runs-on: ubuntu-latest
     steps:
-      - name: Confirm release gate status
-        run: echo "Release validation gates passed."
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v5
+        id: lfs-cache
+        with:
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
+
+      - name: Git LFS Pull
+        run: git lfs pull
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Build AppBundle
+        run: flutter build appbundle --release
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifacts
+          cp build/app/outputs/flutter-apk/app-release.apk artifacts/gatuno-android-${{ github.ref_name }}.apk
+          cp build/app/outputs/bundle/release/app-release.aab artifacts/gatuno-android-${{ github.ref_name }}.aab
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatuno-android-artifacts
+          path: artifacts/*
+
+  build_ios:
+    name: Build iOS (Unsigned)
+    needs: validate_and_gate
+    runs-on: macos-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v5
+        id: lfs-cache
+        with:
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
+
+      - name: Git LFS Pull
+        run: git lfs pull
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (No Codesign)
+        run: flutter build ios --release --no-codesign
+
+      - name: Compress iOS App
+        run: |
+          mkdir -p artifacts
+          cd build/ios/iphoneos
+          zip -r ../../../artifacts/gatuno-ios-${{ github.ref_name }}.zip Runner.app
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatuno-ios-artifact
+          path: artifacts/gatuno-ios-*.zip
+
+  publish_release:
+    name: Publish GitHub Release
+    needs: [build_android, build_ios]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Generate Checksums
+        run: |
+          cd artifacts
+          sha256sum * > checksums.txt
+
+      - name: Publish GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view ${{ github.ref_name }} &>/dev/null; then
+            echo "Release already exists. Updating artifacts..."
+            gh release upload ${{ github.ref_name }} artifacts/* --clobber
+          else
+            echo "Creating new release..."
+            gh release create ${{ github.ref_name }} \
+              artifacts/* \
+              --title "Release ${{ github.ref_name }}" \
+              --generate-notes \
+              --draft=false \
+              --prerelease=false
+          fi
