@@ -36,7 +36,7 @@ class SettingsPage extends StatelessWidget {
 
   Future<void> _handleExportLogs(BuildContext context) async {
     final path = await AppLogger.getLogFilePath();
-    await Share.shareXFiles([XFile(path)]);
+    await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
   }
 
   Future<void> _handleOpenLogs(BuildContext context) async {
