@@ -22,7 +22,13 @@ class ReadingTopBar extends StatelessWidget {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back, color: theme.colorScheme.onSurface),
-            onPressed: () => context.pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
           ),
           Expanded(
             child: Column(

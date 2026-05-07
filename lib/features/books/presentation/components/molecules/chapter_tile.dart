@@ -12,12 +12,14 @@ class ChapterTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     final formattedIndex = chapter.index == chapter.index.toInt()
         ? chapter.index.toInt().toString()
         : chapter.index.toString();
 
     return ListTile(
+      enabled: onTap != null,
       title: Text(l10n.booksChapterLabel(formattedIndex)),
       subtitle: chapter.title != null ? Text(chapter.title!) : null,
       trailing: Row(
@@ -25,9 +27,11 @@ class ChapterTile extends StatelessWidget {
         children: [
           Icon(
             chapter.completed ? Icons.visibility : Icons.visibility_off,
-            color: chapter.completed
-                ? Colors.green
-                : (chapter.read ? Colors.orange : Colors.grey),
+            color: onTap == null
+                ? theme.disabledColor
+                : (chapter.completed
+                    ? Colors.green
+                    : (chapter.read ? Colors.orange : Colors.grey)),
             size: 20,
           ),
           if (chapter.scrapingStatus != null) ...[

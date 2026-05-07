@@ -452,6 +452,18 @@ abstract class AppLocalizations {
   /// **'Error'**
   String get scrapingStatusError;
 
+  /// No description provided for @scrapingStatusProcessWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter is still being processed and is not yet available for reading.'**
+  String get scrapingStatusProcessWarning;
+
+  /// No description provided for @scrapingStatusErrorWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This chapter encountered an error during processing and cannot be read.'**
+  String get scrapingStatusErrorWarning;
+
   /// No description provided for @booksStartReading.
   ///
   /// In en, this message translates to:

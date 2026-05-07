@@ -4,8 +4,14 @@ import '../../../l10n/app_localizations.dart';
 class AppErrorView extends StatelessWidget {
   final String error;
   final VoidCallback onRetry;
+  final VoidCallback onGoBack;
 
-  const AppErrorView({super.key, required this.error, required this.onRetry});
+  const AppErrorView({
+    super.key,
+    required this.error,
+    required this.onRetry,
+    required this.onGoBack,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +26,8 @@ class AppErrorView extends StatelessWidget {
             Text(error, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(onPressed: onRetry, child: Text(l10n.errorRetry)),
+            const SizedBox(height: 8),
+            TextButton(onPressed: onGoBack, child: Text(l10n.errorBack)),
           ],
         ),
       ),

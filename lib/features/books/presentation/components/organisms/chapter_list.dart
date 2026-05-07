@@ -98,7 +98,10 @@ class ChapterList extends StatelessWidget {
         final chapter = chapters[index];
         return ChapterTile(
           chapter: chapter,
-          onTap: () => onChapterTap(chapter),
+          onTap: chapter.scrapingStatus != null &&
+                  chapter.scrapingStatus != ScrapingStatus.ready
+              ? null
+              : () => onChapterTap(chapter),
         );
       }, childCount: chapters.length + 1),
     );

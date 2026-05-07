@@ -193,6 +193,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scrapingStatusError => 'Error';
 
   @override
+  String get scrapingStatusProcessWarning =>
+      'This chapter is still being processed and is not yet available for reading.';
+
+  @override
+  String get scrapingStatusErrorWarning =>
+      'This chapter encountered an error during processing and cannot be read.';
+
+  @override
   String get booksStartReading => 'Start Reading';
 
   @override
