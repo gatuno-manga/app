@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - developer
+  pull_request:
+    branches:
+      - main
+      - developer
+
+jobs:
+  ci:
+    uses: gatuno-manga/workflows/.github/workflows/flutter-ci.yml@main
+    with:
+      flutter_channel: 'stable'

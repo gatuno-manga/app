@@ -1,0 +1,13 @@
+# Configuração do Lefthook para Flutter
+# Documentação: https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    flutter-format:
+      glob: "lib/**/*.dart"
+      run: flutter format {staged_files} && git add {staged_files}
+    flutter-fix:
+      run: dart fix --apply && git add .
+    flutter-analyze:
+      run: flutter analyze
