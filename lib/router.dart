@@ -5,6 +5,7 @@ import 'features/books/books_router.dart';
 import 'features/reading/reading_router.dart';
 import 'features/settings/settings_router.dart';
 import 'features/welcome/welcome_router.dart';
+import 'features/book_requests/book_requests_router.dart';
 import 'shared/presentation/error_screen.dart';
 import 'shared/components/organisms/navigation_shell.dart';
 import 'core/logging/logger.dart';
@@ -24,6 +25,7 @@ GoRouter createAppRouter(String initialLocation) {
       ...authRoutes,
       ...welcomeRoutes,
       ...readingRoutes,
+      ...bookRequestsRoutes,
     ],
     errorBuilder: (context, state) {
       AppLogger.e('Router Error: ${state.uri}', state.error, null, 'ROUTER');

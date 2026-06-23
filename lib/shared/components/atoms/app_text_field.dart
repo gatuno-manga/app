@@ -8,6 +8,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType keyboardType;
   final Widget? prefixIcon;
   final Iterable<String>? autofillHints;
+  final AutovalidateMode? autovalidateMode;
 
   const AppTextField({
     super.key,
@@ -18,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.prefixIcon,
     this.autofillHints,
+    this.autovalidateMode,
   });
 
   @override
@@ -28,6 +30,7 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
       autofillHints: autofillHints,
+      autovalidateMode: autovalidateMode,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: prefixIcon,

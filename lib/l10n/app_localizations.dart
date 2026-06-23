@@ -865,6 +865,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown'**
   String get booksUnknownFormat;
+
+  /// No description provided for @bookRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Requests'**
+  String get bookRequestsTitle;
+
+  /// No description provided for @bookRequestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No requests found.'**
+  String get bookRequestsEmpty;
+
+  /// No description provided for @bookRequestsCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Request'**
+  String get bookRequestsCreateTitle;
+
+  /// No description provided for @bookRequestsFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Title'**
+  String get bookRequestsFormTitle;
+
+  /// No description provided for @bookRequestsFormAuthor.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get bookRequestsFormAuthor;
+
+  /// No description provided for @bookRequestsFormSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Request'**
+  String get bookRequestsFormSubmit;
+
+  /// No description provided for @bookRequestsSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Request created successfully!'**
+  String get bookRequestsSuccess;
+
+  /// No description provided for @homeCtaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t find what you\'re looking for?'**
+  String get homeCtaTitle;
+
+  /// No description provided for @homeCtaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a new book to be added to our collection. We\'ll review it as soon as possible.'**
+  String get homeCtaDescription;
+
+  /// No description provided for @bookRequestsFormUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get bookRequestsFormUrl;
+
+  /// No description provided for @bookRequestsFormReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get bookRequestsFormReason;
+
+  /// No description provided for @homeCtaSignInButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In to Request'**
+  String get homeCtaSignInButton;
+
+  /// No description provided for @bookRequestsFormTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get bookRequestsFormTitleRequired;
+
+  /// No description provided for @bookRequestsFormUrlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a URL'**
+  String get bookRequestsFormUrlRequired;
+
+  /// No description provided for @bookRequestsFormUrlInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid URL'**
+  String get bookRequestsFormUrlInvalid;
 }
 
 class _AppLocalizationsDelegate

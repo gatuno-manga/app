@@ -172,5 +172,20 @@
       }
     }
   },
-  "booksUnknownFormat": "Desconhecido"
+  "booksUnknownFormat": "Desconhecido",
+  "bookRequestsTitle": "Pedidos de Livros",
+  "bookRequestsEmpty": "Nenhum pedido encontrado.",
+  "bookRequestsCreateTitle": "Novo Pedido",
+  "bookRequestsFormTitle": "Título do Livro",
+  "bookRequestsFormAuthor": "Autor",
+  "bookRequestsFormSubmit": "Enviar Pedido",
+  "bookRequestsSuccess": "Solicitação criada com sucesso!",
+  "homeCtaTitle": "Não encontrou o que procura?",
+  "homeCtaDescription": "Solicite a adição de um novo livro ao nosso acervo. Avaliaremos o mais breve possível.",
+  "bookRequestsFormUrl": "URL",
+  "bookRequestsFormReason": "Motivo (opcional)",
+  "homeCtaSignInButton": "Faça Login para Solicitar",
+  "bookRequestsFormTitleRequired": "Por favor, insira um título",
+  "bookRequestsFormUrlRequired": "Por favor, insira uma URL",
+  "bookRequestsFormUrlInvalid": "Por favor, insira uma URL válida"
 }

@@ -11,6 +11,7 @@ import '../../features/authentication/authentication_injection.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
+import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
 import '../../features/settings/domain/use_cases/settings_service.dart';
@@ -49,6 +50,7 @@ Future<void> initDI() async {
   initHomeInjection(sl);
   initBooksInjection(sl);
   initReadingDI(sl);
+  initBookRequestsInjection(sl);
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)
   setupCookieInterceptor(sl<DioClient>());

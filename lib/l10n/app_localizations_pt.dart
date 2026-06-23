@@ -417,4 +417,50 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get booksUnknownFormat => 'Desconhecido';
+
+  @override
+  String get bookRequestsTitle => 'Pedidos de Livros';
+
+  @override
+  String get bookRequestsEmpty => 'Nenhum pedido encontrado.';
+
+  @override
+  String get bookRequestsCreateTitle => 'Novo Pedido';
+
+  @override
+  String get bookRequestsFormTitle => 'Título do Livro';
+
+  @override
+  String get bookRequestsFormAuthor => 'Autor';
+
+  @override
+  String get bookRequestsFormSubmit => 'Enviar Pedido';
+
+  @override
+  String get bookRequestsSuccess => 'Solicitação criada com sucesso!';
+
+  @override
+  String get homeCtaTitle => 'Não encontrou o que procura?';
+
+  @override
+  String get homeCtaDescription =>
+      'Solicite a adição de um novo livro ao nosso acervo. Avaliaremos o mais breve possível.';
+
+  @override
+  String get bookRequestsFormUrl => 'URL';
+
+  @override
+  String get bookRequestsFormReason => 'Motivo (opcional)';
+
+  @override
+  String get homeCtaSignInButton => 'Faça Login para Solicitar';
+
+  @override
+  String get bookRequestsFormTitleRequired => 'Por favor, insira um título';
+
+  @override
+  String get bookRequestsFormUrlRequired => 'Por favor, insira uma URL';
+
+  @override
+  String get bookRequestsFormUrlInvalid => 'Por favor, insira uma URL válida';
 }

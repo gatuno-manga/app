@@ -7,11 +7,17 @@ final List<GoRoute> authRoutes = [
   GoRoute(
     path: '/auth/signin',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const SignInPage(),
+    builder: (context, state) {
+      final redirect = state.uri.queryParameters['redirect'];
+      return SignInPage(redirectUrl: redirect);
+    },
   ),
   GoRoute(
     path: '/auth/signup',
     parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state) => const SignUpPage(),
+    builder: (context, state) {
+      final redirect = state.uri.queryParameters['redirect'];
+      return SignUpPage(redirectUrl: redirect);
+    },
   ),
 ];

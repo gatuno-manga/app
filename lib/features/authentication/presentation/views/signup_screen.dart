@@ -10,7 +10,9 @@ import '../view_models/signup_view_model.dart';
 import '../../../../core/di/injection.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+  final String? redirectUrl;
+
+  const SignUpPage({super.key, this.redirectUrl});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -50,7 +52,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (success && mounted) {
       TextInput.finishAutofillContext(shouldSave: true);
-      context.go('/home');
+      if (widget.redirectUrl != null) {
+        context.go(widget.redirectUrl!);
+      } else {
+        context.go('/home');
+      }
     }
   }
 
@@ -80,7 +86,11 @@ class _SignUpPageState extends State<SignUpPage> {
           form: SignUpForm(
             onSubmit: _handleSignUp,
             onSignIn: () {
-              context.go('/auth/signin');
+              if (widget.redirectUrl != null) {
+                context.go('/auth/signin?redirect=${widget.redirectUrl}');
+              } else {
+                context.go('/auth/signin');
+              }
             },
             isLoading: _viewModel.isLoading,
           ),

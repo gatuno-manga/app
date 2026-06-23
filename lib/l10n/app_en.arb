@@ -172,5 +172,20 @@
       }
     }
   },
-  "booksUnknownFormat": "Unknown"
+  "booksUnknownFormat": "Unknown",
+  "bookRequestsTitle": "Book Requests",
+  "bookRequestsEmpty": "No requests found.",
+  "bookRequestsCreateTitle": "New Request",
+  "bookRequestsFormTitle": "Book Title",
+  "bookRequestsFormAuthor": "Author",
+  "bookRequestsFormSubmit": "Submit Request",
+  "bookRequestsSuccess": "Request created successfully!",
+  "homeCtaTitle": "Can't find what you're looking for?",
+  "homeCtaDescription": "Request a new book to be added to our collection. We'll review it as soon as possible.",
+  "bookRequestsFormUrl": "URL",
+  "bookRequestsFormReason": "Reason (optional)",
+  "homeCtaSignInButton": "Sign In to Request",
+  "bookRequestsFormTitleRequired": "Please enter a title",
+  "bookRequestsFormUrlRequired": "Please enter a URL",
+  "bookRequestsFormUrlInvalid": "Please enter a valid URL"
 }
