@@ -1,3 +1,4 @@
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/book_requests/domain/repositories/book_requests_repository.dart';
@@ -26,8 +27,8 @@ void main() {
         userId: 'user1',
         adminId: null,
         rejectionMessage: const RequestRejectionMessageVO(null),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
       );
 
       when(() => mockRepository.createBookRequest(
@@ -36,7 +37,7 @@ void main() {
             reason: any(named: 'reason'),
           )).thenAnswer((_) async => request);
 
-      final result = await viewModel.submitRequest(title: 'T', url: 'https://example.com');
+      final result = await viewModel.submitRequest(title: 'Title', url: 'https://example.com');
 
       expect(result, true);
       expect(viewModel.isSubmitting, false);

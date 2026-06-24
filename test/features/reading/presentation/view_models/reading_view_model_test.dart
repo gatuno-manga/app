@@ -1,10 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 
 class MockReadingRepository extends Mock implements ReadingRepository {}
 
@@ -13,11 +24,11 @@ class MockReadingProgressCoordinator extends Mock
 
 class FakeReadingChapter extends Fake implements ReadingChapter {
   @override
-  String get id => 'chapter-1';
+  ChapterId get id => ChapterId('chapter-1');
   @override
-  String get bookId => 'book-1';
+  BookId get bookId => BookId('book-1');
   @override
-  String get title => 'Test Chapter';
+  ChapterTitle get title => ChapterTitle('Test Chapter');
   @override
   List<ReadingPage> get pages => [];
   @override
@@ -50,7 +61,7 @@ void main() {
     test('loadChapter success updates state correctly', () async {
       final mockChapter = FakeReadingChapter();
       when(
-        () => mockRepository.getChapter(chapterId),
+        () => mockRepository.getChapter(const ChapterId(chapterId)),
       ).thenAnswer((_) async => mockChapter);
 
       final future = viewModel.loadChapter(chapterId);
@@ -63,7 +74,7 @@ void main() {
       expect(viewModel.isLoading, isFalse);
       expect(viewModel.chapter, mockChapter);
       expect(viewModel.error, isNull);
-      verify(() => mockRepository.getChapter(chapterId)).called(1);
+      verify(() => mockRepository.getChapter(const ChapterId(chapterId))).called(1);
     });
 
     test(
@@ -71,7 +82,7 @@ void main() {
       () async {
         final mockChapter = FakeReadingChapter();
         when(
-          () => mockRepository.getChapter(chapterId),
+          () => mockRepository.getChapter(const ChapterId(chapterId)),
         ).thenAnswer((_) async => mockChapter);
 
         await viewModel.loadChapter(chapterId, initialPage: 5);
@@ -82,7 +93,7 @@ void main() {
 
     test('loadChapter failure updates error state', () async {
       when(
-        () => mockRepository.getChapter(chapterId),
+        () => mockRepository.getChapter(const ChapterId(chapterId)),
       ).thenThrow(Exception('Failed to load'));
 
       await viewModel.loadChapter(chapterId);
@@ -109,7 +120,7 @@ void main() {
     test('setCurrentPage calls saveProgress when isAutoSave is true', () async {
       final mockChapter = FakeReadingChapter();
       when(
-        () => mockRepository.getChapter(chapterId),
+        () => mockRepository.getChapter(const ChapterId(chapterId)),
       ).thenAnswer((_) async => mockChapter);
 
       when(
@@ -127,10 +138,10 @@ void main() {
 
       verify(
         () => mockCoordinator.saveProgress(
-          chapterId: 'chapter-1',
-          bookId: 'book-1',
-          pageIndex: 3,
-          totalPages: 0,
+          chapterId: const ChapterId('chapter-1'),
+          bookId: const BookId('book-1'),
+          pageIndex: const PositiveInt(3),
+          totalPages: const PositiveInt(0),
           completed: false,
         ),
       ).called(1);

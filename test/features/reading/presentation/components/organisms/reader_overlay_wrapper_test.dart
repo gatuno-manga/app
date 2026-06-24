@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_overlay_wrapper.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_top_overlay.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
 
@@ -13,15 +24,15 @@ class MockReadingViewModel extends Mock implements ReadingViewModel {}
 
 class _MockChapter extends Fake implements ReadingChapter {
   @override
-  final String id = 'chapter-1';
+  final ChapterId id = const ChapterId('chapter-1');
   @override
-  final String bookTitle = 'Test Book';
+  final BookTitle bookTitle = const BookTitle('Test Book');
   @override
-  final String? title = 'Test Chapter';
+  final ChapterTitle? title = const ChapterTitle('Test Chapter');
   @override
-  final String? previous = null;
+  final ChapterId? previous = null;
   @override
-  final String? next = null;
+  final ChapterId? next = null;
   @override
   final List<ReadingPage> pages = [];
 }

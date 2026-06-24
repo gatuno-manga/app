@@ -1,19 +1,25 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../features/books/domain/value_objects/book_id.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../features/users/domain/value_objects/user_id.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../../../shared/domain/value_objects/timestamp.dart';
+import '../../domain/value_objects/progress_id.dart';
 
 part 'reading_progress_dto.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RemoteReadingProgress {
-  final String id;
-  final String userId;
-  final String chapterId;
-  final String bookId;
-  final int pageIndex;
-  final DateTime timestamp;
-  final int version;
-  final int? totalPages;
+  final ProgressId id;
+  final UserId userId;
+  final ChapterId chapterId;
+  final BookId bookId;
+  final PositiveInt pageIndex;
+  final Timestamp timestamp;
+  final PositiveInt version;
+  final PositiveInt? totalPages;
   final bool? completed;
-  final DateTime? updatedAt;
+  final Timestamp? updatedAt;
 
   RemoteReadingProgress({
     required this.id,
@@ -35,11 +41,12 @@ class RemoteReadingProgress {
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class SaveProgressDto {
-  final String chapterId;
-  final String bookId;
-  final int pageIndex;
-  final int timestamp; // Unix timestamp as used in the web app
-  final int? totalPages;
+  final ChapterId chapterId;
+  final BookId bookId;
+  final PositiveInt pageIndex;
+  @TimestampAsIntConverter()
+  final Timestamp timestamp;
+  final PositiveInt? totalPages;
   final bool? completed;
 
   SaveProgressDto({

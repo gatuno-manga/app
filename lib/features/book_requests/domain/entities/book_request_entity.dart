@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 
 class RequestIdVO extends Equatable {
   final String value;
@@ -70,8 +71,8 @@ class BookRequestEntity extends Equatable {
   final RequestStatus status;
   final String? adminId;
   final RequestRejectionMessageVO rejectionMessage;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final Timestamp createdAt;
+  final Timestamp updatedAt;
 
   const BookRequestEntity({
     required this.id,

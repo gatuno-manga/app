@@ -4,6 +4,22 @@ import '../../domain/entities/reading_enums.dart';
 import '../../../books/domain/entities/chapter.dart';
 
 import '../../../../shared/data/models/image_metadata_model.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../../../features/books/domain/value_objects/book_id.dart';
+import '../../../../features/books/domain/value_objects/book_title.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../features/books/domain/value_objects/chapter_index.dart';
+import '../../../../features/books/domain/value_objects/chapter_title.dart';
+import '../../../../features/users/domain/value_objects/user_display_name.dart';
+import '../../../../features/users/domain/value_objects/user_id.dart';
+import '../../domain/value_objects/chapter_content.dart';
+import '../../domain/value_objects/comment_content.dart';
+import '../../domain/value_objects/comment_id.dart';
+import '../../domain/value_objects/document_path.dart';
+import '../../domain/value_objects/original_url.dart';
+import '../../domain/value_objects/reading_page_id.dart';
+import '../../domain/value_objects/reading_page_url.dart';
+import '../../../../shared/domain/value_objects/timestamp.dart';
 
 part 'reading_chapter_model.g.dart';
 
@@ -15,13 +31,17 @@ class IntConverter implements JsonConverter<int, dynamic> {
   dynamic toJson(int object) => object;
 }
 
-class DoubleConverter implements JsonConverter<double, dynamic> {
-  const DoubleConverter();
+class IndexConverter implements JsonConverter<ChapterIndex, dynamic> {
+  const IndexConverter();
   @override
-  double fromJson(dynamic json) =>
-      double.tryParse(json?.toString() ?? '0') ?? 0.0;
+  ChapterIndex fromJson(dynamic json) {
+    if (json == null) return const ChapterIndex(0.0);
+    if (json is num) return ChapterIndex(json.toDouble());
+    return ChapterIndex(double.tryParse(json.toString()) ?? 0.0);
+  }
+
   @override
-  dynamic toJson(double object) => object;
+  dynamic toJson(ChapterIndex object) => object.value;
 }
 
 class StringConverter implements JsonConverter<String, dynamic> {
@@ -154,7 +174,7 @@ class ChapterCommentListConverter
     ReadingPageListConverter(),
     ChapterCommentListConverter(),
     StringConverter(),
-    DoubleConverter(),
+    IndexConverter(),
     IntConverter(),
     ContentTypeConverter(),
     ContentFormatConverter(),

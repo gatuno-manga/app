@@ -1,3 +1,4 @@
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/certificates/presentation/view_models/certificates_view_model.dart';
@@ -28,7 +29,7 @@ void main() {
       subject: 'sub',
       issuer: 'iss',
       isIgnored: false,
-      addedAt: DateTime.now(),
+      addedAt: Timestamp.now(),
     );
 
     test('exposes trusted and ignored certificates from service', () {

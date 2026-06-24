@@ -56,7 +56,7 @@ class ReadingBottomBar extends StatelessWidget {
                 ),
                 onPressed: chapter.previous != null
                     ? () => context.pushReplacement(
-                        '/chapters/${chapter.previous}',
+                        '/chapters/${chapter.previous?.value}',
                       )
                     : null,
                 tooltip: l10n.readingPreviousChapter,
@@ -64,7 +64,7 @@ class ReadingBottomBar extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.skip_next, color: theme.colorScheme.onSurface),
                 onPressed: chapter.next != null
-                    ? () => context.pushReplacement('/chapters/${chapter.next}')
+                    ? () => context.pushReplacement('/chapters/${chapter.next?.value}')
                     : null,
                 tooltip: l10n.readingNextChapter,
               ),

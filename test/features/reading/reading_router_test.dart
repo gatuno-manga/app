@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/features/reading/presentation/views/reading_screen.dart';
@@ -8,6 +17,8 @@ import 'package:gatuno/features/reading/reading_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 import '../../helpers/test_injection.dart';
 
 class MockReadingViewModel extends Mock implements ReadingViewModel {}

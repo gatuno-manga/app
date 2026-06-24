@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
+
+
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/image_reader.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
@@ -7,6 +18,8 @@ import 'package:gatuno/features/reading/presentation/components/organisms/readin
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
 import '../../../../../helpers/test_injection.dart';
@@ -15,30 +28,30 @@ class MockReadingViewModel extends Mock implements ReadingViewModel {}
 
 class _MockChapter extends Fake implements ReadingChapter {
   @override
-  final String id = 'chapter-1';
+  final ChapterId id = const ChapterId('chapter-1');
   @override
   final List<ReadingPage> pages;
   @override
-  final String? previous = null;
+  final ChapterId? previous = null;
   @override
-  final String? next = null;
+  final ChapterId? next = null;
   @override
-  final String? title = 'Chapter 1';
+  final ChapterTitle? title = const ChapterTitle('Chapter 1');
   @override
-  final String bookTitle = 'Test Book';
+  final BookTitle bookTitle = const BookTitle('Test Book');
   @override
-  final double index = 1.0;
+  final ChapterIndex index = const ChapterIndex(1.0);
 
   _MockChapter({required this.pages});
 }
 
 class _MockPage extends Fake implements ReadingPage {
   @override
-  final String id;
+  final ReadingPageId id;
   @override
-  final String url;
+  final ReadingPageUrl url;
   @override
-  final int index;
+  final PositiveInt index;
   @override
   final ImageMetadata? metadata = const ImageMetadata(width: 100, height: 200);
 
@@ -63,8 +76,8 @@ void main() {
     testWidgets('renders pages and toggles overlay on tap', (tester) async {
       final chapter = _MockChapter(
         pages: [
-          _MockPage(id: '1', url: 'p1.png', index: 0),
-          _MockPage(id: '2', url: 'p2.png', index: 1),
+          _MockPage(id: const ReadingPageId('1'), url: const ReadingPageUrl('p1.png'), index: const PositiveInt(0)),
+          _MockPage(id: const ReadingPageId('2'), url: const ReadingPageUrl('p2.png'), index: const PositiveInt(1)),
         ],
       );
 

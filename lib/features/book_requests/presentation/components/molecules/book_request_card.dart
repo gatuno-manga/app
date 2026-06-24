@@ -136,7 +136,7 @@ class BookRequestCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   l10n.bookRequestsCardDate(
-                    DateFormat.yMMMd().format(request.createdAt),
+                    DateFormat.yMMMd().format(request.createdAt.value),
                   ),
                   style: Theme.of(context)
                       .textTheme

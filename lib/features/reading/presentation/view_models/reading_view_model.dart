@@ -4,6 +4,8 @@ import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
 import '../../domain/repositories/reading_repository.dart';
 import '../../domain/use_cases/reading_progress_coordinator.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 
 class ReadingViewModel extends SafeChangeNotifier {
   final ReadingRepository _repository;
@@ -36,8 +38,8 @@ class ReadingViewModel extends SafeChangeNotifier {
     notifyListeners();
 
     try {
-      _chapter = await _repository.getChapter(chapterId);
-      AppLogger.i('Chapter loaded successfully: ${_chapter?.title}', _logTag);
+      _chapter = await _repository.getChapter(ChapterId(chapterId));
+      AppLogger.i('Chapter loaded successfully: ${_chapter?.title?.value}', _logTag);
       final isTextChapter = _chapter?.contentType == ContentType.text;
       saveProgress(completed: isTextChapter);
     } catch (e, stackTrace) {
@@ -70,8 +72,8 @@ class ReadingViewModel extends SafeChangeNotifier {
       await _progressCoordinator.saveProgress(
         chapterId: chapter.id,
         bookId: chapter.bookId,
-        pageIndex: _currentPageIndex,
-        totalPages: chapter.pages.length,
+        pageIndex: PositiveInt(_currentPageIndex),
+        totalPages: PositiveInt(chapter.pages.length),
         completed: completed,
       );
     } catch (e, stackTrace) {

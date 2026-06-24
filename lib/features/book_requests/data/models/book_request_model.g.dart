@@ -16,8 +16,8 @@ BookRequestModel _$BookRequestModelFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String,
       adminId: json['adminId'] as String?,
       rejectionMessage: json['rejectionMessage'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: Timestamp.fromJson(json['createdAt']),
+      updatedAt: Timestamp.fromJson(json['updatedAt']),
     );
 
 Map<String, dynamic> _$BookRequestModelToJson(BookRequestModel instance) =>
@@ -30,6 +30,6 @@ Map<String, dynamic> _$BookRequestModelToJson(BookRequestModel instance) =>
       'status': instance.status,
       'adminId': instance.adminId,
       'rejectionMessage': instance.rejectionMessage,
-      'createdAt': instance.createdAt.toIso8601String(),
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'createdAt': instance.createdAt.toJson(),
+      'updatedAt': instance.updatedAt.toJson(),
     };

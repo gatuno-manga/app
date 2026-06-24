@@ -35,7 +35,7 @@ class ReadingTopBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  chapter.bookTitle,
+                  chapter.bookTitle.value,
                   style: TextStyle(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
@@ -43,7 +43,7 @@ class ReadingTopBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  chapter.title ?? 'Chapter ${chapter.index}',
+                  chapter.title?.value ?? 'Chapter ${chapter.index.value}',
                   style: TextStyle(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     fontSize: 12,

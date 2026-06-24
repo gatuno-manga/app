@@ -1,10 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/features/reading/data/repositories/reading_repository_impl.dart';
 import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 
 class MockDioClient extends Mock implements DioClient {}
 
@@ -51,10 +62,10 @@ void main() {
         ),
       );
 
-      final result = await repository.getChapter(chapterId);
+      final result = await repository.getChapter(const ChapterId(chapterId));
 
-      expect(result.id, chapterId);
-      expect(result.title, 'Chapter 1');
+      expect(result.id.value, chapterId);
+      expect(result.title?.value, 'Chapter 1');
       expect(result, isA<ReadingChapterModel>());
       verify(() => mockDio.get<Map<String, dynamic>>(any())).called(1);
     });
@@ -71,7 +82,7 @@ void main() {
         );
 
         expect(
-          () => repository.getChapter(chapterId),
+          () => repository.getChapter(const ChapterId(chapterId)),
           throwsA(isA<ServerException>()),
         );
       },
@@ -87,7 +98,7 @@ void main() {
       );
 
       expect(
-        () => repository.getChapter(chapterId),
+        () => repository.getChapter(const ChapterId(chapterId)),
         throwsA(isA<ServerException>()),
       );
     });
@@ -101,7 +112,7 @@ void main() {
       );
 
       expect(
-        () => repository.getChapter(chapterId),
+        () => repository.getChapter(const ChapterId(chapterId)),
         throwsA(isA<NetworkException>()),
       );
     });
@@ -112,7 +123,7 @@ void main() {
       ).thenThrow(ServerException(message: 'Server Error'));
 
       expect(
-        () => repository.getChapter(chapterId),
+        () => repository.getChapter(const ChapterId(chapterId)),
         throwsA(isA<ServerException>()),
       );
     });
@@ -122,7 +133,7 @@ void main() {
         () => mockDio.get<Map<String, dynamic>>(any()),
       ).thenThrow(Exception('Unexpected'));
 
-      expect(() => repository.getChapter(chapterId), throwsA(isA<Exception>()));
+      expect(() => repository.getChapter(const ChapterId(chapterId)), throwsA(isA<Exception>()));
     });
   });
 }

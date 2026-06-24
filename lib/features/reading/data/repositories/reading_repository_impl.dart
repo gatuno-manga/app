@@ -3,6 +3,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../../../core/network/api_constants.dart';
 import '../../../../core/network/exceptions.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../books/domain/value_objects/chapter_id.dart';
 import '../../domain/repositories/reading_repository.dart';
 import '../models/reading_chapter_model.dart';
 
@@ -13,11 +14,11 @@ class ReadingRepositoryImpl implements ReadingRepository {
   ReadingRepositoryImpl(this._dioClient);
 
   @override
-  Future<ReadingChapterModel> getChapter(String chapterId) async {
-    AppLogger.i('Fetching chapter details for ID: $chapterId', _logTag);
+  Future<ReadingChapterModel> getChapter(ChapterId chapterId) async {
+    AppLogger.i('Fetching chapter details for ID: ${chapterId.value}', _logTag);
     try {
       final response = await _dioClient.dio.get<Map<String, dynamic>>(
-        '${ApiConstants.chapters}/$chapterId',
+        '${ApiConstants.chapters}/${chapterId.value}',
       );
 
       final data = response.data;

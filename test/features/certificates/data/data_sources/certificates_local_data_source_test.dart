@@ -1,3 +1,4 @@
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gatuno/features/certificates/data/data_sources/certificates_local_data_source.dart';
@@ -22,7 +23,7 @@ void main() {
         subject: 'subject',
         issuer: 'issuer',
         isIgnored: false,
-        addedAt: DateTime(2023, 1, 1),
+        addedAt: Timestamp.now(),
       ),
     ];
 

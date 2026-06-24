@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/book_request_entity.dart';
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 
 part 'book_request_model.g.dart';
 
@@ -13,8 +14,8 @@ class BookRequestModel {
   final String status;
   final String? adminId;
   final String? rejectionMessage;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final Timestamp createdAt;
+  final Timestamp updatedAt;
 
   BookRequestModel({
     required this.id,

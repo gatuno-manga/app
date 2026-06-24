@@ -1,11 +1,27 @@
 import '../../../../shared/domain/entities/image_metadata.dart';
 import 'reading_enums.dart';
 import '../../../../features/books/domain/entities/chapter.dart';
+import '../../../../features/books/domain/value_objects/book_id.dart';
+import '../../../../features/books/domain/value_objects/book_title.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../features/books/domain/value_objects/chapter_index.dart';
+import '../../../../features/books/domain/value_objects/chapter_title.dart';
+import '../../../../features/users/domain/value_objects/user_display_name.dart';
+import '../../../../features/users/domain/value_objects/user_id.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../../../shared/domain/value_objects/timestamp.dart';
+import '../value_objects/chapter_content.dart';
+import '../value_objects/comment_content.dart';
+import '../value_objects/comment_id.dart';
+import '../value_objects/document_path.dart';
+import '../value_objects/original_url.dart';
+import '../value_objects/reading_page_id.dart';
+import '../value_objects/reading_page_url.dart';
 
 class ReadingPage {
-  final String id;
-  final String url;
-  final int index;
+  final ReadingPageId id;
+  final ReadingPageUrl url;
+  final PositiveInt index;
   final ImageMetadata? metadata;
 
   const ReadingPage({
@@ -20,11 +36,11 @@ class ReadingPage {
 }
 
 class ChapterComment {
-  final String id;
-  final String content;
-  final DateTime createdAt;
-  final String userId;
-  final String userName;
+  final CommentId id;
+  final CommentContent content;
+  final Timestamp createdAt;
+  final UserId userId;
+  final UserDisplayName userName;
 
   const ChapterComment({
     required this.id,
@@ -36,24 +52,24 @@ class ChapterComment {
 }
 
 class ReadingChapter {
-  final String id;
-  final String? title;
-  final String originalUrl;
-  final double index;
+  final ChapterId id;
+  final ChapterTitle? title;
+  final OriginalUrl originalUrl;
+  final ChapterIndex index;
   final ContentType contentType;
-  final String? content;
+  final ChapterContent? content;
   final ContentFormat? contentFormat;
-  final String? documentPath;
+  final DocumentPath? documentPath;
   final DocumentFormat? documentFormat;
   final ScrapingStatus? scrapingStatus;
-  final int retries;
+  final PositiveInt retries;
   final bool isFinal;
   final DateTime? deletedAt;
-  final String? previous;
-  final String? next;
-  final String bookId;
-  final String bookTitle;
-  final int totalChapters;
+  final ChapterId? previous;
+  final ChapterId? next;
+  final BookId bookId;
+  final BookTitle bookTitle;
+  final PositiveInt totalChapters;
   final List<ReadingPage> pages;
   final List<ChapterComment> comments;
 

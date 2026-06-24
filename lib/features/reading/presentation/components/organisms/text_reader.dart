@@ -20,7 +20,7 @@ class _TextReaderState extends State<TextReader> {
   @override
   void initState() {
     super.initState();
-    _textContent = _buildTextContent(widget.chapter.content ?? '');
+    _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
   }
 
   @override
@@ -28,7 +28,7 @@ class _TextReaderState extends State<TextReader> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.chapter.content != widget.chapter.content ||
         oldWidget.chapter.contentFormat != widget.chapter.contentFormat) {
-      _textContent = _buildTextContent(widget.chapter.content ?? '');
+      _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
     }
   }
 
@@ -62,7 +62,7 @@ class _TextReaderState extends State<TextReader> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: Text(
-                  widget.chapter.title!,
+                  widget.chapter.title!.value,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

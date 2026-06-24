@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reading_top_bar.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_top_overlay.dart';
@@ -7,11 +16,11 @@ import '../../../../../helpers/pump_app.dart';
 
 class _MockChapter extends Fake implements ReadingChapter {
   @override
-  final String? title = 'Chapter 1';
+  final ChapterTitle? title = const ChapterTitle('Chapter 1');
   @override
-  final String bookTitle = 'Test Book';
+  final BookTitle bookTitle = const BookTitle('Test Book');
   @override
-  final double index = 1.0;
+  final ChapterIndex index = const ChapterIndex(1.0);
 }
 
 void main() {

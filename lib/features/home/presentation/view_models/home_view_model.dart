@@ -120,7 +120,7 @@ class HomeViewModel extends SafeChangeNotifier {
         return;
       }
 
-      final futures = bookIds.map((id) => _booksRepository.getBook(BookId(id)));
+      final futures = bookIds.map((id) => _booksRepository.getBook(id));
       final books = await Future.wait(futures);
       
       continueReadingBooks = books.toList();

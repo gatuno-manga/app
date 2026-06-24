@@ -4,6 +4,9 @@ import '../../data/database/reading_database.dart';
 import '../../data/repositories/reading_progress_local_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../features/books/domain/value_objects/book_id.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../sync/domain/use_cases/app_sync_coordinator.dart';
 
 class ReadingProgressCoordinator {
@@ -52,7 +55,7 @@ class ReadingProgressCoordinator {
         'Migrating ${guestProgress.length} guest progress items',
         _logTag,
       );
-      await _localService.updateProgressUserId('guest', user.id.value);
+      await _localService.updateProgressUserId('guest', user.id);
     }
 
     // 2. Trigger Unified Sync
@@ -60,22 +63,22 @@ class ReadingProgressCoordinator {
   }
 
   Future<void> saveProgress({
-    required String chapterId,
-    required String bookId,
-    required int pageIndex,
-    int? totalPages,
+    required ChapterId chapterId,
+    required BookId bookId,
+    required PositiveInt pageIndex,
+    PositiveInt? totalPages,
     bool completed = false,
   }) async {
     final user = _authService.currentUser;
     final timestamp = DateTime.now();
 
     // 1. Check local state (Highest Page Wins)
-    final local = await _localService.getProgress(user.id.value, chapterId);
+    final local = await _localService.getProgress(user.id, chapterId);
 
-    int finalPageIndex = pageIndex;
+    int finalPageIndex = pageIndex.value;
     bool finalCompleted = completed;
 
-    if (local != null && pageIndex < local.pageIndex && !completed) {
+    if (local != null && pageIndex.value < local.pageIndex && !completed) {
       // Keep the highest page index and completed status to avoid regressing progress
       finalPageIndex = local.pageIndex;
       finalCompleted = local.completed;
@@ -84,11 +87,11 @@ class ReadingProgressCoordinator {
     // 2. Save locally (Always update timestamp to mark as most recently accessed)
     final companion = ReadingProgressCompanion(
       userId: Value(user.id.value),
-      chapterId: Value(chapterId),
-      bookId: Value(bookId),
+      chapterId: Value(chapterId.value),
+      bookId: Value(bookId.value),
       pageIndex: Value(finalPageIndex),
       timestamp: Value(timestamp),
-      totalPages: Value(totalPages ?? local?.totalPages),
+      totalPages: Value(totalPages?.value ?? local?.totalPages),
       completed: Value(finalCompleted),
     );
     await _localService.saveProgress(companion);
@@ -99,21 +102,21 @@ class ReadingProgressCoordinator {
     }
   }
 
-  Future<ReadingProgressData?> getLastReadChapter(String bookId) async {
+  Future<ReadingProgressData?> getLastReadChapter(BookId bookId) async {
     final user = _authService.currentUser;
     AppLogger.d(
-      'Coordinator: Getting last read chapter for book: $bookId, user: ${user.id.value}',
+      'Coordinator: Getting last read chapter for book: ${bookId.value}, user: ${user.id.value}',
       _logTag,
     );
-    return _localService.getLastReadChapter(user.id.value, bookId);
+    return _localService.getLastReadChapter(user.id, bookId);
   }
 
-  Future<List<ReadingProgressData>> getAllProgressForBook(String bookId) async {
+  Future<List<ReadingProgressData>> getAllProgressForBook(BookId bookId) async {
     final user = _authService.currentUser;
-    return _localService.getAllProgressForBook(user.id.value, bookId);
+    return _localService.getAllProgressForBook(user.id, bookId);
   }
 
-  Future<List<String>> getContinueReadingBooks({int limit = 10}) async {
+  Future<List<BookId>> getContinueReadingBooks({int limit = 10}) async {
     final user = _authService.currentUser;
     if (user.isGuest) return [];
     
@@ -121,7 +124,7 @@ class ReadingProgressCoordinator {
       'Coordinator: Getting continue reading books for user: ${user.id.value}',
       _logTag,
     );
-    return _localService.getRecentUniqueBookIds(user.id.value, limit: limit);
+    return _localService.getRecentUniqueBookIds(user.id, limit: limit);
   }
 
   void dispose() {

@@ -28,14 +28,14 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
   @override
   void didUpdateWidget(ImageReaderItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.page.url != widget.page.url) {
+    if (oldWidget.page.url.value != widget.page.url.value) {
       _updateAspectRatio();
     }
   }
 
   void _updateAspectRatio() {
     // 1. Check in-memory global cache
-    final cached = ImageAspectRatioCache.get(widget.page.url);
+    final cached = ImageAspectRatioCache.get(widget.page.url.value);
     if (cached != null) {
       _aspectRatio = cached;
       return;
@@ -57,7 +57,7 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
     if (!mounted) return;
 
     final newAspectRatio = ImageAspectRatioCache.updateFromSize(
-      widget.page.url,
+      widget.page.url.value,
       size,
     );
 
@@ -71,7 +71,7 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
     return AspectRatio(
       aspectRatio: _aspectRatio,
       child: AppImage(
-        imageUrl: widget.page.url,
+        imageUrl: widget.page.url.value,
         strategy: sl<ImageLoadingStrategy>(),
         blurHash: widget.page.metadata?.blurHash,
         fit: BoxFit.fill,

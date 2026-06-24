@@ -2,11 +2,24 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
+
+
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/image_reader_item.dart';
 import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:gatuno/shared/utils/image_aspect_ratio_cache.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 import '../../../../../helpers/test_injection.dart';
 
 void main() {
@@ -28,9 +41,9 @@ void main() {
   }
 
   final testPage = ReadingPage(
-    id: '1',
-    url: 'http://example.com/image.png',
-    index: 0,
+    id: const ReadingPageId('1'),
+    url: const ReadingPageUrl('http://example.com/image.png'),
+    index: const PositiveInt(0),
     metadata: const ImageMetadata(width: 100, height: 200),
   );
 
@@ -49,7 +62,7 @@ void main() {
     testWidgets('uses cached dimensions if available', (
       WidgetTester tester,
     ) async {
-      ImageAspectRatioCache.set(testPage.url, 1.5);
+      ImageAspectRatioCache.set(testPage.url.value, 1.5);
 
       await tester.pumpWidget(createWidget(testPage));
 
@@ -160,7 +173,7 @@ void main() {
         (tester.widget(find.byType(AspectRatio)) as AspectRatio).aspectRatio,
         1.0,
       );
-      expect(ImageAspectRatioCache.get(testPage.url), 1.0);
+      expect(ImageAspectRatioCache.get(testPage.url.value), 1.0);
     });
   });
 }

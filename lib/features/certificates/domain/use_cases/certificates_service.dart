@@ -7,6 +7,7 @@ import '../../data/data_sources/certificates_local_data_source.dart';
 import '../../../../core/network/http_overrides.dart';
 import '../../../../core/logging/logger.dart';
 import '../../exceptions/certificates_exceptions.dart';
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 
 enum CertificateStatus { trusted, ignored, unknown }
 
@@ -93,7 +94,7 @@ class CertificatesService extends ChangeNotifier {
       subject: cert.subject,
       issuer: cert.issuer,
       isIgnored: false,
-      addedAt: DateTime.now(),
+      addedAt: Timestamp.now(),
     );
     await _addOrUpdate(newItem);
     removePending(name);
@@ -108,7 +109,7 @@ class CertificatesService extends ChangeNotifier {
       subject: cert.subject,
       issuer: cert.issuer,
       isIgnored: true,
-      addedAt: DateTime.now(),
+      addedAt: Timestamp.now(),
     );
     await _addOrUpdate(newItem);
     removePending(host);
@@ -129,7 +130,7 @@ class CertificatesService extends ChangeNotifier {
       subject: 'Manual: $name',
       issuer: 'Manual: $name',
       isIgnored: false,
-      addedAt: DateTime.now(),
+      addedAt: Timestamp.now(),
     );
     await _addOrUpdate(newItem);
   }

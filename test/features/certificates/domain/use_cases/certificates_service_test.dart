@@ -1,3 +1,4 @@
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +28,7 @@ void main() {
       subject: 'sub',
       issuer: 'iss',
       isIgnored: false,
-      addedAt: DateTime.now(),
+      addedAt: Timestamp.now(),
     );
 
     test('init loads certificates from storage', () async {

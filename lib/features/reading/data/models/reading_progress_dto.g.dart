@@ -9,18 +9,20 @@ part of 'reading_progress_dto.dart';
 RemoteReadingProgress _$RemoteReadingProgressFromJson(
   Map<String, dynamic> json,
 ) => RemoteReadingProgress(
-  id: json['id'] as String,
-  userId: json['user_id'] as String,
-  chapterId: json['chapter_id'] as String,
-  bookId: json['book_id'] as String,
-  pageIndex: (json['page_index'] as num).toInt(),
-  timestamp: DateTime.parse(json['timestamp'] as String),
-  version: (json['version'] as num).toInt(),
-  totalPages: (json['total_pages'] as num?)?.toInt(),
+  id: ProgressId.fromJson(json['id'] as String),
+  userId: UserId.fromJson(json['user_id'] as String),
+  chapterId: ChapterId.fromJson(json['chapter_id'] as String),
+  bookId: BookId.fromJson(json['book_id'] as String),
+  pageIndex: PositiveInt.fromJson((json['page_index'] as num).toInt()),
+  timestamp: Timestamp.fromJson(json['timestamp']),
+  version: PositiveInt.fromJson((json['version'] as num).toInt()),
+  totalPages: json['total_pages'] == null
+      ? null
+      : PositiveInt.fromJson((json['total_pages'] as num).toInt()),
   completed: json['completed'] as bool?,
   updatedAt: json['updated_at'] == null
       ? null
-      : DateTime.parse(json['updated_at'] as String),
+      : Timestamp.fromJson(json['updated_at']),
 );
 
 Map<String, dynamic> _$RemoteReadingProgressToJson(
@@ -31,20 +33,24 @@ Map<String, dynamic> _$RemoteReadingProgressToJson(
   'chapter_id': instance.chapterId,
   'book_id': instance.bookId,
   'page_index': instance.pageIndex,
-  'timestamp': instance.timestamp.toIso8601String(),
+  'timestamp': instance.timestamp,
   'version': instance.version,
   'total_pages': instance.totalPages,
   'completed': instance.completed,
-  'updated_at': instance.updatedAt?.toIso8601String(),
+  'updated_at': instance.updatedAt,
 };
 
 SaveProgressDto _$SaveProgressDtoFromJson(Map<String, dynamic> json) =>
     SaveProgressDto(
-      chapterId: json['chapter_id'] as String,
-      bookId: json['book_id'] as String,
-      pageIndex: (json['page_index'] as num).toInt(),
-      timestamp: (json['timestamp'] as num).toInt(),
-      totalPages: (json['total_pages'] as num?)?.toInt(),
+      chapterId: ChapterId.fromJson(json['chapter_id'] as String),
+      bookId: BookId.fromJson(json['book_id'] as String),
+      pageIndex: PositiveInt.fromJson((json['page_index'] as num).toInt()),
+      timestamp: const TimestampAsIntConverter().fromJson(
+        (json['timestamp'] as num).toInt(),
+      ),
+      totalPages: json['total_pages'] == null
+          ? null
+          : PositiveInt.fromJson((json['total_pages'] as num).toInt()),
       completed: json['completed'] as bool?,
     );
 
@@ -53,7 +59,7 @@ Map<String, dynamic> _$SaveProgressDtoToJson(SaveProgressDto instance) =>
       'chapter_id': instance.chapterId,
       'book_id': instance.bookId,
       'page_index': instance.pageIndex,
-      'timestamp': instance.timestamp,
+      'timestamp': const TimestampAsIntConverter().toJson(instance.timestamp),
       'total_pages': instance.totalPages,
       'completed': instance.completed,
     };

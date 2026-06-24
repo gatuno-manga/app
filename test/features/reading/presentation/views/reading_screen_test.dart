@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+
+
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
@@ -11,6 +20,8 @@ import 'package:gatuno/features/reading/presentation/components/organisms/text_r
 import 'package:gatuno/features/reading/presentation/components/organisms/document_reader.dart';
 import 'package:gatuno/features/reading/presentation/components/templates/reading_template.dart';
 import 'package:mocktail/mocktail.dart';
+
+
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
 
@@ -20,21 +31,21 @@ class _MockChapter extends Fake implements ReadingChapter {
   @override
   final ContentType contentType;
   @override
-  final String id = 'chapter-1';
+  final ChapterId id = const ChapterId('chapter-1');
   @override
   final List<ReadingPage> pages = [];
   @override
-  final String? previous = null;
+  final ChapterId? previous = null;
   @override
-  final String? next = null;
+  final ChapterId? next = null;
   @override
-  final String? title = 'Chapter 1';
+  final ChapterTitle? title = const ChapterTitle('Chapter 1');
   @override
-  final String bookTitle = 'Test Book';
+  final BookTitle bookTitle = const BookTitle('Test Book');
   @override
-  final double index = 1.0;
+  final ChapterIndex index = const ChapterIndex(1.0);
   @override
-  final String? content = 'Content';
+  final ChapterContent? content = const ChapterContent('Content');
   @override
   final ContentFormat? contentFormat = ContentFormat.plain;
   @override

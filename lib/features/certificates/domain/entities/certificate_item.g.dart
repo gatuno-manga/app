@@ -14,7 +14,7 @@ CertificateItem _$CertificateItemFromJson(Map<String, dynamic> json) =>
       subject: json['subject'] as String,
       issuer: json['issuer'] as String,
       isIgnored: json['is_ignored'] as bool,
-      addedAt: DateTime.parse(json['added_at'] as String),
+      addedAt: Timestamp.fromJson(json['added_at']),
     );
 
 Map<String, dynamic> _$CertificateItemToJson(CertificateItem instance) =>
@@ -25,5 +25,5 @@ Map<String, dynamic> _$CertificateItemToJson(CertificateItem instance) =>
       'subject': instance.subject,
       'issuer': instance.issuer,
       'is_ignored': instance.isIgnored,
-      'added_at': instance.addedAt.toIso8601String(),
+      'added_at': instance.addedAt,
     };

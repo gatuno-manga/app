@@ -7,8 +7,12 @@ import '../../../reading/data/models/reading_progress_dto.dart';
 import '../../../reading/data/repositories/reading_progress_local_service.dart';
 import '../../data/data_sources/sync_local_data_source.dart';
 import '../../data/models/sync_dto.dart';
+import '../../data/models/sync_dto.dart';
 import '../../data/repositories/sync_remote_service.dart';
-
+import '../../../../features/books/domain/value_objects/book_id.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../../../shared/domain/value_objects/timestamp.dart';
 class AppSyncCoordinator {
   final SyncLocalDataSource _syncLocal;
   final SyncRemoteService _syncRemote;
@@ -47,17 +51,17 @@ class AppSyncCoordinator {
       // 1. Gather Reading Progress
       List<ReadingProgressData> localProgress;
       if (lastSyncAt != null) {
-        localProgress = await _readingLocal.getModifiedSince(user.id.value, lastSyncAt);
+        localProgress = await _readingLocal.getModifiedSince(user.id, lastSyncAt);
       } else {
-        localProgress = await _readingLocal.getAllProgress(user.id.value);
+        localProgress = await _readingLocal.getAllProgress(user.id);
       }
 
       final progressDtos = localProgress.map((p) => SaveProgressDto(
-        chapterId: p.chapterId,
-        bookId: p.bookId,
-        pageIndex: p.pageIndex,
-        timestamp: p.timestamp.millisecondsSinceEpoch,
-        totalPages: p.totalPages,
+        chapterId: ChapterId(p.chapterId),
+        bookId: BookId(p.bookId),
+        pageIndex: PositiveInt(p.pageIndex),
+        timestamp: Timestamp(p.timestamp),
+        totalPages: p.totalPages != null ? PositiveInt(p.totalPages!) : null,
         completed: p.completed,
       )).toList();
 
@@ -75,13 +79,13 @@ class AppSyncCoordinator {
         for (final remote in syncedProgress) {
           await _readingLocal.saveProgress(
             ReadingProgressCompanion(
-              userId: Value(remote.userId),
-              chapterId: Value(remote.chapterId),
-              bookId: Value(remote.bookId),
-              pageIndex: Value(remote.pageIndex),
-              timestamp: Value(remote.timestamp),
-              version: Value(remote.version),
-              totalPages: Value(remote.totalPages),
+              userId: Value(remote.userId.value),
+              chapterId: Value(remote.chapterId.value),
+              bookId: Value(remote.bookId.value),
+              pageIndex: Value(remote.pageIndex.value),
+              timestamp: Value(remote.timestamp.value),
+              version: Value(remote.version.value),
+              totalPages: Value(remote.totalPages?.value),
               completed: Value(remote.completed ?? false),
             ),
           );

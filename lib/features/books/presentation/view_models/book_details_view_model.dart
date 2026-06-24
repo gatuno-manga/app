@@ -61,8 +61,8 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       final results = await Future.wait([
         _repository.getBook(BookId(bookId)),
         _repository.getBookChapters(BookId(bookId), _options),
-        _progressCoordinator.getLastReadChapter(bookId),
-        _progressCoordinator.getAllProgressForBook(bookId),
+        _progressCoordinator.getLastReadChapter(BookId(bookId)),
+        _progressCoordinator.getAllProgressForBook(BookId(bookId)),
       ]);
 
       _book = results[0] as Book;
@@ -105,7 +105,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
   Future<void> _fetchLastReadChapter() async {
     try {
-      _lastReadChapter = await _progressCoordinator.getLastReadChapter(bookId);
+      _lastReadChapter = await _progressCoordinator.getLastReadChapter(BookId(bookId));
       AppLogger.d(
         'Fetched last read chapter: ${_lastReadChapter?.chapterId}, completed: ${_lastReadChapter?.completed}',
         _logTag,
@@ -122,7 +122,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
     if (_chapterList != null) {
       final localProgress = await _progressCoordinator.getAllProgressForBook(
-        bookId,
+        BookId(bookId),
       );
 
       final progressMap = {
@@ -173,7 +173,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
         _options,
       );
       final localProgress = await _progressCoordinator.getAllProgressForBook(
-        bookId,
+        BookId(bookId),
       );
 
       final progressMap = {
@@ -221,7 +221,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       _options = _options.copyWith(cursor: _chapterList!.nextCursor);
       final result = await _repository.getBookChapters(BookId(bookId), _options);
       final localProgress = await _progressCoordinator.getAllProgressForBook(
-        bookId,
+        BookId(bookId),
       );
 
       final progressMap = {
