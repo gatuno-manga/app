@@ -75,6 +75,21 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeTitle => 'Início';
 
   @override
+  String get homeFeaturedReadNow => 'Ler agora';
+
+  @override
+  String get homeContinueReadingTitle => 'Continue a sua leitura';
+
+  @override
+  String get homeLatestUpdatesTitle => 'Atualizações Recentes';
+
+  @override
+  String get homeRecentlyAddedTitle => 'Novidades no Gatuno';
+
+  @override
+  String get homeViewAll => 'Ver tudo';
+
+  @override
   String get booksTitle => 'Livros';
 
   @override

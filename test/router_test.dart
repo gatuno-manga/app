@@ -42,6 +42,14 @@ void main() {
     when(() => mockHomeViewModel.isAuthenticated).thenReturn(false);
     when(() => mockHomeViewModel.isInitialized).thenReturn(true);
     when(() => mockHomeViewModel.displayName).thenReturn(null);
+    when(() => mockHomeViewModel.isLoadingFeatured).thenReturn(false);
+    when(() => mockHomeViewModel.isLoadingContinueReading).thenReturn(false);
+    when(() => mockHomeViewModel.isLoadingGrid).thenReturn(false);
+    when(() => mockHomeViewModel.isLoadingRecentlyAdded).thenReturn(false);
+    when(() => mockHomeViewModel.featuredBooks).thenReturn([]);
+    when(() => mockHomeViewModel.continueReadingBooks).thenReturn([]);
+    when(() => mockHomeViewModel.latestUpdatedBooks).thenReturn([]);
+    when(() => mockHomeViewModel.recentlyAddedBooks).thenReturn([]);
 
     when(() => mockNavigationViewModel.isAuthenticated).thenReturn(false);
     when(() => mockNavigationViewModel.user).thenReturn(UserModel.guest);

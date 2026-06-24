@@ -525,11 +525,18 @@ abstract class _$ReadingDatabase extends GeneratedDatabase {
   late final $ReadingProgressTable readingProgress = $ReadingProgressTable(
     this,
   );
+  late final Index idxReadingProgressRecent = Index(
+    'idx_reading_progress_recent',
+    'CREATE INDEX idx_reading_progress_recent ON reading_progress (user_id, timestamp)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [readingProgress];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    readingProgress,
+    idxReadingProgressRecent,
+  ];
 }
 
 typedef $$ReadingProgressTableCreateCompanionBuilder =

@@ -213,6 +213,17 @@ class ReadingProgressCoordinator {
     return _localService.getAllProgressForBook(user.id.value, bookId);
   }
 
+  Future<List<String>> getContinueReadingBooks({int limit = 10}) async {
+    final user = _authService.currentUser;
+    if (user.isGuest) return [];
+    
+    AppLogger.d(
+      'Coordinator: Getting continue reading books for user: ${user.id.value}',
+      _logTag,
+    );
+    return _localService.getRecentUniqueBookIds(user.id.value, limit: limit);
+  }
+
   void dispose() {
     _authSubscription?.cancel();
     _remoteSubscription?.cancel();

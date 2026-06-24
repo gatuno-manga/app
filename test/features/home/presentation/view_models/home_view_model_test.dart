@@ -9,19 +9,27 @@ import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
+import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
+import 'package:gatuno/features/books/domain/entities/book.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 
 class MockAuthService extends Mock implements AuthService {}
-
 class MockUserService extends Mock implements UserService {}
+class MockBooksRepository extends Mock implements BooksRepository {}
+class MockReadingProgressCoordinator extends Mock implements ReadingProgressCoordinator {}
 
 void main() {
   late HomeViewModel viewModel;
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
+  late MockBooksRepository mockBooksRepository;
+  late MockReadingProgressCoordinator mockReadingCoordinator;
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
+    mockBooksRepository = MockBooksRepository();
+    mockReadingCoordinator = MockReadingProgressCoordinator();
 
     when(() => mockAuthService.addListener(any())).thenAnswer((_) {});
     when(() => mockAuthService.removeListener(any())).thenAnswer((_) {});
@@ -30,8 +38,11 @@ void main() {
     when(
       () => mockUserService.getCurrentUser(),
     ).thenAnswer((_) async => UserModel.guest);
+    
+    when(() => mockBooksRepository.getBooks(any())).thenAnswer((_) async => const BookList(data: [], total: 0, page: 1, limit: 12, totalPages: 1));
+    when(() => mockReadingCoordinator.getContinueReadingBooks(limit: any(named: 'limit'))).thenAnswer((_) async => []);
 
-    viewModel = HomeViewModel(mockAuthService, mockUserService);
+    viewModel = HomeViewModel(mockAuthService, mockUserService, mockBooksRepository, mockReadingCoordinator);
   });
 
   group('HomeViewModel', () {
@@ -55,7 +66,7 @@ void main() {
       ).thenAnswer((_) async => user);
 
       // Re-initialize to trigger _loadUser
-      viewModel = HomeViewModel(mockAuthService, mockUserService);
+      viewModel = HomeViewModel(mockAuthService, mockUserService, mockBooksRepository, mockReadingCoordinator);
 
       // Wait for async load
       await Future<void>.delayed(Duration.zero);

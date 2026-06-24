@@ -77,6 +77,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Home';
 
   @override
+  String get homeFeaturedReadNow => 'Read now';
+
+  @override
+  String get homeContinueReadingTitle => 'Continue reading';
+
+  @override
+  String get homeLatestUpdatesTitle => 'Latest Updates';
+
+  @override
+  String get homeRecentlyAddedTitle => 'New on Gatuno';
+
+  @override
+  String get homeViewAll => 'View all';
+
+  @override
   String get booksTitle => 'Books';
 
   @override

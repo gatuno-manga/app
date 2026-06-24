@@ -3,6 +3,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 
 part 'reading_database.g.dart';
 
+@TableIndex(name: 'idx_reading_progress_recent', columns: {#userId, #timestamp})
 class ReadingProgress extends Table {
   TextColumn get userId => text()();
   TextColumn get chapterId => text()();
@@ -22,7 +23,7 @@ class ReadingDatabase extends _$ReadingDatabase {
   ReadingDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -42,6 +43,9 @@ class ReadingDatabase extends _$ReadingDatabase {
             );
             await customStatement('DROP TABLE reading_progress_old;');
           });
+        }
+        if (from < 3) {
+          await customStatement('CREATE INDEX idx_reading_progress_recent ON reading_progress(user_id, timestamp);');
         }
       },
     );

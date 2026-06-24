@@ -147,6 +147,30 @@ class ReadingProgressLocalService {
     }
   }
 
+  Future<List<String>> getRecentUniqueBookIds(String userId, {int limit = 10}) async {
+    try {
+      final query = _database.selectOnly(_database.readingProgress)
+        ..addColumns([_database.readingProgress.bookId, _database.readingProgress.timestamp.max()])
+        ..where(_database.readingProgress.userId.equals(userId))
+        ..groupBy([_database.readingProgress.bookId])
+        ..orderBy([
+          OrderingTerm(
+            expression: _database.readingProgress.timestamp.max(),
+            mode: OrderingMode.desc,
+          ),
+        ])
+        ..limit(limit);
+
+      final result = await query.get();
+      return result
+          .map((row) => row.read(_database.readingProgress.bookId)!)
+          .toList();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error getting recent unique book ids', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
   Future<void> deleteSyncedProgress(String userId) async {
     // This could be used for cleanup, but for now we keep everything locally as per offline-first
   }

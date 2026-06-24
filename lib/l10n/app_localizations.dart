@@ -224,6 +224,36 @@ abstract class AppLocalizations {
   /// **'Home'**
   String get homeTitle;
 
+  /// No description provided for @homeFeaturedReadNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Read now'**
+  String get homeFeaturedReadNow;
+
+  /// No description provided for @homeContinueReadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get homeContinueReadingTitle;
+
+  /// No description provided for @homeLatestUpdatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest Updates'**
+  String get homeLatestUpdatesTitle;
+
+  /// No description provided for @homeRecentlyAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New on Gatuno'**
+  String get homeRecentlyAddedTitle;
+
+  /// No description provided for @homeViewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get homeViewAll;
+
   /// No description provided for @booksTitle.
   ///
   /// In en, this message translates to:
