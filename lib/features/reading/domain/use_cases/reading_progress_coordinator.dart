@@ -1,30 +1,23 @@
 import 'dart:async';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import '../../data/database/reading_database.dart';
-import '../../data/models/reading_progress_dto.dart';
 import '../../data/repositories/reading_progress_local_service.dart';
-import '../../data/repositories/reading_progress_remote_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
-import '../../../settings/domain/use_cases/settings_service.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../sync/domain/use_cases/app_sync_coordinator.dart';
 
 class ReadingProgressCoordinator {
   final ReadingProgressLocalService _localService;
-  final ReadingProgressRemoteService _remoteService;
+  final AppSyncCoordinator _syncCoordinator;
   final AuthService _authService;
-  final SettingsService _settingsService;
   static const String _logTag = 'ReadingProgressCoordinator';
 
   StreamSubscription<AuthEvent>? _authSubscription;
-  StreamSubscription<RemoteReadingProgress>? _remoteSubscription;
-  VoidCallback? _settingsListener;
 
   ReadingProgressCoordinator(
     this._localService,
-    this._remoteService,
+    this._syncCoordinator,
     this._authService,
-    this._settingsService,
   ) {
     _init();
   }
@@ -34,30 +27,12 @@ class ReadingProgressCoordinator {
     _authSubscription = _authService.onAuthChange.listen((event) {
       if (event == AuthEvent.authenticated) {
         _handleLogin();
-      } else if (event == AuthEvent.unauthenticated) {
-        _handleLogout();
       }
     });
 
-    // Listen to remote updates
-    _remoteSubscription = _remoteService.onRemoteUpdate.listen((
-      remoteProgress,
-    ) {
-      _handleRemoteUpdate(remoteProgress);
-    });
-
-    // Listen to settings changes (API URL)
-    _settingsListener = () {
-      if (_settingsService.apiUrl != null && _authService.authenticated) {
-        _remoteService.disconnect();
-        _remoteService.connect(_settingsService.apiUrl!);
-      }
-    };
-    _settingsService.addListener(_settingsListener!);
-
-    // Initial connection if already authenticated
-    if (_authService.authenticated && _settingsService.apiUrl != null) {
-      _remoteService.connect(_settingsService.apiUrl!);
+    // Initial sync if already authenticated
+    if (_authService.authenticated) {
+      _syncCoordinator.sync();
     }
   }
 
@@ -78,70 +53,10 @@ class ReadingProgressCoordinator {
         _logTag,
       );
       await _localService.updateProgressUserId('guest', user.id.value);
-
-      // 2. Sync migrated items to remote
-      final dtos = guestProgress
-          .map(
-            (p) => SaveProgressDto(
-              chapterId: p.chapterId,
-              bookId: p.bookId,
-              pageIndex: p.pageIndex,
-              timestamp: p.timestamp.millisecondsSinceEpoch,
-              totalPages: p.totalPages,
-              completed: p.completed,
-            ),
-          )
-          .toList();
-
-      try {
-        await _remoteService.syncBatch(SyncReadingProgressDto(progress: dtos));
-      } catch (e) {
-        AppLogger.w(
-          'Failed to sync migrated guest progress to remote: $e',
-          _logTag,
-        );
-      }
     }
 
-    // 3. Connect WebSocket
-    if (_settingsService.apiUrl != null) {
-      _remoteService.connect(_settingsService.apiUrl!);
-    }
-  }
-
-  void _handleLogout() {
-    AppLogger.i('Handling logout in ReadingProgressCoordinator', _logTag);
-    _remoteService.disconnect();
-  }
-
-  Future<void> _handleRemoteUpdate(RemoteReadingProgress remote) async {
-    final currentUser = _authService.currentUser;
-    if (currentUser.id.value != remote.userId) return;
-
-    final local = await _localService.getProgress(
-      remote.userId,
-      remote.chapterId,
-    );
-
-    // Highest Page Wins
-    if (local == null || remote.pageIndex >= local.pageIndex) {
-      AppLogger.d(
-        'Updating local progress from remote for chapter: ${remote.chapterId}',
-        _logTag,
-      );
-      await _localService.saveProgress(
-        ReadingProgressCompanion(
-          userId: Value(remote.userId),
-          chapterId: Value(remote.chapterId),
-          bookId: Value(remote.bookId),
-          pageIndex: Value(remote.pageIndex),
-          timestamp: Value(remote.timestamp),
-          version: Value(remote.version),
-          totalPages: Value(remote.totalPages),
-          completed: Value(remote.completed ?? false),
-        ),
-      );
-    }
+    // 2. Trigger Unified Sync
+    await _syncCoordinator.sync();
   }
 
   Future<void> saveProgress({
@@ -178,24 +93,9 @@ class ReadingProgressCoordinator {
     );
     await _localService.saveProgress(companion);
 
-    // 3. Save remotely if authenticated
+    // 3. Trigger Sync
     if (!user.isGuest) {
-      final dto = SaveProgressDto(
-        chapterId: chapterId,
-        bookId: bookId,
-        pageIndex: finalPageIndex,
-        timestamp: timestamp.millisecondsSinceEpoch,
-        totalPages: totalPages ?? local?.totalPages,
-        completed: finalCompleted,
-      );
-      try {
-        await _remoteService.saveProgress(dto);
-      } catch (e) {
-        AppLogger.w(
-          'Failed to save progress remotely, cached locally: $e',
-          _logTag,
-        );
-      }
+      _syncCoordinator.sync(); // Fire and forget
     }
   }
 
@@ -226,10 +126,6 @@ class ReadingProgressCoordinator {
 
   void dispose() {
     _authSubscription?.cancel();
-    _remoteSubscription?.cancel();
-    if (_settingsListener != null) {
-      _settingsService.removeListener(_settingsListener!);
-    }
-    _remoteService.dispose();
   }
 }
+

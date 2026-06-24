@@ -14,4 +14,7 @@ class ApiConstants {
   // Reading Progress Routes
   static const String readingProgress = '/users/me/reading-progress';
   static const String readingProgressSync = '/users/me/reading-progress/sync';
+  
+  // Sync Route
+  static const String syncUnified = '/sync';
 }

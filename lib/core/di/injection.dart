@@ -13,6 +13,7 @@ import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
+import '../../features/sync/sync_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
 import '../../features/settings/domain/use_cases/settings_service.dart';
 import '../../features/certificates/certificates_injection.dart';
@@ -49,6 +50,7 @@ Future<void> initDI() async {
   initUsersInjection(sl);
   initHomeInjection(sl);
   initBooksInjection(sl);
+  initSyncDI(sl); // Must be before reading since reading depends on sync coordinator
   initReadingDI(sl);
   initBookRequestsInjection(sl);
 
@@ -59,3 +61,4 @@ Future<void> initDI() async {
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
 }
+

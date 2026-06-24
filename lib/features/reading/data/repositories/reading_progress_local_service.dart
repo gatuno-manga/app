@@ -171,6 +171,28 @@ class ReadingProgressLocalService {
     }
   }
 
+  Future<List<ReadingProgressData>> getModifiedSince(String userId, DateTime since) async {
+    try {
+      return await (_database.select(_database.readingProgress)
+            ..where((t) => t.userId.equals(userId) & t.timestamp.isBiggerThanValue(since)))
+          .get();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error getting modified progress', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
+  Future<List<ReadingProgressData>> getAllProgress(String userId) async {
+    try {
+      return await (_database.select(_database.readingProgress)
+            ..where((t) => t.userId.equals(userId)))
+          .get();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error getting all progress', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
   Future<void> deleteSyncedProgress(String userId) async {
     // This could be used for cleanup, but for now we keep everything locally as per offline-first
   }
