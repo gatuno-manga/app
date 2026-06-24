@@ -1,3 +1,5 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/presentation/views/signup_screen.dart';
@@ -8,6 +10,11 @@ import '../../../helpers/test_injection.dart';
 
 void main() {
   late MockAuthService mockAuthService;
+
+  setUpAll(() {
+    registerFallbackValue(EmailAddress('test@example.com'));
+    registerFallbackValue(Password('password'));
+  });
 
   setUp(() async {
     mockAuthService = MockAuthService();
@@ -25,7 +32,7 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signUp('test@example.com', 'Password123!'),
+      () => mockAuthService.signUp(EmailAddress('test@example.com'), Password('Password123!')),
     ).thenAnswer((_) async => true);
 
     await tester.pumpApp(const SignUpPage());

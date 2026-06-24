@@ -1,7 +1,9 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/auth_token.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/data/repositories/auth_repository_impl.dart';
-import 'package:gatuno/features/authentication/data/models/auth_response.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -33,10 +35,10 @@ void main() {
           ),
         );
 
-        final result = await repository.signIn('email', 'password');
+        final result = await repository.signIn(EmailAddress('test@example.com'), Password('password'));
 
-        expect(result.token, 'access');
-        expect(result, isA<AuthResponse>());
+        expect(result.value, 'access');
+        expect(result, isA<AuthToken>());
       });
 
       test('throws ServerException when response data is invalid', () async {
@@ -54,7 +56,7 @@ void main() {
         );
 
         expect(
-          () => repository.signIn('email', 'password'),
+          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<ServerException>()),
         );
       });
@@ -73,7 +75,7 @@ void main() {
         );
 
         expect(
-          () => repository.signIn('email', 'password'),
+          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<NetworkException>()),
         );
       });
@@ -87,7 +89,7 @@ void main() {
         ).thenThrow(ValidationException(message: 'validation error'));
 
         expect(
-          () => repository.signIn('email', 'password'),
+          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<ValidationException>()),
         );
       });
@@ -101,7 +103,7 @@ void main() {
         ).thenThrow(Exception('unexpected'));
 
         expect(
-          () => repository.signIn('email', 'password'),
+          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<AuthException>()),
         );
       });
@@ -121,12 +123,12 @@ void main() {
           ),
         );
 
-        await repository.signUp('email', 'password');
+        await repository.signUp(EmailAddress('test@example.com'), Password('password'));
 
         verify(
           () => mockDio.post<Map<String, dynamic>>(
             any(),
-            data: {'email': 'email', 'password': 'password'},
+            data: {'email': 'test@example.com', 'password': 'password'},
           ),
         ).called(1);
       });
@@ -146,7 +148,7 @@ void main() {
         );
 
         expect(
-          () => repository.signUp('email', 'password'),
+          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<ServerException>()),
         );
       });
@@ -169,7 +171,7 @@ void main() {
         );
 
         expect(
-          () => repository.signUp('email', 'password'),
+          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<AuthException>()),
         );
       });
@@ -183,7 +185,7 @@ void main() {
         ).thenThrow(Exception('unexpected'));
 
         expect(
-          () => repository.signUp('email', 'password'),
+          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
           throwsA(isA<AuthException>()),
         );
       });
@@ -255,8 +257,8 @@ void main() {
 
         final result = await repository.refreshToken();
 
-        expect(result.token, 'new_token');
-        expect(result, isA<AuthResponse>());
+        expect(result.value, 'new_token');
+        expect(result, isA<AuthToken>());
       });
 
       test('throws ServerException when response data is invalid', () async {

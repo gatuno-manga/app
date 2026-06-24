@@ -17,7 +17,7 @@ void main() {
   group('BooksFilterSheet', () {
     testWidgets('shows initial options correctly', (tester) async {
       const initialOptions = BookPageOptions(
-        publication: const PositiveInt(2020),
+        publication: PositiveInt(2020),
         publicationOperator: 'gt',
         type: [TypeBook.manga],
       );

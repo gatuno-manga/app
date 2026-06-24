@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 import '../../../../core/network/api_constants.dart';
 import '../../../../core/network/exceptions.dart';
 import '../../../../core/logging/logger.dart';
-import '../../domain/entities/auth_token.dart';
+import '../../domain/value_objects/auth_token.dart';
+import '../../domain/value_objects/email_address.dart';
+import '../../domain/value_objects/password.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/auth_response.dart';
 
@@ -13,20 +15,20 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._dio);
 
   @override
-  Future<AuthToken> signIn(String email, String password) async {
-    final redactedEmail = AppLogger.redactEmail(email);
+  Future<AuthToken> signIn(EmailAddress email, Password password) async {
+    final redactedEmail = AppLogger.redactEmail(email.value);
     AppLogger.i('SignIn attempt for: $redactedEmail', _logTag);
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiConstants.signIn,
-        data: {'email': email, 'password': password},
+        data: {'email': email.value, 'password': password.value},
       );
 
       final data = response.data;
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           data is Map<String, dynamic>) {
         AppLogger.i('SignIn success for: $redactedEmail', _logTag);
-        return AuthResponse.fromJson(data);
+        return AuthResponse.fromJson(data).token;
       } else {
         AppLogger.e(
           'SignIn failed: Invalid response format for $redactedEmail',
@@ -61,13 +63,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> signUp(String email, String password) async {
-    final redactedEmail = AppLogger.redactEmail(email);
+  Future<void> signUp(EmailAddress email, Password password) async {
+    final redactedEmail = AppLogger.redactEmail(email.value);
     AppLogger.i('SignUp attempt for: $redactedEmail', _logTag);
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         ApiConstants.signUp,
-        data: {'email': email, 'password': password},
+        data: {'email': email.value, 'password': password.value},
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -145,7 +147,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           data is Map<String, dynamic>) {
         AppLogger.i('Token refresh success', _logTag);
-        return AuthResponse.fromJson(data);
+        return AuthResponse.fromJson(data).token;
       } else {
         AppLogger.e(
           'Token refresh failed: Invalid response format',

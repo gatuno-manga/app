@@ -1,3 +1,5 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/presentation/view_models/signin_view_model.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
@@ -22,7 +24,7 @@ void main() {
 
     test('signIn success updates state correctly', () async {
       when(
-        () => mockAuthService.signIn('test@example.com', 'password'),
+        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('password')),
       ).thenAnswer((_) async => true);
 
       final success = await viewModel.signIn('test@example.com', 'password');
@@ -34,7 +36,7 @@ void main() {
 
     test('signIn failure updates state correctly', () async {
       when(
-        () => mockAuthService.signIn('test@example.com', 'wrong'),
+        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
       ).thenThrow(Exception('Invalid credentials'));
 
       final success = await viewModel.signIn('test@example.com', 'wrong');
@@ -46,7 +48,7 @@ void main() {
 
     test('clearError resets error message', () async {
       when(
-        () => mockAuthService.signIn('test@example.com', 'wrong'),
+        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
       ).thenThrow(Exception('Error'));
 
       await viewModel.signIn('test@example.com', 'wrong');

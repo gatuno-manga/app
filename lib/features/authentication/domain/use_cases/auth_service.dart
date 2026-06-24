@@ -4,6 +4,8 @@ import '../repositories/auth_repository.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../core/utils/jwt_decoder.dart';
 import '../../../users/data/models/user_model.dart';
+import '../value_objects/email_address.dart';
+import '../value_objects/password.dart';
 import 'token_manager.dart';
 
 enum AuthEvent { authenticated, unauthenticated, initialized }
@@ -92,13 +94,13 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  Future<bool> signIn(String email, String password) async {
-    final redactedEmail = AppLogger.redactEmail(email);
+  Future<bool> signIn(EmailAddress email, Password password) async {
+    final redactedEmail = AppLogger.redactEmail(email.value);
     AppLogger.i('Performing signIn for: $redactedEmail', _logTag);
     try {
       final response = await _authRepository.signIn(email, password);
 
-      await _tokenManager.saveToken(response.token);
+      await _tokenManager.saveToken(response);
 
       AppLogger.i(
         'SignIn completed and token saved for: $redactedEmail',
@@ -119,8 +121,8 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  Future<bool> signUp(String email, String password) async {
-    final redactedEmail = AppLogger.redactEmail(email);
+  Future<bool> signUp(EmailAddress email, Password password) async {
+    final redactedEmail = AppLogger.redactEmail(email.value);
     AppLogger.i('Performing signUp for: $redactedEmail', _logTag);
     try {
       await _authRepository.signUp(email, password);

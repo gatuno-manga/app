@@ -4,6 +4,7 @@ import '../../../../core/logging/logger.dart';
 import '../../../../core/utils/jwt_decoder.dart';
 import '../repositories/auth_repository.dart';
 import '../../data/data_sources/auth_local_data_source.dart';
+import '../value_objects/auth_token.dart';
 
 class TokenManager implements TokenProvider {
   final AuthRepository _authRepository;
@@ -29,9 +30,9 @@ class TokenManager implements TokenProvider {
     }
   }
 
-  Future<void> saveToken(String token) async {
-    _token = token;
-    await _authStorage.saveToken(token);
+  Future<void> saveToken(AuthToken token) async {
+    _token = token.value;
+    await _authStorage.saveToken(token.value);
     scheduleRefresh();
     onTokenChanged?.call();
   }
@@ -104,7 +105,7 @@ class TokenManager implements TokenProvider {
     AppLogger.i('Performing token refresh', _logTag);
     try {
       final response = await _authRepository.refreshToken();
-      await saveToken(response.token);
+      await saveToken(response);
       AppLogger.i('Token refresh success', _logTag);
     } catch (e, stackTrace) {
       AppLogger.e('Token refresh failed', e, stackTrace, _logTag);

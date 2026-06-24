@@ -62,7 +62,7 @@ class HomeViewModel extends SafeChangeNotifier {
     try {
       final res = await _booksRepository.getBooks(
         const BookPageOptions(
-          limit: const PositiveInt(12),
+          limit: PositiveInt(12),
           orderBy: 'updatedAt',
           order: SortOrder.desc,
         ),
@@ -88,7 +88,7 @@ class HomeViewModel extends SafeChangeNotifier {
     try {
       final res = await _booksRepository.getBooks(
         const BookPageOptions(
-          limit: const PositiveInt(12),
+          limit: PositiveInt(12),
           orderBy: 'createdAt',
           order: SortOrder.desc,
         ),

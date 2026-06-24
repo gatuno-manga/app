@@ -1,9 +1,11 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/token_manager.dart';
 import 'package:gatuno/features/authentication/domain/repositories/auth_repository.dart';
-import 'package:gatuno/features/authentication/domain/entities/auth_token.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/auth_token.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
@@ -17,7 +19,9 @@ void main() {
   late MockTokenManager mockTokenManager;
 
   setUpAll(() {
-    registerFallbackValue(AuthToken(token: ''));
+    registerFallbackValue(EmailAddress('test@example.com'));
+    registerFallbackValue(Password('password'));
+    registerFallbackValue(AuthToken('token'));
   });
 
   setUp(() {
@@ -31,7 +35,7 @@ void main() {
     authService = AuthService(mockAuthRepository, mockTokenManager);
   });
 
-  final tToken = AuthToken(token: 'access');
+  final tToken = AuthToken('access');
 
   group('AuthService', () {
     test(
@@ -47,15 +51,15 @@ void main() {
           () => mockTokenManager.saveToken(any()),
         ).thenAnswer((_) async => {});
 
-        final result = await authService.signIn('test@example.com', 'password');
+        final result = await authService.signIn(EmailAddress('test@example.com'), Password('password'));
 
         expect(result, true);
         expect(authService.authenticated, true);
         expect(notificationCount, greaterThan(0));
         verify(
-          () => mockAuthRepository.signIn('test@example.com', 'password'),
+          () => mockAuthRepository.signIn(EmailAddress('test@example.com'), Password('password')),
         ).called(1);
-        verify(() => mockTokenManager.saveToken(tToken.token)).called(1);
+        verify(() => mockTokenManager.saveToken(tToken)).called(1);
       },
     );
 

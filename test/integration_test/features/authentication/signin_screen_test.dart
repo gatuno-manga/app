@@ -1,3 +1,5 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/presentation/views/signin_screen.dart';
@@ -25,7 +27,7 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signIn('test@example.com', 'password'),
+      () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('password')),
     ).thenAnswer((_) async => true);
 
     await tester.pumpApp(const SignInPage());
@@ -49,7 +51,7 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signIn('test@example.com', 'wrong'),
+      () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
     ).thenThrow(Exception('Invalid credentials'));
 
     await tester.pumpApp(const SignInPage());

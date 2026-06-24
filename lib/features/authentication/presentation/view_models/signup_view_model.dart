@@ -1,5 +1,7 @@
 import '../../../../core/base/safe_change_notifier.dart';
 import '../../domain/use_cases/auth_service.dart';
+import '../../domain/value_objects/email_address.dart';
+import '../../domain/value_objects/password.dart';
 import '../../../../core/logging/logger.dart';
 
 class SignUpViewModel extends SafeChangeNotifier {
@@ -22,7 +24,7 @@ class SignUpViewModel extends SafeChangeNotifier {
     notifyListeners();
 
     try {
-      final success = await _authService.signUp(email, password);
+      final success = await _authService.signUp(EmailAddress(email), Password(password));
       _isLoading = false;
       AppLogger.i('SignUp result for $redactedEmail: $success', _logTag);
       notifyListeners();

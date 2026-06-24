@@ -105,9 +105,9 @@ void main() {
 
     final chapterList = entity.ChapterList(
       data: [
-        const entity.Chapter(id: const ChapterId('1'),
-          index: const ChapterIndex(1),
-          title: const ChapterTitle('Chapter 1 Title'),
+        const entity.Chapter(id: ChapterId('1'),
+          index: ChapterIndex(1),
+          title: ChapterTitle('Chapter 1 Title'),
           read: false,
         ),
       ],

@@ -14,7 +14,7 @@ part 'book_request_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class BookRequestModel extends BookRequestEntity {
-  BookRequestModel({
+  const BookRequestModel({
     required super.id,
     required super.userId,
     required super.title,

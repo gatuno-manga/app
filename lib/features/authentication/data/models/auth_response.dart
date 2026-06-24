@@ -1,24 +1,38 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../../core/network/exceptions.dart';
-import '../../domain/entities/auth_token.dart';
+import '../../domain/value_objects/auth_token.dart';
 
 part 'auth_response.g.dart';
 
-@JsonSerializable()
-class AuthResponse extends AuthToken {
-  AuthResponse({
-    @JsonKey(name: 'access_token', readValue: _readToken) required super.token,
-  });
+class AuthTokenConverter implements JsonConverter<AuthToken, dynamic> {
+  const AuthTokenConverter();
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) {
-    final token = _readToken(json, 'token');
-    if (token == null || token is! String) {
+  @override
+  AuthToken fromJson(dynamic json) {
+    if (json == null || json is! String) {
       throw ValidationException(
         message: 'Invalid or missing access_token in response',
       );
     }
-    return _$AuthResponseFromJson(json);
+    return AuthToken(json);
   }
+
+  @override
+  dynamic toJson(AuthToken object) => object.value;
+}
+
+@JsonSerializable()
+@AuthTokenConverter()
+class AuthResponse {
+  @JsonKey(name: 'access_token', readValue: _readToken)
+  final AuthToken token;
+
+  AuthResponse({
+    required this.token,
+  });
+
+  factory AuthResponse.fromJson(Map<String, dynamic> json) =>
+      _$AuthResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 

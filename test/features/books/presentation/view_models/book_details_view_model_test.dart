@@ -60,9 +60,9 @@ void main() {
     });
 
     test('fetchBookDetails success updates state correctly', () async {
-      const book = Book(id: BookId(bookId), title: const BookTitle('Test Book'));
+      const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
       const chapterList = ChapterList(
-        data: [Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0))],
+        data: [Chapter(id: ChapterId('1'), index: ChapterIndex(1.0))],
         hasNextPage: false,
       );
 
@@ -90,15 +90,15 @@ void main() {
     test('getResumeChapterId returns first chapter when no progress', () async {
       const chapterList = ChapterList(
         data: [
-          Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0)),
-          Chapter(id: const ChapterId('2'), index: const ChapterIndex(2.0)),
+          Chapter(id: ChapterId('1'), index: ChapterIndex(1.0)),
+          Chapter(id: ChapterId('2'), index: ChapterIndex(2.0)),
         ],
         hasNextPage: false,
       );
 
       when(
         () => mockRepository.getBook(const BookId(bookId)),
-      ).thenAnswer((_) async => const Book(id: BookId(bookId), title: const BookTitle('Test')));
+      ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
       when(
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => chapterList);
@@ -119,8 +119,8 @@ void main() {
       () async {
         const chapterList = ChapterList(
           data: [
-            Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0)),
-            Chapter(id: const ChapterId('2'), index: const ChapterIndex(2.0)),
+            Chapter(id: ChapterId('1'), index: ChapterIndex(1.0)),
+            Chapter(id: ChapterId('2'), index: ChapterIndex(2.0)),
           ],
           hasNextPage: false,
         );
@@ -136,7 +136,7 @@ void main() {
 
         when(
           () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: const BookTitle('Test')));
+        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
@@ -159,8 +159,8 @@ void main() {
       () async {
         const chapterList = ChapterList(
           data: [
-            Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0)),
-            Chapter(id: const ChapterId('2'), index: const ChapterIndex(2.0)),
+            Chapter(id: ChapterId('1'), index: ChapterIndex(1.0)),
+            Chapter(id: ChapterId('2'), index: ChapterIndex(2.0)),
           ],
           hasNextPage: false,
         );
@@ -176,7 +176,7 @@ void main() {
 
         when(
           () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: const BookTitle('Test')));
+        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
@@ -197,7 +197,7 @@ void main() {
       'getResumeChapterId returns current chapter when last is completed but it is the last chapter',
       () async {
         const chapterList = ChapterList(
-          data: [Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0))],
+          data: [Chapter(id: ChapterId('1'), index: ChapterIndex(1.0))],
           hasNextPage: false,
         );
         final progress = ReadingProgressData(
@@ -212,7 +212,7 @@ void main() {
 
         when(
           () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: const BookTitle('Test')));
+        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
@@ -241,14 +241,14 @@ void main() {
     });
 
     test('loadMoreChapters success appends chapters', () async {
-      const book = Book(id: BookId(bookId), title: const BookTitle('Test Book'));
+      const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
       const initialChapterList = ChapterList(
-        data: [Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0))],
+        data: [Chapter(id: ChapterId('1'), index: ChapterIndex(1.0))],
         nextCursor: 'cursor',
         hasNextPage: true,
       );
       const moreChapterList = ChapterList(
-        data: [Chapter(id: const ChapterId('2'), index: const ChapterIndex(2.0))],
+        data: [Chapter(id: ChapterId('2'), index: ChapterIndex(2.0))],
         hasNextPage: false,
       );
 
@@ -278,7 +278,7 @@ void main() {
     });
 
     test('setChapterOrder changes order and refetches', () async {
-      const book = Book(id: BookId(bookId), title: const BookTitle('Test Book'));
+      const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
       const chapterList = ChapterList(data: [], hasNextPage: false);
 
       when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer((_) async => book);
@@ -327,11 +327,11 @@ void main() {
     test(
       'refreshReadStatus updates chapter completed and read state',
       () async {
-        const book = Book(id: BookId(bookId), title: const BookTitle('Test Book'));
+        const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
         const chapterList = ChapterList(
           data: [
-            Chapter(id: const ChapterId('1'), index: const ChapterIndex(1.0), read: false, completed: false),
-            Chapter(id: const ChapterId('2'), index: const ChapterIndex(2.0), read: false, completed: false),
+            Chapter(id: ChapterId('1'), index: ChapterIndex(1.0), read: false, completed: false),
+            Chapter(id: ChapterId('2'), index: ChapterIndex(2.0), read: false, completed: false),
           ],
           hasNextPage: false,
         );

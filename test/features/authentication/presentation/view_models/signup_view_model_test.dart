@@ -1,3 +1,5 @@
+import 'package:gatuno/features/authentication/domain/value_objects/email_address.dart';
+import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/authentication/presentation/view_models/signup_view_model.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
@@ -8,6 +10,12 @@ class MockAuthService extends Mock implements AuthService {}
 void main() {
   late SignUpViewModel viewModel;
   late MockAuthService mockAuthService;
+
+  
+  setUpAll(() {
+    registerFallbackValue(EmailAddress('test@example.com'));
+    registerFallbackValue(Password('password'));
+  });
 
   setUp(() {
     mockAuthService = MockAuthService();
@@ -22,7 +30,7 @@ void main() {
 
     test('signUp success updates state correctly', () async {
       when(
-        () => mockAuthService.signUp('test@example.com', 'Password123!'),
+        () => mockAuthService.signUp(EmailAddress('test@example.com'), Password('Password123!')),
       ).thenAnswer((_) async => true);
 
       final success = await viewModel.signUp(
