@@ -1,4 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/network/api_constants.dart';
 import 'package:gatuno/core/network/dio_client.dart';
@@ -53,8 +66,8 @@ void main() {
 
       // assert
       expect(result.data.length, 1);
-      expect(result.data[0].id, '1');
-      expect(result.total, 1);
+      expect(result.data[0].id.value, '1');
+      expect(result.total.value, 1);
     });
 
     test(
@@ -149,7 +162,7 @@ void main() {
   });
 
   group('getBook', () {
-    const bookId = '1';
+    const bookId = BookId('1');
     final bookJson = {'id': '1', 'title': 'Book 1'};
 
     test('should return BookModel when the call is successful', () async {
@@ -158,7 +171,7 @@ void main() {
         (_) async => Response(
           data: bookJson,
           statusCode: 200,
-          requestOptions: RequestOptions(path: '${ApiConstants.books}/$bookId'),
+          requestOptions: RequestOptions(path: '${ApiConstants.books}/${bookId.value}'),
         ),
       );
 
@@ -166,8 +179,8 @@ void main() {
       final result = await repository.getBook(bookId);
 
       // assert
-      expect(result.id, '1');
-      expect(result.title, 'Book 1');
+      expect(result.id.value, '1');
+      expect(result.title.value, 'Book 1');
     });
 
     test(
@@ -179,7 +192,7 @@ void main() {
             data: null,
             statusCode: 200,
             requestOptions: RequestOptions(
-              path: '${ApiConstants.books}/$bookId',
+              path: '${ApiConstants.books}/${bookId.value}',
             ),
           ),
         );
@@ -220,7 +233,7 @@ void main() {
   });
 
   group('getBookChapters', () {
-    const bookId = '1';
+    const bookId = BookId('1');
     const options = ChapterPageOptions();
     final chapterListJson = {
       'data': [
@@ -243,7 +256,7 @@ void main() {
             data: chapterListJson,
             statusCode: 200,
             requestOptions: RequestOptions(
-              path: '${ApiConstants.books}/$bookId/chapters',
+              path: '${ApiConstants.books}/${bookId.value}/chapters',
             ),
           ),
         );
@@ -253,7 +266,7 @@ void main() {
 
         // assert
         expect(result.data.length, 1);
-        expect(result.data[0].id, '1');
+        expect(result.data[0].id.value, '1');
         expect(result.hasNextPage, false);
       },
     );

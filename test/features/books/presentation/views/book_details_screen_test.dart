@@ -1,4 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/author.dart';
@@ -80,25 +93,23 @@ void main() {
   });
 
   testWidgets('renders book details and chapters', (tester) async {
-    final book = Book(
-      id: '1',
-      title: 'Test Book',
-      authors: [const Author(id: '1', name: 'Test Author')],
-      description: 'Test Description',
-      cover: 'test_cover.jpg',
+    final book = Book(id: const BookId('1'),
+      title: const BookTitle('Test Book'),
+      authors: [Author(id: const AuthorId('1'), name: const AuthorName('Test Author'))],
+      description: const BookDescription('Test Description'),
+      cover: const BookCover('test_cover.jpg'),
       tags: [],
-      totalChapters: 1,
-      publication: 2023,
+      totalChapters: const PositiveInt(1),
+      publication: const PositiveInt(2023),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
     final chapterList = entity.ChapterList(
       data: [
-        const entity.Chapter(
-          id: '1',
-          index: 1,
-          title: 'Chapter 1 Title',
+        const entity.Chapter(id: const ChapterId('1'),
+          index: const ChapterIndex(1),
+          title: const ChapterTitle('Chapter 1 Title'),
           read: false,
         ),
       ],

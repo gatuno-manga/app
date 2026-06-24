@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:optional/optional.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../../shared/components/atoms/app_button.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
@@ -27,7 +28,7 @@ class BooksFilterSheet extends StatefulWidget {
         initialOptions: viewModel.options,
         onApply: (newOptions) {
           viewModel.updateFilters(
-            publication: newOptions.publication,
+            publication: newOptions.publication?.value,
             publicationOperator: newOptions.publicationOperator,
             type: newOptions.type,
             tags: newOptions.tags,
@@ -57,7 +58,7 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
     super.initState();
     _currentOptions = widget.initialOptions;
     if (_currentOptions.publication != null) {
-      _yearController.text = _currentOptions.publication.toString();
+      _yearController.text = _currentOptions.publication!.value.toString();
     }
   }
 
@@ -77,8 +78,9 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
 
   void _onYearChanged(String value) {
     setState(() {
+      final parsed = int.tryParse(value);
       _currentOptions = _currentOptions.copyWith(
-        publication: Optional.ofNullable(int.tryParse(value)),
+        publication: Optional.ofNullable(parsed != null ? PositiveInt(parsed) : null),
       );
     });
   }

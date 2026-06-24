@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/author.dart';
+import '../../domain/value_objects/author_id.dart';
+import '../../domain/value_objects/author_name.dart';
 
 part 'author_model.g.dart';
 

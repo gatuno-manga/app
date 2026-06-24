@@ -40,14 +40,13 @@ class BookDetailsContent extends StatelessWidget {
         ),
       ),
       cover: BookCoverLarge(
-        coverUrl: book.cover,
-        blurHash: book.metadata?.blurHash,
+        coverUrl: book.cover?.value,
       ),
       header: BookDetailsHeader(
-        title: book.title,
+        title: book.title.value,
         authors: book.authors,
-        totalChapters: book.totalChapters,
-        publicationYear: book.publication,
+        totalChapters: book.totalChapters?.value,
+        publicationYear: book.publication?.value,
       ),
       actionButtons: BookActionButtons(
         hasProgress: viewModel.hasReadingProgress,
@@ -65,14 +64,14 @@ class BookDetailsContent extends StatelessWidget {
         },
       ),
       tags: BookTagsList(tags: book.tags),
-      description: BookDescription(description: book.description),
+      description: BookDescription(description: book.description?.value),
       chapterList: ChapterList(
         chapters: viewModel.chapterList?.data ?? [],
         isLoading: viewModel.isLoadingChapters,
         hasNextPage: viewModel.chapterList?.hasNextPage ?? false,
         onChapterTap: (chapter) async {
-          if (chapter.lastPage > 0 && !chapter.completed) {
-            await context.push('/chapters/${chapter.id}/page/${chapter.lastPage}');
+          if (chapter.lastPage.value > 0 && !chapter.completed) {
+            await context.push('/chapters/${chapter.id}/page/${chapter.lastPage.value}');
           } else {
             await context.push('/chapters/${chapter.id}');
           }

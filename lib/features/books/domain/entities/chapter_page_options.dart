@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 
 part 'chapter_page_options.g.dart';
 
@@ -7,13 +8,13 @@ enum ChapterSortOrder { asc, desc }
 @JsonSerializable(includeIfNull: false)
 class ChapterPageOptions {
   final String? cursor;
-  final int limit;
+  final PositiveInt limit;
   @JsonKey(toJson: _orderToJson)
   final ChapterSortOrder order;
 
   const ChapterPageOptions({
     this.cursor,
-    this.limit = 200,
+    this.limit = const PositiveInt(200),
     this.order = ChapterSortOrder.asc,
   });
 
@@ -21,7 +22,7 @@ class ChapterPageOptions {
 
   ChapterPageOptions copyWith({
     String? cursor,
-    int? limit,
+    PositiveInt? limit,
     ChapterSortOrder? order,
   }) {
     return ChapterPageOptions(

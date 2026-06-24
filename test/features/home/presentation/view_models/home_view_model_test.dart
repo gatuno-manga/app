@@ -12,6 +12,7 @@ import 'package:gatuno/features/users/domain/value_objects/user_display_name.dar
 import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 class MockAuthService extends Mock implements AuthService {}
 class MockUserService extends Mock implements UserService {}
@@ -39,7 +40,7 @@ void main() {
       () => mockUserService.getCurrentUser(),
     ).thenAnswer((_) async => UserModel.guest);
     
-    when(() => mockBooksRepository.getBooks(any())).thenAnswer((_) async => const BookList(data: [], total: 0, page: 1, limit: 12, totalPages: 1));
+    when(() => mockBooksRepository.getBooks(any())).thenAnswer((_) async => const BookList(data: [], total: PositiveInt(0), page: PositiveInt(1), limit: PositiveInt(12), totalPages: PositiveInt(1)));
     when(() => mockReadingCoordinator.getContinueReadingBooks(limit: any(named: 'limit'))).thenAnswer((_) async => []);
 
     viewModel = HomeViewModel(mockAuthService, mockUserService, mockBooksRepository, mockReadingCoordinator);

@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/tag.dart';
+import '../../domain/value_objects/tag_id.dart';
+import '../../domain/value_objects/tag_name.dart';
 
 part 'tag_model.g.dart';
 

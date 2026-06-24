@@ -1,6 +1,7 @@
 import 'package:optional/optional.dart';
 import '../../../../core/base/safe_change_notifier.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../settings/domain/use_cases/settings_service.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_page_options.dart';
@@ -45,7 +46,7 @@ class BooksViewModel extends SafeChangeNotifier {
     _isLoading = true;
     _error = null;
     if (refresh && resetPage) {
-      _options = _options.copyWith(page: 1);
+      _options = _options.copyWith(page: const PositiveInt(1));
     }
     notifyListeners();
 
@@ -80,17 +81,17 @@ class BooksViewModel extends SafeChangeNotifier {
   }
 
   void setPage(int page) {
-    if (page < 1 || (_bookList != null && page > _bookList!.totalPages)) {
+    if (page < 1 || (_bookList != null && page > _bookList!.totalPages.value)) {
       return;
     }
     AppLogger.i('Setting page to: $page', _logTag);
-    _options = _options.copyWith(page: page);
+    _options = _options.copyWith(page: PositiveInt(page));
     fetchBooks();
   }
 
-  void loadNextPage() => setPage(_options.page + 1);
+  void loadNextPage() => setPage(_options.page.value + 1);
 
-  void loadPreviousPage() => setPage(_options.page - 1);
+  void loadPreviousPage() => setPage(_options.page.value - 1);
 
   void setLayoutMode(BooksLayoutMode mode) {
     AppLogger.i('Setting layout mode to: $mode', _logTag);
@@ -104,19 +105,19 @@ class BooksViewModel extends SafeChangeNotifier {
       return;
     }
     AppLogger.i('Setting search to: $search', _logTag);
-    _options = _options.copyWith(search: Optional.ofNullable(search), page: 1);
+    _options = _options.copyWith(search: Optional.ofNullable(search), page: const PositiveInt(1));
     fetchBooks(refresh: true);
   }
 
   void clearSearch() {
     AppLogger.i('Clearing search', _logTag);
-    _options = _options.copyWith(search: const Optional.empty(), page: 1);
+    _options = _options.copyWith(search: const Optional.empty(), page: const PositiveInt(1));
     fetchBooks(refresh: true);
   }
 
   void setSort(String orderBy, SortOrder order) {
     AppLogger.i('Setting sort: $orderBy $order', _logTag);
-    _options = _options.copyWith(orderBy: orderBy, order: order, page: 1);
+    _options = _options.copyWith(orderBy: orderBy, order: order, page: const PositiveInt(1));
     fetchBooks(refresh: true);
   }
 
@@ -134,7 +135,7 @@ class BooksViewModel extends SafeChangeNotifier {
   }) {
     AppLogger.i('Updating filters', _logTag);
     _options = _options.copyWith(
-      publication: Optional.ofNullable(publication),
+      publication: Optional.ofNullable(publication != null ? PositiveInt(publication) : null),
       publicationOperator: Optional.ofNullable(publicationOperator),
       type: Optional.ofNullable(type),
       tags: Optional.ofNullable(tags),
@@ -144,7 +145,7 @@ class BooksViewModel extends SafeChangeNotifier {
       authors: Optional.ofNullable(authors),
       authorsLogic: Optional.ofNullable(authorsLogic),
       sensitiveContent: Optional.ofNullable(sensitiveContent),
-      page: 1,
+      page: const PositiveInt(1),
     );
     fetchBooks(refresh: true);
   }

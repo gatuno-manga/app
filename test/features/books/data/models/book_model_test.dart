@@ -1,4 +1,17 @@
 import 'package:gatuno/features/books/data/models/author_model.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:gatuno/features/books/data/models/book_model.dart';
 import 'package:gatuno/features/books/data/models/tag_model.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
@@ -28,18 +41,18 @@ void main() {
     test('fromJson should return a valid model', () {
       final model = BookModel.fromJson(json);
 
-      expect(model.id, '1');
-      expect(model.title, 'Test Book');
+      expect(model.id.value, '1');
+      expect(model.title.value, 'Test Book');
       expect(model.authors.length, 2);
       expect(model.authors[0], isA<AuthorModel>());
-      expect(model.authors[0].name, 'Author 1');
+      expect(model.authors[0].name.value, 'Author 1');
       expect(model.tags.length, 2);
       expect(model.tags[0], isA<TagModel>());
-      expect(model.tags[0].name, 'Tag 1');
-      expect(model.description, 'Description');
-      expect(model.cover, 'cover.jpg');
+      expect(model.tags[0].name.value, 'Tag 1');
+      expect(model.description?.value, 'Description');
+      expect(model.cover?.value, 'cover.jpg');
       expect(model.type, TypeBook.manga);
-      expect(model.publication, 2021);
+      expect(model.publication?.value, 2021);
       expect(model.createdAt, DateTime.parse('2021-01-01T00:00:00.000Z'));
       expect(model.updatedAt, DateTime.parse('2021-01-01T00:00:00.000Z'));
     });

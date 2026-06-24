@@ -1,4 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
@@ -15,7 +28,7 @@ void main() {
   group('BooksFilterSheet', () {
     testWidgets('shows initial options correctly', (tester) async {
       const initialOptions = BookPageOptions(
-        publication: 2020,
+        publication: const PositiveInt(2020),
         publicationOperator: 'gt',
         type: [TypeBook.manga],
       );
@@ -109,7 +122,7 @@ void main() {
       await tester.tap(find.byType(AppButton));
       await tester.pumpAndSettle();
 
-      expect(appliedOptions?.publication, 2022);
+      expect(appliedOptions?.publication?.value, 2022);
       expect(appliedOptions?.publicationOperator, 'lt');
       expect(appliedOptions?.type, contains(TypeBook.manhwa));
       expect(appliedOptions?.sensitiveContent, contains('Ecchi'));

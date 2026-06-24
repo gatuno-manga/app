@@ -1,19 +1,23 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../domain/entities/chapter.dart';
+import '../../domain/value_objects/chapter_id.dart';
+import '../../domain/value_objects/chapter_index.dart';
+import '../../domain/value_objects/chapter_title.dart';
 
 part 'chapter_model.g.dart';
 
-class IndexConverter implements JsonConverter<double, dynamic> {
+class IndexConverter implements JsonConverter<ChapterIndex, dynamic> {
   const IndexConverter();
   @override
-  double fromJson(dynamic json) {
-    if (json == null) return 0.0;
-    if (json is num) return json.toDouble();
-    return double.tryParse(json.toString()) ?? 0.0;
+  ChapterIndex fromJson(dynamic json) {
+    if (json == null) return const ChapterIndex(0.0);
+    if (json is num) return ChapterIndex(json.toDouble());
+    return ChapterIndex(double.tryParse(json.toString()) ?? 0.0);
   }
 
   @override
-  dynamic toJson(double object) => object;
+  dynamic toJson(ChapterIndex object) => object.value;
 }
 
 class ScrapingStatusConverter
@@ -63,7 +67,7 @@ class ChapterModel extends Chapter {
     super.scrapingStatus,
     super.read = false,
     super.completed = false,
-    super.lastPage = 0,
+    super.lastPage = const PositiveInt(0),
   });
 
   factory ChapterModel.fromJson(Map<String, dynamic> json) =>

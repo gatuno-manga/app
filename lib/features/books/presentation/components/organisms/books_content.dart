@@ -50,8 +50,8 @@ class BooksContent extends StatelessWidget {
           ),
         ),
         Pagination(
-          currentPage: viewModel.options.page,
-          totalPages: viewModel.bookList?.totalPages ?? 1,
+          currentPage: viewModel.options.page.value,
+          totalPages: viewModel.bookList?.totalPages.value ?? 1,
           isLoading: viewModel.isLoading,
           onPageChanged: (page) => viewModel.setPage(page),
         ),

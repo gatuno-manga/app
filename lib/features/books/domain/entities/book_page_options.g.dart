@@ -8,14 +8,20 @@ part of 'book_page_options.dart';
 
 BookPageOptions _$BookPageOptionsFromJson(Map<String, dynamic> json) =>
     BookPageOptions(
-      page: (json['page'] as num?)?.toInt() ?? 1,
-      limit: (json['limit'] as num?)?.toInt() ?? 20,
+      page: json['page'] == null
+          ? const PositiveInt(1)
+          : PositiveInt.fromJson((json['page'] as num).toInt()),
+      limit: json['limit'] == null
+          ? const PositiveInt(20)
+          : PositiveInt.fromJson((json['limit'] as num).toInt()),
       orderBy: json['orderBy'] as String? ?? 'createdAt',
       order:
           $enumDecodeNullable(_$SortOrderEnumMap, json['order']) ??
           SortOrder.desc,
       search: json['search'] as String?,
-      publication: (json['publication'] as num?)?.toInt(),
+      publication: json['publication'] == null
+          ? null
+          : PositiveInt.fromJson((json['publication'] as num).toInt()),
       publicationOperator: json['publicationOperator'] as String?,
       type: (json['type'] as List<dynamic>?)
           ?.map((e) => $enumDecode(_$TypeBookEnumMap, e))

@@ -23,7 +23,7 @@ class FeaturedCarouselBackground extends StatelessWidget {
         // Background Image with Blur
         if (book.cover != null)
           AppImage(
-            imageUrl: book.cover!,
+            imageUrl: book.cover!.value,
             blurHash: book.metadata?.blurHash,
             fit: BoxFit.cover,
             strategy: sl<ImageLoadingStrategy>(),

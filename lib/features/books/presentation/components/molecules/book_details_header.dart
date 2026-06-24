@@ -34,7 +34,7 @@ class BookDetailsHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          authors.map((e) => e.name).join(', '),
+          authors.map((e) => e.name.value).join(', '),
           style: textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface.withValues(alpha: 0.8),

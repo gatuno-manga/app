@@ -6,6 +6,7 @@ import '../../../../core/logging/logger.dart';
 import '../../domain/entities/book_page_options.dart';
 import '../../domain/entities/chapter_page_options.dart';
 import '../../domain/repositories/books_repository.dart';
+import '../../domain/value_objects/book_id.dart';
 import '../models/book_model.dart';
 import '../models/chapter_model.dart';
 
@@ -50,11 +51,11 @@ class BooksRepositoryImpl implements BooksRepository {
   }
 
   @override
-  Future<BookModel> getBook(String bookId) async {
-    AppLogger.i('Fetching book with ID: $bookId', _logTag);
+  Future<BookModel> getBook(BookId bookId) async {
+    AppLogger.i('Fetching book with ID: ${bookId.value}', _logTag);
     try {
       final response = await _dioClient.dio.get<Map<String, dynamic>>(
-        '${ApiConstants.books}/$bookId',
+        '${ApiConstants.books}/${bookId.value}',
       );
 
       final data = response.data;
@@ -84,16 +85,16 @@ class BooksRepositoryImpl implements BooksRepository {
 
   @override
   Future<ChapterListModel> getBookChapters(
-    String bookId,
+    BookId bookId,
     ChapterPageOptions options,
   ) async {
     AppLogger.i(
-      'Fetching chapters for book: $bookId, options: ${options.toJson()}',
+      'Fetching chapters for book: ${bookId.value}, options: ${options.toJson()}',
       _logTag,
     );
     try {
       final response = await _dioClient.dio.get<Map<String, dynamic>>(
-        '${ApiConstants.books}/$bookId/chapters',
+        '${ApiConstants.books}/${bookId.value}/chapters',
         queryParameters: options.toJson(),
       );
 

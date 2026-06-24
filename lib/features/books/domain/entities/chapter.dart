@@ -1,13 +1,18 @@
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../value_objects/chapter_id.dart';
+import '../value_objects/chapter_index.dart';
+import '../value_objects/chapter_title.dart';
+
 enum ScrapingStatus { process, ready, error }
 
 class Chapter {
-  final String id;
-  final String? title;
-  final double index;
+  final ChapterId id;
+  final ChapterTitle? title;
+  final ChapterIndex index;
   final ScrapingStatus? scrapingStatus;
   final bool read;
   final bool completed;
-  final int lastPage;
+  final PositiveInt lastPage;
 
   const Chapter({
     required this.id,
@@ -16,17 +21,17 @@ class Chapter {
     this.scrapingStatus,
     this.read = false,
     this.completed = false,
-    this.lastPage = 0,
+    this.lastPage = const PositiveInt(0),
   });
 
   Chapter copyWith({
-    String? id,
-    String? title,
-    double? index,
+    ChapterId? id,
+    ChapterTitle? title,
+    ChapterIndex? index,
     ScrapingStatus? scrapingStatus,
     bool? read,
     bool? completed,
-    int? lastPage,
+    PositiveInt? lastPage,
   }) {
     return Chapter(
       id: id ?? this.id,

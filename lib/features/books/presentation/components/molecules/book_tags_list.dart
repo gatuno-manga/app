@@ -13,7 +13,7 @@ class BookTagsList extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       alignment: WrapAlignment.center,
-      children: tags.map((tag) => BookTag(label: tag.name)).toList(),
+      children: tags.map((tag) => BookTag(label: tag.name.value)).toList(),
     );
   }
 }

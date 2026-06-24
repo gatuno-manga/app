@@ -23,7 +23,7 @@ class BookListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BookCover(
-                imageUrl: book.cover,
+                imageUrl: book.cover?.value,
                 blurHash: book.metadata?.blurHash,
                 width: 70,
                 height: 100,
@@ -31,8 +31,8 @@ class BookListItem extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: BookInfo(
-                  title: book.title,
-                  description: book.description,
+                  title: book.title.value,
+                  description: book.description?.value,
                   titleStyle: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

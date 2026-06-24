@@ -19,7 +19,7 @@ class BookCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             BookCover(
-              imageUrl: book.cover,
+              imageUrl: book.cover?.value,
               blurHash: book.metadata?.blurHash,
               borderRadius: 0,
               iconSize: 60,
@@ -43,7 +43,7 @@ class BookCard extends StatelessWidget {
                 ),
                 padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
                 child: BookTitle(
-                  title: book.title,
+                  title: book.title.value,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,

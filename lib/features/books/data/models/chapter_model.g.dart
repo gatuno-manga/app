@@ -7,24 +7,25 @@ part of 'chapter_model.dart';
 // **************************************************************************
 
 ChapterModel _$ChapterModelFromJson(Map<String, dynamic> json) => ChapterModel(
-  id: const StringConverter().fromJson(json['id']),
-  title: const StringConverter().fromJson(json['title']),
+  id: ChapterId.fromJson(const StringConverter().fromJson(json['id'])),
+  title: json['title'] == null
+      ? null
+      : ChapterTitle.fromJson(const StringConverter().fromJson(json['title'])),
   index: const IndexConverter().fromJson(json['index']),
   scrapingStatus: const ScrapingStatusConverter().fromJson(
     json['scrapingStatus'],
   ),
   read: json['read'] as bool? ?? false,
   completed: json['completed'] as bool? ?? false,
-  lastPage: (json['lastPage'] as num?)?.toInt() ?? 0,
+  lastPage: json['lastPage'] == null
+      ? const PositiveInt(0)
+      : PositiveInt.fromJson((json['lastPage'] as num).toInt()),
 );
 
 Map<String, dynamic> _$ChapterModelToJson(ChapterModel instance) =>
     <String, dynamic>{
-      'id': const StringConverter().toJson(instance.id),
-      'title': _$JsonConverterToJson<dynamic, String>(
-        instance.title,
-        const StringConverter().toJson,
-      ),
+      'id': instance.id,
+      'title': instance.title,
       'index': const IndexConverter().toJson(instance.index),
       'scrapingStatus': const ScrapingStatusConverter().toJson(
         instance.scrapingStatus,
@@ -33,11 +34,6 @@ Map<String, dynamic> _$ChapterModelToJson(ChapterModel instance) =>
       'completed': instance.completed,
       'lastPage': instance.lastPage,
     };
-
-Json? _$JsonConverterToJson<Json, Value>(
-  Value? value,
-  Json? Function(Value value) toJson,
-) => value == null ? null : toJson(value);
 
 ChapterListModel _$ChapterListModelFromJson(Map<String, dynamic> json) =>
     ChapterListModel(

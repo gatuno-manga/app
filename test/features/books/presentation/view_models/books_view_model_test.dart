@@ -1,4 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
@@ -39,10 +52,10 @@ void main() {
     test('fetchBooks success updates state correctly', () async {
       final bookList = BookList(
         data: [],
-        total: 0,
-        page: 1,
-        limit: 20,
-        totalPages: 1,
+        total: const PositiveInt(0),
+        page: const PositiveInt(1),
+        limit: const PositiveInt(20),
+        totalPages: const PositiveInt(1),
       );
 
       when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
@@ -83,10 +96,10 @@ void main() {
     test('setSearch(null) should clear search filter', () async {
       final bookList = BookList(
         data: [],
-        total: 0,
-        page: 1,
-        limit: 20,
-        totalPages: 1,
+        total: const PositiveInt(0),
+        page: const PositiveInt(1),
+        limit: const PositiveInt(20),
+        totalPages: const PositiveInt(1),
       );
 
       when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);

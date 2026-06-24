@@ -14,14 +14,14 @@ class ChapterTile extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    final formattedIndex = chapter.index == chapter.index.toInt()
-        ? chapter.index.toInt().toString()
-        : chapter.index.toString();
+    final formattedIndex = chapter.index.value == chapter.index.value.toInt()
+        ? chapter.index.value.toInt().toString()
+        : chapter.index.value.toString();
 
     return ListTile(
       enabled: onTap != null,
       title: Text(l10n.booksChapterLabel(formattedIndex)),
-      subtitle: chapter.title != null ? Text(chapter.title!) : null,
+      subtitle: chapter.title != null ? Text(chapter.title!.value) : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

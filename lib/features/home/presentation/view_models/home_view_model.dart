@@ -7,6 +7,8 @@ import '../../../books/domain/repositories/books_repository.dart';
 import '../../../books/domain/entities/book_page_options.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../../books/domain/value_objects/book_id.dart';
 
 class HomeViewModel extends SafeChangeNotifier {
   final AuthService _authService;
@@ -61,7 +63,7 @@ class HomeViewModel extends SafeChangeNotifier {
     try {
       final res = await _booksRepository.getBooks(
         const BookPageOptions(
-          limit: 12,
+          limit: const PositiveInt(12),
           orderBy: 'updatedAt',
           order: SortOrder.desc,
         ),
@@ -87,7 +89,7 @@ class HomeViewModel extends SafeChangeNotifier {
     try {
       final res = await _booksRepository.getBooks(
         const BookPageOptions(
-          limit: 12,
+          limit: const PositiveInt(12),
           orderBy: 'createdAt',
           order: SortOrder.desc,
         ),
@@ -118,7 +120,7 @@ class HomeViewModel extends SafeChangeNotifier {
         return;
       }
 
-      final futures = bookIds.map((id) => _booksRepository.getBook(id));
+      final futures = bookIds.map((id) => _booksRepository.getBook(BookId(id)));
       final books = await Future.wait(futures);
       
       continueReadingBooks = books.toList();

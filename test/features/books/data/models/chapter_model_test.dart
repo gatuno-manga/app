@@ -1,4 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:gatuno/features/books/data/models/chapter_model.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
 
@@ -15,9 +28,9 @@ void main() {
 
       final model = ChapterModel.fromJson(json);
 
-      expect(model.id, '1');
-      expect(model.title, 'Chapter 1');
-      expect(model.index, 1.0);
+      expect(model.id.value, '1');
+      expect(model.title?.value, 'Chapter 1');
+      expect(model.index.value, 1.0);
       expect(model.scrapingStatus, ScrapingStatus.ready);
       expect(model.read, true);
     });
@@ -27,7 +40,7 @@ void main() {
 
       final model = ChapterModel.fromJson(json);
 
-      expect(model.index, 86.5);
+      expect(model.index.value, 86.5);
     });
 
     test('fromJson should handle invalid index as 0.0', () {
@@ -35,7 +48,7 @@ void main() {
 
       final model = ChapterModel.fromJson(json);
 
-      expect(model.index, 0.0);
+      expect(model.index.value, 0.0);
     });
 
     test('fromJson should parse scrapingStatus correctly', () {
@@ -96,7 +109,7 @@ void main() {
       final model = ChapterListModel.fromJson(json);
 
       expect(model.data.length, 2);
-      expect(model.data[0].index, 1.0);
+      expect(model.data.first.index.value, 1.0);
       expect(model.nextCursor, 'next_id');
       expect(model.hasNextPage, true);
     });

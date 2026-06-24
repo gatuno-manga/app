@@ -1,11 +1,13 @@
 import '../../../../core/base/safe_change_notifier.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../reading/data/database/reading_database.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/chapter.dart';
 import '../../domain/entities/chapter_page_options.dart';
 import '../../domain/repositories/books_repository.dart';
+import '../../domain/value_objects/book_id.dart';
 
 class BookDetailsViewModel extends SafeChangeNotifier {
   final BooksRepository _repository;
@@ -57,8 +59,8 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
     try {
       final results = await Future.wait([
-        _repository.getBook(bookId),
-        _repository.getBookChapters(bookId, _options),
+        _repository.getBook(BookId(bookId)),
+        _repository.getBookChapters(BookId(bookId), _options),
         _progressCoordinator.getLastReadChapter(bookId),
         _progressCoordinator.getAllProgressForBook(bookId),
       ]);
@@ -73,12 +75,12 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       };
 
       final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = progressMap[chapter.id];
+        final progress = progressMap[chapter.id.value];
         final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
           completed: isCompleted,
           read: chapter.read || isCompleted || progress != null,
-          lastPage: progress?.pageIndex ?? 0,
+          lastPage: PositiveInt(progress?.pageIndex ?? 0),
         );
       }).toList();
 
@@ -129,7 +131,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
       var changed = false;
       final updatedChapters = _chapterList!.data.map((chapter) {
-        final progress = progressMap[chapter.id];
+        final progress = progressMap[chapter.id.value];
 
         final isCompleted = progress?.completed ?? false;
         final lastPage = progress?.pageIndex ?? 0;
@@ -138,12 +140,12 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
         if (chapter.completed != isCompleted ||
             chapter.read != isRead ||
-            chapter.lastPage != lastPage) {
+            chapter.lastPage.value != lastPage) {
           changed = true;
           return chapter.copyWith(
             completed: isCompleted,
             read: isRead,
-            lastPage: lastPage,
+            lastPage: PositiveInt(lastPage),
           );
         }
         return chapter;
@@ -167,7 +169,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
     try {
       final chaptersResult = await _repository.getBookChapters(
-        bookId,
+        BookId(bookId),
         _options,
       );
       final localProgress = await _progressCoordinator.getAllProgressForBook(
@@ -179,12 +181,12 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       };
 
       final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = progressMap[chapter.id];
+        final progress = progressMap[chapter.id.value];
         final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
           completed: isCompleted,
           read: chapter.read || isCompleted || progress != null,
-          lastPage: progress?.pageIndex ?? 0,
+          lastPage: PositiveInt(progress?.pageIndex ?? 0),
         );
       }).toList();
 
@@ -217,7 +219,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
 
     try {
       _options = _options.copyWith(cursor: _chapterList!.nextCursor);
-      final result = await _repository.getBookChapters(bookId, _options);
+      final result = await _repository.getBookChapters(BookId(bookId), _options);
       final localProgress = await _progressCoordinator.getAllProgressForBook(
         bookId,
       );
@@ -227,12 +229,12 @@ class BookDetailsViewModel extends SafeChangeNotifier {
       };
 
       final updatedNewChapters = result.data.map((chapter) {
-        final progress = progressMap[chapter.id];
+        final progress = progressMap[chapter.id.value];
         final isCompleted = progress?.completed ?? false;
         return chapter.copyWith(
           completed: isCompleted,
           read: chapter.read || isCompleted || progress != null,
-          lastPage: progress?.pageIndex ?? 0,
+          lastPage: PositiveInt(progress?.pageIndex ?? 0),
         );
       }).toList();
 
@@ -277,7 +279,7 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     }
 
     if (_lastReadChapter == null) {
-      final firstId = chapters.first.id;
+      final firstId = chapters.first.id.value;
       AppLogger.d(
         'getResumeChapterId: No progress, returning first chapter: $firstId',
         _logTag,
@@ -288,9 +290,9 @@ class BookDetailsViewModel extends SafeChangeNotifier {
     final lastChapterId = _lastReadChapter!.chapterId;
     if (_lastReadChapter!.completed) {
       // Find next chapter
-      final currentIndex = chapters.indexWhere((c) => c.id == lastChapterId);
+      final currentIndex = chapters.indexWhere((c) => c.id.value == lastChapterId);
       if (currentIndex != -1 && currentIndex < chapters.length - 1) {
-        final nextId = chapters[currentIndex + 1].id;
+        final nextId = chapters[currentIndex + 1].id.value;
         AppLogger.d(
           'getResumeChapterId: Last chapter completed, returning next chapter: $nextId',
           _logTag,

@@ -1,4 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
@@ -61,12 +74,13 @@ void main() {
   });
 
   final testBook = Book(
-    id: '1',
-    title: 'Test Book Title',
+    id: const BookId('1'),
+    title: const vo.BookTitle('Test Book Title'),
     type: TypeBook.manga,
     createdAt: DateTime.now(),
     updatedAt: DateTime.now(),
-    cover: 'https://example.com/cover.jpg',
+    cover: const vo.BookCover('https://example.com/cover.jpg'),
+    description: const BookDescription('Test Book Description'),
   );
 
   testWidgets('BookCard renders title correctly over image', (tester) async {

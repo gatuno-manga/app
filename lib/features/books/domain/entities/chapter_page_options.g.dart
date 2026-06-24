@@ -9,7 +9,9 @@ part of 'chapter_page_options.dart';
 ChapterPageOptions _$ChapterPageOptionsFromJson(Map<String, dynamic> json) =>
     ChapterPageOptions(
       cursor: json['cursor'] as String?,
-      limit: (json['limit'] as num?)?.toInt() ?? 200,
+      limit: json['limit'] == null
+          ? const PositiveInt(200)
+          : PositiveInt.fromJson((json['limit'] as num).toInt()),
       order:
           $enumDecodeNullable(_$ChapterSortOrderEnumMap, json['order']) ??
           ChapterSortOrder.asc,

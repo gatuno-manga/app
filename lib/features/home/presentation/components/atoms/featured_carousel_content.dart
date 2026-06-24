@@ -25,14 +25,14 @@ class FeaturedCarouselContent extends StatelessWidget {
           // Cover
           if (book.cover != null)
             Hero(
-              tag: 'book_cover_${book.id}',
+              tag: 'book_cover_${book.id.value}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
                   width: 100,
                   height: 150,
                   child: AppImage(
-                    imageUrl: book.cover!,
+                    imageUrl: book.cover!.value,
                     blurHash: book.metadata?.blurHash,
                     fit: BoxFit.cover,
                     strategy: sl<ImageLoadingStrategy>(),
@@ -49,7 +49,7 @@ class FeaturedCarouselContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  book.title,
+                  book.title.value,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -58,9 +58,9 @@ class FeaturedCarouselContent extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                if (book.description != null && book.description!.isNotEmpty)
+                if (book.description != null && book.description!.value.isNotEmpty)
                   Text(
-                    book.description!,
+                    book.description!.value,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.white70,
                     ),
@@ -70,7 +70,7 @@ class FeaturedCarouselContent extends StatelessWidget {
                 const SizedBox(height: 16),
                 AppButton(
                   text: l10n.homeFeaturedReadNow,
-                  onPressed: () => context.push('/books/${book.id}'),
+                  onPressed: () => context.push('/books/${book.id.value}'),
                 ),
                 const SizedBox(height: 16), // space for dots
               ],

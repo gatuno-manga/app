@@ -1,9 +1,14 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../../shared/data/models/image_metadata_model.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
+import '../../domain/entities/author.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_type.dart';
-import '../../domain/entities/author.dart';
 import '../../domain/entities/tag.dart';
+import '../../domain/value_objects/book_cover.dart';
+import '../../domain/value_objects/book_description.dart';
+import '../../domain/value_objects/book_id.dart';
+import '../../domain/value_objects/book_title.dart';
 import 'author_model.dart';
 import 'tag_model.dart';
 

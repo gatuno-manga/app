@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:optional/optional.dart';
+import '../../../../shared/domain/value_objects/positive_int.dart';
 import 'book_type.dart';
 
 part 'book_page_options.g.dart';
@@ -14,13 +15,13 @@ class SortOption {
 
 @JsonSerializable(includeIfNull: false)
 class BookPageOptions {
-  final int page;
-  final int limit;
+  final PositiveInt page;
+  final PositiveInt limit;
   final String orderBy;
   @JsonKey(toJson: _orderToJson)
   final SortOrder order;
   final String? search;
-  final int? publication;
+  final PositiveInt? publication;
   final String? publicationOperator; // 'eq', 'gt', 'lt', 'gte', 'lte'
   @JsonKey(toJson: _typeToJson)
   final List<TypeBook>? type;
@@ -33,8 +34,8 @@ class BookPageOptions {
   final String? authorsLogic; // 'and', 'or'
 
   const BookPageOptions({
-    this.page = 1,
-    this.limit = 20,
+    this.page = const PositiveInt(1),
+    this.limit = const PositiveInt(20),
     this.orderBy = 'createdAt',
     this.order = SortOrder.desc,
     this.search,
@@ -57,12 +58,12 @@ class BookPageOptions {
       type?.map((e) => e.name.toLowerCase()).toList();
 
   BookPageOptions copyWith({
-    int? page,
-    int? limit,
+    PositiveInt? page,
+    PositiveInt? limit,
     String? orderBy,
     SortOrder? order,
     Optional<String?>? search,
-    Optional<int?>? publication,
+    Optional<PositiveInt?>? publication,
     Optional<String?>? publicationOperator,
     Optional<List<TypeBook>?>? type,
     Optional<List<String>?>? sensitiveContent,

@@ -1,4 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
@@ -40,9 +53,10 @@ void main() {
 
   final testBooks = List.generate(
     5,
-    (i) => Book(
-      id: '$i',
-      title: 'Book $i',
+    (i) => Book(id: BookId('$i'),
+      title: BookTitle('Book $i'),
+      description: BookDescription('Description $i'),
+      cover: BookCover('cover_$i.jpg'),
       type: TypeBook.manga,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
