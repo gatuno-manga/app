@@ -61,32 +61,20 @@ void main() {
   });
 
   group('createBookRequest', () {
-    test('returns BookRequestEntity on successful creation', () async {
+    test('completes successfully on successful creation', () async {
       when(() => mockDio.post<Map<String, dynamic>>(any(), data: any(named: 'data')))
           .thenAnswer((_) async => Response(
                 requestOptions: RequestOptions(path: ''),
                 data: {
-                  'id': '2',
-                  'title': 'New Book',
-                  'url': 'https://example.com/newbook',
-                  'reason': 'Good book',
-                  'status': 'pending',
-                  'userId': 'user1',
-                  'adminId': null,
-                  'rejectionMessage': null,
-                  'createdAt': '2023-01-01T00:00:00Z',
-                  'updatedAt': '2023-01-01T00:00:00Z',
+                  'message': 'Book request submitted successfully'
                 },
               ));
 
-      final result = await repository.createBookRequest(
+      await repository.createBookRequest(
         title: 'New Book',
         url: 'https://example.com/newbook',
         reason: 'Good book',
       );
-
-      expect(result.title.value, 'New Book');
-      expect(result.url.value, 'https://example.com/newbook');
     });
 
     test('throws ValidationException on 400', () async {

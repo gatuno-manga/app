@@ -44,7 +44,7 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
   }
 
   @override
-  Future<BookRequestEntity> createBookRequest({
+  Future<void> createBookRequest({
     required String title,
     required String url,
     String? reason,
@@ -56,13 +56,10 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
         reason: reason,
       );
 
-      final response = await _dioClient.dio.post<Map<String, dynamic>>(
+      await _dioClient.dio.post<Map<String, dynamic>>(
         '/book-requests',
         data: dto.toJson(),
       );
-
-      final model = BookRequestModel.fromJson(response.data!);
-      return model.toEntity();
     } on DioException catch (e) {
       throw ApiExceptionHandler.handle(e);
     } catch (e) {
