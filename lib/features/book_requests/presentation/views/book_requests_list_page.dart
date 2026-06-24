@@ -69,10 +69,18 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(viewModel.error!, style: const TextStyle(color: Colors.red)),
-            ElevatedButton(
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              viewModel.error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
               onPressed: () => viewModel.fetchRequests(refresh: true),
-              child: Text(l10n.errorRetry),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.errorRetry),
             ),
           ],
         ),
@@ -81,7 +89,29 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
 
     if (viewModel.requests.isEmpty) {
       return Center(
-        child: Text(l10n.bookRequestsEmpty),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.bookRequestsEmpty,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/requests/create'),
+              icon: const Icon(Icons.add),
+              label: Text(l10n.bookRequestsCreateTitle),
+            ),
+          ],
+        ),
       );
     }
 

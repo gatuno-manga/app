@@ -463,4 +463,27 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get bookRequestsFormUrlInvalid => 'Por favor, insira uma URL válida';
+
+  @override
+  String get bookRequestsCardUrl => 'URL';
+
+  @override
+  String get bookRequestsCardReason => 'Motivo';
+
+  @override
+  String get bookRequestsCardRejection => 'Mensagem de Rejeição';
+
+  @override
+  String bookRequestsCardDate(String date) {
+    return 'Solicitado em $date';
+  }
+
+  @override
+  String get bookRequestStatusPending => 'PENDENTE';
+
+  @override
+  String get bookRequestStatusApproved => 'APROVADO';
+
+  @override
+  String get bookRequestStatusRejected => 'REJEITADO';
 }

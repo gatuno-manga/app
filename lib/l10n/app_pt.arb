@@ -187,5 +187,19 @@
   "homeCtaSignInButton": "Faça Login para Solicitar",
   "bookRequestsFormTitleRequired": "Por favor, insira um título",
   "bookRequestsFormUrlRequired": "Por favor, insira uma URL",
-  "bookRequestsFormUrlInvalid": "Por favor, insira uma URL válida"
+  "bookRequestsFormUrlInvalid": "Por favor, insira uma URL válida",
+  "bookRequestsCardUrl": "URL",
+  "bookRequestsCardReason": "Motivo",
+  "bookRequestsCardRejection": "Mensagem de Rejeição",
+  "bookRequestsCardDate": "Solicitado em {date}",
+  "@bookRequestsCardDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookRequestStatusPending": "PENDENTE",
+  "bookRequestStatusApproved": "APROVADO",
+  "bookRequestStatusRejected": "REJEITADO"
 }

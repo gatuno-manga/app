@@ -187,5 +187,19 @@
   "homeCtaSignInButton": "Sign In to Request",
   "bookRequestsFormTitleRequired": "Please enter a title",
   "bookRequestsFormUrlRequired": "Please enter a URL",
-  "bookRequestsFormUrlInvalid": "Please enter a valid URL"
+  "bookRequestsFormUrlInvalid": "Please enter a valid URL",
+  "bookRequestsCardUrl": "URL",
+  "bookRequestsCardReason": "Reason",
+  "bookRequestsCardRejection": "Rejection Message",
+  "bookRequestsCardDate": "Requested on {date}",
+  "@bookRequestsCardDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "bookRequestStatusPending": "PENDING",
+  "bookRequestStatusApproved": "APPROVED",
+  "bookRequestStatusRejected": "REJECTED"
 }

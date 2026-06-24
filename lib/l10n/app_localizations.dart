@@ -955,6 +955,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a valid URL'**
   String get bookRequestsFormUrlInvalid;
+
+  /// No description provided for @bookRequestsCardUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get bookRequestsCardUrl;
+
+  /// No description provided for @bookRequestsCardReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get bookRequestsCardReason;
+
+  /// No description provided for @bookRequestsCardRejection.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection Message'**
+  String get bookRequestsCardRejection;
+
+  /// No description provided for @bookRequestsCardDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested on {date}'**
+  String bookRequestsCardDate(String date);
+
+  /// No description provided for @bookRequestStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'PENDING'**
+  String get bookRequestStatusPending;
+
+  /// No description provided for @bookRequestStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'APPROVED'**
+  String get bookRequestStatusApproved;
+
+  /// No description provided for @bookRequestStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'REJECTED'**
+  String get bookRequestStatusRejected;
 }
 
 class _AppLocalizationsDelegate
