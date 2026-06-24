@@ -8,7 +8,6 @@ import '../../../books/domain/entities/book_page_options.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
-import '../../../books/domain/value_objects/book_id.dart';
 
 class HomeViewModel extends SafeChangeNotifier {
   final AuthService _authService;

@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/features/book_requests/data/repositories/book_requests_repository_impl.dart';
-import 'package:gatuno/features/book_requests/domain/entities/book_request_entity.dart';
 
 class MockDioClient extends Mock implements DioClient {}
 class MockDio extends Mock implements Dio {}

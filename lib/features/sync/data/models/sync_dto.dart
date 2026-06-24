@@ -1,13 +1,25 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../../../features/reading/data/models/reading_progress_dto.dart';
+import '../../../../features/books/domain/value_objects/chapter_id.dart';
+import '../../../../features/reading/domain/value_objects/comment_id.dart';
+import '../../../../features/reading/domain/value_objects/comment_content.dart';
+import '../../../../shared/domain/value_objects/timestamp.dart';
 
 part 'sync_dto.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+class StringConverter implements JsonConverter<String, dynamic> {
+  const StringConverter();
+  @override
+  String fromJson(dynamic json) => json?.toString() ?? '';
+  @override
+  dynamic toJson(String object) => object;
+}
+
+@JsonSerializable(explicitToJson: true, converters: [StringConverter()])
 class SyncCommentDto {
-  final String chapterId;
-  final String? parentId;
-  final String content;
+  final ChapterId chapterId;
+  final CommentId? parentId;
+  final CommentContent content;
   final bool? isPublic;
 
   SyncCommentDto({
@@ -24,7 +36,7 @@ class SyncCommentDto {
 
 @JsonSerializable(explicitToJson: true)
 class SyncRequestDto {
-  final String? lastSyncAt;
+  final Timestamp? lastSyncAt;
   final List<SaveProgressDto>? readingProgress;
   final List<Map<String, dynamic>>? savedPages; // Use Map since CreateSavedPageDto isn't defined yet
   final List<SyncCommentDto>? comments;
@@ -45,7 +57,7 @@ class SyncRequestDto {
 class SyncReadingProgressResultDto {
   final List<RemoteReadingProgress> synced;
   final List<dynamic> conflicts;
-  final String lastSyncAt;
+  final Timestamp lastSyncAt;
 
   SyncReadingProgressResultDto({
     required this.synced,
@@ -63,7 +75,7 @@ class SyncResultDto {
   final SyncReadingProgressResultDto? readingProgress;
   final List<dynamic>? savedPages;
   final List<dynamic>? comments;
-  final String syncedAt;
+  final Timestamp syncedAt;
 
   SyncResultDto({
     this.readingProgress,

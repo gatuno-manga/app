@@ -3,19 +3,9 @@ Analyzing app...
    info • Constructors in '@immutable' classes should be declared as 'const'. Try adding 'const' to the constructor declaration • lib/features/book_requests/data/models/book_request_model.dart:17:3 • prefer_const_constructors_in_immutables
    info • 'bytes' is deprecated and shouldn't be used. Use readAsBytes() instead to avoid out-of-memory issues with large files. Try replacing the use of the deprecated member with the replacement • lib/features/certificates/presentation/view_models/certificates_view_model.dart:55:16 • deprecated_member_use
    info • 'bytes' is deprecated and shouldn't be used. Use readAsBytes() instead to avoid out-of-memory issues with large files. Try replacing the use of the deprecated member with the replacement • lib/features/certificates/presentation/view_models/certificates_view_model.dart:56:49 • deprecated_member_use
-warning • Unused import: '../../../books/domain/value_objects/book_id.dart'. Try removing the import directive • lib/features/home/presentation/view_models/home_view_model.dart:11:8 • unused_import
-   info • Unnecessary 'const' keyword. Try removing the keyword • lib/features/home/presentation/view_models/home_view_model.dart:66:18 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • lib/features/home/presentation/view_models/home_view_model.dart:92:18 • unnecessary_const
-warning • Duplicate import. Try removing all but one import of the library • lib/features/sync/domain/use_cases/app_sync_coordinator.dart:10:8 • duplicate_import
-warning • Unused import: 'package:gatuno/features/book_requests/domain/value_objects/request_reason.dart'. Try removing the import directive • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:1:8 • unused_import
-warning • Unused import: 'package:gatuno/features/book_requests/domain/value_objects/request_url.dart'. Try removing the import directive • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:2:8 • unused_import
-warning • Unused import: 'package:gatuno/features/book_requests/domain/value_objects/request_title.dart'. Try removing the import directive • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:3:8 • unused_import
+   info • Unnecessary 'const' keyword. Try removing the keyword • lib/features/home/presentation/view_models/home_view_model.dart:65:18 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • lib/features/home/presentation/view_models/home_view_model.dart:91:18 • unnecessary_const
 warning • Unused import: 'package:gatuno/features/book_requests/domain/entities/book_request_entity.dart'. Try removing the import directive • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:11:8 • unused_import
-  error • The argument type 'String' can't be assigned to the parameter type 'RequestTitle'.  • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:78:16 • argument_type_not_assignable
-  error • The argument type 'String' can't be assigned to the parameter type 'RequestUrl'.  • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:79:14 • argument_type_not_assignable
-  error • The argument type 'String' can't be assigned to the parameter type 'RequestReason?'.  • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:80:17 • argument_type_not_assignable
-  error • The argument type 'String' can't be assigned to the parameter type 'RequestTitle'.  • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:95:56 • argument_type_not_assignable
-  error • The argument type 'String' can't be assigned to the parameter type 'RequestUrl'.  • test/features/book_requests/data/repositories/book_requests_repository_impl_test.dart:95:65 • argument_type_not_assignable
 warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/features/books/data/models/book_model_test.dart:2:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/features/books/data/models/book_model_test.dart:3:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/features/books/data/models/book_model_test.dart:4:8 • unused_import
@@ -121,38 +111,38 @@ warning • Unused import: 'package:gatuno/features/books/domain/value_objects/a
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/tag_id.dart'. Try removing the import directive • test/features/books/presentation/view_models/book_details_view_model_test.dart:9:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/tag_name.dart'. Try removing the import directive • test/features/books/presentation/view_models/book_details_view_model_test.dart:10:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_title.dart'. Try removing the import directive • test/features/books/presentation/view_models/book_details_view_model_test.dart:12:8 • unused_import
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:68:52 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:70:28 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:70:57 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:98:23 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:98:52 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:99:23 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:99:52 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:106:71 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:127:25 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:127:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:128:25 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:128:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:144:73 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:167:25 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:167:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:168:25 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:168:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:184:73 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:205:30 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:205:59 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:220:73 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:249:52 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:251:28 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:251:57 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:256:28 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:256:57 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:286:52 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:335:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:338:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:71:52 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:73:28 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:73:57 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:101:23 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:101:52 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:102:23 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:102:52 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:109:71 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:130:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:130:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:131:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:131:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:147:73 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:170:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:170:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:171:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:171:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:187:73 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:208:30 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:208:59 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:223:73 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:252:52 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:254:28 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:254:57 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:259:28 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:259:57 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:289:52 • unnecessary_const
    info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:338:54 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:339:25 • unnecessary_const
-   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:339:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:341:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:341:54 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:342:25 • unnecessary_const
+   info • Unnecessary 'const' keyword. Try removing the keyword • test/features/books/presentation/view_models/book_details_view_model_test.dart:342:54 • unnecessary_const
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/features/books/presentation/view_models/books_view_model_test.dart:3:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/features/books/presentation/view_models/books_view_model_test.dart:4:8 • unused_import
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_description.dart'. Try removing the import directive • test/features/books/presentation/view_models/books_view_model_test.dart:5:8 • unused_import
@@ -262,45 +252,4 @@ warning • Unused import: 'package:gatuno/features/books/domain/value_objects/c
 warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/features/reading/reading_router_test.dart:8:8 • unused_import
 warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart'. Try removing the import directive • test/features/reading/reading_router_test.dart:9:8 • unused_import
 warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/features/reading/reading_router_test.dart:10:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_id.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:3:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_title.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:4:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:5:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_index.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:6:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:7:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:8:8 • unused_import
-warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:9:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:10:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:11:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/original_url.dart'. Try removing the import directive • test/shared/components/atoms/atoms_test.dart:12:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_id.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:3:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_title.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:4:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:5:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_index.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:6:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:7:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:8:8 • unused_import
-warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:9:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:10:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:11:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/original_url.dart'. Try removing the import directive • test/shared/components/molecules/pagination_test.dart:12:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_id.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:3:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_title.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:4:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:5:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_index.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:6:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:7:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:8:8 • unused_import
-warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:9:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:10:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:11:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/original_url.dart'. Try removing the import directive • test/shared/components/organisms/organisms_test.dart:12:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_id.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:3:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_title.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:4:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_title.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:5:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/chapter_index.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:6:8 • unused_import
-warning • Unused import: 'package:gatuno/features/books/domain/value_objects/book_id.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:7:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:8:8 • unused_import
-warning • Unused import: 'package:gatuno/shared/domain/value_objects/positive_int.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:9:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:10:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:11:8 • unused_import
-warning • Unused import: 'package:gatuno/features/reading/domain/value_objects/original_url.dart'. Try removing the import directive • test/shared/components/templates/templates_test.dart:12:8 • unused_import
 
-302 issues found. (ran in 4.0s)

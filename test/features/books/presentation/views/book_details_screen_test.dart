@@ -6,8 +6,6 @@ import 'package:gatuno/features/books/domain/value_objects/book_description.dart
 import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
 import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
-import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
-import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';

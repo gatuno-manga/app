@@ -1,11 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
-import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
-import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
-import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
-import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'package:gatuno/features/reading/domain/value_objects/document_path.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
