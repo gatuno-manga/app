@@ -83,7 +83,7 @@ ReadingChapterModel _$ReadingChapterModelFromJson(
   isFinal: json['isFinal'] as bool? ?? false,
   deletedAt: json['deletedAt'] == null
       ? null
-      : DateTime.parse(json['deletedAt'] as String),
+      : Timestamp.fromJson(json['deletedAt']),
   previous: json['previous'] == null
       ? null
       : ChapterId.fromJson(const StringConverter().fromJson(json['previous'])),
@@ -124,7 +124,7 @@ Map<String, dynamic> _$ReadingChapterModelToJson(
   ),
   'retries': instance.retries,
   'isFinal': instance.isFinal,
-  'deletedAt': instance.deletedAt?.toIso8601String(),
+  'deletedAt': instance.deletedAt,
   'previous': instance.previous,
   'next': instance.next,
   'bookId': instance.bookId,

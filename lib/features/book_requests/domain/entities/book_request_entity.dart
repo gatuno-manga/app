@@ -1,76 +1,23 @@
 import 'package:equatable/equatable.dart';
 import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
 
-class RequestIdVO extends Equatable {
-  final String value;
-  const RequestIdVO._(this.value);
-  
-  factory RequestIdVO(String input) {
-    if (input.trim().isEmpty) throw ArgumentError('Request ID cannot be empty');
-    return RequestIdVO._(input.trim());
-  }
-  
-  @override
-  List<Object?> get props => [value];
-}
-
-class RequestTitleVO extends Equatable {
-  final String value;
-  const RequestTitleVO._(this.value);
-  
-  factory RequestTitleVO(String input) {
-    if (input.trim().isEmpty) throw ArgumentError('Title cannot be empty');
-    return RequestTitleVO._(input.trim());
-  }
-  
-  @override
-  List<Object?> get props => [value];
-}
-
-class RequestUrlVO extends Equatable {
-  final String value;
-  const RequestUrlVO._(this.value);
-  
-  factory RequestUrlVO(String input) {
-    if (input.trim().isEmpty) throw ArgumentError('URL cannot be empty');
-    return RequestUrlVO._(input.trim());
-  }
-  
-  @override
-  List<Object?> get props => [value];
-}
-
-class RequestReasonVO extends Equatable {
-  final String? value;
-  const RequestReasonVO(this.value);
-  
-  @override
-  List<Object?> get props => [value];
-}
-
-class RequestRejectionMessageVO extends Equatable {
-  final String? value;
-  const RequestRejectionMessageVO(this.value);
-  
-  @override
-  List<Object?> get props => [value];
-}
-
-enum RequestStatus {
-  pending,
-  approved,
-  rejected,
-}
+import '../value_objects/request_id.dart';
+import '../value_objects/request_title.dart';
+import '../value_objects/request_url.dart';
+import '../value_objects/request_reason.dart';
+import '../value_objects/request_status.dart';
+import '../value_objects/request_rejection_message.dart';
 
 class BookRequestEntity extends Equatable {
-  final RequestIdVO id;
-  final String userId;
-  final RequestTitleVO title;
-  final RequestUrlVO url;
-  final RequestReasonVO reason;
+  final RequestId id;
+  final UserId userId;
+  final RequestTitle title;
+  final RequestUrl url;
+  final RequestReason reason;
   final RequestStatus status;
-  final String? adminId;
-  final RequestRejectionMessageVO rejectionMessage;
+  final UserId? adminId;
+  final RequestRejectionMessage rejectionMessage;
   final Timestamp createdAt;
   final Timestamp updatedAt;
 

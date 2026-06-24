@@ -1,3 +1,7 @@
+import 'package:gatuno/features/book_requests/domain/value_objects/request_reason.dart';
+import 'package:gatuno/features/book_requests/domain/value_objects/request_url.dart';
+import 'package:gatuno/features/book_requests/domain/value_objects/request_title.dart';
+import 'package:gatuno/features/book_requests/domain/value_objects/request_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:dio/dio.dart';
@@ -14,7 +18,13 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(RequestTitle('dummy'));
+    registerFallbackValue(RequestUrl('https://dummy.com'));
+    registerFallbackValue(const RequestReason('dummy'));
+  });
+
+setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
     when(() => mockDioClient.dio).thenReturn(mockDio);
@@ -71,9 +81,9 @@ void main() {
               ));
 
       await repository.createBookRequest(
-        title: 'New Book',
-        url: 'https://example.com/newbook',
-        reason: 'Good book',
+        title: RequestTitle('New Book'),
+        url: RequestUrl('https://example.com/newbook'),
+        reason: RequestReason('Good book'),
       );
     });
 
@@ -88,7 +98,7 @@ void main() {
         ),
       ));
 
-      expect(() => repository.createBookRequest(title: '', url: ''),
+      expect(() => repository.createBookRequest(title: RequestTitle('dummy'), url: RequestUrl('dummy')),
           throwsA(isA<ValidationException>()));
     });
   });

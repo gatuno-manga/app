@@ -64,7 +64,7 @@ class ReadingChapter {
   final ScrapingStatus? scrapingStatus;
   final PositiveInt retries;
   final bool isFinal;
-  final DateTime? deletedAt;
+  final Timestamp? deletedAt;
   final ChapterId? previous;
   final ChapterId? next;
   final BookId bookId;

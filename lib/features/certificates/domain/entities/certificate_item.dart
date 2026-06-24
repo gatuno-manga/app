@@ -1,9 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
-@JsonSerializable(fieldRename: FieldRename.snake)
-
 part 'certificate_item.g.dart';
 
+@JsonSerializable(fieldRename: FieldRename.snake)
 class CertificateItem {
   final String name;
   final String fingerprint; // SHA256 of DER

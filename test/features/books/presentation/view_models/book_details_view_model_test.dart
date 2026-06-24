@@ -33,6 +33,9 @@ void main() {
   const bookId = '1';
 
   setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+    registerFallbackValue(ChapterId('dummy'));
+
     registerFallbackValue(const ChapterPageOptions());
   });
 

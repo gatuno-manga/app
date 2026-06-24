@@ -1,12 +1,15 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../domain/value_objects/request_title.dart';
+import '../../domain/value_objects/request_url.dart';
+import '../../domain/value_objects/request_reason.dart';
 
 part 'create_book_request_dto.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class CreateBookRequestDto {
-  final String title;
-  final String url;
-  final String? reason;
+  final RequestTitle title;
+  final RequestUrl url;
+  final RequestReason? reason;
 
   CreateBookRequestDto({
     required this.title,

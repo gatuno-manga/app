@@ -26,7 +26,12 @@ class MockBooksViewModel extends Mock implements BooksViewModel {}
 void main() {
   late MockBooksViewModel mockViewModel;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+    registerFallbackValue(const BookPageOptions());
+  });
+
+setUp(() {
     mockViewModel = MockBooksViewModel();
 
     // Default mock behavior

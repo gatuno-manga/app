@@ -79,7 +79,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Switch'), findsOneWidget);
+      expect(find.text('Title'), findsOneWidget);
       expect(find.text('Subtitle'), findsOneWidget);
 
       await tester.tap(find.byType(SwitchListTile));

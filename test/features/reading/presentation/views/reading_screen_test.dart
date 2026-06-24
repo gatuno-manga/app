@@ -75,7 +75,11 @@ void main() {
     sl.registerFactory<ReadingViewModel>(() => mockViewModel);
   });
 
-  group('ReadingScreen', () {
+    setUpAll(() {
+    registerFallbackValue(ChapterId('dummy'));
+  });
+
+group('ReadingScreen', () {
     testWidgets('initializes viewModel and loads chapter', (tester) async {
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),

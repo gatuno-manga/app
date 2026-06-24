@@ -1,33 +1,30 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../domain/entities/book_request_entity.dart';
 import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+
+import '../../domain/value_objects/request_id.dart';
+import '../../domain/value_objects/request_title.dart';
+import '../../domain/value_objects/request_url.dart';
+import '../../domain/value_objects/request_reason.dart';
+import '../../domain/value_objects/request_status.dart';
+import '../../domain/value_objects/request_rejection_message.dart';
 
 part 'book_request_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class BookRequestModel {
-  final String id;
-  final String userId;
-  final String title;
-  final String url;
-  final String? reason;
-  final String status;
-  final String? adminId;
-  final String? rejectionMessage;
-  final Timestamp createdAt;
-  final Timestamp updatedAt;
-
+class BookRequestModel extends BookRequestEntity {
   BookRequestModel({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.url,
-    this.reason,
-    required this.status,
-    this.adminId,
-    this.rejectionMessage,
-    required this.createdAt,
-    required this.updatedAt,
+    required super.id,
+    required super.userId,
+    required super.title,
+    required super.url,
+    required super.reason,
+    required super.status,
+    super.adminId,
+    required super.rejectionMessage,
+    required super.createdAt,
+    required super.updatedAt,
   });
 
   factory BookRequestModel.fromJson(Map<String, dynamic> json) => 
@@ -35,21 +32,5 @@ class BookRequestModel {
       
   Map<String, dynamic> toJson() => _$BookRequestModelToJson(this);
 
-  BookRequestEntity toEntity() {
-    return BookRequestEntity(
-      id: RequestIdVO(id),
-      userId: userId,
-      title: RequestTitleVO(title),
-      url: RequestUrlVO(url),
-      reason: RequestReasonVO(reason),
-      status: RequestStatus.values.firstWhere(
-        (e) => e.name.toLowerCase() == status.toLowerCase(),
-        orElse: () => RequestStatus.pending,
-      ),
-      adminId: adminId,
-      rejectionMessage: RequestRejectionMessageVO(rejectionMessage),
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
-  }
+  BookRequestEntity toEntity() => this;
 }

@@ -36,7 +36,11 @@ class FakeReadingPage extends Fake implements ReadingPage {}
 void main() {
   late MockReadingViewModel mockViewModel;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(ChapterId('dummy'));
+  });
+
+setUp(() {
     mockViewModel = MockReadingViewModel();
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
   });

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../../shared/components/atoms/app_status_badge.dart';
 import '../../../domain/entities/book_request_entity.dart';
+import '../../../domain/value_objects/request_status.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
 class BookRequestCard extends StatelessWidget {

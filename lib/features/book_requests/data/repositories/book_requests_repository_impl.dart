@@ -5,6 +5,9 @@ import '../../domain/entities/book_request_entity.dart';
 import '../../domain/repositories/book_requests_repository.dart';
 import '../models/book_request_model.dart';
 import '../models/create_book_request_dto.dart';
+import '../../domain/value_objects/request_title.dart';
+import '../../domain/value_objects/request_url.dart';
+import '../../domain/value_objects/request_reason.dart';
 
 class BookRequestsRepositoryImpl implements BookRequestsRepository {
   final DioClient _dioClient;
@@ -45,9 +48,9 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
 
   @override
   Future<void> createBookRequest({
-    required String title,
-    required String url,
-    String? reason,
+    required RequestTitle title,
+    required RequestUrl url,
+    RequestReason? reason,
   }) async {
     try {
       final dto = CreateBookRequestDto(

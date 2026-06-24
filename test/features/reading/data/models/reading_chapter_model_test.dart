@@ -6,6 +6,9 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
+import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
+import 'package:gatuno/features/reading/domain/value_objects/document_path.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
 
 
 import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
@@ -103,12 +106,12 @@ void main() {
       final model = ReadingChapterModel.fromJson(json);
 
       expect(model.scrapingStatus, ScrapingStatus.ready);
-      expect(model.documentPath, '/path/to/doc');
+      expect(model.documentPath, DocumentPath('/path/to/doc'));
       expect(model.documentFormat, DocumentFormat.pdf);
       expect(model.contentFormat, ContentFormat.markdown);
-      expect(model.deletedAt, isA<DateTime>());
+      expect(model.deletedAt, isA<Timestamp>());
       expect(model.comments.length, 1);
-      expect(model.comments[0].userName, 'User');
+      expect(model.comments[0].userName, UserDisplayName('User'));
     });
 
     test('fromJson handles null scraping status', () {

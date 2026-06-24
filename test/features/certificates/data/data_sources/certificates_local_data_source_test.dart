@@ -23,7 +23,7 @@ void main() {
         subject: 'subject',
         issuer: 'issuer',
         isIgnored: false,
-        addedAt: Timestamp.now(),
+        addedAt: Timestamp(DateTime(2023, 1, 1)),
       ),
     ];
 
@@ -40,7 +40,7 @@ void main() {
       expect(certs.first.fingerprint, 'abc');
       expect(certs.first.pem, 'pem_data');
       expect(certs.first.isIgnored, isFalse);
-      expect(certs.first.addedAt, DateTime(2023, 1, 1));
+      expect(certs.first.addedAt, Timestamp(DateTime(2023, 1, 1)));
     });
 
     test('getCertificates returns empty list on invalid json', () async {

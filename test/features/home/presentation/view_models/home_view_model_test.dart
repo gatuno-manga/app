@@ -11,6 +11,7 @@ import 'package:gatuno/features/users/domain/value_objects/sensitive_content_wei
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
 import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
+import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
@@ -25,6 +26,10 @@ void main() {
   late MockUserService mockUserService;
   late MockBooksRepository mockBooksRepository;
   late MockReadingProgressCoordinator mockReadingCoordinator;
+
+  setUpAll(() {
+    registerFallbackValue(const BookPageOptions());
+  });
 
   setUp(() {
     mockAuthService = MockAuthService();

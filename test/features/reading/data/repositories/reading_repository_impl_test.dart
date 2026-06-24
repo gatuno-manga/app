@@ -26,7 +26,11 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(ChapterId('dummy'));
+  });
+
+setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
     when(() => mockDioClient.dio).thenReturn(mockDio);

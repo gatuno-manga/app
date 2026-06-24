@@ -30,7 +30,12 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+    registerFallbackValue(const BookPageOptions());
+  });
+
+setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
     when(() => mockDioClient.dio).thenReturn(mockDio);

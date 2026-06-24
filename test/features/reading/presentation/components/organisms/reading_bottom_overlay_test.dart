@@ -33,7 +33,11 @@ class _MockChapter extends Fake implements ReadingChapter {
 void main() {
   late MockReadingViewModel mockViewModel;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(ChapterId('dummy'));
+  });
+
+setUp(() {
     mockViewModel = MockReadingViewModel();
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
   });

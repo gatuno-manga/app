@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../core/network/exceptions.dart';
 import '../../domain/repositories/book_requests_repository.dart';
+import '../../domain/value_objects/request_title.dart';
+import '../../domain/value_objects/request_url.dart';
+import '../../domain/value_objects/request_reason.dart';
 
 class CreateBookRequestViewModel extends ChangeNotifier {
   final BookRequestsRepository _repository;
@@ -27,12 +30,21 @@ class CreateBookRequestViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final titleVO = RequestTitle(title);
+      final urlVO = RequestUrl(url);
+      final reasonVO = RequestReason(reason);
+
       await _repository.createBookRequest(
-        title: title,
-        url: url,
-        reason: reason,
+        title: titleVO,
+        url: urlVO,
+        reason: reasonVO,
       );
       return true;
+    } on ArgumentError catch (e) {
+      _error = e.message.toString();
+      _isSubmitting = false;
+      notifyListeners();
+      return false;
     } on ValidationException catch (e) {
       _error = e.message;
       return false;

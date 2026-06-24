@@ -27,7 +27,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Title'), findsOneWidget);
+      expect(find.text('Test Title'), findsOneWidget);
       expect(find.text('HEADER'), findsOneWidget);
       expect(find.text('SETTINGS'), findsOneWidget);
     });

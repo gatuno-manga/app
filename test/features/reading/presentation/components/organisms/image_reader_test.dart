@@ -72,7 +72,11 @@ void main() {
     await initTestDI();
   });
 
-  group('ImageReader', () {
+    setUpAll(() {
+    registerFallbackValue(ChapterId('dummy'));
+  });
+
+group('ImageReader', () {
     testWidgets('renders pages and toggles overlay on tap', (tester) async {
       final chapter = _MockChapter(
         pages: [

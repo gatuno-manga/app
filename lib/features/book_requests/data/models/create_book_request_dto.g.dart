@@ -9,15 +9,17 @@ part of 'create_book_request_dto.dart';
 CreateBookRequestDto _$CreateBookRequestDtoFromJson(
   Map<String, dynamic> json,
 ) => CreateBookRequestDto(
-  title: json['title'] as String,
-  url: json['url'] as String,
-  reason: json['reason'] as String?,
+  title: RequestTitle.fromJson(json['title'] as String),
+  url: RequestUrl.fromJson(json['url'] as String),
+  reason: json['reason'] == null
+      ? null
+      : RequestReason.fromJson(json['reason'] as String?),
 );
 
 Map<String, dynamic> _$CreateBookRequestDtoToJson(
   CreateBookRequestDto instance,
 ) => <String, dynamic>{
-  'title': instance.title,
-  'url': instance.url,
-  'reason': instance.reason,
+  'title': instance.title.toJson(),
+  'url': instance.url.toJson(),
+  'reason': instance.reason?.toJson(),
 };

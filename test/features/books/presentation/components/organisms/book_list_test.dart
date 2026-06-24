@@ -28,7 +28,11 @@ class MockDioClient extends Mock implements DioClient {}
 void main() {
   late MockDioClient mockDioClient;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+  });
+
+setUp(() {
     mockDioClient = MockDioClient();
     if (sl.isRegistered<DioClient>()) {
       sl.unregister<DioClient>();

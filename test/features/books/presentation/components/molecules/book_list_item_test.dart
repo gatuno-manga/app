@@ -34,7 +34,11 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+  });
+
+setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
 

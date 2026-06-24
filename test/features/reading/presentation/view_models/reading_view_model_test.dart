@@ -40,7 +40,13 @@ void main() {
   late MockReadingRepository mockRepository;
   late MockReadingProgressCoordinator mockCoordinator;
 
-  setUp(() {
+    setUpAll(() {
+    registerFallbackValue(BookId('dummy'));
+    registerFallbackValue(ChapterId('dummy'));
+    registerFallbackValue(const PositiveInt(1));
+  });
+
+setUp(() {
     mockRepository = MockReadingRepository();
     mockCoordinator = MockReadingProgressCoordinator();
     viewModel = ReadingViewModel(mockRepository, mockCoordinator);
