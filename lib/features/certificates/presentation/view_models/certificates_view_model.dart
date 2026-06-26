@@ -52,10 +52,11 @@ class CertificatesViewModel extends SafeChangeNotifier {
     notifyListeners();
 
     try {
-      if (file.bytes != null) {
-        fileContent = String.fromCharCodes(file.bytes!);
-      } else if (file.path != null) {
+      if (file.path != null) {
         fileContent = await File(file.path!).readAsString();
+      } else if (file.size > 0) {
+        final bytes = await file.xFile.readAsBytes();
+        fileContent = String.fromCharCodes(bytes);
       } else {
         throw CertificateFileMissingException();
       }
