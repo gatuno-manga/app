@@ -30,11 +30,8 @@ Map<String, dynamic> _$SyncCommentDtoToJson(SyncCommentDto instance) =>
       'isPublic': instance.isPublic,
     };
 
-SyncRequestDto _$SyncRequestDtoFromJson(Map<String, dynamic> json) =>
-    SyncRequestDto(
-      lastSyncAt: json['lastSyncAt'] == null
-          ? null
-          : Timestamp.fromJson(json['lastSyncAt']),
+PushSyncRequestDto _$PushSyncRequestDtoFromJson(Map<String, dynamic> json) =>
+    PushSyncRequestDto(
       readingProgress: (json['readingProgress'] as List<dynamic>?)
           ?.map((e) => SaveProgressDto.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -46,49 +43,23 @@ SyncRequestDto _$SyncRequestDtoFromJson(Map<String, dynamic> json) =>
           .toList(),
     );
 
-Map<String, dynamic> _$SyncRequestDtoToJson(
-  SyncRequestDto instance,
+Map<String, dynamic> _$PushSyncRequestDtoToJson(
+  PushSyncRequestDto instance,
 ) => <String, dynamic>{
-  'lastSyncAt': instance.lastSyncAt?.toJson(),
   'readingProgress': instance.readingProgress?.map((e) => e.toJson()).toList(),
   'savedPages': instance.savedPages,
   'comments': instance.comments?.map((e) => e.toJson()).toList(),
 };
 
-SyncReadingProgressResultDto _$SyncReadingProgressResultDtoFromJson(
-  Map<String, dynamic> json,
-) => SyncReadingProgressResultDto(
-  synced: (json['synced'] as List<dynamic>)
-      .map((e) => RemoteReadingProgress.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  conflicts: json['conflicts'] as List<dynamic>,
-  lastSyncAt: Timestamp.fromJson(json['lastSyncAt']),
-);
-
-Map<String, dynamic> _$SyncReadingProgressResultDtoToJson(
-  SyncReadingProgressResultDto instance,
-) => <String, dynamic>{
-  'synced': instance.synced.map((e) => e.toJson()).toList(),
-  'conflicts': instance.conflicts,
-  'lastSyncAt': instance.lastSyncAt.toJson(),
-};
-
-SyncResultDto _$SyncResultDtoFromJson(Map<String, dynamic> json) =>
-    SyncResultDto(
-      readingProgress: json['readingProgress'] == null
-          ? null
-          : SyncReadingProgressResultDto.fromJson(
-              json['readingProgress'] as Map<String, dynamic>,
-            ),
-      savedPages: json['savedPages'] as List<dynamic>?,
-      comments: json['comments'] as List<dynamic>?,
+PullSyncResponseDto _$PullSyncResponseDtoFromJson(Map<String, dynamic> json) =>
+    PullSyncResponseDto(
       syncedAt: Timestamp.fromJson(json['syncedAt']),
+      data: json['data'] as Map<String, dynamic>,
     );
 
-Map<String, dynamic> _$SyncResultDtoToJson(SyncResultDto instance) =>
-    <String, dynamic>{
-      'readingProgress': instance.readingProgress?.toJson(),
-      'savedPages': instance.savedPages,
-      'comments': instance.comments,
-      'syncedAt': instance.syncedAt.toJson(),
-    };
+Map<String, dynamic> _$PullSyncResponseDtoToJson(
+  PullSyncResponseDto instance,
+) => <String, dynamic>{
+  'syncedAt': instance.syncedAt.toJson(),
+  'data': instance.data,
+};

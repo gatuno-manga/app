@@ -42,7 +42,7 @@ setUp(() {
                       'title': 'Test Book',
                       'url': 'https://example.com/book',
                       'reason': 'Test Reason',
-                      'status': 'pending',
+                      'status': 'PENDING',
                       'userId': 'user1',
                       'adminId': null,
                       'rejectionMessage': null,

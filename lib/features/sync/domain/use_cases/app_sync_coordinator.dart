@@ -63,17 +63,26 @@ class AppSyncCoordinator {
         completed: p.completed,
       )).toList();
 
-      final request = SyncRequestDto(
-        lastSyncAt: lastSyncAt,
-        readingProgress: progressDtos.isNotEmpty ? progressDtos : null,
-      );
+      // 2. Perform Push if there are local changes
+      if (progressDtos.isNotEmpty) {
+        AppLogger.d('Pushing ${progressDtos.length} reading progress items', _logTag);
+        final pushRequest = PushSyncRequestDto(
+          readingProgress: progressDtos,
+        );
+        await _syncRemote.pushData(pushRequest);
+      }
 
-      // 2. Perform Sync
-      final result = await _syncRemote.syncData(request);
+      // 3. Perform Pull
+      AppLogger.d('Pulling remote changes', _logTag);
+      final pullResponse = await _syncRemote.pullData(lastSyncAt: lastSyncAt);
 
-      // 3. Process Result
-      if (result.readingProgress != null) {
-        final syncedProgress = result.readingProgress!.synced;
+      // 4. Process Pull Result
+      final readingProgressData = pullResponse.data['readingProgress'];
+      if (readingProgressData != null && readingProgressData is List) {
+        final syncedProgress = readingProgressData
+            .map((e) => RemoteReadingProgress.fromJson(e as Map<String, dynamic>))
+            .toList();
+
         for (final remote in syncedProgress) {
           await _readingLocal.saveProgress(
             ReadingProgressCompanion(
@@ -90,8 +99,8 @@ class AppSyncCoordinator {
         }
       }
 
-      // 4. Update lastSyncAt
-      await _syncLocal.setLastSyncAt(user.id, result.syncedAt);
+      // 5. Update lastSyncAt
+      await _syncLocal.setLastSyncAt(user.id, pullResponse.syncedAt);
       AppLogger.i('Unified sync completed successfully', _logTag);
     } catch (e, stackTrace) {
       AppLogger.e('Error during unified sync', e, stackTrace, _logTag);

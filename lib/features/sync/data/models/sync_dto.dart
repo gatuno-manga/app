@@ -35,56 +35,33 @@ class SyncCommentDto {
 }
 
 @JsonSerializable(explicitToJson: true)
-class SyncRequestDto {
-  final Timestamp? lastSyncAt;
+class PushSyncRequestDto {
   final List<SaveProgressDto>? readingProgress;
-  final List<Map<String, dynamic>>? savedPages; // Use Map since CreateSavedPageDto isn't defined yet
+  final List<Map<String, dynamic>>? savedPages;
   final List<SyncCommentDto>? comments;
 
-  SyncRequestDto({
-    this.lastSyncAt,
+  PushSyncRequestDto({
     this.readingProgress,
     this.savedPages,
     this.comments,
   });
 
-  factory SyncRequestDto.fromJson(Map<String, dynamic> json) =>
-      _$SyncRequestDtoFromJson(json);
-  Map<String, dynamic> toJson() => _$SyncRequestDtoToJson(this);
+  factory PushSyncRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$PushSyncRequestDtoFromJson(json);
+  Map<String, dynamic> toJson() => _$PushSyncRequestDtoToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
-class SyncReadingProgressResultDto {
-  final List<RemoteReadingProgress> synced;
-  final List<dynamic> conflicts;
-  final Timestamp lastSyncAt;
-
-  SyncReadingProgressResultDto({
-    required this.synced,
-    required this.conflicts,
-    required this.lastSyncAt,
-  });
-
-  factory SyncReadingProgressResultDto.fromJson(Map<String, dynamic> json) =>
-      _$SyncReadingProgressResultDtoFromJson(json);
-  Map<String, dynamic> toJson() => _$SyncReadingProgressResultDtoToJson(this);
-}
-
-@JsonSerializable(explicitToJson: true)
-class SyncResultDto {
-  final SyncReadingProgressResultDto? readingProgress;
-  final List<dynamic>? savedPages;
-  final List<dynamic>? comments;
+class PullSyncResponseDto {
   final Timestamp syncedAt;
+  final Map<String, dynamic> data;
 
-  SyncResultDto({
-    this.readingProgress,
-    this.savedPages,
-    this.comments,
+  PullSyncResponseDto({
     required this.syncedAt,
+    required this.data,
   });
 
-  factory SyncResultDto.fromJson(Map<String, dynamic> json) =>
-      _$SyncResultDtoFromJson(json);
-  Map<String, dynamic> toJson() => _$SyncResultDtoToJson(this);
+  factory PullSyncResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$PullSyncResponseDtoFromJson(json);
+  Map<String, dynamic> toJson() => _$PullSyncResponseDtoToJson(this);
 }
