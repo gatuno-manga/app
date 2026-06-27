@@ -31,7 +31,7 @@ Map<String, dynamic> _$BookRequestModelToJson(BookRequestModel instance) =>
       'title': instance.title.toJson(),
       'url': instance.url.toJson(),
       'reason': instance.reason.toJson(),
-      'status': instance.status.toJson(),
+      'status': _$RequestStatusEnumMap[instance.status]!,
       'adminId': instance.adminId?.toJson(),
       'rejectionMessage': instance.rejectionMessage.toJson(),
       'createdAt': instance.createdAt.toJson(),
@@ -39,7 +39,7 @@ Map<String, dynamic> _$BookRequestModelToJson(BookRequestModel instance) =>
     };
 
 const _$RequestStatusEnumMap = {
-  RequestStatus.pending: 'pending',
-  RequestStatus.approved: 'approved',
-  RequestStatus.rejected: 'rejected',
+  RequestStatus.pending: 'PENDING',
+  RequestStatus.approved: 'APPROVED',
+  RequestStatus.rejected: 'REJECTED',
 };
