@@ -13,6 +13,7 @@ class AuthInterceptor extends QueuedInterceptor {
     ApiConstants.signIn,
     ApiConstants.signUp,
     ApiConstants.authRefresh,
+    ApiConstants.s3Prefix,
   ];
 
   AuthInterceptor({required this.dioClient, required this.tokenProvider});
@@ -33,10 +34,12 @@ class AuthInterceptor extends QueuedInterceptor {
 
     if (!isApiOrigin) return false;
 
-    // 2. Check if the path is an auth endpoint that shouldn't have the token
-    // Some auth endpoints (signin, signup) don't need the Authorization header.
+    // 2. Check if the path is excluded from getting the token
     final bool isExcluded = _excludedPaths.any(
-      (path) => options.path == path || requestUri.path.endsWith(path),
+      (path) =>
+          options.path == path ||
+          requestUri.path.endsWith(path) ||
+          requestUri.path.startsWith(path),
     );
 
     return !isExcluded;

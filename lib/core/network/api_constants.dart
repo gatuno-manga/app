@@ -17,4 +17,7 @@ class ApiConstants {
   
   // Sync Route
   static const String syncUnified = '/sync';
+
+  // Object Storage
+  static const String s3Prefix = '/s3/';
 }
