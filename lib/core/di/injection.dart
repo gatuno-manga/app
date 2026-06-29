@@ -20,6 +20,7 @@ import '../../features/certificates/certificates_injection.dart';
 import '../../features/certificates/domain/use_cases/certificates_service.dart';
 import '../image/image_loading_strategy.dart';
 import '../image/dio_image_loading_strategy.dart';
+import '../network/app_mqtt_service.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -47,6 +48,9 @@ Future<void> initDI() async {
 
   // Features
   initAuthenticationInjection(sl);
+  sl.registerLazySingleton<AppMqttService>(
+    () => AppMqttService(sl(), sl()),
+  );
   initUsersInjection(sl);
   initHomeInjection(sl);
   initBooksInjection(sl);

@@ -16,6 +16,6 @@ void initSyncDI(GetIt sl) {
 
   // Coordinator
   sl.registerLazySingleton<AppSyncCoordinator>(
-    () => AppSyncCoordinator(sl(), sl(), sl(), sl()),
+    () => AppSyncCoordinator(sl(), sl(), sl(), sl(), sl()),
   );
 }

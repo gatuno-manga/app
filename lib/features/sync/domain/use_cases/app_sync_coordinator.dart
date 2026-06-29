@@ -12,11 +12,13 @@ import '../../../../features/books/domain/value_objects/book_id.dart';
 import '../../../../features/books/domain/value_objects/chapter_id.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../../shared/domain/value_objects/timestamp.dart';
+import '../../../../core/network/app_mqtt_service.dart';
 class AppSyncCoordinator {
   final SyncLocalDataSource _syncLocal;
   final SyncRemoteService _syncRemote;
   final AuthService _authService;
   final ReadingProgressLocalService _readingLocal;
+  final AppMqttService _mqttService;
   
   static const String _logTag = 'AppSyncCoordinator';
   bool _isSyncing = false;
@@ -26,7 +28,37 @@ class AppSyncCoordinator {
     this._syncRemote,
     this._authService,
     this._readingLocal,
-  );
+    this._mqttService,
+  ) {
+    _setupMqttListener();
+  }
+
+  void _setupMqttListener() {
+    _mqttService.progressSyncedStream.listen((remote) async {
+      AppLogger.i('Received reading progress sync via MQTT for chapter ${remote.chapterId.value}', _logTag);
+      
+      try {
+        final current = await _readingLocal.getProgress(remote.userId, remote.chapterId);
+        if (current == null || remote.pageIndex.value > current.pageIndex) {
+          await _readingLocal.saveProgress(
+            ReadingProgressCompanion(
+              userId: Value(remote.userId.value),
+              chapterId: Value(remote.chapterId.value),
+              bookId: Value(remote.bookId.value),
+              pageIndex: Value(remote.pageIndex.value),
+              timestamp: Value(remote.timestamp.value),
+              version: Value(remote.version.value),
+              totalPages: Value(remote.totalPages?.value),
+              completed: Value(remote.completed ?? false),
+            ),
+          );
+          AppLogger.d('Local progress updated from MQTT payload', _logTag);
+        }
+      } catch (e, stack) {
+        AppLogger.e('Error processing MQTT progress sync', e, stack, _logTag);
+      }
+    });
+  }
 
   Future<void> sync() async {
     if (_isSyncing) {
