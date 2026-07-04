@@ -133,7 +133,6 @@ class ReadingProgressLocalService {
                   bookId: Value(item.bookId),
                   pageIndex: Value(item.pageIndex),
                   timestamp: Value(item.timestamp),
-                  version: Value(item.version),
                   totalPages: Value(item.totalPages),
                   completed: Value(item.completed),
                 ),

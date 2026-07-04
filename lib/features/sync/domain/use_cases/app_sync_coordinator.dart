@@ -1,64 +1,27 @@
 import 'dart:async';
-import 'package:drift/drift.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
-import '../../../reading/data/database/reading_database.dart';
-import '../../../reading/data/models/reading_progress_dto.dart';
-import '../../../reading/data/repositories/reading_progress_local_service.dart';
 import '../../data/data_sources/sync_local_data_source.dart';
-import '../../data/models/sync_dto.dart';
-import '../../data/repositories/sync_remote_service.dart';
-import '../../../../features/books/domain/value_objects/book_id.dart';
-import '../../../../features/books/domain/value_objects/chapter_id.dart';
-import '../../../../shared/domain/value_objects/positive_int.dart';
-import '../../../../shared/domain/value_objects/timestamp.dart';
-import '../../../../core/network/app_mqtt_service.dart';
+import '../repositories/sync_repository.dart';
+import '../entities/syncable_entity.dart';
+import '../value_objects/sync_feature_key.dart';
+import 'local_sync_feature_provider.dart';
+
 class AppSyncCoordinator {
   final SyncLocalDataSource _syncLocal;
-  final SyncRemoteService _syncRemote;
+  final SyncRepository _syncRepository;
   final AuthService _authService;
-  final ReadingProgressLocalService _readingLocal;
-  final AppMqttService _mqttService;
-  
+  final List<LocalSyncFeatureProvider> _providers;
+
   static const String _logTag = 'AppSyncCoordinator';
   bool _isSyncing = false;
 
   AppSyncCoordinator(
     this._syncLocal,
-    this._syncRemote,
+    this._syncRepository,
     this._authService,
-    this._readingLocal,
-    this._mqttService,
-  ) {
-    _setupMqttListener();
-  }
-
-  void _setupMqttListener() {
-    _mqttService.progressSyncedStream.listen((remote) async {
-      AppLogger.i('Received reading progress sync via MQTT for chapter ${remote.chapterId.value}', _logTag);
-      
-      try {
-        final current = await _readingLocal.getProgress(remote.userId, remote.chapterId);
-        if (current == null || remote.pageIndex.value > current.pageIndex) {
-          await _readingLocal.saveProgress(
-            ReadingProgressCompanion(
-              userId: Value(remote.userId.value),
-              chapterId: Value(remote.chapterId.value),
-              bookId: Value(remote.bookId.value),
-              pageIndex: Value(remote.pageIndex.value),
-              timestamp: Value(remote.timestamp.value),
-              version: Value(remote.version.value),
-              totalPages: Value(remote.totalPages?.value),
-              completed: Value(remote.completed ?? false),
-            ),
-          );
-          AppLogger.d('Local progress updated from MQTT payload', _logTag);
-        }
-      } catch (e, stack) {
-        AppLogger.e('Error processing MQTT progress sync', e, stack, _logTag);
-      }
-    });
-  }
+    this._providers,
+  );
 
   Future<void> sync() async {
     if (_isSyncing) {
@@ -75,60 +38,40 @@ class AppSyncCoordinator {
     _isSyncing = true;
     try {
       AppLogger.i('Starting unified sync for user: ${user.id.value}', _logTag);
-      
+
       final lastSyncAt = await _syncLocal.getLastSyncAt(user.id);
 
-      // 1. Gather Reading Progress
-      List<ReadingProgressData> localProgress;
-      if (lastSyncAt != null) {
-        localProgress = await _readingLocal.getModifiedSince(user.id, lastSyncAt.value);
-      } else {
-        localProgress = await _readingLocal.getAllProgress(user.id);
-      }
-
-      final progressDtos = localProgress.map((p) => SaveProgressDto(
-        chapterId: ChapterId(p.chapterId),
-        bookId: BookId(p.bookId),
-        pageIndex: PositiveInt(p.pageIndex),
-        timestamp: Timestamp(p.timestamp),
-        totalPages: p.totalPages != null ? PositiveInt(p.totalPages!) : null,
-        completed: p.completed,
-      )).toList();
-
-      // 2. Perform Push if there are local changes
-      if (progressDtos.isNotEmpty) {
-        AppLogger.d('Pushing ${progressDtos.length} reading progress items', _logTag);
-        final pushRequest = PushSyncRequestDto(
-          readingProgress: progressDtos,
-        );
-        await _syncRemote.pushData(pushRequest);
-      }
-
-      // 3. Perform Pull
+      // 1. Perform Pull
       AppLogger.d('Pulling remote changes', _logTag);
-      final pullResponse = await _syncRemote.pullData(lastSyncAt: lastSyncAt);
+      final pullResponse = await _syncRepository.pullData(
+        lastSyncAt: lastSyncAt,
+      );
 
-      // 4. Process Pull Result
-      final readingProgressData = pullResponse.data['readingProgress'];
-      if (readingProgressData != null && readingProgressData is List) {
-        final syncedProgress = readingProgressData
-            .map((e) => RemoteReadingProgress.fromJson(e as Map<String, dynamic>))
-            .toList();
-
-        for (final remote in syncedProgress) {
-          await _readingLocal.saveProgress(
-            ReadingProgressCompanion(
-              userId: Value(remote.userId.value),
-              chapterId: Value(remote.chapterId.value),
-              bookId: Value(remote.bookId.value),
-              pageIndex: Value(remote.pageIndex.value),
-              timestamp: Value(remote.timestamp.value),
-              version: Value(remote.version.value),
-              totalPages: Value(remote.totalPages?.value),
-              completed: Value(remote.completed ?? false),
-            ),
-          );
+      // 2. Process Pull Result using providers
+      for (final provider in _providers) {
+        final data = pullResponse.data[provider.syncKey.key];
+        if (data != null && data is List) {
+          await provider.processPulledData(data, user.id);
         }
+      }
+
+      // 3. Gather Local Progress
+      final Map<SyncFeatureKey, List<SyncableEntity>> pushPayload = {};
+
+      for (final provider in _providers) {
+        final changes = await provider.getLocalChanges(
+          user.id,
+          lastSyncAt?.value,
+        );
+        if (changes.isNotEmpty) {
+          pushPayload[provider.syncKey] = changes;
+        }
+      }
+
+      // 4. Perform Push if there are local changes
+      if (pushPayload.isNotEmpty) {
+        AppLogger.d('Pushing local changes to remote', _logTag);
+        await _syncRepository.pushData(pushPayload);
       }
 
       // 5. Update lastSyncAt

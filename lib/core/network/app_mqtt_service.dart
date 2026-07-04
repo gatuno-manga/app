@@ -11,12 +11,14 @@ import '../logging/logger.dart';
 class AppMqttService with WidgetsBindingObserver {
   final AuthService _authService;
   final SettingsService _settingsService;
-  
+
   MqttServerClient? _client;
   static const String _logTag = 'AppMqttService';
-  
-  final _progressSyncedController = StreamController<RemoteReadingProgress>.broadcast();
-  Stream<RemoteReadingProgress> get progressSyncedStream => _progressSyncedController.stream;
+
+  final _progressSyncedController =
+      StreamController<RemoteReadingProgress>.broadcast();
+  Stream<RemoteReadingProgress> get progressSyncedStream =>
+      _progressSyncedController.stream;
 
   AppMqttService(this._authService, this._settingsService) {
     WidgetsBinding.instance.addObserver(this);
@@ -27,7 +29,7 @@ class AppMqttService with WidgetsBindingObserver {
         disconnect();
       }
     });
-    
+
     // Connect initially if already authenticated
     if (_authService.authenticated) {
       connect();
@@ -46,7 +48,8 @@ class AppMqttService with WidgetsBindingObserver {
   }
 
   Future<void> connect() async {
-    if (_client != null && _client!.connectionStatus!.state == MqttConnectionState.connected) {
+    if (_client != null &&
+        _client!.connectionStatus!.state == MqttConnectionState.connected) {
       return;
     }
 
@@ -54,18 +57,19 @@ class AppMqttService with WidgetsBindingObserver {
     if (apiUrl == null) return;
 
     final uri = Uri.parse(apiUrl);
-    final wsHost = 'ws://${uri.host}';
-    
+    final host = uri.host;
+
     final token = await _authService.getToken();
     if (token == null) return;
 
     final user = _authService.currentUser;
     if (user.isGuest) return;
 
-    final clientId = 'gatuno_app_${user.id.value}_${DateTime.now().millisecondsSinceEpoch}';
+    final clientId =
+        'gatuno_app_${user.id.value}_${DateTime.now().millisecondsSinceEpoch}';
 
-    _client = MqttServerClient.withPort(wsHost, clientId, 8083)
-      ..useWebSocket = true
+    _client = MqttServerClient.withPort(host, clientId, 8883)
+      ..useWebSocket = false
       ..keepAlivePeriod = 20
       ..logging(on: false)
       ..onDisconnected = _onDisconnected
@@ -74,15 +78,15 @@ class AppMqttService with WidgetsBindingObserver {
       ..pongCallback = _pong;
 
     final connMess = MqttConnectMessage()
-        ..authenticateAs('jwt', token)
-        ..withClientIdentifier(clientId)
-        ..startClean()
-        ..withWillQos(MqttQos.atLeastOnce);
-    
+      ..authenticateAs('jwt', token)
+      ..withClientIdentifier(clientId)
+      ..startClean()
+      ..withWillQos(MqttQos.atLeastOnce);
+
     _client!.connectionMessage = connMess;
 
     try {
-      AppLogger.i('Connecting to MQTT broker at $wsHost:8083', _logTag);
+      AppLogger.i('Connecting to MQTT broker at $host:1883', _logTag);
       await _client!.connect();
     } catch (e) {
       AppLogger.e('Exception: $e', e, null, _logTag);
@@ -91,17 +95,22 @@ class AppMqttService with WidgetsBindingObserver {
 
     if (_client?.connectionStatus?.state == MqttConnectionState.connected) {
       AppLogger.i('MQTT client connected', _logTag);
-      
+
       final topic = 'users/${user.id.value}/reading-progress';
       _client!.subscribe(topic, MqttQos.atLeastOnce);
-      
+
       _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
-        final String pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        final String pt = MqttPublishPayload.bytesToStringAsString(
+          recMess.payload.message,
+        );
         _handleMessage(c[0].topic, pt);
       });
     } else {
-      AppLogger.w('MQTT client connection failed - status is ${_client?.connectionStatus}', _logTag);
+      AppLogger.w(
+        'MQTT client connection failed - status is ${_client?.connectionStatus}',
+        _logTag,
+      );
       disconnect();
     }
   }
@@ -109,16 +118,17 @@ class AppMqttService with WidgetsBindingObserver {
   void _handleMessage(String topic, String message) {
     try {
       final data = jsonDecode(message);
-      if (data['event'] == 'progress:synced' || data['event'] == 'progress.synced') {
+      if (data['event'] == 'progress:synced' ||
+          data['event'] == 'progress.synced') {
         final payload = data['payload'] as Map<String, dynamic>;
-        
+
         if (payload['success'] == true && payload['progress'] != null) {
-           final progressJson = payload['progress'] as Map<String, dynamic>;
-           final progress = RemoteReadingProgress.fromJson(progressJson);
-           _progressSyncedController.add(progress);
+          final progressJson = payload['progress'] as Map<String, dynamic>;
+          final progress = RemoteReadingProgress.fromJson(progressJson);
+          _progressSyncedController.add(progress);
         } else if (payload['id'] != null) {
-           final progress = RemoteReadingProgress.fromJson(payload);
-           _progressSyncedController.add(progress);
+          final progress = RemoteReadingProgress.fromJson(payload);
+          _progressSyncedController.add(progress);
         }
       }
     } catch (e, stack) {

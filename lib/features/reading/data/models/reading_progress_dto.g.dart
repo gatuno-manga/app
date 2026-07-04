@@ -10,12 +10,15 @@ RemoteReadingProgress _$RemoteReadingProgressFromJson(
   Map<String, dynamic> json,
 ) => RemoteReadingProgress(
   id: ProgressId.fromJson(json['id'] as String),
-  userId: UserId.fromJson(json['user_id'] as String),
+  userId: json['user_id'] == null
+      ? null
+      : UserId.fromJson(json['user_id'] as String),
   chapterId: ChapterId.fromJson(json['chapter_id'] as String),
   bookId: BookId.fromJson(json['book_id'] as String),
   pageIndex: PositiveInt.fromJson((json['page_index'] as num).toInt()),
-  timestamp: Timestamp.fromJson(json['timestamp']),
-  version: PositiveInt.fromJson((json['version'] as num).toInt()),
+  timestamp: json['timestamp'] == null
+      ? null
+      : Timestamp.fromJson(json['timestamp']),
   totalPages: json['total_pages'] == null
       ? null
       : PositiveInt.fromJson((json['total_pages'] as num).toInt()),
@@ -34,7 +37,6 @@ Map<String, dynamic> _$RemoteReadingProgressToJson(
   'book_id': instance.bookId,
   'page_index': instance.pageIndex,
   'timestamp': instance.timestamp,
-  'version': instance.version,
   'total_pages': instance.totalPages,
   'completed': instance.completed,
   'updated_at': instance.updatedAt,

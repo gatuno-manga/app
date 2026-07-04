@@ -60,18 +60,6 @@ class $ReadingProgressTable extends ReadingProgress
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _versionMeta = const VerificationMeta(
-    'version',
-  );
-  @override
-  late final GeneratedColumn<int> version = GeneratedColumn<int>(
-    'version',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
   static const VerificationMeta _totalPagesMeta = const VerificationMeta(
     'totalPages',
   );
@@ -105,7 +93,6 @@ class $ReadingProgressTable extends ReadingProgress
     bookId,
     pageIndex,
     timestamp,
-    version,
     totalPages,
     completed,
   ];
@@ -161,12 +148,6 @@ class $ReadingProgressTable extends ReadingProgress
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
-    if (data.containsKey('version')) {
-      context.handle(
-        _versionMeta,
-        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
-      );
-    }
     if (data.containsKey('total_pages')) {
       context.handle(
         _totalPagesMeta,
@@ -208,10 +189,6 @@ class $ReadingProgressTable extends ReadingProgress
         DriftSqlType.dateTime,
         data['${effectivePrefix}timestamp'],
       )!,
-      version: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}version'],
-      )!,
       totalPages: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}total_pages'],
@@ -236,7 +213,6 @@ class ReadingProgressData extends DataClass
   final String bookId;
   final int pageIndex;
   final DateTime timestamp;
-  final int version;
   final int? totalPages;
   final bool completed;
   const ReadingProgressData({
@@ -245,7 +221,6 @@ class ReadingProgressData extends DataClass
     required this.bookId,
     required this.pageIndex,
     required this.timestamp,
-    required this.version,
     this.totalPages,
     required this.completed,
   });
@@ -257,7 +232,6 @@ class ReadingProgressData extends DataClass
     map['book_id'] = Variable<String>(bookId);
     map['page_index'] = Variable<int>(pageIndex);
     map['timestamp'] = Variable<DateTime>(timestamp);
-    map['version'] = Variable<int>(version);
     if (!nullToAbsent || totalPages != null) {
       map['total_pages'] = Variable<int>(totalPages);
     }
@@ -272,7 +246,6 @@ class ReadingProgressData extends DataClass
       bookId: Value(bookId),
       pageIndex: Value(pageIndex),
       timestamp: Value(timestamp),
-      version: Value(version),
       totalPages: totalPages == null && nullToAbsent
           ? const Value.absent()
           : Value(totalPages),
@@ -291,7 +264,6 @@ class ReadingProgressData extends DataClass
       bookId: serializer.fromJson<String>(json['bookId']),
       pageIndex: serializer.fromJson<int>(json['pageIndex']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
-      version: serializer.fromJson<int>(json['version']),
       totalPages: serializer.fromJson<int?>(json['totalPages']),
       completed: serializer.fromJson<bool>(json['completed']),
     );
@@ -305,7 +277,6 @@ class ReadingProgressData extends DataClass
       'bookId': serializer.toJson<String>(bookId),
       'pageIndex': serializer.toJson<int>(pageIndex),
       'timestamp': serializer.toJson<DateTime>(timestamp),
-      'version': serializer.toJson<int>(version),
       'totalPages': serializer.toJson<int?>(totalPages),
       'completed': serializer.toJson<bool>(completed),
     };
@@ -317,7 +288,6 @@ class ReadingProgressData extends DataClass
     String? bookId,
     int? pageIndex,
     DateTime? timestamp,
-    int? version,
     Value<int?> totalPages = const Value.absent(),
     bool? completed,
   }) => ReadingProgressData(
@@ -326,7 +296,6 @@ class ReadingProgressData extends DataClass
     bookId: bookId ?? this.bookId,
     pageIndex: pageIndex ?? this.pageIndex,
     timestamp: timestamp ?? this.timestamp,
-    version: version ?? this.version,
     totalPages: totalPages.present ? totalPages.value : this.totalPages,
     completed: completed ?? this.completed,
   );
@@ -337,7 +306,6 @@ class ReadingProgressData extends DataClass
       bookId: data.bookId.present ? data.bookId.value : this.bookId,
       pageIndex: data.pageIndex.present ? data.pageIndex.value : this.pageIndex,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
-      version: data.version.present ? data.version.value : this.version,
       totalPages: data.totalPages.present
           ? data.totalPages.value
           : this.totalPages,
@@ -353,7 +321,6 @@ class ReadingProgressData extends DataClass
           ..write('bookId: $bookId, ')
           ..write('pageIndex: $pageIndex, ')
           ..write('timestamp: $timestamp, ')
-          ..write('version: $version, ')
           ..write('totalPages: $totalPages, ')
           ..write('completed: $completed')
           ..write(')'))
@@ -367,7 +334,6 @@ class ReadingProgressData extends DataClass
     bookId,
     pageIndex,
     timestamp,
-    version,
     totalPages,
     completed,
   );
@@ -380,7 +346,6 @@ class ReadingProgressData extends DataClass
           other.bookId == this.bookId &&
           other.pageIndex == this.pageIndex &&
           other.timestamp == this.timestamp &&
-          other.version == this.version &&
           other.totalPages == this.totalPages &&
           other.completed == this.completed);
 }
@@ -391,7 +356,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   final Value<String> bookId;
   final Value<int> pageIndex;
   final Value<DateTime> timestamp;
-  final Value<int> version;
   final Value<int?> totalPages;
   final Value<bool> completed;
   final Value<int> rowid;
@@ -401,7 +365,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     this.bookId = const Value.absent(),
     this.pageIndex = const Value.absent(),
     this.timestamp = const Value.absent(),
-    this.version = const Value.absent(),
     this.totalPages = const Value.absent(),
     this.completed = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -412,7 +375,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     required String bookId,
     required int pageIndex,
     required DateTime timestamp,
-    this.version = const Value.absent(),
     this.totalPages = const Value.absent(),
     this.completed = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -427,7 +389,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     Expression<String>? bookId,
     Expression<int>? pageIndex,
     Expression<DateTime>? timestamp,
-    Expression<int>? version,
     Expression<int>? totalPages,
     Expression<bool>? completed,
     Expression<int>? rowid,
@@ -438,7 +399,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
       if (bookId != null) 'book_id': bookId,
       if (pageIndex != null) 'page_index': pageIndex,
       if (timestamp != null) 'timestamp': timestamp,
-      if (version != null) 'version': version,
       if (totalPages != null) 'total_pages': totalPages,
       if (completed != null) 'completed': completed,
       if (rowid != null) 'rowid': rowid,
@@ -451,7 +411,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     Value<String>? bookId,
     Value<int>? pageIndex,
     Value<DateTime>? timestamp,
-    Value<int>? version,
     Value<int?>? totalPages,
     Value<bool>? completed,
     Value<int>? rowid,
@@ -462,7 +421,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
       bookId: bookId ?? this.bookId,
       pageIndex: pageIndex ?? this.pageIndex,
       timestamp: timestamp ?? this.timestamp,
-      version: version ?? this.version,
       totalPages: totalPages ?? this.totalPages,
       completed: completed ?? this.completed,
       rowid: rowid ?? this.rowid,
@@ -487,9 +445,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
     if (timestamp.present) {
       map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
-    if (version.present) {
-      map['version'] = Variable<int>(version.value);
-    }
     if (totalPages.present) {
       map['total_pages'] = Variable<int>(totalPages.value);
     }
@@ -510,7 +465,6 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
           ..write('bookId: $bookId, ')
           ..write('pageIndex: $pageIndex, ')
           ..write('timestamp: $timestamp, ')
-          ..write('version: $version, ')
           ..write('totalPages: $totalPages, ')
           ..write('completed: $completed, ')
           ..write('rowid: $rowid')
@@ -546,7 +500,6 @@ typedef $$ReadingProgressTableCreateCompanionBuilder =
       required String bookId,
       required int pageIndex,
       required DateTime timestamp,
-      Value<int> version,
       Value<int?> totalPages,
       Value<bool> completed,
       Value<int> rowid,
@@ -558,7 +511,6 @@ typedef $$ReadingProgressTableUpdateCompanionBuilder =
       Value<String> bookId,
       Value<int> pageIndex,
       Value<DateTime> timestamp,
-      Value<int> version,
       Value<int?> totalPages,
       Value<bool> completed,
       Value<int> rowid,
@@ -595,11 +547,6 @@ class $$ReadingProgressTableFilterComposer
 
   ColumnFilters<DateTime> get timestamp => $composableBuilder(
     column: $table.timestamp,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get version => $composableBuilder(
-    column: $table.version,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -648,11 +595,6 @@ class $$ReadingProgressTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get version => $composableBuilder(
-    column: $table.version,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<int> get totalPages => $composableBuilder(
     column: $table.totalPages,
     builder: (column) => ColumnOrderings(column),
@@ -687,9 +629,6 @@ class $$ReadingProgressTableAnnotationComposer
 
   GeneratedColumn<DateTime> get timestamp =>
       $composableBuilder(column: $table.timestamp, builder: (column) => column);
-
-  GeneratedColumn<int> get version =>
-      $composableBuilder(column: $table.version, builder: (column) => column);
 
   GeneratedColumn<int> get totalPages => $composableBuilder(
     column: $table.totalPages,
@@ -742,7 +681,6 @@ class $$ReadingProgressTableTableManager
                 Value<String> bookId = const Value.absent(),
                 Value<int> pageIndex = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
-                Value<int> version = const Value.absent(),
                 Value<int?> totalPages = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -752,7 +690,6 @@ class $$ReadingProgressTableTableManager
                 bookId: bookId,
                 pageIndex: pageIndex,
                 timestamp: timestamp,
-                version: version,
                 totalPages: totalPages,
                 completed: completed,
                 rowid: rowid,
@@ -764,7 +701,6 @@ class $$ReadingProgressTableTableManager
                 required String bookId,
                 required int pageIndex,
                 required DateTime timestamp,
-                Value<int> version = const Value.absent(),
                 Value<int?> totalPages = const Value.absent(),
                 Value<bool> completed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -774,7 +710,6 @@ class $$ReadingProgressTableTableManager
                 bookId: bookId,
                 pageIndex: pageIndex,
                 timestamp: timestamp,
-                version: version,
                 totalPages: totalPages,
                 completed: completed,
                 rowid: rowid,

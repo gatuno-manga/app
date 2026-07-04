@@ -10,7 +10,6 @@ class ReadingProgress extends Table {
   TextColumn get bookId => text()();
   IntColumn get pageIndex => integer()();
   DateTimeColumn get timestamp => dateTime()();
-  IntColumn get version => integer().withDefault(const Constant(0))();
   IntColumn get totalPages => integer().nullable()();
   BoolColumn get completed => boolean().withDefault(const Constant(false))();
 
@@ -23,7 +22,7 @@ class ReadingDatabase extends _$ReadingDatabase {
   ReadingDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -46,6 +45,21 @@ class ReadingDatabase extends _$ReadingDatabase {
         }
         if (from < 3) {
           await customStatement('CREATE INDEX idx_reading_progress_recent ON reading_progress(user_id, timestamp);');
+        }
+        if (from < 4) {
+          await transaction(() async {
+            await customStatement(
+              'ALTER TABLE reading_progress RENAME TO reading_progress_old;',
+            );
+            await m.createTable(readingProgress);
+            await customStatement(
+              'INSERT INTO reading_progress '
+              '(user_id, chapter_id, book_id, page_index, timestamp, total_pages, completed) '
+              'SELECT user_id, chapter_id, book_id, page_index, timestamp, total_pages, completed '
+              'FROM reading_progress_old;',
+            );
+            await customStatement('DROP TABLE reading_progress_old;');
+          });
         }
       },
     );

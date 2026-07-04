@@ -11,24 +11,22 @@ part 'reading_progress_dto.g.dart';
 @JsonSerializable(fieldRename: FieldRename.snake)
 class RemoteReadingProgress {
   final ProgressId id;
-  final UserId userId;
+  final UserId? userId;
   final ChapterId chapterId;
   final BookId bookId;
   final PositiveInt pageIndex;
-  final Timestamp timestamp;
-  final PositiveInt version;
+  final Timestamp? timestamp;
   final PositiveInt? totalPages;
   final bool? completed;
   final Timestamp? updatedAt;
 
   RemoteReadingProgress({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.chapterId,
     required this.bookId,
     required this.pageIndex,
-    required this.timestamp,
-    required this.version,
+    this.timestamp,
     this.totalPages,
     this.completed,
     this.updatedAt,

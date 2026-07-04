@@ -130,7 +130,6 @@ void main() {
           bookId: bookId,
           pageIndex: 5,
           timestamp: DateTime.now(),
-          version: 0,
           completed: false,
         );
 
@@ -170,7 +169,6 @@ void main() {
           bookId: bookId,
           pageIndex: 10,
           timestamp: DateTime.now(),
-          version: 0,
           completed: true,
         );
 
@@ -206,7 +204,6 @@ void main() {
           bookId: bookId,
           pageIndex: 10,
           timestamp: DateTime.now(),
-          version: 0,
           completed: true,
         );
 
@@ -358,7 +355,6 @@ void main() {
           bookId: bookId,
           pageIndex: 10,
           timestamp: DateTime.now(),
-          version: 0,
           completed: true,
         );
         final progress2 = ReadingProgressData(
@@ -367,7 +363,6 @@ void main() {
           bookId: bookId,
           pageIndex: 5,
           timestamp: DateTime.now(),
-          version: 0,
           completed: false,
         );
 
