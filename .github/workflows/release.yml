@@ -16,6 +16,8 @@ jobs:
   validate_and_gate:
     name: Validate release trigger and source
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
@@ -58,6 +60,28 @@ jobs:
               exit 1
           fi
 
+      - name: Update version and commit
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
+          
+          # Update pubspec.yaml
+          sed -i -e "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
+          
+          # Configure Git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Commit and push back to main
+          git add pubspec.yaml
+          git commit -m "chore: bump version to ${VERSION}+${BUILD_NUMBER} [skip ci]"
+          git push origin HEAD:main
+          
+          # Force update the tag to the new commit so the release uses it
+          git tag -f "${GITHUB_REF_NAME}"
+          git push origin -f refs/tags/"${GITHUB_REF_NAME}"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -80,6 +104,8 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Create LFS file list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
@@ -130,6 +156,8 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Create LFS file list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
@@ -179,6 +207,8 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
