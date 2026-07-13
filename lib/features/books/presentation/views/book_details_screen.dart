@@ -45,21 +45,24 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) {
-        if (_viewModel.isLoading && _viewModel.book == null) {
+    return StreamBuilder<BookDetailsState>(
+      stream: _viewModel.stateStream,
+      initialData: _viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        
+        if (state.isLoading && state.book == null) {
           return const BookDetailsLoading();
         }
 
-        if (_viewModel.error != null && _viewModel.book == null) {
+        if (state.error != null && state.book == null) {
           return BookDetailsError(
-            error: _viewModel.error!,
+            error: state.error!,
             onRetry: _viewModel.fetchBookDetails,
           );
         }
 
-        final book = _viewModel.book;
+        final book = state.book;
         if (book == null) {
           return BookDetailsError(
             error: l10n.booksNoBooksFound,

@@ -22,11 +22,15 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
 
-    // When listening, we need to stub addListener/removeListener
-    when(() => mockSettingsService.addListener(any())).thenAnswer((_) {});
-    when(() => mockSettingsService.removeListener(any())).thenAnswer((_) {});
-    when(() => mockAuthService.addListener(any())).thenAnswer((_) {});
-    when(() => mockAuthService.removeListener(any())).thenAnswer((_) {});
+    // When listening, we need to stub streams
+    when(() => mockSettingsService.settingsStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
+
+    // Setup mock returns BEFORE init
+    when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
+    when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
+    when(() => mockAuthService.authenticated).thenReturn(true);
+    when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
 
     viewModel = SettingsViewModel(
       settingsService: mockSettingsService,
@@ -43,15 +47,17 @@ void main() {
         maxWeightSensitiveContent: const SensitiveContentWeight(0),
       );
 
-      when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
-      when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
-      when(() => mockAuthService.authenticated).thenReturn(true);
+      // User was mocked to guest in setup, let's override and re-init for this test
       when(() => mockAuthService.currentUser).thenReturn(user);
+      viewModel = SettingsViewModel(
+        settingsService: mockSettingsService,
+        authService: mockAuthService,
+      );
 
-      expect(viewModel.apiUrl, 'http://test.com');
-      expect(viewModel.sensitiveContentEnabled, isTrue);
-      expect(viewModel.isAuthenticated, isTrue);
-      expect(viewModel.user, equals(user));
+      expect(viewModel.state.apiUrl, 'http://test.com');
+      expect(viewModel.state.sensitiveContentEnabled, isTrue);
+      expect(viewModel.state.isAuthenticated, isTrue);
+      expect(viewModel.state.user, equals(user));
     });
 
     test('setSensitiveContentEnabled should call service', () async {

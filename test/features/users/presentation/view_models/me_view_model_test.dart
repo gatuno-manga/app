@@ -21,8 +21,8 @@ void main() {
 
   group('MeViewModel', () {
     test('initial state should be loading and guest', () {
-      expect(viewModel.isLoading, isTrue);
-      expect(viewModel.user, equals(UserModel.guest));
+      expect(viewModel.state.isLoading, isTrue);
+      expect(viewModel.state.user, equals(UserModel.guest));
     });
 
     test('init should load user', () async {
@@ -39,8 +39,8 @@ void main() {
 
       await viewModel.init();
 
-      expect(viewModel.isLoading, isFalse);
-      expect(viewModel.user, equals(user));
+      expect(viewModel.state.isLoading, isFalse);
+      expect(viewModel.state.user, equals(user));
     });
 
     test('logout should call service', () async {

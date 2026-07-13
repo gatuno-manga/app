@@ -53,6 +53,8 @@ void main() {
 
 setUp(() {
     mockViewModel = MockReadingViewModel();
+    when(() => mockViewModel.state).thenReturn(ReadingState.initial());
+    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(ReadingState.initial()));
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
   });
 
@@ -65,7 +67,7 @@ setUp(() {
       );
 
       await tester.pumpApp(
-        ChangeNotifierProvider<ReadingViewModel>.value(
+        Provider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(body: TextReader(chapter: chapter)),
         ),
@@ -83,7 +85,7 @@ setUp(() {
       );
 
       await tester.pumpApp(
-        ChangeNotifierProvider<ReadingViewModel>.value(
+        Provider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(body: TextReader(chapter: chapter)),
         ),
@@ -100,7 +102,7 @@ setUp(() {
       );
 
       await tester.pumpApp(
-        ChangeNotifierProvider<ReadingViewModel>.value(
+        Provider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(body: TextReader(chapter: chapter)),
         ),

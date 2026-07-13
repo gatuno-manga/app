@@ -37,11 +37,11 @@ extension PumpApp on WidgetTester {
 
     final providers = [
       if (sl.isRegistered<AuthService>())
-        ChangeNotifierProvider.value(value: sl<AuthService>()),
+        Provider.value(value: sl<AuthService>()),
       if (sl.isRegistered<HomeViewModel>())
-        ChangeNotifierProvider.value(value: sl<HomeViewModel>()),
+        Provider.value(value: sl<HomeViewModel>()),
       if (sl.isRegistered<MeViewModel>())
-        ChangeNotifierProvider.value(value: sl<MeViewModel>()),
+        Provider.value(value: sl<MeViewModel>()),
     ];
 
     Widget current = MaterialApp.router(

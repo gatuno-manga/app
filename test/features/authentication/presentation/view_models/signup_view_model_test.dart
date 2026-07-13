@@ -24,8 +24,8 @@ void main() {
 
   group('SignUpViewModel', () {
     test('initial state is correct', () {
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, null);
     });
 
     test('signUp success updates state correctly', () async {
@@ -39,8 +39,8 @@ void main() {
       );
 
       expect(success, true);
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, null);
     });
 
     test('signUp failure updates state correctly', () async {
@@ -54,8 +54,8 @@ void main() {
       );
 
       expect(success, false);
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, 'Exception: Signup failed');
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, 'Exception: Signup failed');
     });
 
     test('clearError resets error message', () async {
@@ -66,7 +66,7 @@ void main() {
       await viewModel.signUp('test@example.com', 'Password123!');
       viewModel.clearError();
 
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.errorMessage, null);
     });
   });
 }

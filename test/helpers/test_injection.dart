@@ -12,7 +12,6 @@ import 'package:gatuno/features/home/presentation/view_models/home_view_model.da
 import 'package:gatuno/features/users/presentation/view_models/me_view_model.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
-import 'package:gatuno/features/users/data/models/user_model.dart';
 import 'package:gatuno/features/settings/data/data_sources/settings_local_data_source.dart';
 import 'package:gatuno/features/certificates/domain/use_cases/certificates_service.dart';
 import 'package:gatuno/features/certificates/data/data_sources/certificates_local_data_source.dart';
@@ -131,8 +130,8 @@ Future<void> initTestDI({
 
   final navVM = navigationViewModel ?? MockNavigationViewModel();
   if (navVM is MockNavigationViewModel) {
-    when(() => navVM.isAuthenticated).thenReturn(false);
-    when(() => navVM.user).thenReturn(UserModel.guest);
+    when(() => navVM.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => navVM.state).thenReturn(NavigationState.initial());
   }
   sl.registerFactory<NavigationViewModel>(() => navVM);
 }

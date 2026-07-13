@@ -18,10 +18,13 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
 
-    when(() => mockSettingsService.addListener(any())).thenAnswer((_) {});
-    when(() => mockSettingsService.removeListener(any())).thenAnswer((_) {});
-    when(() => mockAuthService.addListener(any())).thenAnswer((_) {});
-    when(() => mockAuthService.removeListener(any())).thenAnswer((_) {});
+    when(() => mockSettingsService.settingsStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
+
+    when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
+    when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
+    when(() => mockAuthService.authenticated).thenReturn(false);
+    when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
 
     viewModel = SettingsViewModel(
       settingsService: mockSettingsService,
@@ -32,16 +35,11 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
     );
-
-    when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
-    when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
-    when(() => mockAuthService.authenticated).thenReturn(false);
-    when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
   });
 
   testWidgets('SettingsPage renders correctly for guest', (tester) async {
     await tester.pumpApp(
-      ChangeNotifierProvider.value(
+      Provider<SettingsViewModel>.value(
         value: viewModel,
         child: const SettingsPage(),
       ),
@@ -60,7 +58,7 @@ void main() {
     ).thenAnswer((_) async {});
 
     await tester.pumpApp(
-      ChangeNotifierProvider.value(
+      Provider<SettingsViewModel>.value(
         value: viewModel,
         child: const SettingsPage(),
       ),
@@ -81,7 +79,7 @@ void main() {
     when(() => mockSettingsService.setApiUrl(any())).thenAnswer((_) async {});
 
     await tester.pumpApp(
-      ChangeNotifierProvider.value(
+      Provider<SettingsViewModel>.value(
         value: viewModel,
         child: const SettingsPage(),
       ),

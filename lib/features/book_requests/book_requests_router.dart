@@ -9,14 +9,14 @@ import 'presentation/views/create_book_request_page.dart';
 final bookRequestsRoutes = [
   GoRoute(
     path: '/requests',
-    builder: (context, state) => ChangeNotifierProvider(
+    builder: (context, state) => Provider(
       create: (_) => sl<BookRequestsListViewModel>(),
       child: const BookRequestsListPage(),
     ),
   ),
   GoRoute(
     path: '/requests/create',
-    builder: (context, state) => ChangeNotifierProvider(
+    builder: (context, state) => Provider(
       create: (_) => sl<CreateBookRequestViewModel>(),
       child: const CreateBookRequestPage(),
     ),

@@ -42,7 +42,7 @@ void main() {
       'signIn calls repository, saves token and notifies listeners',
       () async {
         var notificationCount = 0;
-        authService.addListener(() => notificationCount++);
+        authService.authStateStream.listen((_) => notificationCount++);
 
         when(
           () => mockAuthRepository.signIn(any(), any()),
@@ -67,7 +67,7 @@ void main() {
       'logout calls repository, clears tokens and notifies listeners',
       () async {
         var notificationCount = 0;
-        authService.addListener(() => notificationCount++);
+        authService.authStateStream.listen((_) => notificationCount++);
 
         when(() => mockAuthRepository.logout()).thenAnswer((_) async => {});
         when(() => mockTokenManager.clearToken()).thenAnswer((_) async => {});

@@ -20,7 +20,7 @@ void main() {
 
   testWidgets('WelcomePage renders correctly', (tester) async {
     await tester.pumpApp(
-      ChangeNotifierProvider.value(
+      Provider<WelcomeViewModel>.value(
         value: viewModel,
         child: const WelcomePage(),
       ),
@@ -44,7 +44,7 @@ void main() {
     when(() => mockSettingsService.setApiUrl(any())).thenAnswer((_) async {});
 
     await tester.pumpApp(
-      ChangeNotifierProvider.value(
+      Provider<WelcomeViewModel>.value(
         value: viewModel,
         child: const WelcomePage(),
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
-
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
@@ -22,30 +22,36 @@ void main() {
     registerFallbackValue(const BookPageOptions());
   });
 
+  late StreamController<BooksState> stateController;
+
 setUp(() {
     mockViewModel = MockBooksViewModel();
 
     // Default mock behavior
+    final mockState = BooksState.initial();
+    stateController = StreamController<BooksState>.broadcast();
+    stateController.add(mockState);
+    when(() => mockViewModel.state).thenReturn(mockState);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.layoutMode).thenReturn(BooksLayoutMode.grid);
     const options = BookPageOptions();
     when(() => mockViewModel.options).thenReturn(options);
     when(() => mockViewModel.bookList).thenReturn(null);
-    when(
-      () => mockViewModel.fetchBooks(
+    when(() => mockViewModel.fetchBooks(
         refresh: any(named: 'refresh'),
         resetPage: any(named: 'resetPage'),
       ),
     ).thenAnswer((_) async {});
+  });
 
-    // Handle listeners
-    when(() => mockViewModel.addListener(any())).thenReturn(null);
-    when(() => mockViewModel.removeListener(any())).thenReturn(null);
+  tearDown(() {
+    stateController.close();
   });
 
   Widget createWidgetUnderTest() {
-    return ChangeNotifierProvider<BooksViewModel>.value(
+    return Provider<BooksViewModel>.value(
       value: mockViewModel,
       child: const BooksPage(),
     );
@@ -70,6 +76,9 @@ setUp(() {
     );
 
     // Initial state with content
+    final mockState2 = BooksState.initial().copyWith(bookList: () => bookList);
+    stateController.add(mockState2);
+    when(() => mockViewModel.state).thenReturn(mockState2);
     when(() => mockViewModel.bookList).thenReturn(bookList);
     when(() => mockViewModel.error).thenReturn(null);
 
@@ -80,17 +89,10 @@ setUp(() {
     expect(find.byType(SnackBar), findsNothing);
 
     // Trigger error
+    final mockState3 = mockState2.copyWith(error: () => 'Some error occurred');
+    stateController.add(mockState3);
+    when(() => mockViewModel.state).thenReturn(mockState3);
     when(() => mockViewModel.error).thenReturn('Some error occurred');
-
-    // Simulate notification - trigger all listeners
-    final listeners = verify(
-      () => mockViewModel.addListener(captureAny()),
-    ).captured;
-    for (final listener in listeners) {
-      if (listener is VoidCallback) {
-        listener();
-      }
-    }
 
     await tester.pump(); // Trigger build
     await tester.pumpAndSettle(); // Show snackbar
@@ -104,6 +106,9 @@ setUp(() {
   testWidgets(
     'shows full screen error when error occurs and there is NO content',
     (tester) async {
+      final mockState4 = BooksState.initial().copyWith(error: () => 'Initial load failed');
+      stateController.add(mockState4);
+      when(() => mockViewModel.state).thenReturn(mockState4);
       when(() => mockViewModel.bookList).thenReturn(null);
       when(() => mockViewModel.error).thenReturn('Initial load failed');
 

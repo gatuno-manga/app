@@ -15,7 +15,7 @@ final StatefulShellBranch booksBranch = StatefulShellBranch(
   routes: [
     GoRoute(
       path: '/books',
-      builder: (context, state) => ChangeNotifierProvider(
+      builder: (context, state) => Provider<BooksViewModel>(
         create: (_) => sl<BooksViewModel>(),
         child: const BooksPage(),
       ),
@@ -25,7 +25,7 @@ final StatefulShellBranch booksBranch = StatefulShellBranch(
           parentNavigatorKey: rootNavigatorKey,
           builder: (context, state) {
             final bookId = state.pathParameters['bookId']!;
-            return ChangeNotifierProvider(
+            return Provider<BookDetailsViewModel>(
               create: (_) => sl<BookDetailsViewModel>(param1: bookId),
               child: const BookDetailsPage(),
             );

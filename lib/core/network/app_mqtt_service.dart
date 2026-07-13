@@ -22,10 +22,10 @@ class AppMqttService with WidgetsBindingObserver {
 
   AppMqttService(this._authService, this._settingsService) {
     WidgetsBinding.instance.addObserver(this);
-    _authService.onAuthChange.listen((event) {
-      if (event == AuthEvent.authenticated) {
+    _authService.authStateStream.listen((state) {
+      if (state == AuthState.authenticated) {
         connect();
-      } else if (event == AuthEvent.unauthenticated) {
+      } else if (state == AuthState.unauthenticated) {
         disconnect();
       }
     });

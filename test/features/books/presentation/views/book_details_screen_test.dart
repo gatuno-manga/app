@@ -11,6 +11,7 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/author.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
@@ -26,6 +27,7 @@ class MockBookDetailsViewModel extends Mock implements BookDetailsViewModel {}
 
 void main() {
   late MockBookDetailsViewModel mockViewModel;
+  late StreamController<BookDetailsState> stateController;
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
@@ -37,6 +39,11 @@ void main() {
 
     mockViewModel = MockBookDetailsViewModel();
 
+    final mockState = BookDetailsState.initial();
+    stateController = StreamController<BookDetailsState>.broadcast();
+    stateController.add(mockState);
+    when(() => mockViewModel.state).thenReturn(mockState);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.isLoadingChapters).thenReturn(false);
     when(() => mockViewModel.hasReadingProgress).thenReturn(false);
@@ -48,8 +55,8 @@ void main() {
     when(() => mockViewModel.fetchChapters()).thenAnswer((_) async {});
 
     // Handle listeners
-    when(() => mockViewModel.addListener(any())).thenReturn(null);
-    when(() => mockViewModel.removeListener(any())).thenReturn(null);
+    
+    
 
     // Mock dio get for images
     registerFallbackValue(RequestOptions(path: ''));
@@ -64,14 +71,22 @@ void main() {
     );
   });
 
+  tearDown(() {
+    stateController.close();
+  });
+
   Widget createWidgetUnderTest() {
-    return ChangeNotifierProvider<BookDetailsViewModel>.value(
+    return Provider<BookDetailsViewModel>.value(
       value: mockViewModel,
       child: const BookDetailsPage(),
     );
   }
 
   testWidgets('renders loading state', (tester) async {
+    final mockState2 = BookDetailsState.initial().copyWith(isLoading: true);
+    when(() => mockViewModel.state).thenReturn(mockState2);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(mockState2));
+    stateController.add(mockState2);
     when(() => mockViewModel.isLoading).thenReturn(true);
 
     await tester.pumpApp(createWidgetUnderTest());
@@ -81,6 +96,10 @@ void main() {
   });
 
   testWidgets('renders error state', (tester) async {
+    final mockState3 = BookDetailsState.initial().copyWith(error: () => 'Failed to load book');
+    when(() => mockViewModel.state).thenReturn(mockState3);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(mockState3));
+    stateController.add(mockState3);
     when(() => mockViewModel.error).thenReturn('Failed to load book');
 
     await tester.pumpApp(createWidgetUnderTest());
@@ -115,6 +134,10 @@ void main() {
       hasNextPage: false,
     );
 
+    final mockState4 = BookDetailsState.initial().copyWith(book: () => book, chapterList: () => chapterList);
+    when(() => mockViewModel.state).thenReturn(mockState4);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(mockState4));
+    stateController.add(mockState4);
     when(() => mockViewModel.book).thenReturn(book);
     when(() => mockViewModel.chapterList).thenReturn(chapterList);
 

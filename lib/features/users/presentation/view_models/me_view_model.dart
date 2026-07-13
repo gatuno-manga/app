@@ -1,37 +1,59 @@
-import '../../../../core/base/safe_change_notifier.dart';
+import '../../../../core/base/base_stream_view_model.dart';
 import '../../domain/use_cases/user_service.dart';
 import '../../data/models/user_model.dart';
 import '../../../../core/logging/logger.dart';
+import 'package:equatable/equatable.dart';
 
-class MeViewModel extends SafeChangeNotifier {
+class MeState extends Equatable {
+  final UserModel user;
+  final bool isLoading;
+
+  const MeState({
+    required this.user,
+    required this.isLoading,
+  });
+
+  factory MeState.initial() {
+    return MeState(
+      user: UserModel.guest,
+      isLoading: true,
+    );
+  }
+
+  MeState copyWith({
+    UserModel? user,
+    bool? isLoading,
+  }) {
+    return MeState(
+      user: user ?? this.user,
+      isLoading: isLoading ?? this.isLoading,
+    );
+  }
+
+  @override
+  List<Object?> get props => [user, isLoading];
+}
+
+class MeViewModel extends BaseStreamViewModel<MeState> {
   final UserService _userService;
   static const String _logTag = 'MeViewModel';
 
-  UserModel _user = UserModel.guest;
-  bool _isLoading = true;
-
-  MeViewModel(this._userService);
-
-  UserModel get user => _user;
-  bool get isLoading => _isLoading;
+  MeViewModel(this._userService) : super(MeState.initial());
 
   Future<void> init() async {
     AppLogger.i('Initializing MeViewModel', _logTag);
-    _isLoading = true;
-    notifyListeners();
+    emit(state.copyWith(isLoading: true));
 
     try {
-      _user = await _userService.getCurrentUser();
+      final user = await _userService.getCurrentUser();
       AppLogger.i(
-        'MeViewModel initialized: user=${_user.displayName}',
+        'MeViewModel initialized: user=${user.displayName}',
         _logTag,
       );
+      emit(state.copyWith(user: user, isLoading: false));
     } catch (e, stackTrace) {
       AppLogger.e('Error initializing MeViewModel', e, stackTrace, _logTag);
-      _user = UserModel.guest;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(user: UserModel.guest, isLoading: false));
     }
   }
 

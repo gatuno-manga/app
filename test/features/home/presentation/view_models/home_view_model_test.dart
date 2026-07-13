@@ -37,8 +37,7 @@ void main() {
     mockBooksRepository = MockBooksRepository();
     mockReadingCoordinator = MockReadingProgressCoordinator();
 
-    when(() => mockAuthService.addListener(any())).thenAnswer((_) {});
-    when(() => mockAuthService.removeListener(any())).thenAnswer((_) {});
+    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.isInitialized).thenReturn(true);
     when(
@@ -53,8 +52,8 @@ void main() {
 
   group('HomeViewModel', () {
     test('should reflect auth status from service', () {
-      expect(viewModel.isAuthenticated, isFalse);
-      expect(viewModel.isInitialized, isTrue);
+      expect(viewModel.state.isAuthenticated, isFalse);
+      expect(viewModel.state.isInitialized, isTrue);
     });
 
     test('should load user when authenticated', () async {
@@ -77,12 +76,12 @@ void main() {
       // Wait for async load
       await Future<void>.delayed(Duration.zero);
 
-      expect(viewModel.isAuthenticated, isTrue);
-      expect(viewModel.displayName, equals('Test'));
+      expect(viewModel.state.isAuthenticated, isTrue);
+      expect(viewModel.state.displayName, equals('Test'));
     });
 
     test('displayName should be null when not authenticated', () {
-      expect(viewModel.displayName, isNull);
+      expect(viewModel.state.displayName, isNull);
     });
   });
 }

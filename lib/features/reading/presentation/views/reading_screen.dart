@@ -22,7 +22,7 @@ class ReadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider<ReadingViewModel>(
       create: (context) =>
           sl<ReadingViewModel>()
             ..loadChapter(chapterId, initialPage: initialPage),
@@ -61,12 +61,16 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ReadingViewModel>(
-      builder: (context, viewModel, child) {
+    final viewModel = context.read<ReadingViewModel>();
+    return StreamBuilder<ReadingState>(
+      stream: viewModel.stateStream,
+      initialData: viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
         return ReadingTemplate(
-          isLoading: viewModel.isLoading,
-          error: viewModel.error,
-          chapter: viewModel.chapter,
+          isLoading: state.isLoading,
+          error: state.error,
+          chapter: state.chapter,
           onRetry: () => viewModel.loadChapter(widget.chapterId),
           onGoBack: () {
             if (context.canPop()) {

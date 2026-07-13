@@ -18,6 +18,10 @@ void main() {
     when(() => mockService.addListener(any())).thenAnswer((_) {});
     when(() => mockService.removeListener(any())).thenAnswer((_) {});
 
+    // Stub properties before init
+    when(() => mockService.trustedCertificates).thenReturn([]);
+    when(() => mockService.ignoredCertificates).thenReturn([]);
+
     viewModel = CertificatesViewModel(mockService);
   });
 
@@ -35,10 +39,11 @@ void main() {
     test('exposes trusted and ignored certificates from service', () {
       when(() => mockService.trustedCertificates).thenReturn([certItem]);
       when(() => mockService.ignoredCertificates).thenReturn([]);
+      viewModel = CertificatesViewModel(mockService);
 
-      expect(viewModel.trustedCertificates.length, 1);
-      expect(viewModel.trustedCertificates.first.name, 'test.com');
-      expect(viewModel.ignoredCertificates, isEmpty);
+      expect(viewModel.state.trustedCertificates.length, 1);
+      expect(viewModel.state.trustedCertificates.first.name, 'test.com');
+      expect(viewModel.state.ignoredCertificates, isEmpty);
     });
 
     test('addManualCertificate returns true on success', () async {
@@ -49,7 +54,7 @@ void main() {
       final result = await viewModel.addManualCertificate('name', 'pem');
 
       expect(result, isTrue);
-      expect(viewModel.error, isNull);
+      expect(viewModel.state.error, isNull);
       verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
     });
 
@@ -63,7 +68,7 @@ void main() {
         final result = await viewModel.addManualCertificate('name', 'pem');
 
         expect(result, isFalse);
-        expect(viewModel.error, isA<CertificateEmptyFingerprintException>());
+        expect(viewModel.state.error, isA<CertificateEmptyFingerprintException>());
         verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
       },
     );
@@ -78,7 +83,7 @@ void main() {
         final result = await viewModel.addManualCertificate('name', 'pem');
 
         expect(result, isFalse);
-        expect(viewModel.error, isA<CertificateDecodingException>());
+        expect(viewModel.state.error, isA<CertificateDecodingException>());
       },
     );
 
@@ -89,10 +94,10 @@ void main() {
       ).thenThrow(CertificateDecodingException());
 
       viewModel.addManualCertificate('n', 'p');
-      expect(viewModel.error, isNotNull);
+      expect(viewModel.state.error, isNotNull);
 
       viewModel.clearError();
-      expect(viewModel.error, isNull);
+      expect(viewModel.state.error, isNull);
     });
 
     test('deleteCertificate calls service', () async {

@@ -18,7 +18,7 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
   routes: [
     GoRoute(
       path: '/settings',
-      builder: (context, state) => ChangeNotifierProvider(
+      builder: (context, state) => Provider<SettingsViewModel>(
         create: (_) => SettingsViewModel(
           settingsService: sl<SettingsService>(),
           authService: sl<AuthService>(),
@@ -37,7 +37,7 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
             }
             return null;
           },
-          builder: (context, state) => ChangeNotifierProvider(
+          builder: (context, state) => Provider<MeViewModel>(
             create: (_) => sl<MeViewModel>(),
             child: const MePage(),
           ),

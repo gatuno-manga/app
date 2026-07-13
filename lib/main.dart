@@ -21,8 +21,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider.value(value: sl<AuthService>()),
-        ChangeNotifierProvider.value(value: settingsService),
+        Provider.value(value: sl<AuthService>()),
+        Provider.value(value: settingsService),
       ],
       child: App(router: router),
     ),

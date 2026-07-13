@@ -40,7 +40,7 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final viewModel = context.watch<BookRequestsListViewModel>();
+    final viewModel = context.read<BookRequestsListViewModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -52,19 +52,26 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () => viewModel.fetchRequests(refresh: true),
-        child: _buildBody(viewModel, l10n),
+      body: StreamBuilder<BookRequestsListState>(
+        stream: viewModel.stateStream,
+        initialData: viewModel.state,
+        builder: (context, snapshot) {
+          final state = snapshot.data!;
+          return RefreshIndicator(
+            onRefresh: () => viewModel.fetchRequests(refresh: true),
+            child: _buildBody(viewModel, state, l10n),
+          );
+        }
       ),
     );
   }
 
-  Widget _buildBody(BookRequestsListViewModel viewModel, AppLocalizations l10n) {
-    if (viewModel.isLoading && viewModel.requests.isEmpty) {
+  Widget _buildBody(BookRequestsListViewModel viewModel, BookRequestsListState state, AppLocalizations l10n) {
+    if (state.isLoading && state.requests.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (viewModel.error != null && viewModel.requests.isEmpty) {
+    if (state.error != null && state.requests.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +79,7 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
             Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text(
-              viewModel.error!,
+              state.error!,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
               textAlign: TextAlign.center,
             ),
@@ -87,7 +94,7 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
       );
     }
 
-    if (viewModel.requests.isEmpty) {
+    if (state.requests.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -117,16 +124,16 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
 
     return ListView.builder(
       controller: _scrollController,
-      itemCount: viewModel.requests.length + (viewModel.hasMore ? 1 : 0),
+      itemCount: state.requests.length + (state.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == viewModel.requests.length) {
+        if (index == state.requests.length) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
             child: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final request = viewModel.requests[index];
+        final request = state.requests[index];
         return BookRequestCard(request: request);
       },
     );

@@ -8,7 +8,7 @@ import '../../../core/di/injection.dart';
 final List<RouteBase> welcomeRoutes = [
   GoRoute(
     path: '/welcome',
-    builder: (context, state) => ChangeNotifierProvider(
+    builder: (context, state) => Provider<WelcomeViewModel>(
       create: (_) => WelcomeViewModel(sl<SettingsService>()),
       child: const WelcomePage(),
     ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../components/organisms/books_app_bar.dart';
@@ -16,12 +17,13 @@ class BooksPage extends StatefulWidget {
 class _BooksPageState extends State<BooksPage> {
   final TextEditingController _searchController = TextEditingController();
   late final BooksViewModel _viewModel;
+  late StreamSubscription<BooksState> _subscription;
 
   @override
   void initState() {
     super.initState();
     _viewModel = context.read<BooksViewModel>();
-    _viewModel.addListener(_onViewModelChanged);
+    _subscription = _viewModel.stateStream.listen(_onStateChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_viewModel.bookList == null) {
@@ -32,19 +34,17 @@ class _BooksPageState extends State<BooksPage> {
 
   @override
   void dispose() {
-    _viewModel.removeListener(_onViewModelChanged);
+    _subscription.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onViewModelChanged() {
-    if (_viewModel.error != null && mounted) {
-      // Show snackbar only if there is already content on the screen
-      // or if the error is different from a full-screen error
-      if (_viewModel.bookList != null && _viewModel.bookList!.data.isNotEmpty) {
+  void _onStateChanged(BooksState state) {
+    if (state.error != null && mounted) {
+      if (state.bookList != null && state.bookList!.data.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_viewModel.error!),
+            content: Text(state.error!),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -55,15 +55,18 @@ class _BooksPageState extends State<BooksPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) {
+    return StreamBuilder<BooksState>(
+      stream: _viewModel.stateStream,
+      initialData: _viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        
         return BooksTemplate(
           appBar: BooksAppBar(
             searchController: _searchController,
-            layoutMode: _viewModel.layoutMode,
+            layoutMode: state.layoutMode,
             onToggleLayout: () => _viewModel.setLayoutMode(
-              _viewModel.layoutMode == BooksLayoutMode.grid
+              state.layoutMode == BooksLayoutMode.grid
                   ? BooksLayoutMode.list
                   : BooksLayoutMode.grid,
             ),

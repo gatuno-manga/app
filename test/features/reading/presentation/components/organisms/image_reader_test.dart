@@ -66,6 +66,8 @@ void main() {
 
   setUp(() async {
     mockViewModel = MockReadingViewModel();
+    when(() => mockViewModel.state).thenReturn(ReadingState.initial());
+    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(ReadingState.initial()));
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
     await initTestDI();
   });
@@ -84,7 +86,7 @@ group('ImageReader', () {
       );
 
       await tester.pumpApp(
-        ChangeNotifierProvider<ReadingViewModel>.value(
+        Provider<ReadingViewModel>.value(
           value: mockViewModel,
           child: Scaffold(body: ImageReader(chapter: chapter)),
         ),

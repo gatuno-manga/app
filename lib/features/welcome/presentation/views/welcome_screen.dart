@@ -25,60 +25,67 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final viewModel = context.watch<WelcomeViewModel>();
+    final viewModel = context.read<WelcomeViewModel>();
 
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.pets, size: 80, color: Colors.orange),
-              const SizedBox(height: 24),
-              Text(
-                l10n.welcomeTitle,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(l10n.welcomeInstructions, textAlign: TextAlign.center),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _urlController,
-                decoration: InputDecoration(
-                  labelText: l10n.settingsApiUrlLabel,
-                  border: const OutlineInputBorder(),
-                  errorText: viewModel.error,
-                  hintText: l10n.settingsApiUrlHint,
-                ),
-                keyboardType: TextInputType.url,
-                enabled: !viewModel.isLoading,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: viewModel.isLoading
-                      ? null
-                      : () async {
-                          final success = await viewModel.validateAndSaveUrl(
-                            _urlController.text,
-                          );
-                          if (success && context.mounted) {
-                            context.go('/home');
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+          child: StreamBuilder<WelcomeState>(
+            stream: viewModel.stateStream,
+            initialData: viewModel.state,
+            builder: (context, snapshot) {
+              final state = snapshot.data!;
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.pets, size: 80, color: Colors.orange),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.welcomeTitle,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  child: viewModel.isLoading
-                      ? const CircularProgressIndicator()
-                      : Text(l10n.welcomeConnect),
-                ),
-              ),
-            ],
+                  const SizedBox(height: 8),
+                  Text(l10n.welcomeInstructions, textAlign: TextAlign.center),
+                  const SizedBox(height: 32),
+                  TextField(
+                    controller: _urlController,
+                    decoration: InputDecoration(
+                      labelText: l10n.settingsApiUrlLabel,
+                      border: const OutlineInputBorder(),
+                      errorText: state.error,
+                      hintText: l10n.settingsApiUrlHint,
+                    ),
+                    keyboardType: TextInputType.url,
+                    enabled: !state.isLoading,
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: state.isLoading
+                          ? null
+                          : () async {
+                              final success = await viewModel.validateAndSaveUrl(
+                                _urlController.text,
+                              );
+                              if (success && context.mounted) {
+                                context.go('/home');
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: state.isLoading
+                          ? const CircularProgressIndicator()
+                          : Text(l10n.welcomeConnect),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

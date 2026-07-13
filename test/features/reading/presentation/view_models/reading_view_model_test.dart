@@ -106,18 +106,22 @@ setUp(() {
       expect(viewModel.error, contains('Failed to load'));
     });
 
-    test('setCurrentPage updates currentPageIndex and notifies listeners', () {
+    test('setCurrentPage updates currentPageIndex and notifies listeners', () async {
       int listenerCount = 0;
-      viewModel.addListener(() => listenerCount++);
+      final sub = viewModel.stateStream.listen((_) => listenerCount++);
 
       viewModel.setCurrentPage(3, isAutoSave: false);
 
       expect(viewModel.currentPageIndex, 3);
-      expect(listenerCount, 1);
+      // Let stream emit
+      await Future.delayed(Duration.zero);
+      expect(listenerCount, 2); 
 
       // Setting same page should not notify
       viewModel.setCurrentPage(3, isAutoSave: false);
-      expect(listenerCount, 1);
+      await Future.delayed(Duration.zero);
+      expect(listenerCount, 2);
+      sub.cancel();
     });
 
     test('setCurrentPage calls saveProgress when isAutoSave is true', () async {

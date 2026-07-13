@@ -1,40 +1,81 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import '../../../../core/base/safe_change_notifier.dart';
+import '../../../../core/base/base_stream_view_model.dart';
 import '../../domain/entities/certificate_item.dart';
 import '../../domain/use_cases/certificates_service.dart';
-
 import '../../exceptions/certificates_exceptions.dart';
+import 'package:equatable/equatable.dart';
 
-class CertificatesViewModel extends SafeChangeNotifier {
+class CertificatesState extends Equatable {
+  final bool isLoading;
+  final CertificateException? error;
+  final List<CertificateItem> trustedCertificates;
+  final List<CertificateItem> ignoredCertificates;
+
+  const CertificatesState({
+    required this.isLoading,
+    this.error,
+    required this.trustedCertificates,
+    required this.ignoredCertificates,
+  });
+
+  factory CertificatesState.initial() {
+    return const CertificatesState(
+      isLoading: false,
+      error: null,
+      trustedCertificates: [],
+      ignoredCertificates: [],
+    );
+  }
+
+  CertificatesState copyWith({
+    bool? isLoading,
+    CertificateException? Function()? error,
+    List<CertificateItem>? trustedCertificates,
+    List<CertificateItem>? ignoredCertificates,
+  }) {
+    return CertificatesState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error != null ? error() : this.error,
+      trustedCertificates: trustedCertificates ?? this.trustedCertificates,
+      ignoredCertificates: ignoredCertificates ?? this.ignoredCertificates,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        isLoading,
+        error,
+        trustedCertificates,
+        ignoredCertificates,
+      ];
+}
+
+class CertificatesViewModel extends BaseStreamViewModel<CertificatesState> {
   final CertificatesService _certificatesService;
 
-  CertificatesViewModel(this._certificatesService) {
-    _certificatesService.addListener(notifyListeners);
+  CertificatesViewModel(this._certificatesService)
+      : super(CertificatesState.initial()) {
+    _certificatesService.addListener(_syncState);
+    _syncState();
+  }
+
+  void _syncState() {
+    emit(state.copyWith(
+      trustedCertificates: _certificatesService.trustedCertificates,
+      ignoredCertificates: _certificatesService.ignoredCertificates,
+    ));
   }
 
   @override
   void dispose() {
-    _certificatesService.removeListener(notifyListeners);
+    _certificatesService.removeListener(_syncState);
     super.dispose();
   }
 
-  CertificateException? _error;
-  CertificateException? get error => _error;
-
-  bool _isLoading = false;
-  bool get isLoading => _isLoading;
-
   void clearError() {
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(error: () => null));
   }
-
-  List<CertificateItem> get trustedCertificates =>
-      _certificatesService.trustedCertificates;
-
-  List<CertificateItem> get ignoredCertificates =>
-      _certificatesService.ignoredCertificates;
 
   Future<bool> addCertificateFromFile(String name) async {
     final result = await FilePicker.pickFiles(
@@ -47,9 +88,7 @@ class CertificatesViewModel extends SafeChangeNotifier {
     final file = result.files.single;
     String fileContent;
 
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(isLoading: true, error: () => null));
 
     try {
       if (file.path != null) {
@@ -62,41 +101,29 @@ class CertificatesViewModel extends SafeChangeNotifier {
       }
 
       await _certificatesService.addManualCertificate(name, fileContent);
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false));
       return true;
     } on CertificateException catch (e) {
-      _error = e;
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: () => e));
       return false;
     } catch (e) {
-      _error = CertificateDecodingException();
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: () => CertificateDecodingException()));
       return false;
     }
   }
 
   Future<bool> addManualCertificate(String name, String pem) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+    emit(state.copyWith(isLoading: true, error: () => null));
 
     try {
       await _certificatesService.addManualCertificate(name, pem);
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false));
       return true;
     } on CertificateException catch (e) {
-      _error = e;
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: () => e));
       return false;
     } catch (e) {
-      _error = CertificateDecodingException();
-      _isLoading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoading: false, error: () => CertificateDecodingException()));
       return false;
     }
   }

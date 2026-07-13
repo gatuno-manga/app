@@ -1,36 +1,69 @@
-import 'package:flutter/material.dart';
+
 import '../../data/data_sources/settings_local_data_source.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/logging/logger.dart';
 
-class SettingsService extends ChangeNotifier {
+import 'package:rxdart/rxdart.dart';
+
+class SettingsState {
+  final String? apiUrl;
+  final bool sensitiveContentEnabled;
+  final bool isInitialized;
+
+  SettingsState({
+    this.apiUrl,
+    this.sensitiveContentEnabled = false,
+    this.isInitialized = false,
+  });
+
+  SettingsState copyWith({
+    String? apiUrl,
+    bool? sensitiveContentEnabled,
+    bool? isInitialized,
+  }) {
+    return SettingsState(
+      apiUrl: apiUrl ?? this.apiUrl,
+      sensitiveContentEnabled: sensitiveContentEnabled ?? this.sensitiveContentEnabled,
+      isInitialized: isInitialized ?? this.isInitialized,
+    );
+  }
+}
+
+class SettingsService {
   final SettingsStorage _storage;
   final DioClient _dioClient;
   static const String _logTag = 'SETTINGS_SERVICE';
 
-  String? _apiUrl;
-  bool _sensitiveContentEnabled = false;
-  bool _isInitialized = false;
+  final _stateSubject = BehaviorSubject<SettingsState>.seeded(SettingsState());
+  Stream<SettingsState> get settingsStream => _stateSubject.stream;
+  SettingsState get state => _stateSubject.value;
 
   SettingsService(this._storage, this._dioClient);
 
-  String? get apiUrl => _apiUrl;
-  bool get sensitiveContentEnabled => _sensitiveContentEnabled;
-  bool get isInitialized => _isInitialized;
+  String? get apiUrl => state.apiUrl;
+  bool get sensitiveContentEnabled => state.sensitiveContentEnabled;
+  bool get isInitialized => state.isInitialized;
+
+  void dispose() {
+    _stateSubject.close();
+  }
 
   Future<void> init() async {
-    if (_isInitialized) return;
+    if (isInitialized) return;
 
     try {
-      _apiUrl = await _storage.getApiUrl();
-      _sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
+      final apiUrl = await _storage.getApiUrl();
+      final sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
 
-      if (_apiUrl != null) {
-        _dioClient.updateBaseUrl(_apiUrl!);
+      if (apiUrl != null) {
+        _dioClient.updateBaseUrl(apiUrl);
       }
 
-      _isInitialized = true;
-      notifyListeners();
+      _stateSubject.add(state.copyWith(
+        apiUrl: apiUrl,
+        sensitiveContentEnabled: sensitiveContentEnabled,
+        isInitialized: true,
+      ));
     } catch (e, stackTrace) {
       AppLogger.e('Error initializing SettingsService', e, stackTrace, _logTag);
     }
@@ -39,9 +72,8 @@ class SettingsService extends ChangeNotifier {
   Future<void> setApiUrl(String url) async {
     try {
       await _storage.setApiUrl(url);
-      _apiUrl = url;
       _dioClient.updateBaseUrl(url);
-      notifyListeners();
+      _stateSubject.add(state.copyWith(apiUrl: url));
     } catch (e, stackTrace) {
       AppLogger.e('Error setting API URL', e, stackTrace, _logTag);
       rethrow;
@@ -51,8 +83,7 @@ class SettingsService extends ChangeNotifier {
   Future<void> setSensitiveContentEnabled(bool enabled) async {
     try {
       await _storage.setSensitiveContentEnabled(enabled);
-      _sensitiveContentEnabled = enabled;
-      notifyListeners();
+      _stateSubject.add(state.copyWith(sensitiveContentEnabled: enabled));
     } catch (e, stackTrace) {
       AppLogger.e(
         'Error setting sensitive content enabled',

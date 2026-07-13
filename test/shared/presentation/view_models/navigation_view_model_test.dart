@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
@@ -25,8 +26,7 @@ void main() {
 
     // Default behaviors
     when(() => mockAuthService.authenticated).thenReturn(false);
-    when(() => mockAuthService.addListener(any())).thenReturn(null);
-    when(() => mockAuthService.removeListener(any())).thenReturn(null);
+    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
     when(
       () => mockUserService.getCurrentUser(),
     ).thenAnswer((_) async => UserModel.guest);
@@ -36,8 +36,8 @@ void main() {
 
   group('NavigationViewModel', () {
     test('initial state when not authenticated', () {
-      expect(viewModel.isAuthenticated, isFalse);
-      expect(viewModel.user, equals(UserModel.guest));
+      expect(viewModel.state.isAuthenticated, isFalse);
+      expect(viewModel.state.user, equals(UserModel.guest));
     });
 
     test('re-loads user when auth state changes', () async {
@@ -52,7 +52,7 @@ void main() {
       // 1. Initial state: not authenticated
       when(() => mockAuthService.authenticated).thenReturn(false);
       viewModel = NavigationViewModel(mockUserService, mockAuthService);
-      expect(viewModel.user, equals(UserModel.guest));
+      expect(viewModel.state.user, equals(UserModel.guest));
 
       // 2. Change to authenticated
       when(() => mockAuthService.authenticated).thenReturn(true);
@@ -60,12 +60,22 @@ void main() {
         () => mockUserService.getCurrentUser(),
       ).thenAnswer((_) async => user);
 
-      // Trigger load manually since we are testing the state transition
-      await viewModel.loadUser();
+      // Simulate stream event to trigger onAuthStateChanged
+      final controller = StreamController<AuthState>();
+      when(() => mockAuthService.authStateStream).thenAnswer((_) => controller.stream);
+      // We must re-init the viewmodel for it to pick up the new stream mock
+      viewModel = NavigationViewModel(mockUserService, mockAuthService);
+      
+      controller.add(AuthState.authenticated);
+      
+      // Wait for stream and futures
+      await Future<void>.delayed(Duration.zero);
 
-      expect(viewModel.user.isGuest, isFalse);
-      expect(viewModel.user.name?.value, equals('Alice'));
-      expect(viewModel.isAuthenticated, isTrue);
+      expect(viewModel.state.user.isGuest, isFalse);
+      expect(viewModel.state.user.name?.value, equals('Alice'));
+      expect(viewModel.state.isAuthenticated, isTrue);
+      
+      await controller.close();
     });
   });
 }

@@ -18,8 +18,8 @@ void main() {
 
   group('SignInViewModel', () {
     test('initial state is correct', () {
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, null);
     });
 
     test('signIn success updates state correctly', () async {
@@ -30,8 +30,8 @@ void main() {
       final success = await viewModel.signIn('test@example.com', 'password');
 
       expect(success, true);
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, null);
     });
 
     test('signIn failure updates state correctly', () async {
@@ -42,8 +42,8 @@ void main() {
       final success = await viewModel.signIn('test@example.com', 'wrong');
 
       expect(success, false);
-      expect(viewModel.isLoading, false);
-      expect(viewModel.errorMessage, 'Exception: Invalid credentials');
+      expect(viewModel.state.isLoading, false);
+      expect(viewModel.state.errorMessage, 'Exception: Invalid credentials');
     });
 
     test('clearError resets error message', () async {
@@ -54,7 +54,7 @@ void main() {
       await viewModel.signIn('test@example.com', 'wrong');
       viewModel.clearError();
 
-      expect(viewModel.errorMessage, null);
+      expect(viewModel.state.errorMessage, null);
     });
   });
 }

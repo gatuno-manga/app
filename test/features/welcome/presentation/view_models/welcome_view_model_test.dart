@@ -18,7 +18,7 @@ void main() {
     test('validateAndSaveUrl should return false for empty url', () async {
       final result = await viewModel.validateAndSaveUrl('');
       expect(result, isFalse);
-      expect(viewModel.error, 'Please enter a URL');
+      expect(viewModel.state.error, 'Please enter a URL');
     });
 
     test('validateAndSaveUrl should save if valid', () async {
@@ -30,7 +30,7 @@ void main() {
       final result = await viewModel.validateAndSaveUrl('http://test.com/');
 
       expect(result, isTrue);
-      expect(viewModel.error, isNull);
+      expect(viewModel.state.error, isNull);
       verify(
         () => mockSettingsService.validateApiUrl('http://test.com/'),
       ).called(1);
@@ -47,7 +47,7 @@ void main() {
         final result = await viewModel.validateAndSaveUrl('http://invalid.com');
 
         expect(result, isFalse);
-        expect(viewModel.error, contains('Could not connect'));
+        expect(viewModel.state.error, contains('Could not connect'));
         verifyNever(() => mockSettingsService.setApiUrl(any()));
       },
     );

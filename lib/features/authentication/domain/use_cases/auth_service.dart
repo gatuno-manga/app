@@ -6,37 +6,40 @@ import '../../../../core/utils/jwt_decoder.dart';
 import '../../../users/data/models/user_model.dart';
 import '../value_objects/email_address.dart';
 import '../value_objects/password.dart';
+import 'package:rxdart/rxdart.dart';
 import 'token_manager.dart';
 
-enum AuthEvent { authenticated, unauthenticated, initialized }
+enum AuthState { uninitialized, unauthenticated, authenticated }
 
-class AuthService extends ChangeNotifier with WidgetsBindingObserver {
+class AuthService with WidgetsBindingObserver {
   final AuthRepository _authRepository;
   final TokenManager _tokenManager;
   static const String _logTag = 'AuthService';
 
-  final _authEventController = StreamController<AuthEvent>.broadcast();
-  Stream<AuthEvent> get onAuthChange => _authEventController.stream;
-
-  bool _isInitialized = false;
-  bool _isAuthenticated = false;
+  final _authStateSubject = BehaviorSubject<AuthState>.seeded(AuthState.uninitialized);
+  Stream<AuthState> get authStateStream => _authStateSubject.stream;
+  AuthState get authState => _authStateSubject.value;
 
   AuthService(this._authRepository, this._tokenManager) {
     _tokenManager.onRefreshFailed = () async {
       await logout();
     };
     _tokenManager.onTokenChanged = () {
-      notifyListeners();
+      _updateAuthState();
     };
     WidgetsBinding.instance.addObserver(this);
     _initAuth();
   }
 
-  @override
   void dispose() {
-    _authEventController.close();
+    _authStateSubject.close();
     WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+  }
+
+  void _updateAuthState() {
+    final token = _tokenManager.currentToken;
+    final isAuth = token != null && token.isNotEmpty && !JwtDecoder.isExpired(token);
+    _authStateSubject.add(isAuth ? AuthState.authenticated : AuthState.unauthenticated);
   }
 
   @override
@@ -48,8 +51,8 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
-  bool get isInitialized => _isInitialized;
-  bool get authenticated => _isAuthenticated;
+  bool get isInitialized => authState != AuthState.uninitialized;
+  bool get authenticated => authState == AuthState.authenticated;
 
   UserModel get currentUser {
     final token = _tokenManager.currentToken;
@@ -73,25 +76,16 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
           await _tokenManager.performTokenRefresh();
         } catch (e) {
           AppLogger.w('Initial token refresh failed: $e', _logTag);
-          _isAuthenticated = false;
         }
       }
-      _isAuthenticated = _tokenManager.currentToken != null;
+      _authStateSubject.add(_tokenManager.currentToken != null ? AuthState.authenticated : AuthState.unauthenticated);
     } else {
-      _isAuthenticated = false;
+      _authStateSubject.add(AuthState.unauthenticated);
     }
-    _isInitialized = true;
     AppLogger.d(
-      'AuthService initialized: authenticated = $_isAuthenticated',
+      'AuthService initialized: authenticated = ${authState == AuthState.authenticated}',
       _logTag,
     );
-    _authEventController.add(AuthEvent.initialized);
-    if (_isAuthenticated) {
-      _authEventController.add(AuthEvent.authenticated);
-    } else {
-      _authEventController.add(AuthEvent.unauthenticated);
-    }
-    notifyListeners();
   }
 
   Future<bool> signIn(EmailAddress email, Password password) async {
@@ -106,9 +100,7 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
         'SignIn completed and token saved for: $redactedEmail',
         _logTag,
       );
-      _isAuthenticated = true;
-      _authEventController.add(AuthEvent.authenticated);
-      notifyListeners();
+      _authStateSubject.add(AuthState.authenticated);
       return true;
     } catch (e, stackTrace) {
       AppLogger.e(
@@ -156,10 +148,8 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
       );
     }
     await _tokenManager.clearToken();
-    _isAuthenticated = false;
-    _authEventController.add(AuthEvent.unauthenticated);
+    _authStateSubject.add(AuthState.unauthenticated);
     AppLogger.i('Tokens cleared successfully', _logTag);
-    notifyListeners();
   }
 
   Future<String?> getToken() async {
@@ -180,18 +170,11 @@ class AuthService extends ChangeNotifier with WidgetsBindingObserver {
       }
     }
 
-    if (_isAuthenticated != authenticated) {
-      _isAuthenticated = authenticated;
-      if (_isAuthenticated) {
-        _authEventController.add(AuthEvent.authenticated);
-      } else {
-        _authEventController.add(AuthEvent.unauthenticated);
-      }
-      notifyListeners();
+    if (authenticated != (authState == AuthState.authenticated)) {
+      _authStateSubject.add(authenticated ? AuthState.authenticated : AuthState.unauthenticated);
     }
 
-    _isInitialized = true;
-    return _isAuthenticated;
+    return authenticated;
   }
 
   Future<void> performTokenRefresh() async {

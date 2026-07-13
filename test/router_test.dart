@@ -6,7 +6,6 @@ import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/di/injection.dart' as di;
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
-import 'package:gatuno/features/users/data/models/user_model.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 
 import 'package:provider/provider.dart';
@@ -39,20 +38,11 @@ void main() {
       () => mockAuthService.isAuthenticated(),
     ).thenAnswer((_) async => false);
 
-    when(() => mockHomeViewModel.isAuthenticated).thenReturn(false);
-    when(() => mockHomeViewModel.isInitialized).thenReturn(true);
-    when(() => mockHomeViewModel.displayName).thenReturn(null);
-    when(() => mockHomeViewModel.isLoadingFeatured).thenReturn(false);
-    when(() => mockHomeViewModel.isLoadingContinueReading).thenReturn(false);
-    when(() => mockHomeViewModel.isLoadingGrid).thenReturn(false);
-    when(() => mockHomeViewModel.isLoadingRecentlyAdded).thenReturn(false);
-    when(() => mockHomeViewModel.featuredBooks).thenReturn([]);
-    when(() => mockHomeViewModel.continueReadingBooks).thenReturn([]);
-    when(() => mockHomeViewModel.latestUpdatedBooks).thenReturn([]);
-    when(() => mockHomeViewModel.recentlyAddedBooks).thenReturn([]);
+    when(() => mockHomeViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockHomeViewModel.state).thenReturn(HomeState.initial());
 
-    when(() => mockNavigationViewModel.isAuthenticated).thenReturn(false);
-    when(() => mockNavigationViewModel.user).thenReturn(UserModel.guest);
+    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
   });
 
   tearDown(() async {
@@ -66,8 +56,8 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider<AuthService>.value(value: mockAuthService),
-          ChangeNotifierProvider<HomeViewModel>.value(value: mockHomeViewModel),
+          Provider<AuthService>.value(value: mockAuthService),
+          Provider<HomeViewModel>.value(value: mockHomeViewModel),
         ],
         child: MaterialApp.router(
           routerConfig: router,

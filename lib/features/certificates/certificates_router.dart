@@ -8,7 +8,7 @@ import '../../../core/di/injection.dart';
 final certificatesRoutes = [
   GoRoute(
     path: 'certificates',
-    builder: (context, state) => ChangeNotifierProvider(
+    builder: (context, state) => Provider<CertificatesViewModel>(
       create: (_) => CertificatesViewModel(sl<CertificatesService>()),
       child: const CertificatesPage(),
     ),

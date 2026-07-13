@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
@@ -56,6 +57,7 @@ class _MockChapter extends Fake implements ReadingChapter {
 
 void main() {
   late MockReadingViewModel mockViewModel;
+  late StreamController<ReadingState> stateController;
 
   setUp(() async {
     mockViewModel = MockReadingViewModel();
@@ -65,6 +67,11 @@ void main() {
         initialPage: any(named: 'initialPage'),
       ),
     ).thenAnswer((_) async {});
+    final mockState = ReadingState.initial();
+    stateController = StreamController<ReadingState>.broadcast();
+    stateController.add(mockState);
+    when(() => mockViewModel.state).thenReturn(mockState);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chapter).thenReturn(null);
@@ -75,6 +82,10 @@ void main() {
 
     setUpAll(() {
     registerFallbackValue(ChapterId('dummy'));
+  });
+
+  tearDown(() {
+    stateController.close();
   });
 
 group('ReadingScreen', () {
@@ -88,7 +99,9 @@ group('ReadingScreen', () {
     });
 
     testWidgets('renders loading state', (tester) async {
-      when(() => mockViewModel.isLoading).thenReturn(true);
+      final st = ReadingState.initial().copyWith(isLoading: true);
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -98,7 +111,9 @@ group('ReadingScreen', () {
     });
 
     testWidgets('renders error state and allows retry', (tester) async {
-      when(() => mockViewModel.error).thenReturn('Error');
+      final st = ReadingState.initial().copyWith(error: () => 'Error');
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -118,7 +133,9 @@ group('ReadingScreen', () {
 
     testWidgets('renders correct reader for image content', (tester) async {
       final chapter = _MockChapter(contentType: ContentType.image);
-      when(() => mockViewModel.chapter).thenReturn(chapter);
+      final st = ReadingState.initial().copyWith(chapter: () => chapter);
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -129,7 +146,9 @@ group('ReadingScreen', () {
 
     testWidgets('renders correct reader for text content', (tester) async {
       final chapter = _MockChapter(contentType: ContentType.text);
-      when(() => mockViewModel.chapter).thenReturn(chapter);
+      final st = ReadingState.initial().copyWith(chapter: () => chapter);
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -140,7 +159,9 @@ group('ReadingScreen', () {
 
     testWidgets('renders correct reader for document content', (tester) async {
       final chapter = _MockChapter(contentType: ContentType.document);
-      when(() => mockViewModel.chapter).thenReturn(chapter);
+      final st = ReadingState.initial().copyWith(chapter: () => chapter);
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),

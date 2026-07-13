@@ -1,34 +1,62 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import '../../../../core/base/safe_change_notifier.dart';
+import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../features/users/domain/use_cases/user_service.dart';
 import '../../../../features/users/data/models/user_model.dart';
 import '../../../../features/authentication/domain/use_cases/auth_service.dart';
+import 'package:equatable/equatable.dart';
 
-class NavigationViewModel extends SafeChangeNotifier {
-  final UserService _userService;
-  final AuthService _authService;
+class NavigationState extends Equatable {
+  final UserModel user;
+  final bool isAuthenticated;
 
-  UserModel _user = UserModel.guest;
+  const NavigationState({
+    required this.user,
+    required this.isAuthenticated,
+  });
 
-  NavigationViewModel(this._userService, this._authService) {
-    _authService.addListener(_onAuthStateChanged);
-    _loadUser();
+  factory NavigationState.initial() {
+    return NavigationState(
+      user: UserModel.guest,
+      isAuthenticated: false,
+    );
   }
 
-  UserModel get user => _user;
-  bool get isAuthenticated => _authService.authenticated;
+  NavigationState copyWith({
+    UserModel? user,
+    bool? isAuthenticated,
+  }) {
+    return NavigationState(
+      user: user ?? this.user,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+    );
+  }
+
+  @override
+  List<Object?> get props => [user, isAuthenticated];
+}
+
+class NavigationViewModel extends BaseStreamViewModel<NavigationState> {
+  final UserService _userService;
+  final AuthService _authService;
+  late final StreamSubscription<AuthState> _authSubscription;
+
+  NavigationViewModel(this._userService, this._authService) : super(NavigationState.initial()) {
+    _authSubscription = _authService.authStateStream.listen((_) => _onAuthStateChanged());
+    _onAuthStateChanged();
+  }
 
   void _onAuthStateChanged() {
+    emit(state.copyWith(isAuthenticated: _authService.authenticated));
     _loadUser();
   }
 
   Future<void> _loadUser() async {
     try {
-      _user = await _userService.getCurrentUser();
+      final user = await _userService.getCurrentUser();
+      emit(state.copyWith(user: user));
     } catch (e) {
-      _user = UserModel.guest;
-    } finally {
-      notifyListeners();
+      emit(state.copyWith(user: UserModel.guest));
     }
   }
 
@@ -37,7 +65,7 @@ class NavigationViewModel extends SafeChangeNotifier {
 
   @override
   void dispose() {
-    _authService.removeListener(_onAuthStateChanged);
+    _authSubscription.cancel();
     super.dispose();
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 
 
@@ -18,6 +19,7 @@ class MockReadingViewModel extends Mock implements ReadingViewModel {}
 
 void main() {
   late MockReadingViewModel mockViewModel;
+  late StreamController<ReadingState> stateController;
 
   setUp(() async {
     await initTestDI();
@@ -30,9 +32,18 @@ void main() {
         initialPage: any(named: 'initialPage'),
       ),
     ).thenAnswer((_) async {});
+    final mockState = ReadingState.initial();
+    stateController = StreamController<ReadingState>.broadcast();
+    stateController.add(mockState);
+    when(() => mockViewModel.state).thenReturn(mockState);
+    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chapter).thenReturn(null);
+  });
+
+  tearDown(() {
+    stateController.close();
   });
 
   testWidgets('reading route works', (tester) async {

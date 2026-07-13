@@ -15,7 +15,7 @@ class ReadingProgressCoordinator {
   final AuthService _authService;
   static const String _logTag = 'ReadingProgressCoordinator';
 
-  StreamSubscription<AuthEvent>? _authSubscription;
+  StreamSubscription<AuthState>? _authSubscription;
 
   ReadingProgressCoordinator(
     this._localService,
@@ -27,8 +27,8 @@ class ReadingProgressCoordinator {
 
   void _init() {
     // Listen to Auth changes
-    _authSubscription = _authService.onAuthChange.listen((event) {
-      if (event == AuthEvent.authenticated) {
+    _authSubscription = _authService.authStateStream.listen((state) {
+      if (state == AuthState.authenticated) {
         _handleLogin();
       }
     });

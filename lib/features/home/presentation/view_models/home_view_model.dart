@@ -1,63 +1,143 @@
-import '../../../../core/base/safe_change_notifier.dart';
+import 'dart:async';
+import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
 import '../../../users/domain/use_cases/user_service.dart';
-import '../../../users/data/models/user_model.dart';
 import '../../../books/domain/repositories/books_repository.dart';
 import '../../../books/domain/entities/book_page_options.dart';
 import '../../../books/domain/entities/book.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
+import 'package:equatable/equatable.dart';
 
-class HomeViewModel extends SafeChangeNotifier {
+class HomeState extends Equatable {
+  final bool isAuthenticated;
+  final bool isInitialized;
+  final String? displayName;
+  
+  final List<Book> featuredBooks;
+  final List<Book> continueReadingBooks;
+  final List<Book> latestUpdatedBooks;
+  final List<Book> recentlyAddedBooks;
+
+  final bool isLoadingFeatured;
+  final bool isLoadingGrid;
+  final bool isLoadingRecentlyAdded;
+  final bool isLoadingContinueReading;
+
+  const HomeState({
+    required this.isAuthenticated,
+    required this.isInitialized,
+    required this.displayName,
+    required this.featuredBooks,
+    required this.continueReadingBooks,
+    required this.latestUpdatedBooks,
+    required this.recentlyAddedBooks,
+    required this.isLoadingFeatured,
+    required this.isLoadingGrid,
+    required this.isLoadingRecentlyAdded,
+    required this.isLoadingContinueReading,
+  });
+
+  factory HomeState.initial() {
+    return const HomeState(
+      isAuthenticated: false,
+      isInitialized: false,
+      displayName: null,
+      featuredBooks: [],
+      continueReadingBooks: [],
+      latestUpdatedBooks: [],
+      recentlyAddedBooks: [],
+      isLoadingFeatured: true,
+      isLoadingGrid: true,
+      isLoadingRecentlyAdded: true,
+      isLoadingContinueReading: false,
+    );
+  }
+
+  HomeState copyWith({
+    bool? isAuthenticated,
+    bool? isInitialized,
+    String? Function()? displayName,
+    List<Book>? featuredBooks,
+    List<Book>? continueReadingBooks,
+    List<Book>? latestUpdatedBooks,
+    List<Book>? recentlyAddedBooks,
+    bool? isLoadingFeatured,
+    bool? isLoadingGrid,
+    bool? isLoadingRecentlyAdded,
+    bool? isLoadingContinueReading,
+  }) {
+    return HomeState(
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      isInitialized: isInitialized ?? this.isInitialized,
+      displayName: displayName != null ? displayName() : this.displayName,
+      featuredBooks: featuredBooks ?? this.featuredBooks,
+      continueReadingBooks: continueReadingBooks ?? this.continueReadingBooks,
+      latestUpdatedBooks: latestUpdatedBooks ?? this.latestUpdatedBooks,
+      recentlyAddedBooks: recentlyAddedBooks ?? this.recentlyAddedBooks,
+      isLoadingFeatured: isLoadingFeatured ?? this.isLoadingFeatured,
+      isLoadingGrid: isLoadingGrid ?? this.isLoadingGrid,
+      isLoadingRecentlyAdded: isLoadingRecentlyAdded ?? this.isLoadingRecentlyAdded,
+      isLoadingContinueReading: isLoadingContinueReading ?? this.isLoadingContinueReading,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+    isAuthenticated,
+    isInitialized,
+    displayName,
+    featuredBooks,
+    continueReadingBooks,
+    latestUpdatedBooks,
+    recentlyAddedBooks,
+    isLoadingFeatured,
+    isLoadingGrid,
+    isLoadingRecentlyAdded,
+    isLoadingContinueReading,
+  ];
+}
+
+class HomeViewModel extends BaseStreamViewModel<HomeState> {
   final AuthService _authService;
   final UserService _userService;
   final BooksRepository _booksRepository;
   final ReadingProgressCoordinator _readingCoordinator;
+  late final StreamSubscription<AuthState> _authSubscription;
   
   static const String _logTag = 'HomeViewModel';
-
-  UserModel _user = UserModel.guest;
-
-  List<Book> featuredBooks = [];
-  List<Book> continueReadingBooks = [];
-  List<Book> latestUpdatedBooks = [];
-  List<Book> recentlyAddedBooks = [];
-
-  bool isLoadingFeatured = true;
-  bool isLoadingGrid = true;
-  bool isLoadingRecentlyAdded = true;
-  bool isLoadingContinueReading = false;
 
   HomeViewModel(
     this._authService, 
     this._userService,
     this._booksRepository,
     this._readingCoordinator,
-  ) {
-    _authService.addListener(_onAuthChanged);
-    _loadUser();
+  ) : super(HomeState.initial()) {
+    _authSubscription = _authService.authStateStream.listen((_) => _onAuthChanged());
+    _onAuthChanged(); // Initialize state from auth service
     _loadBooksData();
     _loadRecentlyAdded();
-    _loadContinueReading();
   }
 
   void _onAuthChanged() {
+    emit(state.copyWith(
+      isAuthenticated: _authService.authenticated,
+      isInitialized: _authService.isInitialized,
+    ));
     _loadUser();
     _loadContinueReading();
   }
 
   Future<void> _loadUser() async {
-    if (isDisposed) return;
-
-    _user = await _userService.getCurrentUser();
-    notifyListeners();
+    final user = await _userService.getCurrentUser();
+    emit(state.copyWith(
+      displayName: () => user.isGuest ? null : user.displayName,
+    ));
   }
 
   Future<void> _loadBooksData() async {
-    isLoadingFeatured = true;
-    isLoadingGrid = true;
-    notifyListeners();
+    emit(state.copyWith(isLoadingFeatured: true, isLoadingGrid: true));
 
     try {
       final res = await _booksRepository.getBooks(
@@ -69,21 +149,20 @@ class HomeViewModel extends SafeChangeNotifier {
       );
       
       if (res.data.isNotEmpty) {
-        featuredBooks = res.data.take(5).toList();
-        latestUpdatedBooks = res.data;
+        emit(state.copyWith(
+          featuredBooks: res.data.take(5).toList(),
+          latestUpdatedBooks: res.data,
+        ));
       }
     } catch (e) {
       AppLogger.e('Error loading latest books data', e, null, _logTag);
     } finally {
-      isLoadingFeatured = false;
-      isLoadingGrid = false;
-      notifyListeners();
+      emit(state.copyWith(isLoadingFeatured: false, isLoadingGrid: false));
     }
   }
 
   Future<void> _loadRecentlyAdded() async {
-    isLoadingRecentlyAdded = true;
-    notifyListeners();
+    emit(state.copyWith(isLoadingRecentlyAdded: true));
 
     try {
       final res = await _booksRepository.getBooks(
@@ -93,51 +172,43 @@ class HomeViewModel extends SafeChangeNotifier {
           order: SortOrder.desc,
         ),
       );
-      recentlyAddedBooks = res.data;
+      emit(state.copyWith(recentlyAddedBooks: res.data));
     } catch (e) {
       AppLogger.e('Error loading recently added books', e, null, _logTag);
     } finally {
-      isLoadingRecentlyAdded = false;
-      notifyListeners();
+      emit(state.copyWith(isLoadingRecentlyAdded: false));
     }
   }
 
   Future<void> _loadContinueReading() async {
-    if (!isAuthenticated) {
-      continueReadingBooks = [];
-      notifyListeners();
+    if (!state.isAuthenticated) {
+      emit(state.copyWith(continueReadingBooks: []));
       return;
     }
 
-    isLoadingContinueReading = true;
-    notifyListeners();
+    emit(state.copyWith(isLoadingContinueReading: true));
 
     try {
       final bookIds = await _readingCoordinator.getContinueReadingBooks(limit: 10);
       if (bookIds.isEmpty) {
-        continueReadingBooks = [];
+        emit(state.copyWith(continueReadingBooks: []));
         return;
       }
 
       final futures = bookIds.map((id) => _booksRepository.getBook(id));
       final books = await Future.wait(futures);
       
-      continueReadingBooks = books.toList();
+      emit(state.copyWith(continueReadingBooks: books.toList()));
     } catch (e) {
       AppLogger.e('Error loading continue reading books', e, null, _logTag);
     } finally {
-      isLoadingContinueReading = false;
-      notifyListeners();
+      emit(state.copyWith(isLoadingContinueReading: false));
     }
   }
 
   @override
   void dispose() {
-    _authService.removeListener(_onAuthChanged);
+    _authSubscription.cancel();
     super.dispose();
   }
-
-  bool get isAuthenticated => _authService.authenticated;
-  bool get isInitialized => _authService.isInitialized;
-  String? get displayName => _user.isGuest ? null : _user.displayName;
 }

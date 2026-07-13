@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -20,26 +21,27 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   late final SignUpViewModel _viewModel;
+  late final StreamSubscription<SignUpState> _subscription;
 
   @override
   void initState() {
     super.initState();
     _viewModel = SignUpViewModel(sl<AuthService>());
-    _viewModel.addListener(_onViewModelChanged);
+    _subscription = _viewModel.stateStream.listen(_onStateChanged);
   }
 
   @override
   void dispose() {
-    _viewModel.removeListener(_onViewModelChanged);
+    _subscription.cancel();
     _viewModel.dispose();
     super.dispose();
   }
 
-  void _onViewModelChanged() {
-    if (_viewModel.errorMessage != null && mounted) {
+  void _onStateChanged(SignUpState state) {
+    if (state.errorMessage != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_viewModel.errorMessage!),
+          content: Text(state.errorMessage!),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -64,9 +66,12 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return ListenableBuilder(
-      listenable: _viewModel,
-      builder: (context, _) {
+    return StreamBuilder<SignUpState>(
+      stream: _viewModel.stateStream,
+      initialData: _viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        
         return AuthTemplate(
           onBack: () {
             if (context.canPop()) {
@@ -92,7 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 context.go('/auth/signin');
               }
             },
-            isLoading: _viewModel.isLoading,
+            isLoading: state.isLoading,
           ),
         );
       },

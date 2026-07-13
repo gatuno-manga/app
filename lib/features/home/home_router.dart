@@ -12,7 +12,7 @@ final StatefulShellBranch homeBranch = StatefulShellBranch(
   routes: [
     GoRoute(
       path: '/home',
-      builder: (context, state) => ChangeNotifierProvider(
+      builder: (context, state) => Provider<HomeViewModel>(
         create: (_) => sl<HomeViewModel>(),
         child: const HomePage(),
       ),

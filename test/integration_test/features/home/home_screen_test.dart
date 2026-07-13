@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/core/router/router_keys.dart';
+import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
+import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 import '../../../helpers/test_injection.dart';
 
 void main() {
@@ -31,9 +33,8 @@ void main() {
       () => mockAuthService.isAuthenticated(),
     ).thenAnswer((_) async => false);
 
-    when(() => mockHomeViewModel.isAuthenticated).thenReturn(false);
-    when(() => mockHomeViewModel.isInitialized).thenReturn(true);
-    when(() => mockHomeViewModel.displayName).thenReturn(null);
+    when(() => mockHomeViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockHomeViewModel.state).thenReturn(HomeState.initial());
   });
 
   Future<void> pumpNavigationShell(WidgetTester tester) async {
@@ -80,7 +81,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<AuthService>.value(
+      Provider<AuthService>.value(
         value: mockAuthService,
         child: MaterialApp.router(
           routerConfig: router,
@@ -95,7 +96,8 @@ void main() {
   testWidgets('NavigationShell renders bottom navigation items', (
     WidgetTester tester,
   ) async {
-    when(() => mockNavigationViewModel.isAuthenticated).thenReturn(false);
+    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
     expect(find.byIcon(Icons.home), findsOneWidget);
@@ -107,7 +109,8 @@ void main() {
   testWidgets('NavigationShell navigates between branches', (
     WidgetTester tester,
   ) async {
-    when(() => mockNavigationViewModel.isAuthenticated).thenReturn(false);
+    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
     // Tap Books

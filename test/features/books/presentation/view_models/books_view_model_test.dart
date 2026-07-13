@@ -83,6 +83,10 @@ void main() {
     });
 
     test('setSearch(null) should clear search filter', () async {
+      viewModel = BooksViewModel(
+        repository: mockRepository,
+        settingsService: mockSettingsService,
+      );
       final bookList = BookList(
         data: [],
         total: const PositiveInt(0),

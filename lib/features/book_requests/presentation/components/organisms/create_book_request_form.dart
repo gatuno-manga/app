@@ -68,63 +68,70 @@ class _CreateBookRequestFormState extends State<CreateBookRequestForm> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<CreateBookRequestViewModel>();
+    final viewModel = context.read<CreateBookRequestViewModel>();
     final l10n = AppLocalizations.of(context)!;
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (viewModel.error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Text(
-                viewModel.error!,
-                style: const TextStyle(color: Colors.red),
+    return StreamBuilder<CreateBookRequestState>(
+      stream: viewModel.stateStream,
+      initialData: viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        return Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (state.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    state.error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+              AppTextField(
+                controller: _titleController,
+                label: l10n.bookRequestsFormTitle,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (String? val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return l10n.bookRequestsFormTitleRequired;
+                  }
+                  return null;
+                },
               ),
-            ),
-          AppTextField(
-            controller: _titleController,
-            label: l10n.bookRequestsFormTitle,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? val) {
-              if (val == null || val.trim().isEmpty) {
-                return l10n.bookRequestsFormTitleRequired;
-              }
-              return null;
-            },
+              const SizedBox(height: 16),
+              AppTextField(
+                controller: _urlController,
+                label: l10n.bookRequestsFormUrl,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (String? val) {
+                  if (val == null || val.trim().isEmpty) {
+                    return l10n.bookRequestsFormUrlRequired;
+                  }
+                  final uri = Uri.tryParse(val.trim());
+                  if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
+                    return l10n.bookRequestsFormUrlInvalid;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                controller: _reasonController,
+                label: l10n.bookRequestsFormReason,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+              const SizedBox(height: 32),
+              AppButton(
+                text: l10n.bookRequestsFormSubmit,
+                onPressed: _isFormValid ? _submit : null,
+                isLoading: state.isSubmitting,
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          AppTextField(
-            controller: _urlController,
-            label: l10n.bookRequestsFormUrl,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? val) {
-              if (val == null || val.trim().isEmpty) {
-                return l10n.bookRequestsFormUrlRequired;
-              }
-              final uri = Uri.tryParse(val.trim());
-              if (uri == null || !uri.hasScheme || uri.host.isEmpty) {
-                return l10n.bookRequestsFormUrlInvalid;
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          AppTextField(
-            controller: _reasonController,
-            label: l10n.bookRequestsFormReason,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-          ),
-          const SizedBox(height: 32),
-          AppButton(
-            text: l10n.bookRequestsFormSubmit,
-            onPressed: _isFormValid ? _submit : null,
-            isLoading: viewModel.isSubmitting,
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 }

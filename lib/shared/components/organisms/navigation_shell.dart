@@ -16,16 +16,23 @@ class NavigationShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return Provider<NavigationViewModel>(
       create: (_) => sl<NavigationViewModel>(),
-      child: Consumer<NavigationViewModel>(
-        builder: (context, viewModel, _) {
-          return Scaffold(
-            body: navigationShell,
-            bottomNavigationBar: AppBottomNavBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: (index) => _onTap(context, index),
-            ),
+      child: Builder(
+        builder: (context) {
+          final viewModel = context.read<NavigationViewModel>();
+          return StreamBuilder<NavigationState>(
+            stream: viewModel.stateStream,
+            initialData: viewModel.state,
+            builder: (context, snapshot) {
+              return Scaffold(
+                body: navigationShell,
+                bottomNavigationBar: AppBottomNavBar(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: (index) => _onTap(context, index),
+                ),
+              );
+            },
           );
         },
       ),

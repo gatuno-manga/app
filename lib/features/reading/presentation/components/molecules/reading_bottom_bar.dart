@@ -18,60 +18,68 @@ class ReadingBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final viewModel = context.watch<ReadingViewModel>();
-    final theme = Theme.of(context);
+    final viewModel = context.read<ReadingViewModel>();
+    
+    return StreamBuilder<ReadingState>(
+      stream: viewModel.stateStream,
+      initialData: viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        final theme = Theme.of(context);
 
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: bottomPadding + 8,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      color: theme.colorScheme.surface.withValues(alpha: 0.9),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (chapter.pages.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: Text(
-                l10n.commonPageOf(
-                  viewModel.currentPageIndex + 1,
-                  chapter.pages.length,
-                ),
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Container(
+          padding: EdgeInsets.only(
+            bottom: bottomPadding + 8,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          color: theme.colorScheme.surface.withValues(alpha: 0.9),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                icon: Icon(
-                  Icons.skip_previous,
-                  color: theme.colorScheme.onSurface,
+              if (chapter.pages.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    l10n.commonPageOf(
+                      state.currentPageIndex + 1,
+                      chapter.pages.length,
+                    ),
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-                onPressed: chapter.previous != null
-                    ? () => context.pushReplacement(
-                        '/chapters/${chapter.previous?.value}',
-                      )
-                    : null,
-                tooltip: l10n.readingPreviousChapter,
-              ),
-              IconButton(
-                icon: Icon(Icons.skip_next, color: theme.colorScheme.onSurface),
-                onPressed: chapter.next != null
-                    ? () => context.pushReplacement('/chapters/${chapter.next?.value}')
-                    : null,
-                tooltip: l10n.readingNextChapter,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.skip_previous,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    onPressed: chapter.previous != null
+                        ? () => context.pushReplacement(
+                            '/chapters/${chapter.previous?.value}',
+                          )
+                        : null,
+                    tooltip: l10n.readingPreviousChapter,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.skip_next, color: theme.colorScheme.onSurface),
+                    onPressed: chapter.next != null
+                        ? () => context.pushReplacement('/chapters/${chapter.next?.value}')
+                        : null,
+                    tooltip: l10n.readingNextChapter,
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
