@@ -1,0 +1,1470 @@
+{
+  "$schema-note": "Defined by issue #40 (Impeccable base context). Not an Impeccable-upstream schema. Validated by tool/check_design_tokens.py.",
+  "version": 1,
+  "source": {
+    "figmaFile": "https://www.figma.com/design/QlUrvomONqwfefHCwTg0Hh/Gatuno",
+    "fileKey": "QlUrvomONqwfefHCwTg0Hh",
+    "nodes": {
+      "mobileScreens": "455:1930",
+      "themeTable": "884:104",
+      "webScreens": "857:6124",
+      "components": "857:6123",
+      "standards": "857:6122"
+    },
+    "variableCollections": [
+      "Gatuno / Tokens (código)",
+      "Gatuno / Leitura (temas)"
+    ],
+    "excludedCollections": [
+      "Gatuno / The Cheap Weekly (exploration page, not product tokens)"
+    ],
+    "excludedTextStyles": "Legado/Gatuno/* (superseded, Inknut Antiqua only)"
+  },
+  "themes": [
+    "Dark",
+    "Light",
+    "True-dark",
+    "Dracula",
+    "Slate"
+  ],
+  "themeImplementation": {
+    "Dark": "AppTheme.darkTheme (partial)",
+    "Light": "AppTheme.lightTheme (diverges)",
+    "True-dark": "none",
+    "Dracula": "none",
+    "Slate": "none"
+  },
+  "colors": {
+    "color/app-background": {
+      "figma": {
+        "name": "color/app-background",
+        "cssVar": "--app-background-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#000212",
+        "Light": "#eeeeee",
+        "True-dark": "#000000",
+        "Dracula": "#282a36",
+        "Slate": "#15161a"
+      },
+      "flutter": {
+        "target": "colorScheme.surface + scaffoldBackgroundColor",
+        "status": "differs",
+        "code": {
+          "Light": "#fdfdfd"
+        }
+      }
+    },
+    "color/text": {
+      "figma": {
+        "name": "color/text",
+        "cssVar": "--app-text-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d1",
+        "Light": "#2b2d31",
+        "True-dark": "#e9e1d1",
+        "Dracula": "#f8f8f2",
+        "Slate": "#f8fafc"
+      },
+      "flutter": {
+        "target": "colorScheme.onSurface",
+        "status": "differs",
+        "code": {
+          "Light": "#20142a"
+        }
+      }
+    },
+    "color/text-secondary": {
+      "figma": {
+        "name": "color/text-secondary",
+        "cssVar": "--app-text-color-secondary",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d18c",
+        "Light": "#2b2d31a6",
+        "True-dark": "#e9e1d173",
+        "Dracula": "#6272a4",
+        "Slate": "#94a3b8"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/text-muted": {
+      "figma": {
+        "name": "color/text-muted",
+        "cssVar": "--app-text-color-muted",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#fdfdfd73",
+        "Light": "#2b2d3173",
+        "True-dark": "#fdfdfd59",
+        "Dracula": "#f8f8f273",
+        "Slate": "#f8fafc73"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/primary": {
+      "figma": {
+        "name": "color/primary",
+        "cssVar": "--primary-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f18522",
+        "Light": "#cc5e00",
+        "True-dark": "#f18522",
+        "Dracula": "#bd93f9",
+        "Slate": "#f18522"
+      },
+      "flutter": {
+        "target": "colorScheme.primary",
+        "status": "differs",
+        "code": {
+          "Light": "#a972ff"
+        }
+      }
+    },
+    "color/secondary": {
+      "figma": {
+        "name": "color/secondary",
+        "cssVar": "--secondary-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#181a1f",
+        "Light": "#e0e0e0",
+        "True-dark": "#181a1f",
+        "Dracula": "#44475a",
+        "Slate": "#212329"
+      },
+      "flutter": {
+        "target": "colorScheme.surfaceContainerHighest (proposed)",
+        "status": "differs",
+        "code": {
+          "Dark": "#20142a",
+          "Light": "#f8f9fa"
+        }
+      }
+    },
+    "color/border": {
+      "figma": {
+        "name": "color/border",
+        "cssVar": "--border-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d126",
+        "Light": "#2b2d311f",
+        "True-dark": "#e9e1d11a",
+        "Dracula": "#f8f8f226",
+        "Slate": "#f8fafc26"
+      },
+      "flutter": {
+        "target": "colorScheme.outline",
+        "status": "differs",
+        "code": {
+          "Dark": "#666666",
+          "Light": "#cccccc"
+        }
+      }
+    },
+    "color/hover": {
+      "figma": {
+        "name": "color/hover",
+        "cssVar": "--hover-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d114",
+        "Light": "#2b2d310f",
+        "True-dark": "#e9e1d10f",
+        "Dracula": "#f8f8f214",
+        "Slate": "#f8fafc14"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/divider": {
+      "figma": {
+        "name": "color/divider",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d11a",
+        "Light": "#2b2d311a",
+        "True-dark": "#e9e1d112",
+        "Dracula": "#f8f8f21a",
+        "Slate": "#f8fafc1a"
+      },
+      "flutter": {
+        "target": "dividerTheme.color",
+        "status": "differs",
+        "code": {
+          "Dark": "#555555",
+          "Light": "#e0e0e0"
+        }
+      }
+    },
+    "color/context-menu-bg": {
+      "figma": {
+        "name": "color/context-menu-bg",
+        "cssVar": "--context-menu-bg",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#000212cc",
+        "Light": "#ffffffe5",
+        "True-dark": "#000000e5",
+        "Dracula": "#282a36e5",
+        "Slate": "#15161ae5"
+      },
+      "flutter": {
+        "target": "GatunoColors.contextMenuBackground",
+        "status": "differs",
+        "code": {
+          "Light": "#fdfdfde6"
+        }
+      }
+    },
+    "color/overlay": {
+      "figma": {
+        "name": "color/overlay",
+        "cssVar": "--overlay-bg",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#000000b2",
+        "Light": "#0000004d",
+        "True-dark": "#000000d9",
+        "Dracula": "#000000bf",
+        "Slate": "#000000b2"
+      },
+      "flutter": {
+        "target": "GatunoColors.overlayBackground",
+        "status": "differs",
+        "code": {
+          "Dark": "#000000b3"
+        }
+      }
+    },
+    "color/on-primary": {
+      "figma": {
+        "name": "color/on-primary",
+        "cssVar": "--white",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#fdfdfd",
+        "Light": "#fdfdfd",
+        "True-dark": "#fdfdfd",
+        "Dracula": "#fdfdfd",
+        "Slate": "#fdfdfd"
+      },
+      "flutter": {
+        "target": "colorScheme.onPrimary",
+        "status": "differs",
+        "code": {
+          "Dark": "#000212"
+        }
+      }
+    },
+    "color/danger": {
+      "figma": {
+        "name": "color/danger",
+        "cssVar": "--danger-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f12237",
+        "Light": "#ff0000",
+        "True-dark": "#f12237",
+        "Dracula": "#ff5555",
+        "Slate": "#ef4444"
+      },
+      "flutter": {
+        "target": "colorScheme.error",
+        "status": "differs",
+        "code": {
+          "Dark": "#f18522",
+          "Light": "#f18522"
+        }
+      }
+    },
+    "color/warning": {
+      "figma": {
+        "name": "color/warning",
+        "cssVar": "--warning-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#ffc107",
+        "Light": "#ffc107",
+        "True-dark": "#ffc107",
+        "Dracula": "#ffb86c",
+        "Slate": "#f59e0b"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/success": {
+      "figma": {
+        "name": "color/success",
+        "cssVar": "--success-color",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#157219",
+        "Light": "#28a745",
+        "True-dark": "#157219",
+        "Dracula": "#50fa7b",
+        "Slate": "#10b981"
+      },
+      "flutter": {
+        "target": "GatunoColors.scrapingStatusReady",
+        "status": "differs",
+        "code": {
+          "Light": "#00ff00"
+        }
+      }
+    },
+    "color/lilac": {
+      "figma": {
+        "name": "color/lilac",
+        "cssVar": "--lilac",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#a972ff",
+        "Light": "#a972ff",
+        "True-dark": "#a972ff",
+        "Dracula": "#a972ff",
+        "Slate": "#a972ff"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/cyan": {
+      "figma": {
+        "name": "color/cyan",
+        "cssVar": "--cyan",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#17a2b8",
+        "Light": "#17a2b8",
+        "True-dark": "#17a2b8",
+        "Dracula": "#17a2b8",
+        "Slate": "#17a2b8"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/primary-10": {
+      "figma": {
+        "name": "color/primary-10",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f185221a",
+        "Light": "#cc5e001a",
+        "True-dark": "#f185221a",
+        "Dracula": "#bd93f91a",
+        "Slate": "#f185221a"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/primary-15": {
+      "figma": {
+        "name": "color/primary-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f1852226",
+        "Light": "#cc5e0026",
+        "True-dark": "#f1852226",
+        "Dracula": "#bd93f926",
+        "Slate": "#f1852226"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/primary-40": {
+      "figma": {
+        "name": "color/primary-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f1852266",
+        "Light": "#cc5e0066",
+        "True-dark": "#f1852266",
+        "Dracula": "#bd93f966",
+        "Slate": "#f1852266"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/lilac-15": {
+      "figma": {
+        "name": "color/lilac-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#a972ff26",
+        "Light": "#a972ff26",
+        "True-dark": "#a972ff26",
+        "Dracula": "#a972ff26",
+        "Slate": "#a972ff26"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/lilac-40": {
+      "figma": {
+        "name": "color/lilac-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#a972ff66",
+        "Light": "#a972ff66",
+        "True-dark": "#a972ff66",
+        "Dracula": "#a972ff66",
+        "Slate": "#a972ff66"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/success-15": {
+      "figma": {
+        "name": "color/success-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#15721926",
+        "Light": "#28a74526",
+        "True-dark": "#15721926",
+        "Dracula": "#50fa7b26",
+        "Slate": "#10b98126"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/success-40": {
+      "figma": {
+        "name": "color/success-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#15721966",
+        "Light": "#28a74566",
+        "True-dark": "#15721966",
+        "Dracula": "#50fa7b66",
+        "Slate": "#10b98166"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/danger-10": {
+      "figma": {
+        "name": "color/danger-10",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f122371a",
+        "Light": "#ff00001a",
+        "True-dark": "#f122371a",
+        "Dracula": "#ff55551a",
+        "Slate": "#ef44441a"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/danger-15": {
+      "figma": {
+        "name": "color/danger-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f1223726",
+        "Light": "#ff000026",
+        "True-dark": "#f1223726",
+        "Dracula": "#ff555526",
+        "Slate": "#ef444426"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/danger-40": {
+      "figma": {
+        "name": "color/danger-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#f1223766",
+        "Light": "#ff000066",
+        "True-dark": "#f1223766",
+        "Dracula": "#ff555566",
+        "Slate": "#ef444466"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/warning-15": {
+      "figma": {
+        "name": "color/warning-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#ffc10726",
+        "Light": "#ffc10726",
+        "True-dark": "#ffc10726",
+        "Dracula": "#ffb86c26",
+        "Slate": "#f59e0b26"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/warning-40": {
+      "figma": {
+        "name": "color/warning-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#ffc10766",
+        "Light": "#ffc10766",
+        "True-dark": "#ffc10766",
+        "Dracula": "#ffb86c66",
+        "Slate": "#f59e0b66"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/cyan-15": {
+      "figma": {
+        "name": "color/cyan-15",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#17a2b826",
+        "Light": "#17a2b826",
+        "True-dark": "#17a2b826",
+        "Dracula": "#17a2b826",
+        "Slate": "#17a2b826"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/cyan-40": {
+      "figma": {
+        "name": "color/cyan-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#17a2b866",
+        "Light": "#17a2b866",
+        "True-dark": "#17a2b866",
+        "Dracula": "#17a2b866",
+        "Slate": "#17a2b866"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/secondary-45": {
+      "figma": {
+        "name": "color/secondary-45",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#181a1f73",
+        "Light": "#e0e0e073",
+        "True-dark": "#181a1f73",
+        "Dracula": "#44475a73",
+        "Slate": "#21232973"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/secondary-60": {
+      "figma": {
+        "name": "color/secondary-60",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#181a1f99",
+        "Light": "#e0e0e099",
+        "True-dark": "#181a1f99",
+        "Dracula": "#44475a99",
+        "Slate": "#21232999"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/text-10": {
+      "figma": {
+        "name": "color/text-10",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d11a",
+        "Light": "#2b2d311a",
+        "True-dark": "#e9e1d11a",
+        "Dracula": "#f8f8f21a",
+        "Slate": "#f8fafc1a"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/text-40": {
+      "figma": {
+        "name": "color/text-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#e9e1d166",
+        "Light": "#2b2d3166",
+        "True-dark": "#e9e1d166",
+        "Dracula": "#f8f8f266",
+        "Slate": "#f8fafc66"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/app-background-2": {
+      "figma": {
+        "name": "color/app-background-2",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#00021205",
+        "Light": "#eeeeee05",
+        "True-dark": "#00000005",
+        "Dracula": "#282a3605",
+        "Slate": "#15161a05"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/app-background-3": {
+      "figma": {
+        "name": "color/app-background-3",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#00021208",
+        "Light": "#eeeeee08",
+        "True-dark": "#00000008",
+        "Dracula": "#282a3608",
+        "Slate": "#15161a08"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/app-background-40": {
+      "figma": {
+        "name": "color/app-background-40",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#00021266",
+        "Light": "#eeeeee66",
+        "True-dark": "#00000066",
+        "Dracula": "#282a3666",
+        "Slate": "#15161a66"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    },
+    "color/app-background-75": {
+      "figma": {
+        "name": "color/app-background-75",
+        "cssVar": null,
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "values": {
+        "Dark": "#000212bf",
+        "Light": "#eeeeeebf",
+        "True-dark": "#000000bf",
+        "Dracula": "#282a36bf",
+        "Slate": "#15161abf"
+      },
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "code": {}
+      }
+    }
+  },
+  "typography": {
+    "Display/Hero": {
+      "figma": {
+        "name": "Display/Hero",
+        "type": "text-style"
+      },
+      "family": "Inknut Antiqua",
+      "style": "Bold",
+      "weight": 700,
+      "size": 48,
+      "lineHeightPercent": 120,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.displayLarge",
+        "status": "differs",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+      }
+    },
+    "Título/1": {
+      "figma": {
+        "name": "Título/1",
+        "type": "text-style"
+      },
+      "family": "Inknut Antiqua",
+      "style": "SemiBold",
+      "weight": 600,
+      "size": 32,
+      "lineHeightPercent": 130,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.headlineMedium",
+        "status": "differs",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+      }
+    },
+    "Título/2": {
+      "figma": {
+        "name": "Título/2",
+        "type": "text-style"
+      },
+      "family": "Inknut Antiqua",
+      "style": "SemiBold",
+      "weight": 600,
+      "size": 24,
+      "lineHeightPercent": 135,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.headlineSmall",
+        "status": "differs",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+      }
+    },
+    "Título/3": {
+      "figma": {
+        "name": "Título/3",
+        "type": "text-style"
+      },
+      "family": "Inknut Antiqua",
+      "style": "Medium",
+      "weight": 500,
+      "size": 20,
+      "lineHeightPercent": 140,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.titleLarge",
+        "status": "differs",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+      }
+    },
+    "Corpo/Grande": {
+      "figma": {
+        "name": "Corpo/Grande",
+        "type": "text-style"
+      },
+      "family": "Manrope",
+      "style": "Regular",
+      "weight": 400,
+      "size": 18,
+      "lineHeightPercent": 160,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.bodyLarge",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Corpo/Padrão": {
+      "figma": {
+        "name": "Corpo/Padrão",
+        "type": "text-style"
+      },
+      "family": "Manrope",
+      "style": "Regular",
+      "weight": 400,
+      "size": 16,
+      "lineHeightPercent": 160,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.bodyMedium",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Corpo/Pequeno": {
+      "figma": {
+        "name": "Corpo/Pequeno",
+        "type": "text-style"
+      },
+      "family": "Manrope",
+      "style": "Regular",
+      "weight": 400,
+      "size": 14,
+      "lineHeightPercent": 150,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.bodySmall",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Interface/Botão": {
+      "figma": {
+        "name": "Interface/Botão",
+        "type": "text-style"
+      },
+      "family": "Plus Jakarta Sans",
+      "style": "SemiBold",
+      "weight": 600,
+      "size": 14,
+      "lineHeightPercent": 120,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.labelLarge",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Interface/Rótulo": {
+      "figma": {
+        "name": "Interface/Rótulo",
+        "type": "text-style"
+      },
+      "family": "Plus Jakarta Sans",
+      "style": "Medium",
+      "weight": 500,
+      "size": 13,
+      "lineHeightPercent": 130,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.labelMedium",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Interface/Legenda": {
+      "figma": {
+        "name": "Interface/Legenda",
+        "type": "text-style"
+      },
+      "family": "Plus Jakarta Sans",
+      "style": "Medium",
+      "weight": 500,
+      "size": 12,
+      "lineHeightPercent": 130,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": "textTheme.labelSmall",
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Interface/Sobrelinha": {
+      "figma": {
+        "name": "Interface/Sobrelinha",
+        "type": "text-style"
+      },
+      "family": "Plus Jakarta Sans",
+      "style": "Bold",
+      "weight": 700,
+      "size": 11,
+      "lineHeightPercent": 130,
+      "letterSpacingPercent": 12,
+      "textCase": "UPPER",
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Leitura/Serifa": {
+      "figma": {
+        "name": "Leitura/Serifa",
+        "type": "text-style"
+      },
+      "family": "Literata",
+      "style": "Regular",
+      "weight": 400,
+      "size": 19,
+      "lineHeightPercent": 180,
+      "letterSpacingPercent": 0,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    },
+    "Leitura/Dislexia": {
+      "figma": {
+        "name": "Leitura/Dislexia",
+        "type": "text-style"
+      },
+      "family": "Lexend",
+      "style": "Regular",
+      "weight": 400,
+      "size": 20,
+      "lineHeightPercent": 180,
+      "letterSpacingPercent": 5,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+      }
+    }
+  },
+  "radius": {
+    "radius/sm": {
+      "figma": {
+        "name": "radius/sm",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 4,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no shared radius token in code"
+      }
+    },
+    "radius/md": {
+      "figma": {
+        "name": "radius/md",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 8,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "code only uses literal BorderRadius.circular(8) in snackBarTheme"
+      }
+    },
+    "radius/lg": {
+      "figma": {
+        "name": "radius/lg",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 12,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no shared radius token in code"
+      }
+    },
+    "radius/xl": {
+      "figma": {
+        "name": "radius/xl",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 16,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no shared radius token in code"
+      }
+    },
+    "radius/pill": {
+      "figma": {
+        "name": "radius/pill",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 999,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no shared radius token in code"
+      }
+    }
+  },
+  "spacing": {
+    "space/xs": {
+      "figma": {
+        "name": "space/xs",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 4,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/sm": {
+      "figma": {
+        "name": "space/sm",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 8,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/md": {
+      "figma": {
+        "name": "space/md",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 12,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/lg": {
+      "figma": {
+        "name": "space/lg",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 16,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/xl": {
+      "figma": {
+        "name": "space/xl",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 20,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/2xl": {
+      "figma": {
+        "name": "space/2xl",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 24,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    },
+    "space/3xl": {
+      "figma": {
+        "name": "space/3xl",
+        "collection": "Gatuno / Tokens (código)"
+      },
+      "value": 40,
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no spacing token in code"
+      }
+    }
+  },
+  "effects": {
+    "Vidro/Leve": {
+      "figma": {
+        "name": "Vidro/Leve",
+        "type": "effect-style"
+      },
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "radius": 4
+        }
+      ],
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no BackdropFilter/shadow tokens in code; only GatunoColors.shadowColor"
+      }
+    },
+    "Vidro/Médio": {
+      "figma": {
+        "name": "Vidro/Médio",
+        "type": "effect-style"
+      },
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "radius": 8
+        }
+      ],
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no BackdropFilter/shadow tokens in code; only GatunoColors.shadowColor"
+      }
+    },
+    "Vidro/Dropdown": {
+      "figma": {
+        "name": "Vidro/Dropdown",
+        "type": "effect-style"
+      },
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "radius": 8
+        },
+        {
+          "type": "DROP_SHADOW",
+          "radius": 12,
+          "offset": [
+            0,
+            4
+          ],
+          "color": "#00001280"
+        }
+      ],
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no BackdropFilter/shadow tokens in code; only GatunoColors.shadowColor"
+      }
+    },
+    "Vidro/Overlay": {
+      "figma": {
+        "name": "Vidro/Overlay",
+        "type": "effect-style"
+      },
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "radius": 12
+        }
+      ],
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no BackdropFilter/shadow tokens in code; only GatunoColors.shadowColor"
+      }
+    },
+    "Vidro/Painel": {
+      "figma": {
+        "name": "Vidro/Painel",
+        "type": "effect-style"
+      },
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "radius": 24
+        },
+        {
+          "type": "DROP_SHADOW",
+          "radius": 40,
+          "offset": [
+            0,
+            12
+          ],
+          "color": "#00000066"
+        }
+      ],
+      "flutter": {
+        "target": null,
+        "status": "missing",
+        "note": "no BackdropFilter/shadow tokens in code; only GatunoColors.shadowColor"
+      }
+    }
+  },
+  "readerThemes": {
+    "modes": [
+      "Padrão",
+      "Sépia",
+      "Creme",
+      "Alto contraste"
+    ],
+    "tokens": {
+      "leitura/fundo": {
+        "figma": {
+          "name": "leitura/fundo",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#000212",
+          "Sépia": "#f4ecd8",
+          "Creme": "#faf4e1",
+          "Alto contraste": "#000000"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/superficie": {
+        "figma": {
+          "name": "leitura/superficie",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#181a1f",
+          "Sépia": "#eadfc6",
+          "Creme": "#f0e8d0",
+          "Alto contraste": "#111111"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/texto": {
+        "figma": {
+          "name": "leitura/texto",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#e9e1d1",
+          "Sépia": "#4a3a2c",
+          "Creme": "#1f2430",
+          "Alto contraste": "#ffffff"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/texto-suave": {
+        "figma": {
+          "name": "leitura/texto-suave",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#e9e1d19e",
+          "Sépia": "#6e5a48",
+          "Creme": "#4a5060",
+          "Alto contraste": "#e6e6e6"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/acento": {
+        "figma": {
+          "name": "leitura/acento",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#f18522",
+          "Sépia": "#9a4a00",
+          "Creme": "#1b5fad",
+          "Alto contraste": "#ffd600"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/destaque": {
+        "figma": {
+          "name": "leitura/destaque",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#f185221f",
+          "Sépia": "#9a4a001f",
+          "Creme": "#1b5fad1f",
+          "Alto contraste": "#ffd60038"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      },
+      "leitura/borda": {
+        "figma": {
+          "name": "leitura/borda",
+          "collection": "Gatuno / Leitura (temas)"
+        },
+        "values": {
+          "Padrão": "#e9e1d126",
+          "Sépia": "#4a3a2c2e",
+          "Creme": "#1f243029",
+          "Alto contraste": "#ffffff99"
+        },
+        "flutter": {
+          "target": null,
+          "status": "missing",
+          "note": "code has no reader themes"
+        }
+      }
+    }
+  },
+  "gaps": [
+    {
+      "id": "fonts-not-bundled",
+      "summary": "Manrope, Plus Jakarta Sans, Literata and Lexend are used by Figma text styles but are not declared in pubspec.yaml; only Inknut Antiqua is bundled."
+    },
+    {
+      "id": "text-theme-uncustomized",
+      "summary": "AppTheme sets fontFamily only; no TextTheme roles map to the Figma text styles."
+    },
+    {
+      "id": "light-theme-diverges",
+      "summary": "AppTheme.lightTheme uses lilac primary, white surface and darkPurple onSurface; Figma Light uses #cc5e00 primary, #eeeeee background and #2b2d31 text."
+    },
+    {
+      "id": "themes-missing",
+      "summary": "True-dark, Dracula and Slate exist in Figma but not in AppTheme; no theme-selection mechanism exists in code."
+    },
+    {
+      "id": "on-primary-dark",
+      "summary": "Dark onPrimary is #000212 in code; Figma color/on-primary is #fdfdfd in every theme."
+    },
+    {
+      "id": "error-role",
+      "summary": "colorScheme.error is orange (#f18522) in both code themes; Figma color/danger is #f12237 (Dark) / #ff0000 (Light). Code keeps danger only in GatunoColors.scrapingStatusError."
+    },
+    {
+      "id": "outline-divider-values",
+      "summary": "outline and divider use opaque grays in code; Figma border/divider are translucent text-color tints."
+    },
+    {
+      "id": "secondary-role",
+      "summary": "colorScheme.secondary is darkPurple (Dark) / beige (Light) in code; Figma color/secondary is #181a1f / #e0e0e0. Proposed mapping to surfaceContainerHighest is not implemented."
+    },
+    {
+      "id": "tokens-without-code",
+      "summary": "text-secondary, text-muted, hover, warning, lilac, cyan, alpha ramps, radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart."
+    },
+    {
+      "id": "badge-colors-not-in-figma",
+      "summary": "GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and AppColors.gray*/badge* constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping."
+    },
+    {
+      "id": "degrader-not-in-figma",
+      "summary": "GatunoColors.degrader gradient has no Figma style."
+    },
+    {
+      "id": "figma-surfaces-empty",
+      "summary": "Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames; the web section 1 has no /library or /users/:userId frame. Surface files for library, profile, auth and settings therefore have no Figma frame anchors."
+    },
+    {
+      "id": "routes-differ",
+      "summary": "Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /settings/certificates, /auth/signin, /auth/signup, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome which have no Figma frames."
+    },
+    {
+      "id": "cheap-weekly-exploration",
+      "summary": "Collection 'Gatuno / The Cheap Weekly' (press-black palette) is a redesign exploration and is excluded from tokens."
+    }
+  ]
+}

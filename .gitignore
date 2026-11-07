@@ -46,3 +46,9 @@ app.*.map.json
 
 # direnv
 .direnv/
+
+# Impeccable: keep context files, ignore runtime/cache files
+.impeccable/*
+!.impeccable/design.json
+!.impeccable/surfaces/
+!.impeccable/critique/
