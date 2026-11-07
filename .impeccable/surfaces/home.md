@@ -21,20 +21,20 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 `lib/features/home/presentation/views/home_screen.dart`, template `home_template.dart`.
 
 ## Tokens used
-- ``color/app-background``
-- ``color/text``
-- ``color/text-secondary``
-- ``color/primary``
-- ``color/border``
-- ``color/context-menu-bg``
-- ``Título/2``
-- ``Título/3``
-- ``Corpo/Padrão``
-- ``Interface/Rótulo``
-- ``Interface/Botão``
-- ``radius/md``
-- ``Vidro/Médio``
-- ``Vidro/Painel``
+- `color/app-background`
+- `color/text`
+- `color/text-secondary`
+- `color/primary`
+- `color/border`
+- `color/context-menu-bg`
+- `Título/2`
+- `Título/3`
+- `Corpo/Padrão`
+- `Interface/Rótulo`
+- `Interface/Botão`
+- `radius/md`
+- `Vidro/Médio`
+- `Vidro/Painel`
 
 ## States in Figma
 - Default: featured carousel (`Home/Destaque`, 620 dp) then three sections, the first being continue-reading with a horizontal list of `Livro/Card` (140×295).

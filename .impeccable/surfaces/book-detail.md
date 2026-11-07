@@ -25,15 +25,15 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 `lib/features/books/presentation/views/book_details_screen.dart`.
 
 ## Tokens used
-- ``color/app-background``
-- ``color/text``
-- ``color/text-secondary``
-- ``color/primary``
-- ``color/context-menu-bg``
-- ``Título/2``
-- ``Corpo/Padrão``
-- ``Interface/Rótulo``
-- ``Vidro/Dropdown``
+- `color/app-background`
+- `color/text`
+- `color/text-secondary`
+- `color/primary`
+- `color/context-menu-bg`
+- `Título/2`
+- `Corpo/Padrão`
+- `Interface/Rótulo`
+- `Vidro/Dropdown`
 
 ## States in Figma
 - Chapters tab, more-options menu open, chapters grouped by number.

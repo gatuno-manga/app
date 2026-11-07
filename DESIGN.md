@@ -32,21 +32,21 @@ Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`
 
 | Token (Figma) | CSS var | Dark | Light | True-dark | Dracula | Slate | Flutter target | Code vs Figma |
 |---|---|---|---|---|---|---|---|---|
-| `color/app-background` | `--app-background-color` | `#000212` | `#eeeeee` | `#000000` | `#282a36` | `#15161a` | `colorScheme.surface + scaffoldBackgroundColor` | differs: code Dark `#000212`, Light `#fdfdfd` |
-| `color/text` | `--app-text-color` | `#e9e1d1` | `#2b2d31` | `#e9e1d1` | `#f8f8f2` | `#f8fafc` | `colorScheme.onSurface` | differs: code Dark `#e9e1d1`, Light `#20142a` |
+| `color/app-background` | `--app-background-color` | `#000212` | `#eeeeee` | `#000000` | `#282a36` | `#15161a` | `colorScheme.surface + scaffoldBackgroundColor` | differs: code Light `#fdfdfd` |
+| `color/text` | `--app-text-color` | `#e9e1d1` | `#2b2d31` | `#e9e1d1` | `#f8f8f2` | `#f8fafc` | `colorScheme.onSurface` | differs: code Light `#20142a` |
 | `color/text-secondary` | `--app-text-color-secondary` | `#e9e1d18c` | `#2b2d31a6` | `#e9e1d173` | `#6272a4` | `#94a3b8` | none | no code token |
 | `color/text-muted` | `--app-text-color-muted` | `#fdfdfd73` | `#2b2d3173` | `#fdfdfd59` | `#f8f8f273` | `#f8fafc73` | none | no code token |
-| `color/primary` | `--primary-color` | `#f18522` | `#cc5e00` | `#f18522` | `#bd93f9` | `#f18522` | `colorScheme.primary` | differs: code Dark `#f18522`, Light `#a972ff` |
+| `color/primary` | `--primary-color` | `#f18522` | `#cc5e00` | `#f18522` | `#bd93f9` | `#f18522` | `colorScheme.primary` | differs: code Light `#a972ff` |
 | `color/secondary` | `--secondary-color` | `#181a1f` | `#e0e0e0` | `#181a1f` | `#44475a` | `#212329` | `colorScheme.surfaceContainerHighest (proposed)` | differs: code Dark `#20142a`, Light `#f8f9fa` |
 | `color/border` | `--border-color` | `#e9e1d126` | `#2b2d311f` | `#e9e1d11a` | `#f8f8f226` | `#f8fafc26` | `colorScheme.outline` | differs: code Dark `#666666`, Light `#cccccc` |
 | `color/hover` | `--hover-color` | `#e9e1d114` | `#2b2d310f` | `#e9e1d10f` | `#f8f8f214` | `#f8fafc14` | none | no code token |
 | `color/divider` | (none) | `#e9e1d11a` | `#2b2d311a` | `#e9e1d112` | `#f8f8f21a` | `#f8fafc1a` | `dividerTheme.color` | differs: code Dark `#555555`, Light `#e0e0e0` |
-| `color/context-menu-bg` | `--context-menu-bg` | `#000212cc` | `#ffffffe5` | `#000000e5` | `#282a36e5` | `#15161ae5` | `GatunoColors.contextMenuBackground` | differs: code Dark `#000212cc`, Light `#fdfdfde5` |
-| `color/overlay` | `--overlay-bg` | `#000000b2` | `#0000004d` | `#000000d9` | `#000000bf` | `#000000b2` | `GatunoColors.overlayBackground` | differs: code Dark `#000000b3`, Light `#0000004d` |
-| `color/on-primary` | `--white` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `colorScheme.onPrimary` | differs: code Dark `#000212`, Light `#fdfdfd` |
+| `color/context-menu-bg` | `--context-menu-bg` | `#000212cc` | `#ffffffe5` | `#000000e5` | `#282a36e5` | `#15161ae5` | `GatunoColors.contextMenuBackground` | differs: code Light `#fdfdfde6` |
+| `color/overlay` | `--overlay-bg` | `#000000b2` | `#0000004d` | `#000000d9` | `#000000bf` | `#000000b2` | `GatunoColors.overlayBackground` | differs: code Dark `#000000b3` |
+| `color/on-primary` | `--white` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `colorScheme.onPrimary` | differs: code Dark `#000212` |
 | `color/danger` | `--danger-color` | `#f12237` | `#ff0000` | `#f12237` | `#ff5555` | `#ef4444` | `colorScheme.error` | differs: code Dark `#f18522`, Light `#f18522` |
 | `color/warning` | `--warning-color` | `#ffc107` | `#ffc107` | `#ffc107` | `#ffb86c` | `#f59e0b` | none | no code token |
-| `color/success` | `--success-color` | `#157219` | `#28a745` | `#157219` | `#50fa7b` | `#10b981` | `GatunoColors.scrapingStatusReady` | differs: code Dark `#157219`, Light `#00ff00` |
+| `color/success` | `--success-color` | `#157219` | `#28a745` | `#157219` | `#50fa7b` | `#10b981` | `GatunoColors.scrapingStatusReady` | differs: code Light `#00ff00` |
 | `color/lilac` | `--lilac` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | none | no code token |
 | `color/cyan` | `--cyan` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | none | no code token |
 
@@ -148,6 +148,6 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 - **tokens-without-code**: text-secondary, text-muted, hover, warning, lilac, cyan, alpha ramps, radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and AppColors.gray*/badge* constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.
 - **degrader-not-in-figma**: GatunoColors.degrader gradient has no Figma style.
-- **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames. Surface files for library, profile, auth and settings therefore have no Figma frame anchors.
-- **routes-differ**: Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /auth/signin, /auth/signup, /chapters/:id, /requests and /welcome which have no Figma frames.
+- **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames; the web section 1 has no /library or /users/:userId frame. Surface files for library, profile, auth and settings therefore have no Figma frame anchors.
+- **routes-differ**: Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /settings/certificates, /auth/signin, /auth/signup, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome which have no Figma frames.
 - **cheap-weekly-exploration**: Collection 'Gatuno / The Cheap Weekly' (press-black palette) is a redesign exploration and is excluded from tokens.

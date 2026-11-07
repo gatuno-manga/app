@@ -52,7 +52,6 @@
         "target": "colorScheme.surface + scaffoldBackgroundColor",
         "status": "differs",
         "code": {
-          "Dark": "#000212",
           "Light": "#fdfdfd"
         }
       }
@@ -74,7 +73,6 @@
         "target": "colorScheme.onSurface",
         "status": "differs",
         "code": {
-          "Dark": "#e9e1d1",
           "Light": "#20142a"
         }
       }
@@ -134,7 +132,6 @@
         "target": "colorScheme.primary",
         "status": "differs",
         "code": {
-          "Dark": "#f18522",
           "Light": "#a972ff"
         }
       }
@@ -241,8 +238,7 @@
         "target": "GatunoColors.contextMenuBackground",
         "status": "differs",
         "code": {
-          "Dark": "#000212cc",
-          "Light": "#fdfdfde5"
+          "Light": "#fdfdfde6"
         }
       }
     },
@@ -263,8 +259,7 @@
         "target": "GatunoColors.overlayBackground",
         "status": "differs",
         "code": {
-          "Dark": "#000000b3",
-          "Light": "#0000004d"
+          "Dark": "#000000b3"
         }
       }
     },
@@ -285,8 +280,7 @@
         "target": "colorScheme.onPrimary",
         "status": "differs",
         "code": {
-          "Dark": "#000212",
-          "Light": "#fdfdfd"
+          "Dark": "#000212"
         }
       }
     },
@@ -348,7 +342,6 @@
         "target": "GatunoColors.scrapingStatusReady",
         "status": "differs",
         "code": {
-          "Dark": "#157219",
           "Light": "#00ff00"
         }
       }
@@ -1463,11 +1456,11 @@
     },
     {
       "id": "figma-surfaces-empty",
-      "summary": "Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames. Surface files for library, profile, auth and settings therefore have no Figma frame anchors."
+      "summary": "Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames; the web section 1 has no /library or /users/:userId frame. Surface files for library, profile, auth and settings therefore have no Figma frame anchors."
     },
     {
       "id": "routes-differ",
-      "summary": "Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /auth/signin, /auth/signup, /chapters/:id, /requests and /welcome which have no Figma frames."
+      "summary": "Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /settings/certificates, /auth/signin, /auth/signup, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome which have no Figma frames."
     },
     {
       "id": "cheap-weekly-exploration",

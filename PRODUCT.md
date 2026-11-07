@@ -26,7 +26,7 @@ Self-hosted: the user supplies their own server URL on first launch (`/welcome`)
 - Design source of truth: the Gatuno Figma file (see `DESIGN.md`). Some surfaces (library, profile, auth, settings) have no Figma frames yet.
 
 ## Brand Commitments
-- Name: Gatuno. Brand orange `#F18522` (also the Android adaptive icon background).
+- Name: Gatuno. Brand orange `#F18522`.
 - Title typeface: Inknut Antiqua.
 
 ## Evidence on Hand

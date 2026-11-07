@@ -23,14 +23,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 Not implemented in code. Web frames exist too (`925:4328` history, `925:4590` sensitive visible, `925:4849` empty, `925:4955` loading).
 
 ## Tokens used
-- ``color/app-background``
-- ``color/text``
-- ``color/text-secondary``
-- ``color/primary``
-- ``Título/2``
-- ``Corpo/Padrão``
-- ``Interface/Rótulo``
-- ``Interface/Legenda``
+- `color/app-background`
+- `color/text`
+- `color/text-secondary`
+- `color/primary`
+- `Título/2`
+- `Corpo/Padrão`
+- `Interface/Rótulo`
+- `Interface/Legenda`
 
 ## States in Figma
 - History list grouped by date (3 groups, 4 items).

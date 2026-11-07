@@ -18,7 +18,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 `lib/features/authentication/presentation/views/{signin_screen,signup_screen}.dart`, templates and organisms under `presentation/components`; shared `app_text_field.dart`, `app_button.dart`. Welcome: `lib/features/welcome/presentation/views/welcome_screen.dart`.
 
 ## Tokens used
-- Not designed. Use only the shared tokens in `design.json` (inputs and buttons: `color/border`, `color/primary`, `color/on-primary`, `color/danger`, `Interface/Botão`, `Interface/Rótulo`, `radius/md`).
+- Not designed. Use only the shared tokens in `design.json`.
 
 ## States in Figma
 - None drawn.

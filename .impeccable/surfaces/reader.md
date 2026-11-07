@@ -31,19 +31,19 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 `lib/features/reading/presentation/views/reading_screen.dart`; organisms `image_reader.dart`, `text_reader.dart`, `document_reader.dart`; templates `reading_template.dart`.
 
 ## Tokens used
-- ``leitura/fundo``
-- ``leitura/superficie``
-- ``leitura/texto``
-- ``leitura/texto-suave``
-- ``leitura/acento``
-- ``leitura/destaque``
-- ``leitura/borda``
-- ``color/overlay``
-- ``color/context-menu-bg``
-- ``Leitura/Serifa``
-- ``Leitura/Dislexia``
-- ``Interface/Rótulo``
-- ``Vidro/Overlay``
+- `leitura/fundo`
+- `leitura/superficie`
+- `leitura/texto`
+- `leitura/texto-suave`
+- `leitura/acento`
+- `leitura/destaque`
+- `leitura/borda`
+- `color/overlay`
+- `color/context-menu-bg`
+- `Leitura/Serifa`
+- `Leitura/Dislexia`
+- `Interface/Rótulo`
+- `Vidro/Overlay`
 
 ## States in Figma
 - Image continuous scroll; text (markdown); PDF and EPUB (both proposals).
