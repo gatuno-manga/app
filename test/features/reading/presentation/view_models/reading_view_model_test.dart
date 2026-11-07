@@ -114,12 +114,12 @@ setUp(() {
 
       expect(viewModel.currentPageIndex, 3);
       // Let stream emit
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       expect(listenerCount, 2); 
 
       // Setting same page should not notify
       viewModel.setCurrentPage(3, isAutoSave: false);
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
       expect(listenerCount, 2);
       sub.cancel();
     });

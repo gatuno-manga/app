@@ -16,7 +16,9 @@ class AuthService with WidgetsBindingObserver {
   final TokenManager _tokenManager;
   static const String _logTag = 'AuthService';
 
-  final _authStateSubject = BehaviorSubject<AuthState>.seeded(AuthState.uninitialized);
+  final _authStateSubject = BehaviorSubject<AuthState>.seeded(
+    AuthState.uninitialized,
+  );
   Stream<AuthState> get authStateStream => _authStateSubject.stream;
   AuthState get authState => _authStateSubject.value;
 
@@ -38,8 +40,11 @@ class AuthService with WidgetsBindingObserver {
 
   void _updateAuthState() {
     final token = _tokenManager.currentToken;
-    final isAuth = token != null && token.isNotEmpty && !JwtDecoder.isExpired(token);
-    _authStateSubject.add(isAuth ? AuthState.authenticated : AuthState.unauthenticated);
+    final isAuth =
+        token != null && token.isNotEmpty && !JwtDecoder.isExpired(token);
+    _authStateSubject.add(
+      isAuth ? AuthState.authenticated : AuthState.unauthenticated,
+    );
   }
 
   @override
@@ -78,7 +83,11 @@ class AuthService with WidgetsBindingObserver {
           AppLogger.w('Initial token refresh failed: $e', _logTag);
         }
       }
-      _authStateSubject.add(_tokenManager.currentToken != null ? AuthState.authenticated : AuthState.unauthenticated);
+      _authStateSubject.add(
+        _tokenManager.currentToken != null
+            ? AuthState.authenticated
+            : AuthState.unauthenticated,
+      );
     } else {
       _authStateSubject.add(AuthState.unauthenticated);
     }
@@ -123,7 +132,7 @@ class AuthService with WidgetsBindingObserver {
         _logTag,
       );
       // Auto-signIn after successful signup
-      return signIn(email, password);
+      return await signIn(email, password);
     } catch (e, stackTrace) {
       AppLogger.e(
         'SignUp failed in AuthService for: $redactedEmail',
@@ -171,7 +180,9 @@ class AuthService with WidgetsBindingObserver {
     }
 
     if (authenticated != (authState == AuthState.authenticated)) {
-      _authStateSubject.add(authenticated ? AuthState.authenticated : AuthState.unauthenticated);
+      _authStateSubject.add(
+        authenticated ? AuthState.authenticated : AuthState.unauthenticated,
+      );
     }
 
     return authenticated;
