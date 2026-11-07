@@ -20,7 +20,7 @@ Re-apply upstream updates by running the install in a scratch directory and diff
 - Commands `live`, `generate`, `pin`, `hooks`, `doctor`.
 
 **Replaced:**
-- Slop detector -> `reference/flutter-checklist.md` plus stock lints in `analysis_options.yaml`. A custom_lint rule set is tracked in gatuno-manga/app#41 (follow-up: custom_lint rules replacing the slop detector).
+- Slop detector -> `reference/flutter-checklist.md` plus the lints already enabled in `analysis_options.yaml` (no lint rules were added or changed). A custom_lint rule set is tracked in gatuno-manga/app#41 (follow-up: custom_lint rules replacing the slop detector).
 - `audit.native.md` and `adapt.native.md` merged into `audit.md` and `adapt.md`.
 
 **Adapted to Flutter (every remaining file):** CSS/Tailwind tokens -> `ThemeData`/`ColorScheme`/`TextTheme`/`ThemeExtension`; DOM/ARIA -> widget tree and `Semantics`; breakpoints -> `MediaQuery`/`LayoutBuilder`; web performance -> frame build/raster times, `const`, `RepaintBoundary`; accessibility -> 48dp targets, text scaling, TalkBack/VoiceOver; motion -> implicit/explicit animations and `Hero`; Impeccable's levels -> Atomic Design mapping in `SKILL.md`.

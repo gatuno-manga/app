@@ -25,10 +25,3 @@ linter:
     avoid_print: true
     require_trailing_commas: true
     sort_child_properties_last: true
-    # Flutter UI hygiene lints (already in flutter_lints; pinned so they stay on). See .agents/skills/impeccable/reference/flutter-checklist.md
-    prefer_const_constructors: true
-    prefer_const_constructors_in_immutables: true
-    prefer_const_literals_to_create_immutables: true
-    sized_box_for_whitespace: true
-    avoid_unnecessary_containers: true
-    use_key_in_widget_constructors: true

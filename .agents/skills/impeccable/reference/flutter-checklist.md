@@ -24,7 +24,7 @@ Replaces upstream's web-only slop detector (62 rules, CLI + hook). Run it by rea
 - Orientation or window-size changes untested (golden at compact and expanded widths).
 
 ## Performance
-- Missing `const` constructors **[lint: prefer_const_constructors, prefer_const_literals_to_create_immutables]**.
+- Missing `const` constructors (lints `prefer_const_constructors` / `prefer_const_literals_to_create_immutables` are NOT enabled in this repo's `analysis_options.yaml`; enabling them reports dozens of existing issues, so flag by grep only).
 - `ListView(children: [...])` for long or dynamic lists instead of `ListView.builder` / the shared scrollable list.
 - Network images without `cacheWidth`/`cacheHeight` or a placeholder (use `AppImage`, `AppSkeleton`).
 - `setState`/`notifyListeners` rebuilding a whole screen for a small change; heavy work inside `build`.

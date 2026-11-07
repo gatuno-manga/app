@@ -1,7 +1,7 @@
 # Impeccable dry run: books screen (critique + audit)
 
 Target: `lib/features/books/presentation/views/books_screen.dart` and the components it composes (`books_template.dart`, `books_app_bar.dart`, `books_content.dart`, `book_grid.dart`, `book_list.dart`, `book_card.dart`, `book_list_item.dart`, `book_cover.dart`, `books_*_action.dart`, `books_search_field.dart`, shared `pagination.dart`, `app_error_view.dart`, `app_clickable_action.dart`).
-Read only. `flutter analyze` was NOT run (explicitly excluded by the requester); `analysis_options.yaml` lints (prefer_const_*, cancel_subscriptions, avoid_print...) were read, not executed. No PRODUCT.md or DESIGN.md exists; none invented. No device/golden evidence: layout claims are from the widget tree only.
+Read only. `flutter analyze` was NOT run (explicitly excluded by the requester); `analysis_options.yaml` lints (cancel_subscriptions, avoid_print...) were read, not executed. No PRODUCT.md or DESIGN.md exists; none invented. No device/golden evidence: layout claims are from the widget tree only.
 
 ---
 
