@@ -33,6 +33,6 @@ coverage:
 fmt *files='.':
     dart format {{ files }}
 
-# Apply automated Dart fixes
-fix:
-    dart fix --apply
+# Apply automated Dart fixes (defaults to the whole project)
+fix *files='.':
+    dart fix --apply {{ files }}

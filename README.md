@@ -15,6 +15,8 @@ just setup             # install git hooks and run flutter pub get
 With [direnv](https://direnv.net), run `direnv allow` once and the shell loads
 automatically (see `.envrc`).
 
+Git hooks (lefthook) call `just` and Flutter, so commit from inside the shell.
+
 Common tasks (run `just` to list them all): `just gen`, `just l10n`,
 `just analyze`, `just test`, `just coverage`, `just fmt`, `just fix`.
 

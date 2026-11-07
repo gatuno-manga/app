@@ -51,6 +51,9 @@
               "36.0.0"
             ];
             # Flutter's doctor checks every license sdkmanager knows about.
+            # List = repo.json licenses in nixpkgs androidenv minus the default
+            # android-sdk-license; refresh it when `flutter doctor` reports
+            # unaccepted licenses.
             extraLicenses = [
               "android-googletv-license"
               "android-googlexr-license"
@@ -77,7 +80,6 @@
               androidSdk
               pkgs.just
               pkgs.lefthook
-              pkgs.git
               jaoppb-tools.packages.${system}.issues-check
               jaoppb-tools.packages.${system}.repo-sync
             ];

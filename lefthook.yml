@@ -1,18 +1,18 @@
 # Lefthook configuration (https://github.com/evilmartians/lefthook)
-# Hooks call `just` recipes; run them inside the dev shell (`nix develop`).
+# Hooks call `just` recipes, so commit from inside the dev shell (`nix develop`).
 
 pre-commit:
   parallel: false
   commands:
     fmt:
       priority: 1
-      glob: "lib/**/*.dart"
+      glob: "{lib,test}/**/*.dart"
       run: just fmt {staged_files}
       stage_fixed: true
     fix:
       priority: 2
-      glob: "lib/**/*.dart"
-      run: just fix
+      glob: "{lib,test}/**/*.dart"
+      run: just fix {staged_files}
       stage_fixed: true
     analyze:
       priority: 3
