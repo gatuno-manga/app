@@ -29,7 +29,7 @@ Replaces upstream's web-only slop detector (62 rules, CLI + hook). Run it by rea
 - Network images without `cacheWidth`/`cacheHeight` or a placeholder (use `AppImage`, `AppSkeleton`).
 - `setState`/`notifyListeners` rebuilding a whole screen for a small change; heavy work inside `build`.
 - Missing `RepaintBoundary` around expensive, frequently animating subtrees; `Opacity`/`ClipRRect` over big subtrees on every frame.
-- Unawaited controllers: `AnimationController`, streams, text controllers not disposed **[lint: cancel_subscriptions, close_sinks]**.
+- Undisposed `AnimationController`s and text controllers (grep for `dispose()`; no lint covers this). Uncancelled `StreamSubscription`s and unclosed sinks **[lint: cancel_subscriptions, close_sinks]**.
 
 ## States, copy and i18n
 - Missing loading, empty or error state (use `AppSkeleton`; `AppErrorView` needs `onGoBack`, so on a tab root build an inline error with a retry action); spinner where a skeleton fits.

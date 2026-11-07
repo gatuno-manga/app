@@ -22,7 +22,7 @@ Measure before and after. Optimizing without measurement spends effort on things
 
 ### Build Performance (UI thread)
 
-- **`const` everywhere possible**: `const` widgets are skipped on rebuild. Satisfy `prefer_const_constructors` and `prefer_const_literals_to_create_immutables`.
+- **`const` everywhere possible**: `const` widgets are skipped on rebuild. Add `const` wherever possible (the `prefer_const_*` lints are not enabled in this repo; flag by grep).
 - **Narrow rebuild scope**: split large `build` methods into small widgets (classes, not helper methods) so a change rebuilds only its subtree. Scope `Consumer`/`Selector`/`ListenableBuilder` to the smallest subtree that depends on the state. Avoid `setState` or `notifyListeners` at screen level for small changes.
 - **Keep `build` pure and cheap**: no sorting, filtering, parsing, or object construction on every build; precompute in the ViewModel or memoize.
 - **Heavy work off the UI thread**: `compute`/`Isolate.run` for payload parsing of large payloads, image processing, or crypto.
@@ -87,7 +87,7 @@ Measure before and after. Optimizing without measurement spends effort on things
 **Tools**:
 - Flutter DevTools (Performance, CPU profiler, Memory, Widget inspector with rebuild tracking)
 - `flutter run --profile` on a real device; the `PerformanceOverlay`
-- `flutter analyze` for perf-related lints (const, dispose, subscriptions)
+- `flutter analyze` for subscription and sink lints (`cancel_subscriptions`, `close_sinks`); check `const` and controller `dispose()` by grep
 - Integration tests with `traceAction` / frame timing summaries for regression checks
 - Crash and performance reporting already wired into the app, if any
 
