@@ -1,13 +1,19 @@
-# Configuração do Lefthook para Flutter
-# Documentação: https://github.com/evilmartians/lefthook
+# Lefthook configuration (https://github.com/evilmartians/lefthook)
+# Hooks call `just` recipes; run them inside the dev shell (`nix develop`).
 
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
-    flutter-format:
+    fmt:
+      priority: 1
       glob: "lib/**/*.dart"
-      run: flutter format {staged_files} && git add {staged_files}
-    flutter-fix:
-      run: dart fix --apply && git add .
-    flutter-analyze:
-      run: flutter analyze
+      run: just fmt {staged_files}
+      stage_fixed: true
+    fix:
+      priority: 2
+      glob: "lib/**/*.dart"
+      run: just fix
+      stage_fixed: true
+    analyze:
+      priority: 3
+      run: just analyze
