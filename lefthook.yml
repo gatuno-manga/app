@@ -17,3 +17,8 @@ pre-commit:
     analyze:
       priority: 3
       run: just analyze
+
+pre-push:
+  commands:
+    issues-check:
+      run: issues-check

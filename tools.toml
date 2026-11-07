@@ -1,0 +1,63 @@
+# Configuration for jaoppb/tools (repo-sync, issues-check).
+
+[github.repository]
+owner = "gatuno-manga"
+name = "app"
+
+[github.repository.settings]
+allow_merge_commit = true
+allow_squash_merge = false
+allow_rebase_merge = false
+delete_branch_on_merge = true
+merge_commit_title = "PR_TITLE"
+merge_commit_message = "PR_BODY"
+
+[github.labels]
+deprecated = [
+    "bug",
+    "documentation",
+    "duplicate",
+    "enhancement",
+    "good first issue",
+    "help wanted",
+    "invalid",
+    "question",
+    "wontfix",
+]
+items = [
+    { name = "type:feat", color = "1d76db", description = "New behaviour or capability" },
+    { name = "type:fix", color = "d73a4a", description = "Something is broken" },
+    { name = "type:docs", color = "0075ca", description = "Documentation, guides, specifications" },
+    { name = "type:chore", color = "8b949e", description = "Tooling, housekeeping, dependencies" },
+    { name = "type:refactor", color = "5319e7", description = "Restructure without changing behaviour" },
+    { name = "type:test", color = "bfd4f2", description = "Tests and test infrastructure" },
+    { name = "type:ci", color = "ededed", description = "CI/CD pipelines and workflows" },
+    { name = "area:app", color = "2ea44f", description = "General app code, cross-cutting or uncategorised" },
+    { name = "area:reader", color = "0e8a16", description = "Chapter readers (image, PDF, EPUB)" },
+    { name = "area:library", color = "0e8a16", description = "Book listing, collections, downloads" },
+    { name = "area:auth", color = "d93f0b", description = "Authentication, MFA, profile and security" },
+    { name = "area:sync", color = "1d76db", description = "Real-time and reading progress sync" },
+    { name = "area:ci", color = "ededed", description = "CI/CD, build and release tooling" },
+    { name = "area:docs", color = "0075ca", description = "Documentation and specifications" },
+]
+
+# Legacy labels with a canonical equivalent are relabelled; the other deprecated labels are just deleted.
+[github.labels.migrations]
+bug = "type:fix"
+enhancement = "type:feat"
+documentation = "type:docs"
+
+[github.milestones]
+items = [
+    { title = "v0.1.0", description = "Initial milestone", state = "open" },
+]
+
+[github.issues.rules]
+cycle = true
+labels = true
+membership = false
+milestone = false
+parent = false
+references = false
+release = false
+text = false
