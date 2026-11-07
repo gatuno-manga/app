@@ -8,7 +8,7 @@ Give advice without executing commands; the menu below is only for bare invocati
 
 Read this when the user invokes `/impeccable` with no argument. They are asking "what should I do?" Make the menu context-aware instead of static. There is no context CLI or signal scanner; inspect the repo directly.
 
-1. Check whether PRODUCT.md and DESIGN.md exist at the repo root. If PRODUCT.md is missing, lead with `/impeccable init` (one line on why) and still show the rest; do not silently jump into init.
+1. Check whether PRODUCT.md and DESIGN.md exist at the repo root. They are optional. If PRODUCT.md is missing, mention `init` as one opt-in option among the others (one line on why); never create either file unless the user picks that command.
 2. Look at `git status` and recent changes under `lib/` to find the surface the user is working on.
 3. Optionally run `flutter analyze` once for a quick signal.
 

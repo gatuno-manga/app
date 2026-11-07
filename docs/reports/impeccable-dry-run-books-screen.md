@@ -130,6 +130,8 @@ P3
 
 ## Skill feedback
 
+> Status: the 'Wrong or inconsistent' items below were fixed in the skill files after this run (disableAnimationsOf everywhere, operate.md title and pinned-font note, AppErrorView/AppIconButton/AppClickableAction caveats in the checklist, #41 link in NOTICE, analyzer fallback and headless-question allowance, unified severity). `docs/reports/` was created by this report.
+
 Wrong or inconsistent
 - `operate.md` and `craft-floor.md` say `MediaQuery.disableAnimations`; `audit.md` and `flutter-checklist.md` say `MediaQuery.disableAnimationsOf(context)`. Pick the `...Of` form everywhere.
 - `operate.md` title says "(and Read notes)" and describes Read screens, but SKILL.md "Not supported" drops the Read mode. Remove or reword.

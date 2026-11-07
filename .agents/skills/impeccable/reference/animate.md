@@ -75,7 +75,7 @@ Keep content visible in the default state. Avoid animating layout-driving proper
 
 Any nonessential loop must stop when the screen is not visible or the app is backgrounded.
 
-Every animation needs a reduced-motion path: when `MediaQuery.of(context).disableAnimations` is true, use `Duration.zero` or a gentle fade instead of spatial movement. Reduced motion means fewer and gentler animations, not disabling all motion; feedback that confirms an action should remain legible.
+Every animation needs a reduced-motion path: when `MediaQuery.disableAnimationsOf(context)` is true, use `Duration.zero` or a gentle fade instead of spatial movement. Reduced motion means fewer and gentler animations, not disabling all motion; feedback that confirms an action should remain legible.
 
 ## Verify
 

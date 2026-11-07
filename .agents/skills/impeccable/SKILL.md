@@ -13,7 +13,7 @@ Core principles:
 
 ## Setup
 
-1. Read `PRODUCT.md` and `DESIGN.md` at the repo root if they exist. Never invent missing context; if PRODUCT.md is absent and the task is a new surface, route through [reference/init.md](reference/init.md) first. A narrow refinement of existing code can proceed on the incumbent implementation.
+1. Read `PRODUCT.md` and `DESIGN.md` at the repo root if they exist. Never invent missing context; if PRODUCT.md is absent and the task is a new surface, offer [reference/init.md](reference/init.md) as an opt-in first step (never create PRODUCT.md or DESIGN.md unless the user chooses it). A narrow refinement of existing code can proceed on the incumbent implementation.
 2. Read the target code and the theme (`lib/core/theme`, `ThemeData`, `ColorScheme`, `TextTheme`, `ThemeExtension`s) and reuse `lib/shared/components/` before creating widgets.
 3. Load the request's playbook from the Commands table, or [reference/new-work.md](reference/new-work.md) for a new screen.
 4. Before any UI edit, read [reference/craft-floor.md](reference/craft-floor.md). After editing, run `dart format`, `flutter analyze` and the relevant tests.
@@ -74,3 +74,5 @@ Routing:
 ## Not supported (dropped from upstream)
 
 `live`, `generate`, `hooks`, `doctor`, `pin`, the `impeccable` CLI binary and its detector, image-generated comps and region maps, and the Persuade/Read/Experience modes. They need a browser, HTML or an external binary. Flutter replacement for the detector: [reference/flutter-checklist.md](reference/flutter-checklist.md) plus `flutter analyze`; a custom_lint rule set is tracked in Refs gatuno-manga/app#41.
+
+Invocation: commands are written `/impeccable <command> [target]` and in the table as `<command> [target]`; both mean the same thing. In Claude Code, say "run impeccable critique on books_screen.dart".

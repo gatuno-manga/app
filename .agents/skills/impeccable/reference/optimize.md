@@ -67,7 +67,7 @@ Measure before and after. Optimizing without measurement spends effort on things
 
 ### Network and Data
 
-- Paginate and request only needed fields; cache responses (HTTP caching headers, local cache) and avoid duplicate in-flight requests.
+- Paginate and request only needed fields; cache responses (response caching, local cache) and avoid duplicate in-flight requests.
 - Compress payloads; cancel requests when the screen is disposed.
 - Optimistic UI for fast-feeling writes, with rollback on failure.
 - Adapt to slow connections: skeletons (`AppSkeleton`), progressive loading, offline support where it matters.
