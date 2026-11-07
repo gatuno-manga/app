@@ -73,6 +73,6 @@ Routing:
 
 ## Not supported (dropped from upstream)
 
-`live`, `generate`, `hooks`, `doctor`, `pin`, the `impeccable` CLI binary and its detector, image-generated comps and region maps, and the Persuade/Read/Experience modes. They need a browser, HTML or an external binary. Flutter replacement for the detector: [reference/flutter-checklist.md](reference/flutter-checklist.md) plus `flutter analyze`; a custom_lint rule set is tracked in tracked in gatuno-manga/app#41.
+`live`, `generate`, `hooks`, `doctor`, `pin`, the `impeccable` CLI binary and its detector, image-generated comps and region maps, and the Persuade/Read/Experience modes. They need a browser, HTML or an external binary. Flutter replacement for the detector: [reference/flutter-checklist.md](reference/flutter-checklist.md) plus `flutter analyze`; a custom_lint rule set is tracked in gatuno-manga/app#41.
 
 Invocation: commands are written `/impeccable <command> [target]` and in the table as `<command> [target]`; both mean the same thing. In Claude Code, say "run impeccable critique on books_screen.dart".

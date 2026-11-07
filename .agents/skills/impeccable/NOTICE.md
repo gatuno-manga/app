@@ -8,7 +8,7 @@ These skills are derived from [Impeccable](https://github.com/pbakaus/impeccable
 
 ## Layout
 
-One real copy lives in `.agents/skills/impeccable/`. `.claude/skills/impeccable` and `.gemini/skills/impeccable` are symlinks to `.agents/skills/impeccable`.
+One real copy lives in `.agents/skills/impeccable/`. `.claude/skills/impeccable` and `.gemini/skills/impeccable` are symlinks to `.agents/skills/impeccable`. On Windows the symlinks need `git config core.symlinks true` and developer mode; otherwise use `.agents/skills/impeccable` directly.
 
 ## Changes from upstream
 
@@ -25,7 +25,7 @@ Re-apply upstream updates by running the install in a scratch directory and diff
 
 **Adapted to Flutter (every remaining file):** CSS/Tailwind tokens -> `ThemeData`/`ColorScheme`/`TextTheme`/`ThemeExtension`; DOM/ARIA -> widget tree and `Semantics`; breakpoints -> `MediaQuery`/`LayoutBuilder`; web performance -> frame build/raster times, `const`, `RepaintBoundary`; accessibility -> 48dp targets, text scaling, TalkBack/VoiceOver; motion -> implicit/explicit animations and `Hero`; Impeccable's levels -> Atomic Design mapping in `SKILL.md`.
 
-**Added:** `NOTICE.md`, `reference/flutter-checklist.md`.
+**Added:** `NOTICE.md`, `reference/flutter-checklist.md`, `LICENSE` (verbatim upstream Apache-2.0 text) and `LICENSE-MIT` (verbatim ehmo license text).
 
 ## Third-party notices (carried over from upstream)
 
@@ -35,6 +35,3 @@ Re-apply upstream updates by running the install in a scratch directory and diff
 - Original license: MIT (text in [LICENSE-MIT](LICENSE-MIT))
 - Author: ehmo
 
-## Symlinks
-
-`.claude/skills/impeccable` and `.gemini/skills/impeccable` are symlinks to `.agents/skills/impeccable`. On Windows they need `git config core.symlinks true` and developer mode; otherwise use `.agents/skills` directly.

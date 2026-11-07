@@ -138,7 +138,7 @@ Wrong or inconsistent
 - `operate.md` warns against display fonts in labels and recommends one family, but the app's default font is Inknut Antiqua (core/theme/theme.dart:199,295, a decorative serif) applied to everything. The skill should say this is pinned and not to be flagged.
 - `flutter-checklist.md` recommends `AppErrorView` for errors, but its constructor requires `onGoBack` (app_error_view.dart:9), so it does not fit a tab root; the checklist also does not flag `AppClickableAction` (used for pagination) having no minimum 48dp hit area.
 - `flutter-checklist.md` says "Prefer ... `AppIconButton` with `Semantics`" but `AppIconButton.tooltip` is optional, so following the advice does not guarantee a label.
-- "Refs #41" appears in SKILL.md, NOTICE.md and the checklist with no link or title; dangling.
+- "Refs #41" appeared with no link or title (resolved: now named in NOTICE.md).
 
 Web-leaning or low value for Flutter
 - Critique's "Design specificity", "Cognitive load: 4-item chunking", "Persona" and "emotional journey (peak-end)" sections are generic and hard to apply to a list/browse screen; the hero-metric, kicker and section-number bans in `craft-floor.md` rarely apply.
