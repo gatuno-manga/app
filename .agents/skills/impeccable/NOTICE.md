@@ -32,7 +32,7 @@ Re-apply upstream updates by running the install in a scratch directory and diff
 `reference/ios.md` and `reference/android.md` are derived (via upstream, then adapted to Flutter here) from ehmo's `platform-design-skills` (Apple Human Interface Guidelines and Material Design 3 rules).
 
 - Original work: https://github.com/ehmo/platform-design-skills
-- Original license: MIT
+- Original license: MIT (text in [LICENSE-MIT](LICENSE-MIT))
 - Author: ehmo
 
 ## Symlinks

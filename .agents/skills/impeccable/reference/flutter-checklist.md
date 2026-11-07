@@ -1,6 +1,6 @@
 # Flutter anti-pattern checklist
 
-Replaces upstream's web-only slop detector (62 rules, CLI + hook). Run it by reading and grepping `lib/` for the target, then run `flutter analyze`. Cite `file:line` for every finding. Rules enforced by the analyzer (`analysis_options.yaml`) are marked **[lint]**; the rest are judgment calls for `critique` and `audit`. A custom_lint rule set may replace this later (Refs gatuno-manga/app#41).
+Replaces upstream's web-only slop detector (62 rules, CLI + hook). Run it by reading and grepping `lib/` for the target, then run `flutter analyze`. Cite `file:line` for every finding. Rules enforced by the analyzer (`analysis_options.yaml`) are marked **[lint]**; the rest are judgment calls for `critique` and `audit`. A custom_lint rule set may replace this later (tracked in gatuno-manga/app#41).
 
 ## Theming and tokens
 - Hardcoded `Color(0x...)` / `Colors.xxx` in widgets instead of `Theme.of(context).colorScheme` (grep `Color(0x`, `Colors\.`).

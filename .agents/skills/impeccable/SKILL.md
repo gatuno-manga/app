@@ -26,7 +26,7 @@ Core principles:
 | Molecules | `lib/shared/components/molecules/` | `.../components/molecules/` |
 | Organisms | `lib/shared/components/organisms/` | `.../components/organisms/` |
 | Templates | n/a | `lib/features/<f>/presentation/components/templates/` |
-| Pages | n/a | `lib/features/<f>/presentation/views/*_screen.dart` |
+| Pages | n/a | `lib/features/<f>/presentation/views/` (`*_screen.dart`; legacy `*_page.dart`) |
 
 Reuse shared components first. State lives in ViewModels (`presentation/view_models`), never in widgets. All strings go through the l10n ARB files (EN and PT).
 
@@ -73,6 +73,6 @@ Routing:
 
 ## Not supported (dropped from upstream)
 
-`live`, `generate`, `hooks`, `doctor`, `pin`, the `impeccable` CLI binary and its detector, image-generated comps and region maps, and the Persuade/Read/Experience modes. They need a browser, HTML or an external binary. Flutter replacement for the detector: [reference/flutter-checklist.md](reference/flutter-checklist.md) plus `flutter analyze`; a custom_lint rule set is tracked in Refs gatuno-manga/app#41.
+`live`, `generate`, `hooks`, `doctor`, `pin`, the `impeccable` CLI binary and its detector, image-generated comps and region maps, and the Persuade/Read/Experience modes. They need a browser, HTML or an external binary. Flutter replacement for the detector: [reference/flutter-checklist.md](reference/flutter-checklist.md) plus `flutter analyze`; a custom_lint rule set is tracked in tracked in gatuno-manga/app#41.
 
 Invocation: commands are written `/impeccable <command> [target]` and in the table as `<command> [target]`; both mean the same thing. In Claude Code, say "run impeccable critique on books_screen.dart".
