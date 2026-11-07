@@ -1,4 +1,4 @@
-# Configuration for jaoppb/tools (repo-sync, issues-check). Pinned to v0.2.0.
+# Configuration for jaoppb/tools (repo-sync, issues-check).
 
 [github.repository]
 owner = "gatuno-manga"
@@ -41,7 +41,7 @@ items = [
     { name = "area:docs", color = "0075ca", description = "Documentation and specifications" },
 ]
 
-# Legacy label migrations mapping legacy names to canonical labels
+# Legacy labels with a canonical equivalent are relabelled; the other deprecated labels are just deleted.
 [github.labels.migrations]
 bug = "type:fix"
 enhancement = "type:feat"

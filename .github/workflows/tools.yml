@@ -12,9 +12,14 @@ permissions:
   contents: read
   issues: read
 
+concurrency:
+  group: tools-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: jaoppb/tools@v0.2.0
         with:
