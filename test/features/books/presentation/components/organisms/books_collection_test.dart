@@ -41,6 +41,8 @@ void main() {
     final delegate =
         grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
     expect(delegate.crossAxisCount, 4);
+    expect(delegate.crossAxisSpacing, 16);
+    expect(delegate.mainAxisSpacing, 20);
   });
 
   testWidgets('cover layout renders BookCoverCard', (tester) async {

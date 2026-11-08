@@ -18,8 +18,16 @@ class BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final titleStyle = theme.textTheme.labelMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+    // Always reserve two title lines so covers in one grid row stay level.
+    final lineHeight =
+        (titleStyle?.fontSize ?? 12) * (titleStyle?.height ?? 1.3);
+    final titleHeight = MediaQuery.textScalerOf(context).scale(lineHeight) * 2;
 
     return Card(
+      margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/books/${book.id}'),
@@ -43,11 +51,9 @@ class BookCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8),
-              child: BookTitle(
-                title: book.title.value,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+              child: SizedBox(
+                height: titleHeight,
+                child: BookTitle(title: book.title.value, style: titleStyle),
               ),
             ),
           ],

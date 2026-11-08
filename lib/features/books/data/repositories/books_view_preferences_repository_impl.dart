@@ -12,28 +12,38 @@ class BooksViewPreferencesRepositoryImpl
   static const String _navigationKey = 'books_view_navigation';
   static const String _logTag = 'BooksViewPreferencesRepository';
 
+  BooksViewPreferences _current = const BooksViewPreferences();
+
   @override
-  Future<BooksViewPreferences> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    const defaults = BooksViewPreferences();
-    final loaded = BooksViewPreferences(
-      layout:
-          _enumByName(BooksLayoutMode.values, prefs.getString(_layoutKey)) ??
-          defaults.layout,
-      columns: _columnsInRange(prefs.getInt(_columnsKey)) ?? defaults.columns,
-      navigation:
-          _enumByName(
-            BooksNavigationMode.values,
-            prefs.getString(_navigationKey),
-          ) ??
-          defaults.navigation,
-    );
-    AppLogger.d('Loaded view preferences: $loaded', _logTag);
-    return loaded;
+  BooksViewPreferences get current => _current;
+
+  @override
+  Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      const defaults = BooksViewPreferences();
+      _current = BooksViewPreferences(
+        layout:
+            _enumByName(BooksLayoutMode.values, prefs.getString(_layoutKey)) ??
+            defaults.layout,
+        columns: _columnsInRange(prefs.getInt(_columnsKey)) ?? defaults.columns,
+        navigation:
+            _enumByName(
+              BooksNavigationMode.values,
+              prefs.getString(_navigationKey),
+            ) ??
+            defaults.navigation,
+      );
+      AppLogger.d('Loaded view preferences: $_current', _logTag);
+    } catch (e, stackTrace) {
+      // Unreadable storage must not block startup; defaults stay in place.
+      AppLogger.e('Error loading view preferences', e, stackTrace, _logTag);
+    }
   }
 
   @override
   Future<void> save(BooksViewPreferences preferences) async {
+    _current = preferences;
     final prefs = await SharedPreferences.getInstance();
     await Future.wait([
       prefs.setString(_layoutKey, preferences.layout.name),

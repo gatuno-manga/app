@@ -40,8 +40,8 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockPrefsRepository = MockViewPreferencesRepository();
     when(
-      () => mockPrefsRepository.load(),
-    ).thenAnswer((_) async => const BooksViewPreferences());
+      () => mockPrefsRepository.current,
+    ).thenReturn(const BooksViewPreferences());
     when(() => mockPrefsRepository.save(any())).thenAnswer((_) async {});
     viewModel = BooksViewModel(
       repository: mockRepository,
@@ -165,7 +165,7 @@ void main() {
           return calls == 1 ? first.future : Future.value(bookList);
         });
 
-        final inFlight = viewModel.fetchBooks(refresh: true);
+        final inFlight = viewModel.fetchBooks();
         viewModel.updateFilters(publication: 2020);
         viewModel.updateFilters(publication: 2021);
         first.complete(bookList);
@@ -240,38 +240,21 @@ void main() {
       expect(viewModel.preferences.layout, BooksLayoutMode.grid);
     });
 
-    test('stored preferences are applied after construction', () async {
+    test('seeds preferences from the repository on construction', () {
       const stored = BooksViewPreferences(
         layout: BooksLayoutMode.list,
         columns: 3,
         navigation: BooksNavigationMode.pages,
       );
-      when(() => mockPrefsRepository.load()).thenAnswer((_) async => stored);
+      when(() => mockPrefsRepository.current).thenReturn(stored);
 
       viewModel = BooksViewModel(
         repository: mockRepository,
         settingsService: mockSettingsService,
         viewPreferencesRepository: mockPrefsRepository,
       );
-      await flush();
 
       expect(viewModel.preferences, stored);
-    });
-
-    test('a change made before the load finishes wins', () async {
-      final load = Completer<BooksViewPreferences>();
-      when(() => mockPrefsRepository.load()).thenAnswer((_) => load.future);
-      viewModel = BooksViewModel(
-        repository: mockRepository,
-        settingsService: mockSettingsService,
-        viewPreferencesRepository: mockPrefsRepository,
-      );
-
-      viewModel.setLayoutMode(BooksLayoutMode.cover);
-      load.complete(const BooksViewPreferences(layout: BooksLayoutMode.list));
-      await flush();
-
-      expect(viewModel.preferences.layout, BooksLayoutMode.cover);
     });
 
     test('setLayoutMode saves and does not fetch', () async {
@@ -428,37 +411,6 @@ void main() {
       when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
     });
 
-    test(
-      'stored preferences merge with a change made during the load',
-      () async {
-        final load = Completer<BooksViewPreferences>();
-        when(() => mockPrefsRepository.load()).thenAnswer((_) => load.future);
-        viewModel = BooksViewModel(
-          repository: mockRepository,
-          settingsService: mockSettingsService,
-          viewPreferencesRepository: mockPrefsRepository,
-        );
-
-        viewModel.setLayoutMode(BooksLayoutMode.cover);
-        load.complete(
-          const BooksViewPreferences(
-            layout: BooksLayoutMode.list,
-            columns: 4,
-            navigation: BooksNavigationMode.pages,
-          ),
-        );
-        await flush();
-
-        const expected = BooksViewPreferences(
-          layout: BooksLayoutMode.cover,
-          columns: 4,
-          navigation: BooksNavigationMode.pages,
-        );
-        expect(viewModel.preferences, expected);
-        verify(() => mockPrefsRepository.save(expected)).called(1);
-      },
-    );
-
     test('setNavigationMode emits one state with the reset list', () async {
       when(
         () => mockRepository.getBooks(any()),
@@ -477,7 +429,7 @@ void main() {
       expect(first.options.page.value, 1);
     });
 
-    test('a refresh in infinite mode restarts from page 1', () async {
+    test('a plain fetch in infinite mode restarts from page 1', () async {
       final seen = <int>[];
       when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
         final o = inv.positionalArguments.first as BookPageOptions;
@@ -487,14 +439,14 @@ void main() {
       await viewModel.fetchBooks();
       await viewModel.loadMore();
 
-      await viewModel.fetchBooks(refresh: true, resetPage: false);
+      await viewModel.fetchBooks();
 
       expect(seen, [1, 2, 1]);
       expect(viewModel.bookList!.data.length, 1);
       expect(viewModel.options.page.value, 1);
     });
 
-    test('a refresh in pages mode keeps the current page', () async {
+    test('a plain fetch in pages mode keeps the current page', () async {
       final seen = <int>[];
       when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
         final o = inv.positionalArguments.first as BookPageOptions;
@@ -506,13 +458,13 @@ void main() {
       viewModel.setPage(2);
       await flush();
 
-      await viewModel.fetchBooks(refresh: true, resetPage: false);
+      await viewModel.fetchBooks();
 
       expect(seen.last, 2);
     });
 
     test(
-      'a refresh queued during an append still restarts from page 1',
+      'a fetch queued during an append still restarts from page 1',
       () async {
         final second = Completer<BookList>();
         final seen = <int>[];
@@ -525,7 +477,7 @@ void main() {
         await viewModel.fetchBooks();
 
         final append = viewModel.loadMore();
-        final refresh = viewModel.fetchBooks(refresh: true, resetPage: false);
+        final refresh = viewModel.fetchBooks();
         second.complete(page(number: 2, totalPages: 3, ids: ['c']));
         await append;
         await refresh;
@@ -556,7 +508,6 @@ void main() {
         await append;
         await flush();
 
-        expect(seen.every((p) => p >= 1), isTrue);
         expect(viewModel.options.page.value, 1);
       },
     );

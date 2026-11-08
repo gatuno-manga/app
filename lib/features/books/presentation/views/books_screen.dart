@@ -27,7 +27,7 @@ class _BooksPageState extends State<BooksPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_viewModel.bookList == null) {
-        _viewModel.fetchBooks(refresh: true);
+        _viewModel.fetchBooks();
       }
     });
   }

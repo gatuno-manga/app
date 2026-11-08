@@ -14,6 +14,8 @@ Future<T?> showAppModalBottomSheet<T>({
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     clipBehavior: Clip.antiAliasWithSaveLayer,
-    builder: builder,
+    // useSafeArea only covers the top; keep the last control clear of the
+    // home indicator / gesture bar.
+    builder: (context) => SafeArea(top: false, child: builder(context)),
   );
 }

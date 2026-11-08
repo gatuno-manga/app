@@ -55,7 +55,7 @@ class BooksContent extends StatelessWidget {
 
     if (!_hasBooks) {
       return RefreshIndicator(
-        onRefresh: _refresh,
+        onRefresh: viewModel.fetchBooks,
         child: ListView(
           children: [
             SizedBox(
@@ -71,7 +71,7 @@ class BooksContent extends StatelessWidget {
       enabled: _infinite && viewModel.hasMore && !viewModel.isLoading,
       onLoadMore: viewModel.loadMore,
       child: RefreshIndicator(
-        onRefresh: _refresh,
+        onRefresh: viewModel.fetchBooks,
         child: BooksCollection(
           books: viewModel.bookList!.data,
           preferences: viewModel.preferences,
@@ -80,9 +80,4 @@ class BooksContent extends StatelessWidget {
       ),
     );
   }
-
-  // The view model restarts from page 1 in infinite mode; pages mode keeps
-  // the page the user is on.
-  Future<void> _refresh() =>
-      viewModel.fetchBooks(refresh: true, resetPage: false);
 }

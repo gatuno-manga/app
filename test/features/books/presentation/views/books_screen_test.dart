@@ -52,10 +52,7 @@ void main() {
     when(() => mockViewModel.options).thenReturn(options);
     when(() => mockViewModel.bookList).thenReturn(null);
     when(
-      () => mockViewModel.fetchBooks(
-        refresh: any(named: 'refresh'),
-        resetPage: any(named: 'resetPage'),
-      ),
+      () => mockViewModel.fetchBooks(append: any(named: 'append')),
     ).thenAnswer((_) async {});
   });
 
@@ -251,9 +248,7 @@ void main() {
       verify(() => mockViewModel.loadMore()).called(1);
     });
 
-    testWidgets('pull-to-refresh refreshes without replaying the page', (
-      tester,
-    ) async {
+    testWidgets('pull-to-refresh fetches again', (tester) async {
       stubState(BooksState.initial().copyWith(bookList: () => listOf(1)));
 
       await tester.pumpApp(createWidgetUnderTest());
@@ -264,9 +259,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      verify(
-        () => mockViewModel.fetchBooks(refresh: true, resetPage: false),
-      ).called(1);
+      verify(() => mockViewModel.fetchBooks()).called(1);
     });
 
     testWidgets('tapping a layout segment calls setLayoutMode', (tester) async {

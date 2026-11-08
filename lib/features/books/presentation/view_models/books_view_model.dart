@@ -74,9 +74,6 @@ class BooksState extends Equatable {
   ];
 }
 
-typedef _PreferencesChange =
-    BooksViewPreferences Function(BooksViewPreferences);
-
 class BooksViewModel extends BaseStreamViewModel<BooksState> {
   final BooksRepository _repository;
   final SettingsService _settingsService;
@@ -90,9 +87,11 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   }) : _repository = repository,
        _settingsService = settingsService,
        _viewPreferencesRepository = viewPreferencesRepository,
-       super(BooksState.initial()) {
-    _loadPreferences();
-  }
+       super(
+         BooksState.initial().copyWith(
+           preferences: viewPreferencesRepository.current,
+         ),
+       );
 
   BookList? get bookList => state.bookList;
   bool get isLoading => state.isLoading;
@@ -105,32 +104,26 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   bool get _infinite =>
       state.preferences.navigation == BooksNavigationMode.infinite;
 
-  ({bool refresh, bool resetPage})? _queuedFetch;
+  bool _fetchQueued = false;
 
   /// Fetches the list. A call made while a fetch is in flight is not dropped:
-  /// one follow-up fetch runs afterwards with that call's `refresh`/`resetPage`
-  /// (the latest wins) and the options then in state. In infinite navigation
-  /// the list holds pages 1..N, so any refresh restarts from page 1 whatever
-  /// [resetPage] says. With [append] the result is added after the current
-  /// books and, on failure, the page is rolled back so the next attempt
-  /// retries it.
-  Future<void> fetchBooks({
-    bool refresh = false,
-    bool resetPage = true,
-    bool append = false,
-  }) async {
+  /// one follow-up fetch runs afterwards with the options then in state. In
+  /// infinite navigation the list holds pages 1..N, so a plain fetch restarts
+  /// from page 1; with [append] the result is added after the current books
+  /// and, on failure, the page is rolled back so the next attempt retries it.
+  Future<void> fetchBooks({bool append = false}) async {
     if (state.isLoading) {
-      _queuedFetch = (refresh: refresh, resetPage: resetPage);
+      _fetchQueued = true;
       return;
     }
 
     AppLogger.i(
-      'Fetching books: refresh=$refresh, resetPage=$resetPage, append=$append, page=${state.options.page}',
+      'Fetching books: append=$append, page=${state.options.page}',
       _logTag,
     );
 
     var newOptions = state.options;
-    if (refresh && (resetPage || _infinite)) {
+    if (!append && _infinite) {
       newOptions = newOptions.copyWith(page: const PositiveInt(1));
     }
     final requestedPage = newOptions.page;
@@ -197,10 +190,9 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       );
     }
 
-    final queued = _queuedFetch;
-    if (queued != null) {
-      _queuedFetch = null;
-      await fetchBooks(refresh: queued.refresh, resetPage: queued.resetPage);
+    if (_fetchQueued) {
+      _fetchQueued = false;
+      await fetchBooks();
     }
   }
 
@@ -233,25 +225,12 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     emit(
       state.copyWith(options: state.options.copyWith(page: PositiveInt(next))),
     );
-    await fetchBooks(refresh: false, resetPage: false, append: true);
+    await fetchBooks(append: true);
   }
 
-  /// Changes made before the stored preferences arrive; replayed on top of
-  /// them so neither the user's taps nor the untouched stored fields are lost.
-  List<_PreferencesChange>? _pendingChanges = [];
-
-  Future<void> _loadPreferences() async {
-    try {
-      final loaded = await _viewPreferencesRepository.load();
-      final pending = _pendingChanges ?? const <_PreferencesChange>[];
-      _pendingChanges = null;
-      final merged = pending.fold(loaded, (prefs, change) => change(prefs));
-      emit(state.copyWith(preferences: merged));
-      if (pending.isNotEmpty) _save(merged);
-    } catch (e, stackTrace) {
-      _pendingChanges = null;
-      AppLogger.e('Error loading view preferences', e, stackTrace, _logTag);
-    }
+  void _updatePreferences(BooksViewPreferences preferences) {
+    emit(state.copyWith(preferences: preferences));
+    _save(preferences);
   }
 
   void _save(BooksViewPreferences preferences) {
@@ -263,21 +242,9 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     });
   }
 
-  /// Applies [change] to the preferences, persists them and emits once,
-  /// with [extra] applied to the same state.
-  void _updatePreferences(
-    _PreferencesChange change, {
-    BooksState Function(BooksState)? extra,
-  }) {
-    _pendingChanges?.add(change);
-    final updated = state.copyWith(preferences: change(state.preferences));
-    emit(extra == null ? updated : extra(updated));
-    _save(updated.preferences);
-  }
-
   void setLayoutMode(BooksLayoutMode mode) {
     AppLogger.i('Setting layout mode to: $mode', _logTag);
-    _updatePreferences((p) => p.copyWith(layout: mode));
+    _updatePreferences(state.preferences.copyWith(layout: mode));
   }
 
   void setColumns(int columns) {
@@ -286,21 +253,23 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       BooksViewPreferences.maxColumns,
     );
     AppLogger.i('Setting columns to: $clamped', _logTag);
-    _updatePreferences((p) => p.copyWith(columns: clamped));
+    _updatePreferences(state.preferences.copyWith(columns: clamped));
   }
 
   /// Switching mode drops the loaded list and starts again from page 1.
   void setNavigationMode(BooksNavigationMode mode) {
     if (mode == state.preferences.navigation) return;
     AppLogger.i('Setting navigation mode to: $mode', _logTag);
-    _updatePreferences(
-      (p) => p.copyWith(navigation: mode),
-      extra: (s) => s.copyWith(
+    final preferences = state.preferences.copyWith(navigation: mode);
+    emit(
+      state.copyWith(
+        preferences: preferences,
         bookList: () => null,
-        options: s.options.copyWith(page: const PositiveInt(1)),
+        options: state.options.copyWith(page: const PositiveInt(1)),
       ),
     );
-    fetchBooks(refresh: true);
+    _save(preferences);
+    fetchBooks();
   }
 
   void setSearch(String? search) {
@@ -317,7 +286,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       ),
     );
-    fetchBooks(refresh: true);
+    fetchBooks();
   }
 
   void clearSearch() {
@@ -330,7 +299,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       ),
     );
-    fetchBooks(refresh: true);
+    fetchBooks();
   }
 
   void setSort(String orderBy, SortOrder order) {
@@ -344,7 +313,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       ),
     );
-    fetchBooks(refresh: true);
+    fetchBooks();
   }
 
   void updateFilters({
@@ -379,13 +348,13 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       ),
     );
-    fetchBooks(refresh: true);
+    fetchBooks();
   }
 
   void clearFilters() {
     AppLogger.i('Clearing filters', _logTag);
     emit(state.copyWith(options: state.options.withoutFilters()));
-    fetchBooks(refresh: true);
+    fetchBooks();
   }
 
   Future<List<FilterOption>>? _tagOptions;

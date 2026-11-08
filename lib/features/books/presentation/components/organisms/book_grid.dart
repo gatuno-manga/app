@@ -7,7 +7,6 @@ class BookGrid extends StatelessWidget {
   final double childAspectRatio;
   final Widget Function(Book book) itemBuilder;
   final Widget? footer;
-  final ScrollController? scrollController;
 
   const BookGrid({
     super.key,
@@ -16,13 +15,11 @@ class BookGrid extends StatelessWidget {
     required this.childAspectRatio,
     required this.itemBuilder,
     this.footer,
-    this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      controller: scrollController,
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
@@ -32,8 +29,9 @@ class BookGrid extends StatelessWidget {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
               childAspectRatio: childAspectRatio,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
+              // Figma gutters: 16 between columns, 20 between rows.
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 20,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => itemBuilder(books[index]),

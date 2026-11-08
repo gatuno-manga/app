@@ -48,6 +48,9 @@ void main() {
     expect(button.onSelectionChanged, isNull);
     final label = tester.widget<Text>(find.text('Count'));
     final context = tester.element(find.text('Count'));
-    expect(label.style?.color, Theme.of(context).disabledColor);
+    expect(
+      label.style?.color,
+      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+    );
   });
 }

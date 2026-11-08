@@ -101,6 +101,40 @@ void main() {
     expect(cardWidget.clipBehavior, Clip.antiAlias);
   });
 
+  testWidgets('BookCard reserves two title lines so covers line up', (
+    tester,
+  ) async {
+    final short = Book(id: const BookId('s'), title: const vo.BookTitle('A'));
+    final long = Book(
+      id: const BookId('l'),
+      title: const vo.BookTitle(
+        'A very long title that certainly wraps onto a second line here',
+      ),
+    );
+    await tester.pumpApp(
+      Row(
+        children: [
+          SizedBox(width: 171, height: 295, child: BookCard(book: short)),
+          SizedBox(width: 171, height: 295, child: BookCard(book: long)),
+        ],
+      ),
+    );
+
+    final covers = find.byType(BookCover);
+    expect(
+      tester.getSize(covers.at(0)).height,
+      tester.getSize(covers.at(1)).height,
+    );
+  });
+
+  testWidgets('BookCard has no outer margin', (tester) async {
+    await tester.pumpApp(
+      SizedBox(width: 171, height: 295, child: BookCard(book: testBook)),
+    );
+
+    expect(tester.widget<Card>(find.byType(Card)).margin, EdgeInsets.zero);
+  });
+
   testWidgets('BookCard shows the book type badge', (tester) async {
     await tester.pumpApp(BookCard(book: testBook));
 

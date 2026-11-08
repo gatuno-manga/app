@@ -28,7 +28,10 @@ class AppLabeledSegmentedButton<T> extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            color: enabled ? null : theme.disabledColor,
+            // Same 38% onSurface the disabled segments use.
+            color: enabled
+                ? null
+                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
           ),
         ),
         SegmentedButton<T>(

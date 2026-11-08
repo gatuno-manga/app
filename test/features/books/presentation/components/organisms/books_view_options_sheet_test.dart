@@ -102,7 +102,10 @@ void main() {
 
     final label = tester.widget<Text>(find.text('Columns'));
     final context = tester.element(find.text('Columns'));
-    expect(label.style?.color, Theme.of(context).disabledColor);
+    expect(
+      label.style?.color,
+      Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+    );
   });
 
   testWidgets('reflects a newer state from the stream', (tester) async {

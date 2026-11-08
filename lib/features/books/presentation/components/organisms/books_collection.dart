@@ -12,14 +12,12 @@ class BooksCollection extends StatelessWidget {
   final List<Book> books;
   final BooksViewPreferences preferences;
   final Widget? footer;
-  final ScrollController? scrollController;
 
   const BooksCollection({
     super.key,
     required this.books,
     required this.preferences,
     this.footer,
-    this.scrollController,
   });
 
   @override
@@ -31,7 +29,6 @@ class BooksCollection extends StatelessWidget {
         childAspectRatio: BookCard.aspectRatio,
         itemBuilder: (book) => BookCard(book: book),
         footer: footer,
-        scrollController: scrollController,
       ),
       BooksLayoutMode.cover => BookGrid(
         books: books,
@@ -39,13 +36,8 @@ class BooksCollection extends StatelessWidget {
         childAspectRatio: BookCoverCard.aspectRatio,
         itemBuilder: (book) => BookCoverCard(book: book),
         footer: footer,
-        scrollController: scrollController,
       ),
-      BooksLayoutMode.list => BookListView(
-        books: books,
-        footer: footer,
-        scrollController: scrollController,
-      ),
+      BooksLayoutMode.list => BookListView(books: books, footer: footer),
     };
   }
 }

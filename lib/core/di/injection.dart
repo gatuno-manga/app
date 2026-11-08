@@ -11,6 +11,7 @@ import '../../features/authentication/authentication_injection.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
+import '../../features/books/domain/repositories/books_view_preferences_repository.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
 import '../../features/sync/sync_injection.dart';
@@ -48,13 +49,14 @@ Future<void> initDI() async {
 
   // Features
   initAuthenticationInjection(sl);
-  sl.registerLazySingleton<AppMqttService>(
-    () => AppMqttService(sl(), sl()),
-  );
+  sl.registerLazySingleton<AppMqttService>(() => AppMqttService(sl(), sl()));
   initUsersInjection(sl);
   initHomeInjection(sl);
   initBooksInjection(sl);
-  initSyncDI(sl); // Must be before reading since reading depends on sync coordinator
+  await sl<BooksViewPreferencesRepository>().init();
+  initSyncDI(
+    sl,
+  ); // Must be before reading since reading depends on sync coordinator
   initReadingDI(sl);
   initBookRequestsInjection(sl);
 
@@ -65,4 +67,3 @@ Future<void> initDI() async {
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
 }
-

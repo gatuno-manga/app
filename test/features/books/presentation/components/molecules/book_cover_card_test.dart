@@ -103,6 +103,14 @@ void main() {
     expect(text.style?.color, Colors.white);
   });
 
+  testWidgets('has no outer margin', (tester) async {
+    await tester.pumpApp(
+      SizedBox(width: 200, height: 270, child: BookCoverCard(book: testBook)),
+    );
+
+    expect(tester.widget<Card>(find.byType(Card)).margin, EdgeInsets.zero);
+  });
+
   testWidgets('shows the book type badge', (tester) async {
     await tester.pumpApp(
       SizedBox(width: 200, height: 270, child: BookCoverCard(book: testBook)),

@@ -14,13 +14,18 @@ void main() {
   });
 
   group('BooksViewPreferencesRepositoryImpl', () {
-    test('load returns defaults when nothing is stored', () async {
-      final prefs = await repository.load();
+    test(
+      'current is the defaults before init and when nothing is stored',
+      () async {
+        expect(repository.current, const BooksViewPreferences());
 
-      expect(prefs, const BooksViewPreferences());
-    });
+        await repository.init();
 
-    test('save then load round-trips', () async {
+        expect(repository.current, const BooksViewPreferences());
+      },
+    );
+
+    test('save updates current and survives a new instance', () async {
       const saved = BooksViewPreferences(
         layout: BooksLayoutMode.cover,
         columns: 3,
@@ -28,34 +33,36 @@ void main() {
       );
 
       await repository.save(saved);
-      final loaded = await repository.load();
+      expect(repository.current, saved);
 
-      expect(loaded, saved);
+      final reopened = BooksViewPreferencesRepositoryImpl();
+      await reopened.init();
+      expect(reopened.current, saved);
     });
 
-    test('load falls back to defaults for invalid stored values', () async {
+    test('init falls back to defaults for invalid stored values', () async {
       SharedPreferences.setMockInitialValues({
         'books_view_layout': 'carousel',
         'books_view_columns': 9,
         'books_view_navigation': 'teleport',
       });
 
-      final prefs = await repository.load();
+      await repository.init();
 
-      expect(prefs, const BooksViewPreferences());
+      expect(repository.current, const BooksViewPreferences());
     });
 
-    test('load keeps valid fields when only one is invalid', () async {
+    test('init keeps valid fields when only one is invalid', () async {
       SharedPreferences.setMockInitialValues({
         'books_view_layout': 'list',
         'books_view_columns': 0,
       });
 
-      final prefs = await repository.load();
+      await repository.init();
 
-      expect(prefs.layout, BooksLayoutMode.list);
-      expect(prefs.columns, 2);
-      expect(prefs.navigation, BooksNavigationMode.infinite);
+      expect(repository.current.layout, BooksLayoutMode.list);
+      expect(repository.current.columns, 2);
+      expect(repository.current.navigation, BooksNavigationMode.infinite);
     });
   });
 }
