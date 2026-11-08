@@ -18,7 +18,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Ícone/bookmark` → empty-state icon
 
 ## Code
-No code exists for `/library`. The closest code surface is `/books` (`books_router.dart`), which lists all books, not the user's saved ones.
+No code exists for `/library`. The closest code surface is `/books` (`lib/features/books/books_router.dart`), which lists all books, not the user's saved ones.
 
 ## Tokens used
 - `color/app-background`

@@ -43,7 +43,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
-- Not audited. Section labels use `Interface/Rótulo` in `color/text-secondary`; Measured in Figma against `color/app-background` (Dark): secondary text about 4.9:1 and `color/danger` about 4.9:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
+- Measured in Figma against `color/app-background` (Dark): secondary text about 4.9:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
+- `Leitor/Item de ajuste` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 
 ## Gaps (Figma vs code)
 - Figma route /user differs from code `/settings`.
