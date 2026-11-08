@@ -19,6 +19,8 @@ import '../../features/settings/data/data_sources/settings_local_data_source.dar
 import '../../features/settings/domain/use_cases/settings_service.dart';
 import '../../features/certificates/certificates_injection.dart';
 import '../../features/certificates/domain/use_cases/certificates_service.dart';
+import '../../features/app_lock/app_lock_injection.dart';
+import '../../features/app_lock/domain/use_cases/app_lock_service.dart';
 import '../image/image_loading_strategy.dart';
 import '../image/dio_image_loading_strategy.dart';
 import '../network/app_mqtt_service.dart';
@@ -46,6 +48,9 @@ Future<void> initDI() async {
 
   // Initialize settings (including base URL)
   await sl<SettingsService>().init();
+
+  initAppLockInjection(sl);
+  await sl<AppLockService>().init();
 
   // Features
   initAuthenticationInjection(sl);

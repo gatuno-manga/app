@@ -1465,6 +1465,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save your backup codes before leaving this screen.'**
   String get mfaSaveCodesFirst;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLockTitle;
+
+  /// No description provided for @settingsAppLockDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Require your fingerprint or device PIN to open Gatuno'**
+  String get settingsAppLockDesc;
+
+  /// No description provided for @appLockSwitchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Gatuno'**
+  String get appLockSwitchTitle;
+
+  /// No description provided for @appLockSwitchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for your fingerprint, face or device PIN when you open the app'**
+  String get appLockSwitchDesc;
+
+  /// No description provided for @appLockUnsupportedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no screen lock, so Gatuno cannot be locked.'**
+  String get appLockUnsupportedDesc;
+
+  /// No description provided for @appLockGraceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock after leaving the app'**
+  String get appLockGraceTitle;
+
+  /// No description provided for @appLockGraceImmediately.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get appLockGraceImmediately;
+
+  /// No description provided for @appLockGraceThirtySeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'After 30 seconds'**
+  String get appLockGraceThirtySeconds;
+
+  /// No description provided for @appLockGraceOneMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 minute'**
+  String get appLockGraceOneMinute;
+
+  /// No description provided for @appLockGraceFiveMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'After 5 minutes'**
+  String get appLockGraceFiveMinutes;
+
+  /// No description provided for @appLockGraceFifteenMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'After 15 minutes'**
+  String get appLockGraceFifteenMinutes;
+
+  /// No description provided for @appLockFallbackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow device PIN, pattern or passcode'**
+  String get appLockFallbackTitle;
+
+  /// No description provided for @appLockFallbackOnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Used when your fingerprint or face is unavailable'**
+  String get appLockFallbackOnDesc;
+
+  /// No description provided for @appLockFallbackOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'If biometrics get locked out, Gatuno stays locked until the device allows them again'**
+  String get appLockFallbackOffDesc;
+
+  /// No description provided for @appLockPromptReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Gatuno'**
+  String get appLockPromptReason;
+
+  /// No description provided for @appLockLockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gatuno is locked'**
+  String get appLockLockedTitle;
+
+  /// No description provided for @appLockLockedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint, face or device PIN to continue'**
+  String get appLockLockedDesc;
+
+  /// No description provided for @appLockUnlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlockButton;
+
+  /// No description provided for @appLockRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get appLockRetryButton;
+
+  /// No description provided for @appLockErrorCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock cancelled'**
+  String get appLockErrorCancelled;
+
+  /// No description provided for @appLockErrorLockedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Biometrics are locked for now.'**
+  String get appLockErrorLockedOut;
+
+  /// No description provided for @appLockErrorNoCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'No screen lock is set on this device. Set one in the system settings.'**
+  String get appLockErrorNoCredentials;
+
+  /// No description provided for @appLockErrorUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Device authentication is not available right now'**
+  String get appLockErrorUnavailable;
+
+  /// No description provided for @appLockErrorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not verify it\'s you. Try again.'**
+  String get appLockErrorFailed;
 }
 
 class _AppLocalizationsDelegate

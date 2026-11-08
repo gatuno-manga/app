@@ -6,6 +6,8 @@
 	<string>Choose a profile photo or banner image.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo to use as your profile photo or banner image.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Unlock Gatuno when the app lock is on.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

@@ -10,6 +10,7 @@ import '../users/presentation/views/me_screen.dart';
 import '../users/presentation/view_models/me_view_model.dart';
 import '../certificates/certificates_router.dart';
 import 'presentation/views/mfa_settings_screen.dart';
+import '../app_lock/presentation/views/app_lock_settings_screen.dart';
 import '../../../core/di/injection.dart';
 
 final GlobalKey<NavigatorState> settingsNavigatorKey =
@@ -30,6 +31,10 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
       ),
       routes: [
         ...certificatesRoutes,
+        GoRoute(
+          path: 'app-lock',
+          builder: (context, state) => const AppLockSettingsPage(),
+        ),
         GoRoute(
           path: 'mfa',
           redirect: (context, state) =>

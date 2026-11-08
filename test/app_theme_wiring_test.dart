@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:gatuno/core/theme/theme.dart';
+import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
 import 'package:gatuno/main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 
+import 'features/app_lock/helpers/app_lock_mocks.dart';
 import 'helpers/test_injection.dart';
 
 void main() {
@@ -20,13 +22,19 @@ void main() {
     when(() => service.settingsStream).thenAnswer((_) => controller.stream);
     when(() => service.themeChoice).thenReturn(AppThemeChoice.system);
 
+    final fake = FakeAppLockService(const AppLockState(isInitialized: true));
+    addTearDown(fake.close);
+
     final router = GoRouter(
       routes: [GoRoute(path: '/', builder: (_, _) => const SizedBox.shrink())],
     );
 
     await tester.pumpWidget(
-      Provider<SettingsService>.value(
-        value: service,
+      MultiProvider(
+        providers: [
+          Provider<SettingsService>.value(value: service),
+          Provider<AppLockService>.value(value: fake.mock),
+        ],
         child: App(router: router),
       ),
     );

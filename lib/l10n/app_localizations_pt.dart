@@ -747,4 +747,87 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get mfaSaveCodesFirst =>
       'Guarde seus códigos de backup antes de sair desta tela.';
+
+  @override
+  String get appLockTitle => 'Bloqueio do app';
+
+  @override
+  String get settingsAppLockDesc =>
+      'Exigir sua digital ou o PIN do aparelho para abrir o Gatuno';
+
+  @override
+  String get appLockSwitchTitle => 'Bloquear o Gatuno';
+
+  @override
+  String get appLockSwitchDesc =>
+      'Pedir sua digital, rosto ou PIN do aparelho ao abrir o app';
+
+  @override
+  String get appLockUnsupportedDesc =>
+      'Este aparelho não tem bloqueio de tela, então o Gatuno não pode ser bloqueado.';
+
+  @override
+  String get appLockGraceTitle => 'Bloquear depois de sair do app';
+
+  @override
+  String get appLockGraceImmediately => 'Imediatamente';
+
+  @override
+  String get appLockGraceThirtySeconds => 'Após 30 segundos';
+
+  @override
+  String get appLockGraceOneMinute => 'Após 1 minuto';
+
+  @override
+  String get appLockGraceFiveMinutes => 'Após 5 minutos';
+
+  @override
+  String get appLockGraceFifteenMinutes => 'Após 15 minutos';
+
+  @override
+  String get appLockFallbackTitle =>
+      'Permitir PIN, padrão ou senha do aparelho';
+
+  @override
+  String get appLockFallbackOnDesc =>
+      'Usado quando sua digital ou rosto não estiver disponível';
+
+  @override
+  String get appLockFallbackOffDesc =>
+      'Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo';
+
+  @override
+  String get appLockPromptReason => 'Desbloquear o Gatuno';
+
+  @override
+  String get appLockLockedTitle => 'O Gatuno está bloqueado';
+
+  @override
+  String get appLockLockedDesc =>
+      'Use sua digital, rosto ou PIN do aparelho para continuar';
+
+  @override
+  String get appLockUnlockButton => 'Desbloquear';
+
+  @override
+  String get appLockRetryButton => 'Tentar de novo';
+
+  @override
+  String get appLockErrorCancelled => 'Desbloqueio cancelado';
+
+  @override
+  String get appLockErrorLockedOut =>
+      'Muitas tentativas. A biometria está bloqueada por enquanto.';
+
+  @override
+  String get appLockErrorNoCredentials =>
+      'Este aparelho não tem bloqueio de tela. Configure um nas configurações do sistema.';
+
+  @override
+  String get appLockErrorUnavailable =>
+      'A autenticação do aparelho não está disponível agora';
+
+  @override
+  String get appLockErrorFailed =>
+      'Não foi possível confirmar que é você. Tente de novo.';
 }

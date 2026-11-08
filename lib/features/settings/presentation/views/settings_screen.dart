@@ -7,6 +7,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/logging/logger.dart';
 import '../view_models/settings_view_model.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
 import '../components/molecules/settings_profile_card.dart';
 import '../components/molecules/settings_section_header.dart';
 import '../components/organisms/settings_api_form.dart';
@@ -85,6 +86,9 @@ class SettingsPage extends StatelessWidget {
             subtitle: l10n.userMeSensitiveContentDesc,
             value: state.sensitiveContentEnabled,
             onChanged: (value) => viewModel.setSensitiveContentEnabled(value),
+          ),
+          appLockTile: AppLockSettingsTile(
+            onTap: () => context.push('/settings/app-lock'),
           ),
           securityTile: state.isAuthenticated
               ? ListTile(
