@@ -8,8 +8,8 @@ void main() {
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    zoom = ReaderZoomController()
-      ..attach(ScrollController(), const Size(width, 600));
+    zoom = ReaderZoomController(ScrollController())
+      ..resize(const Size(width, 600));
   });
 
   test('starts at 1x', () {
@@ -80,8 +80,8 @@ void main() {
   ) async {
     zoom.zoomTo(2, focal: Offset.zero);
     zoom.panBy(-400); // dx == -400 (right edge of 800px content)
-    zoom.attach(ScrollController(), const Size(200, 600));
-    WidgetsBinding.instance.scheduleFrame(); // attach runs during layout
+    zoom.resize(const Size(200, 600));
+    WidgetsBinding.instance.scheduleFrame(); // resize runs during layout
     await tester.pump();
     expect(zoom.dx, -200);
   });

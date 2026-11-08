@@ -10,13 +10,11 @@ import '../../view_models/reader_zoom_controller.dart';
 /// compete with the list's own drag or with tap gestures in the gesture arena.
 class ZoomableViewport extends StatefulWidget {
   final ReaderZoomController zoom;
-  final ScrollController scrollController;
   final Widget Function(BuildContext context, ScrollPhysics? physics) builder;
 
   const ZoomableViewport({
     super.key,
     required this.zoom,
-    required this.scrollController,
     required this.builder,
   });
 
@@ -49,8 +47,11 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
     final newSpan = (after[0] - after[1]).distance;
     final oldFocal = (before[0] + before[1]) / 2;
     final focal = (after[0] + after[1]) / 2;
-    widget.zoom.zoomTo(widget.zoom.scale * newSpan / oldSpan, focal: focal);
-    widget.zoom.panBy(focal.dx - oldFocal.dx);
+    widget.zoom.pinch(
+      widget.zoom.scale * newSpan / oldSpan,
+      focal: focal,
+      focalDelta: focal.dx - oldFocal.dx,
+    );
   }
 
   void _onPointerEnd(PointerEvent event) {
@@ -68,7 +69,7 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        widget.zoom.attach(widget.scrollController, constraints.biggest);
+        widget.zoom.resize(constraints.biggest);
         return Listener(
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,

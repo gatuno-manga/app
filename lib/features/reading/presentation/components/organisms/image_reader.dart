@@ -20,8 +20,8 @@ class ImageReader extends StatefulWidget {
 }
 
 class _ImageReaderState extends State<ImageReader> {
-  final _zoom = ReaderZoomController();
   final _scrollController = ScrollController();
+  late final _zoom = ReaderZoomController(_scrollController);
 
   @override
   void didUpdateWidget(ImageReader oldWidget) {
@@ -44,7 +44,6 @@ class _ImageReaderState extends State<ImageReader> {
       onDoubleTap: _zoom.toggleAt,
       child: ZoomableViewport(
         zoom: _zoom,
-        scrollController: _scrollController,
         builder: (context, physics) => AppScrollablePositionedList(
           controller: _scrollController,
           physics: physics,

@@ -8,8 +8,8 @@ void main() {
   late ScrollController scroll;
 
   setUp(() {
-    zoom = ReaderZoomController();
     scroll = ScrollController();
+    zoom = ReaderZoomController(scroll);
   });
 
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
@@ -19,7 +19,6 @@ void main() {
         height: 600,
         child: ZoomableViewport(
           zoom: zoom,
-          scrollController: scroll,
           builder: (context, physics) => ListView.builder(
             controller: scroll,
             physics: physics,

@@ -12,7 +12,7 @@ class ReaderZoomController extends ChangeNotifier {
   static const double doubleTapScale = 2.0;
   static const double snapThreshold = 0.1;
 
-  ScrollController? _scroll;
+  final ScrollController _scroll;
   Size _viewport = Size.zero;
   double _scale = 1.0;
   double _dx = 0.0;
@@ -20,34 +20,44 @@ class ReaderZoomController extends ChangeNotifier {
   double _pendingRatio = 1.0;
   double _pendingFocalY = 0.0;
   bool _anchorScheduled = false;
+  bool _disposed = false;
+
+  ReaderZoomController(this._scroll);
 
   double get scale => _scale;
 
   /// Left edge of the content, relative to the viewport.
   double get dx => _dx;
 
-  /// Binds the list's scroll controller and the viewport size. Called by the
-  /// viewport on every layout; a width change re-clamps the pan offset.
-  void attach(ScrollController scroll, Size viewport) {
-    _scroll = scroll;
-    if (viewport.width == _viewport.width) {
-      _viewport = viewport;
-      return;
-    }
+  /// Reports the viewport size; called by the viewport on every layout. A
+  /// width change re-clamps the pan offset.
+  void resize(Size viewport) {
+    final widthChanged = viewport.width != _viewport.width;
     _viewport = viewport;
+    if (!widthChanged) return;
     // Layout is in progress: notifying must wait for the next frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_disposed) return;
       _setDx(_dx);
       notifyListeners();
     });
   }
 
   /// Scales to [target] keeping [focal] (viewport coordinates) fixed.
-  void zoomTo(double target, {required Offset focal}) {
+  void zoomTo(double target, {required Offset focal}) =>
+      pinch(target, focal: focal, focalDelta: 0);
+
+  /// One pinch step: scale to [target] around [focal] and move the content by
+  /// [focalDelta] (the pinch midpoint's horizontal travel) in a single update.
+  void pinch(
+    double target, {
+    required Offset focal,
+    required double focalDelta,
+  }) {
     final next = target.clamp(minScale, maxScale);
     final ratio = next / _scale;
     _scale = next;
-    _setDx(focal.dx - (focal.dx - _dx) * ratio);
+    _setDx(focal.dx - (focal.dx - _dx) * ratio + focalDelta);
     _anchorScroll(ratio, focal.dy);
     notifyListeners();
   }
@@ -77,17 +87,22 @@ class ReaderZoomController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Runs one frame after the scale change, so the first frame at a new scale
+  /// shows the previous offset before the jump (accepted trade-off).
+  ///
   /// Batches the re-anchoring: several pointer events can arrive per frame,
   /// and each one must compound on the previous, not on a stale offset.
   void _anchorScroll(double ratio, double focalY) {
     final scroll = _scroll;
-    if (scroll == null || !scroll.hasClients || ratio == 1.0) return;
+    if (!scroll.hasClients || ratio == 1.0) return;
     _pendingRatio *= ratio;
+    // Approximation: only the latest focal Y is used for the whole batch.
     _pendingFocalY = focalY;
     if (_anchorScheduled) return;
     _anchorScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _anchorScheduled = false;
+      if (_disposed) return;
       final applied = _pendingRatio;
       _pendingRatio = 1.0;
       if (!scroll.hasClients) return;
@@ -103,5 +118,11 @@ class ReaderZoomController extends ChangeNotifier {
     _dx = contentWidth <= width
         ? (width - contentWidth) / 2
         : value.clamp(width - contentWidth, 0.0);
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 }
