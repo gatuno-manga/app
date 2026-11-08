@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-
 import '../../../domain/entities/book_type.dart';
 import '../../book_type_label.dart';
 

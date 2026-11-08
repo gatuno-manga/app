@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_type_badge.dart';
@@ -36,15 +35,7 @@ class BookListItem extends StatelessWidget {
                       width: 70,
                       height: 100,
                     ),
-                    Positioned(
-                      top: 4,
-                      left: 4,
-                      right: 4,
-                      child: Align(
-                        alignment: AlignmentDirectional.topStart,
-                        child: BookTypeBadge(type: book.type),
-                      ),
-                    ),
+                    PositionedBookTypeBadge(type: book.type, inset: 4),
                   ],
                 ),
               ),
