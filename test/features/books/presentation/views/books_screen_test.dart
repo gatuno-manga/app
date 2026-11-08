@@ -8,7 +8,11 @@ import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
 import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
+import 'package:gatuno/features/books/presentation/components/organisms/books_view_toolbar.dart';
+import 'package:gatuno/features/books/presentation/components/molecules/books_view_mode_selector.dart';
 import 'package:gatuno/features/books/presentation/views/books_screen.dart';
+import 'package:gatuno/shared/components/molecules/app_load_more_footer.dart';
+import 'package:gatuno/shared/components/molecules/pagination.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../helpers/pump_app.dart';
@@ -39,6 +43,11 @@ void main() {
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.layoutMode).thenReturn(BooksLayoutMode.grid);
+    when(
+      () => mockViewModel.preferences,
+    ).thenReturn(const BooksViewPreferences());
+    when(() => mockViewModel.hasMore).thenReturn(false);
+    when(() => mockViewModel.loadMore()).thenAnswer((_) async {});
     const options = BookPageOptions();
     when(() => mockViewModel.options).thenReturn(options);
     when(() => mockViewModel.bookList).thenReturn(null);
@@ -125,4 +134,114 @@ void main() {
       expect(find.byType(SnackBar), findsNothing);
     },
   );
+
+  BookList listOf(int count, {int totalPages = 1, int page = 1}) {
+    return BookList(
+      data: [
+        for (var i = 0; i < count; i++)
+          Book(id: BookId('$i'), title: BookTitle('Book $i')),
+      ],
+      total: PositiveInt(count),
+      page: PositiveInt(page),
+      limit: const PositiveInt(20),
+      totalPages: PositiveInt(totalPages),
+    );
+  }
+
+  void stubState(BooksState state) {
+    stateController.add(state);
+    when(() => mockViewModel.state).thenReturn(state);
+    when(() => mockViewModel.bookList).thenReturn(state.bookList);
+    when(() => mockViewModel.error).thenReturn(state.error);
+    when(() => mockViewModel.isLoading).thenReturn(state.isLoading);
+    when(() => mockViewModel.preferences).thenReturn(state.preferences);
+    when(() => mockViewModel.layoutMode).thenReturn(state.layoutMode);
+    when(() => mockViewModel.hasMore).thenReturn(state.hasMore);
+    when(() => mockViewModel.options).thenReturn(state.options);
+  }
+
+  group('view options', () {
+    testWidgets('shows the view toolbar with the mode selector', (
+      tester,
+    ) async {
+      stubState(BooksState.initial().copyWith(bookList: () => listOf(1)));
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(BooksViewToolbar), findsOneWidget);
+      expect(find.byType(BooksViewModeSelector), findsOneWidget);
+    });
+
+    testWidgets('hides the pagination bar in infinite mode', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 5),
+          preferences: const BooksViewPreferences(
+            navigation: BooksNavigationMode.infinite,
+          ),
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(Pagination), findsNothing);
+    });
+
+    testWidgets('shows the pagination bar in pages mode', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 5),
+          preferences: const BooksViewPreferences(
+            navigation: BooksNavigationMode.pages,
+          ),
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(Pagination), findsOneWidget);
+    });
+
+    testWidgets('shows the load-more footer while appending', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 5),
+          isLoading: true,
+          preferences: const BooksViewPreferences(
+            navigation: BooksNavigationMode.infinite,
+            columns: 4,
+          ),
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(AppLoadMoreFooter), findsOneWidget);
+    });
+
+    testWidgets('tapping a layout segment calls setLayoutMode', (tester) async {
+      stubState(BooksState.initial().copyWith(bookList: () => listOf(1)));
+
+      await tester.pumpApp(createWidgetUnderTest());
+      await tester.tap(find.byTooltip('Covers'));
+
+      verify(
+        () => mockViewModel.setLayoutMode(BooksLayoutMode.cover),
+      ).called(1);
+    });
+
+    testWidgets('app bar no longer has the layout toggle', (tester) async {
+      stubState(BooksState.initial().copyWith(bookList: () => listOf(1)));
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byIcon(Icons.view_list),
+        ),
+        findsNothing,
+      );
+    });
+  });
 }

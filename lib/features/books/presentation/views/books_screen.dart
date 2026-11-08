@@ -5,7 +5,6 @@ import '../components/organisms/books_app_bar.dart';
 import '../components/organisms/books_content.dart';
 import '../components/organisms/books_filter_sheet.dart';
 import '../components/templates/books_template.dart';
-import '../../domain/entities/books_view_preferences.dart';
 import '../view_models/books_view_model.dart';
 
 class BooksPage extends StatefulWidget {
@@ -59,18 +58,12 @@ class _BooksPageState extends State<BooksPage> {
     return StreamBuilder<BooksState>(
       stream: _viewModel.stateStream,
       initialData: _viewModel.state,
+      // Rebuilds the body on every state change; BooksContent reads the
+      // view model directly.
       builder: (context, snapshot) {
-        final state = snapshot.data!;
-
         return BooksTemplate(
           appBar: BooksAppBar(
             searchController: _searchController,
-            layoutMode: state.layoutMode,
-            onToggleLayout: () => _viewModel.setLayoutMode(
-              state.layoutMode == BooksLayoutMode.grid
-                  ? BooksLayoutMode.list
-                  : BooksLayoutMode.grid,
-            ),
             onFilterPressed: () => BooksFilterSheet.show(context, _viewModel),
             onSearchChanged: (value) => _viewModel.setSearch(value),
             onSortChanged: (orderBy, order) =>
