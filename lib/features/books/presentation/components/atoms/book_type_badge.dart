@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
@@ -17,9 +19,14 @@ class BookTypeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scrim =
-        Theme.of(context).extension<GatunoColors>()?.overlayBackground ??
-        Colors.black.withValues(alpha: 0.7);
+    final theme = Theme.of(context);
+    // Covers are arbitrary art, so the scrim keeps a floor of 0.7 alpha for
+    // the white label: the light palette's overlay token alone is only 0.3.
+    // The translucent GatunoColors.badgeType tint is meant for flat surfaces
+    // and has no contrast over images.
+    final overlay =
+        theme.extension<GatunoColors>()?.overlayBackground ?? Colors.black;
+    final scrim = overlay.withValues(alpha: math.max(overlay.a, 0.7));
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -37,9 +44,7 @@ class BookTypeBadge extends StatelessWidget {
             textScaler: MediaQuery.textScalerOf(
               context,
             ).clamp(maxScaleFactor: 1.2),
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: Colors.white),
+            style: theme.textTheme.labelSmall?.copyWith(color: Colors.white),
           ),
         ),
       ),
@@ -60,11 +65,13 @@ class PositionedBookTypeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // `end` is required: it bounds the width so the label can scale down.
     return PositionedDirectional(
       top: inset,
       start: inset,
       end: inset,
       child: Align(
+        heightFactor: 1,
         alignment: AlignmentDirectional.topStart,
         child: BookTypeBadge(type: type),
       ),

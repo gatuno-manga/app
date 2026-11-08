@@ -51,6 +51,7 @@ void main() {
   testWidgets('PositionedBookTypeBadge pins to the start corner in RTL', (
     tester,
   ) async {
+    const stackKey = Key('stack');
     await tester.pumpApp(
       const Directionality(
         textDirection: TextDirection.rtl,
@@ -58,6 +59,7 @@ void main() {
           width: 200,
           height: 100,
           child: Stack(
+            key: stackKey,
             children: [PositionedBookTypeBadge(type: TypeBook.manga, inset: 8)],
           ),
         ),
@@ -65,7 +67,7 @@ void main() {
     );
 
     final right = tester.getTopRight(find.byType(BookTypeBadge)).dx;
-    final boxRight = tester.getTopRight(find.byType(Stack).first).dx;
+    final boxRight = tester.getTopRight(find.byKey(stackKey)).dx;
     expect(boxRight - right, 8);
   });
 }
