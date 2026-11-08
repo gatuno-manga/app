@@ -118,8 +118,8 @@ void main() {
       expect(bottomOverlay.showOverlay, isFalse);
 
       // Tap to toggle overlay
-      await tester.tap(find.byType(GestureDetector).first);
-      await tester.pump();
+      await tester.tap(find.byType(ListView));
+      await tester.pump(const Duration(milliseconds: 400));
 
       // Overlays should now be shown
       final topOverlayShown = tester.widget<ReadingTopOverlay>(
@@ -130,6 +130,35 @@ void main() {
       );
       expect(topOverlayShown.showOverlay, isTrue);
       expect(bottomOverlayShown.showOverlay, isTrue);
+    });
+
+    testWidgets('double tap does not toggle the overlay', (tester) async {
+      final chapter = _MockChapter(
+        pages: [
+          _MockPage(
+            id: const ReadingPageId('1'),
+            url: const ReadingPageUrl('p1.png'),
+            index: const PositiveInt(0),
+          ),
+        ],
+      );
+      await tester.pumpApp(
+        Provider<ReadingViewModel>.value(
+          value: mockViewModel,
+          child: Scaffold(body: ImageReader(chapter: chapter)),
+        ),
+      );
+      final target = tester.getCenter(find.byType(ListView));
+      await tester.tapAt(target);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(target);
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(
+        tester
+            .widget<ReadingTopOverlay>(find.byType(ReadingTopOverlay))
+            .showOverlay,
+        isFalse,
+      );
     });
   });
 }

@@ -6,6 +6,7 @@ class AppScrollablePositionedList extends StatefulWidget {
   final int initialIndex;
   final void Function(int index)? onVisibleIndexChanged;
   final ScrollController? controller;
+  final ScrollPhysics? physics;
 
   const AppScrollablePositionedList({
     super.key,
@@ -14,6 +15,7 @@ class AppScrollablePositionedList extends StatefulWidget {
     this.initialIndex = 0,
     this.onVisibleIndexChanged,
     this.controller,
+    this.physics,
   });
 
   @override
@@ -100,10 +102,9 @@ class _AppScrollablePositionedListState
             _scrollController.position.viewportDimension;
 
         // Calculate how far we are in terms of indices to adjust speed
-        int currentMaxIndex =
-            _mountedIndices.isNotEmpty
-                ? _mountedIndices.reduce((a, b) => a > b ? a : b)
-                : 0;
+        int currentMaxIndex = _mountedIndices.isNotEmpty
+            ? _mountedIndices.reduce((a, b) => a > b ? a : b)
+            : 0;
         int remainingIndices = (targetIndex - currentMaxIndex).abs();
 
         // Fast-to-slow curve logic:
@@ -199,6 +200,7 @@ class _AppScrollablePositionedListState
       },
       child: ListView.builder(
         controller: _scrollController,
+        physics: widget.physics,
         itemCount: widget.itemCount,
         itemBuilder: (context, index) {
           return _ItemVisibilityTracker(
