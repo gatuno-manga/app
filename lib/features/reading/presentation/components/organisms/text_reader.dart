@@ -1,74 +1,95 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import '../../../domain/entities/reading_chapter.dart';
-import '../../../domain/entities/reading_enums.dart';
-import 'reader_overlay_wrapper.dart';
+import 'package:provider/provider.dart';
 
-class TextReader extends StatefulWidget {
+import '../../../../../core/theme/reader_palette.dart';
+import '../../../domain/entities/reader_preferences.dart';
+import '../../../domain/entities/reading_chapter.dart';
+import '../../../domain/use_cases/reader_preferences_service.dart';
+import '../../theme/reader_text_style.dart';
+import '../../theme/reader_theme_scope.dart';
+import '../molecules/text_reader_content.dart';
+import 'reader_overlay_wrapper.dart';
+import 'reader_settings_sheet.dart';
+import 'text_reader_settings_section.dart';
+
+class TextReader extends StatelessWidget {
   final ReadingChapter chapter;
 
   const TextReader({super.key, required this.chapter});
 
   @override
-  State<TextReader> createState() => _TextReaderState();
-}
-
-class _TextReaderState extends State<TextReader> {
-  late Widget _textContent;
-
-  @override
-  void initState() {
-    super.initState();
-    _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
-  }
-
-  @override
-  void didUpdateWidget(TextReader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.chapter.content != widget.chapter.content ||
-        oldWidget.chapter.contentFormat != widget.chapter.contentFormat) {
-      _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
-    }
-  }
-
-  Widget _buildTextContent(String content) {
-    switch (widget.chapter.contentFormat) {
-      case ContentFormat.html:
-        return Html(data: content);
-      case ContentFormat.markdown:
-        return MarkdownBody(data: content);
-      case ContentFormat.plain:
-      default:
-        return Builder(
-          builder: (context) => Text(
-            content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
+  Widget build(BuildContext context) {
+    final service = context.read<ReaderPreferencesService>();
+    return StreamBuilder<ReaderPreferences>(
+      stream: service.stream,
+      initialData: service.current,
+      builder: (context, snapshot) {
+        final preferences = snapshot.data!;
+        return ReaderThemeScope(
+          theme: preferences.theme,
+          // The Builder's context carries the reader theme into the sheet.
+          child: Builder(
+            builder: (context) => ReaderOverlayWrapper(
+              chapter: chapter,
+              onSettingsPressed: () => ReaderSettingsSheet.show(
+                context,
+                service: service,
+                sections: (preferences) => [
+                  TextReaderSettingsSection(
+                    preferences: preferences,
+                    onChanged: service.update,
+                  ),
+                ],
+              ),
+              child: _TextReaderBody(
+                chapter: chapter,
+                preferences: preferences.text,
+              ),
+            ),
           ),
         );
-    }
+      },
+    );
   }
+}
+
+class _TextReaderBody extends StatelessWidget {
+  final ReadingChapter chapter;
+  final TextReaderPreferences preferences;
+
+  const _TextReaderBody({required this.chapter, required this.preferences});
 
   @override
   Widget build(BuildContext context) {
-    return ReaderOverlayWrapper(
-      chapter: widget.chapter,
+    final theme = Theme.of(context);
+    final palette = theme.extension<ReaderPalette>()!;
+    final title = chapter.title;
+    return ColoredBox(
+      key: const ValueKey('text-reader-surface'),
+      color: palette.background,
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (widget.chapter.title != null)
+            if (title != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: Text(
-                  widget.chapter.title!.value,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  title.value,
+                  textAlign: preferences.alignment.textAlign,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: palette.text,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            _textContent,
+            TextReaderContent(
+              content: chapter.content?.value ?? '',
+              format: chapter.contentFormat,
+              preferences: preferences,
+              palette: palette,
+            ),
           ],
         ),
       ),

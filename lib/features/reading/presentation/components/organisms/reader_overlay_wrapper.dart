@@ -11,11 +11,15 @@ class ReaderOverlayWrapper extends StatefulWidget {
   /// is confirmed after the double-tap window (~300ms).
   final void Function(Offset position)? onDoubleTap;
 
+  /// Shown as a settings action in both bars when set.
+  final VoidCallback? onSettingsPressed;
+
   const ReaderOverlayWrapper({
     super.key,
     required this.child,
     required this.chapter,
     this.onDoubleTap,
+    this.onSettingsPressed,
   });
 
   @override
@@ -48,10 +52,15 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
           behavior: HitTestBehavior.opaque,
           child: widget.child,
         ),
-        ReadingTopOverlay(showOverlay: _showOverlay, chapter: widget.chapter),
+        ReadingTopOverlay(
+          showOverlay: _showOverlay,
+          chapter: widget.chapter,
+          onSettingsPressed: widget.onSettingsPressed,
+        ),
         ReadingBottomOverlay(
           showOverlay: _showOverlay,
           chapter: widget.chapter,
+          onSettingsPressed: widget.onSettingsPressed,
         ),
       ],
     );

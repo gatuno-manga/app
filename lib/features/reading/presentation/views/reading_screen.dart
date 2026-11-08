@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection.dart';
 import '../view_models/reading_view_model.dart';
+import '../../domain/use_cases/reader_preferences_service.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
 import '../components/organisms/image_reader.dart';
@@ -22,10 +23,17 @@ class ReadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider<ReadingViewModel>(
-      create: (context) =>
-          sl<ReadingViewModel>()
-            ..loadChapter(chapterId, initialPage: initialPage),
+    return MultiProvider(
+      providers: [
+        Provider<ReadingViewModel>(
+          create: (context) =>
+              sl<ReadingViewModel>()
+                ..loadChapter(chapterId, initialPage: initialPage),
+        ),
+        Provider<ReaderPreferencesService>.value(
+          value: sl<ReaderPreferencesService>(),
+        ),
+      ],
       child: _ReadingScreenContent(
         chapterId: chapterId,
         initialPage: initialPage,

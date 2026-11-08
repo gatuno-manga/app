@@ -160,5 +160,29 @@ void main() {
         isFalse,
       );
     });
+
+    testWidgets('has no settings action in its overlays', (tester) async {
+      final chapter = _MockChapter(
+        pages: [
+          _MockPage(
+            id: const ReadingPageId('1'),
+            url: const ReadingPageUrl('p1.png'),
+            index: const PositiveInt(0),
+          ),
+        ],
+      );
+      await tester.pumpApp(
+        Provider<ReadingViewModel>.value(
+          value: mockViewModel,
+          child: Scaffold(body: ImageReader(chapter: chapter)),
+        ),
+      );
+
+      await tester.tap(find.byType(ListView));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
+    });
   });
 }

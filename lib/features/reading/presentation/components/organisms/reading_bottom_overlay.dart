@@ -5,11 +5,13 @@ import '../molecules/reading_bottom_bar.dart';
 class ReadingBottomOverlay extends StatelessWidget {
   final bool showOverlay;
   final ReadingChapter chapter;
+  final VoidCallback? onSettingsPressed;
 
   const ReadingBottomOverlay({
     super.key,
     required this.showOverlay,
     required this.chapter,
+    this.onSettingsPressed,
   });
 
   @override
@@ -39,6 +41,7 @@ class ReadingBottomOverlay extends StatelessWidget {
         child: showOverlay
             ? ReadingBottomBar(
                 chapter: chapter,
+                onSettingsPressed: onSettingsPressed,
                 bottomPadding: MediaQuery.of(context).padding.bottom,
               )
             : const SizedBox.shrink(),

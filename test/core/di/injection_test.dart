@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
@@ -16,12 +19,21 @@ void main() {
       'plugins.flutter.io/path_provider',
     );
 
+    late Directory tempDir;
+
     setUp(() async {
       await sl.reset();
+      tempDir = Directory.systemTemp.createTempSync('gatuno-di-test');
+      SharedPreferences.setMockInitialValues({});
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
             if (methodCall.method == 'getApplicationCacheDirectory') {
               return '.';
+            }
+            // The reading database opens eagerly (MQTT handler) and needs a
+            // writable temporary directory.
+            if (methodCall.method == 'getTemporaryDirectory') {
+              return tempDir.path;
             }
             return null;
           });
@@ -29,6 +41,7 @@ void main() {
 
     tearDown(() async {
       await sl.reset();
+      tempDir.deleteSync(recursive: true);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
     });

@@ -20,6 +20,14 @@ extension ReaderTextAlignmentValue on ReaderTextAlignment {
     ReaderTextAlignment.center => TextAlign.center,
     ReaderTextAlignment.justify => TextAlign.justify,
   };
+
+  /// `MarkdownStyleSheet` alignment; `spaceBetween` is what the markdown
+  /// builder turns into [TextAlign.justify].
+  WrapAlignment get wrapAlignment => switch (this) {
+    ReaderTextAlignment.left => WrapAlignment.start,
+    ReaderTextAlignment.center => WrapAlignment.center,
+    ReaderTextAlignment.justify => WrapAlignment.spaceBetween,
+  };
 }
 
 extension TextReaderPreferencesStyle on TextReaderPreferences {

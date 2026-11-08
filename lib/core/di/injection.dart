@@ -14,6 +14,7 @@ import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
+import '../../features/reading/domain/use_cases/reader_preferences_service.dart';
 import '../../features/sync/sync_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
 import '../../features/settings/domain/use_cases/settings_service.dart';
@@ -57,6 +58,7 @@ Future<void> initDI() async {
     sl,
   ); // Must be before reading since reading depends on sync coordinator
   initReadingDI(sl);
+  await sl<ReaderPreferencesService>().init();
   initBookRequestsInjection(sl);
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)

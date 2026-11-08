@@ -189,5 +189,36 @@ void main() {
         isNotNull,
       );
     });
+
+    testWidgets('shows a settings action only when a callback is given', (
+      tester,
+    ) async {
+      final chapter = _chapter(pages: []);
+      await tester.pumpApp(
+        Provider<ReadingViewModel>.value(
+          value: mockViewModel,
+          child: Scaffold(
+            body: ReadingBottomBar(chapter: chapter, bottomPadding: 0.0),
+          ),
+        ),
+      );
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
+
+      var taps = 0;
+      await tester.pumpApp(
+        Provider<ReadingViewModel>.value(
+          value: mockViewModel,
+          child: Scaffold(
+            body: ReadingBottomBar(
+              chapter: chapter,
+              bottomPadding: 0.0,
+              onSettingsPressed: () => taps++,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      expect(taps, 1);
+    });
   });
 }

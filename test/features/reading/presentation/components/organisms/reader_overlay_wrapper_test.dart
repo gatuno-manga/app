@@ -101,4 +101,29 @@ void main() {
     expect(getShowOverlay(topOverlayFinder), isFalse);
     expect(getShowOverlay(bottomOverlayFinder), isFalse);
   });
+
+  testWidgets('ReaderOverlayWrapper passes the settings callback to the bars', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpApp(
+      Provider<ReadingViewModel>.value(
+        value: mockViewModel,
+        child: Scaffold(
+          body: ReaderOverlayWrapper(
+            chapter: _MockChapter(),
+            onSettingsPressed: () => taps++,
+            child: const Center(child: Text('Content')),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Content'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.settings_outlined), findsNWidgets(2));
+    await tester.tap(find.byIcon(Icons.settings_outlined).last);
+    expect(taps, 1);
+  });
 }
