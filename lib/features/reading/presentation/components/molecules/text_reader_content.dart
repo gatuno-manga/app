@@ -56,25 +56,36 @@ class TextReaderContent extends StatelessWidget {
     }
   }
 
+  // Heading sizes relative to the body, so they scale with the font size
+  // setting and never fall below the paragraphs.
+  static const List<double> _headingScale = [1.6, 1.4, 1.2, 1.1, 1.0, 1.0];
+
   MarkdownStyleSheet _markdownStyle(ThemeData theme, TextStyle body) {
     final base = MarkdownStyleSheet.fromTheme(theme);
-    TextStyle? tinted(TextStyle? heading) =>
-        heading?.copyWith(color: palette.text);
+    final bodySize = body.fontSize!;
+    TextStyle? heading(TextStyle? style, int level) => style?.copyWith(
+      color: palette.text,
+      fontSize: bodySize * _headingScale[level],
+      height: body.height,
+      fontWeight: level >= 4 ? FontWeight.w700 : null,
+    );
     final align = preferences.alignment.wrapAlignment;
     return base.copyWith(
       p: body,
-      h1: tinted(base.h1),
-      h2: tinted(base.h2),
-      h3: tinted(base.h3),
-      h4: tinted(base.h4),
-      h5: tinted(base.h5),
-      h6: tinted(base.h6),
+      h1: heading(base.h1, 0),
+      h2: heading(base.h2, 1),
+      h3: heading(base.h3, 2),
+      h4: heading(base.h4, 3),
+      h5: heading(base.h5, 4),
+      h6: heading(base.h6, 5),
       listBullet: body,
       tableBody: body,
       checkbox: body,
       code: base.code?.copyWith(
         color: palette.text,
         backgroundColor: palette.surface,
+        fontSize: bodySize * 0.9,
+        height: body.height,
       ),
       codeblockDecoration: BoxDecoration(
         color: palette.surface,

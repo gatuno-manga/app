@@ -1103,7 +1103,7 @@ abstract class AppLocalizations {
   /// No description provided for @readingFontSans.
   ///
   /// In en, this message translates to:
-  /// **'Sans'**
+  /// **'Sans-serif'**
   String get readingFontSans;
 
   /// No description provided for @readingFontLexend.
@@ -1136,6 +1136,18 @@ abstract class AppLocalizations {
   /// **'A- / A+'**
   String get readingFontSizeDesc;
 
+  /// No description provided for @readingDecreaseFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease font size'**
+  String get readingDecreaseFontSize;
+
+  /// No description provided for @readingIncreaseFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase font size'**
+  String get readingIncreaseFontSize;
+
   /// No description provided for @readingLineHeight.
   ///
   /// In en, this message translates to:
@@ -1147,6 +1159,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Distance between lines'**
   String get readingLineHeightDesc;
+
+  /// No description provided for @readingDecreaseLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease line spacing'**
+  String get readingDecreaseLineHeight;
+
+  /// No description provided for @readingIncreaseLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase line spacing'**
+  String get readingIncreaseLineHeight;
 
   /// No description provided for @readingAlignment.
   ///
@@ -1603,30 +1627,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save your backup codes before leaving this screen.'**
   String get mfaSaveCodesFirst;
-
-  /// No description provided for @readingDecreaseFontSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease font size'**
-  String get readingDecreaseFontSize;
-
-  /// No description provided for @readingIncreaseFontSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase font size'**
-  String get readingIncreaseFontSize;
-
-  /// No description provided for @readingDecreaseLineHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease line spacing'**
-  String get readingDecreaseLineHeight;
-
-  /// No description provided for @readingIncreaseLineHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase line spacing'**
-  String get readingIncreaseLineHeight;
 }
 
 class _AppLocalizationsDelegate

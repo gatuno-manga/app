@@ -534,7 +534,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingFontSerif => 'Serif';
 
   @override
-  String get readingFontSans => 'Sans';
+  String get readingFontSans => 'Sans-serif';
 
   @override
   String get readingFontLexend => 'Lexend';
@@ -554,6 +554,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingFontSizeDesc => 'A- / A+';
 
   @override
+  String get readingDecreaseFontSize => 'Decrease font size';
+
+  @override
+  String get readingIncreaseFontSize => 'Increase font size';
+
+  @override
   String readingLineHeight(double value) {
     final intl.NumberFormat valueNumberFormat =
         intl.NumberFormat.decimalPatternDigits(
@@ -567,6 +573,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readingLineHeightDesc => 'Distance between lines';
+
+  @override
+  String get readingDecreaseLineHeight => 'Decrease line spacing';
+
+  @override
+  String get readingIncreaseLineHeight => 'Increase line spacing';
 
   @override
   String get readingAlignment => 'Alignment';
@@ -825,16 +837,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mfaSaveCodesFirst =>
       'Save your backup codes before leaving this screen.';
-
-  @override
-  String get readingDecreaseFontSize => 'Decrease font size';
-
-  @override
-  String get readingIncreaseFontSize => 'Increase font size';
-
-  @override
-  String get readingDecreaseLineHeight => 'Decrease line spacing';
-
-  @override
-  String get readingIncreaseLineHeight => 'Increase line spacing';
 }

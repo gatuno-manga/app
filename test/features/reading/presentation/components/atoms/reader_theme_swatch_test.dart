@@ -27,10 +27,12 @@ void main() {
       final sample = tester.widget<Text>(find.text('Aa'));
       expect(sample.style?.color, ReaderPalette.sepia.text);
       expect(
-        tester.widget<Text>(find.text('Sepia')).style?.fontWeight,
+        DefaultTextStyle.of(
+          tester.element(find.text('Sepia')),
+        ).style.fontWeight,
         isNot(FontWeight.w600),
       );
-      final box = tester.widget<DecoratedBox>(
+      final box = tester.widget<AnimatedContainer>(
         find.byKey(const ValueKey('reader-theme-swatch-sample')),
       );
       expect(
@@ -56,7 +58,9 @@ void main() {
       );
 
       expect(
-        tester.widget<Text>(find.text('Cream')).style?.fontWeight,
+        DefaultTextStyle.of(
+          tester.element(find.text('Cream')),
+        ).style.fontWeight,
         FontWeight.w600,
       );
       expect(

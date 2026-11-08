@@ -4,6 +4,11 @@ import '../../../../core/logging/logger.dart';
 import '../../data/data_sources/reader_preferences_storage.dart';
 import '../entities/reader_preferences.dart';
 
+/// Applies a change to the current [ReaderPreferences]. Callers never see a
+/// stale value, so rapid changes compose instead of overwriting.
+typedef ReaderPreferencesChange =
+    ReaderPreferences Function(ReaderPreferences current);
+
 /// Holds the current [ReaderPreferences] for every reader and persists
 /// changes. Seeded with the defaults until [init] loads the stored values.
 class ReaderPreferencesService {
@@ -37,9 +42,7 @@ class ReaderPreferencesService {
   /// Deriving from [current] inside the service means rapid changes never
   /// overwrite each other. A failed write logs and restores the previous
   /// value.
-  Future<void> update(
-    ReaderPreferences Function(ReaderPreferences current) change,
-  ) async {
+  Future<void> update(ReaderPreferencesChange change) async {
     final previous = current;
     final next = change(previous);
     if (next == previous) return;

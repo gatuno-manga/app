@@ -5,16 +5,12 @@ import '../../../domain/entities/reader_preferences.dart';
 import '../molecules/reader_choice_row.dart';
 import '../molecules/reader_stepper_row.dart';
 
-/// Applies a change to the current [ReaderPreferences]; sections never see
-/// a stale value, so rapid changes compose instead of overwriting.
-typedef ReaderPreferencesChange =
-    ReaderPreferences Function(ReaderPreferences current);
-
 /// The text reader's rows of the settings sheet (Figma tab `Texto`): font
-/// family, font size, line spacing and alignment.
+/// family, font size, line spacing and alignment. Changes are functions of
+/// the current value, so rapid changes compose instead of overwriting.
 class TextReaderSettingsSection extends StatelessWidget {
-  final ReaderPreferences preferences;
-  final ValueChanged<ReaderPreferencesChange> onChanged;
+  final TextReaderPreferences preferences;
+  final ValueChanged<TextReaderPreferencesChange> onChanged;
 
   const TextReaderSettingsSection({
     super.key,
@@ -22,14 +18,10 @@ class TextReaderSettingsSection extends StatelessWidget {
     required this.onChanged,
   });
 
-  void _changeText(
-    TextReaderPreferences Function(TextReaderPreferences text) change,
-  ) => onChanged((current) => current.copyWith(text: change(current.text)));
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final text = preferences.text;
+    final text = preferences;
     return Column(
       children: [
         ReaderChoiceRow<ReaderFontFamily>(
@@ -48,17 +40,17 @@ class TextReaderSettingsSection extends StatelessWidget {
             ),
           ],
           onChanged: (family) =>
-              _changeText((t) => t.copyWith(fontFamily: family)),
+              onChanged((t) => t.copyWith(fontFamily: family)),
         ),
         ReaderStepperRow(
           icon: Icons.format_size,
           title: l10n.readingFontSize(text.fontSize.round()),
           subtitle: l10n.readingFontSizeDesc,
           onDecrement: text.canDecreaseFontSize
-              ? () => _changeText((t) => t.stepFontSize(-1))
+              ? () => onChanged((t) => t.stepFontSize(-1))
               : null,
           onIncrement: text.canIncreaseFontSize
-              ? () => _changeText((t) => t.stepFontSize(1))
+              ? () => onChanged((t) => t.stepFontSize(1))
               : null,
           decrementTooltip: l10n.readingDecreaseFontSize,
           incrementTooltip: l10n.readingIncreaseFontSize,
@@ -68,10 +60,10 @@ class TextReaderSettingsSection extends StatelessWidget {
           title: l10n.readingLineHeight(text.lineHeight),
           subtitle: l10n.readingLineHeightDesc,
           onDecrement: text.canDecreaseLineHeight
-              ? () => _changeText((t) => t.stepLineHeight(-1))
+              ? () => onChanged((t) => t.stepLineHeight(-1))
               : null,
           onIncrement: text.canIncreaseLineHeight
-              ? () => _changeText((t) => t.stepLineHeight(1))
+              ? () => onChanged((t) => t.stepLineHeight(1))
               : null,
           decrementTooltip: l10n.readingDecreaseLineHeight,
           incrementTooltip: l10n.readingIncreaseLineHeight,
@@ -87,7 +79,7 @@ class TextReaderSettingsSection extends StatelessWidget {
             ReaderChoice(ReaderTextAlignment.justify, l10n.readingAlignJustify),
           ],
           onChanged: (alignment) =>
-              _changeText((t) => t.copyWith(alignment: alignment)),
+              onChanged((t) => t.copyWith(alignment: alignment)),
         ),
       ],
     );

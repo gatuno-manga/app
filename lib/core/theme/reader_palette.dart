@@ -83,8 +83,12 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     onAccent: _dark,
   );
 
-  // Alpha of `leitura/destaque` in the Figma `Padrão` mode (#f185221f).
+  // Alphas of the Figma `Padrão` mode: `leitura/destaque` #f185221f and
+  // `leitura/texto-suave` #e9e1d19e. The soft text is derived from the text
+  // rather than `color/text-secondary`, which fails contrast on the darker
+  // sheet surface (`color/secondary`) in Dracula and True-dark.
   static const int _highlightAlpha = 0x1F;
+  static const int _softTextAlpha = 0x9E;
 
   /// Figma mode `Padrão`: the app theme's own tokens, so True-dark, Dracula
   /// or Light users keep their look inside the reader.
@@ -92,7 +96,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     background: app.appBackground,
     surface: app.secondary,
     text: app.text,
-    textSoft: app.textSecondary,
+    textSoft: app.text.withAlpha(_softTextAlpha),
     accent: app.primary,
     highlight: app.primary.withAlpha(_highlightAlpha),
     border: app.border,

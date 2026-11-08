@@ -15,7 +15,7 @@ class ReaderPreferencesStorage {
   Future<ReaderPreferences> read() async {
     final prefs = await SharedPreferences.getInstance();
     // copyWith clamps the numbers and the enums fall back on unknown names.
-    return ReaderPreferences.defaults.copyWith(
+    return ReaderPreferences(
       theme: ReaderTheme.fromName(prefs.getString(_themeKey)),
       text: TextReaderPreferences.defaults.copyWith(
         fontFamily: ReaderFontFamily.fromName(prefs.getString(_fontFamilyKey)),
@@ -29,10 +29,12 @@ class ReaderPreferencesStorage {
   Future<void> write(ReaderPreferences preferences) async {
     final prefs = await SharedPreferences.getInstance();
     final text = preferences.text;
-    await prefs.setString(_themeKey, preferences.theme.name);
-    await prefs.setString(_fontFamilyKey, text.fontFamily.name);
-    await prefs.setDouble(_fontSizeKey, text.fontSize);
-    await prefs.setDouble(_lineHeightKey, text.lineHeight);
-    await prefs.setString(_alignmentKey, text.alignment.name);
+    await Future.wait([
+      prefs.setString(_themeKey, preferences.theme.name),
+      prefs.setString(_fontFamilyKey, text.fontFamily.name),
+      prefs.setDouble(_fontSizeKey, text.fontSize),
+      prefs.setDouble(_lineHeightKey, text.lineHeight),
+      prefs.setString(_alignmentKey, text.alignment.name),
+    ]);
   }
 }

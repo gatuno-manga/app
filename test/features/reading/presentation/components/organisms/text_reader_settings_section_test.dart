@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/text_reader_settings_section.dart';
+import 'package:gatuno/shared/components/molecules/app_stepper.dart';
 
 import '../../../../../helpers/pump_app.dart';
 
@@ -22,9 +23,10 @@ void main() {
       child: Scaffold(
         body: SingleChildScrollView(
           child: TextReaderSettingsSection(
-            preferences: prefs,
+            preferences: prefs.text,
             // Each change is applied to the value the section was built with.
-            onChanged: (change) => changes.add(change(prefs)),
+            onChanged: (change) =>
+                changes.add(prefs.copyWith(text: change(prefs.text))),
           ),
         ),
       ),
@@ -110,6 +112,27 @@ void main() {
         ReaderTextAlignment.left,
         ReaderTextAlignment.justify,
       ]);
+    });
+
+    testWidgets('stepper and dropdown controls share the trailing edge', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await pump(tester, ReaderPreferences.defaults);
+
+      final stepperRight = tester.getTopRight(find.byType(AppStepper).first).dx;
+      final dropdownRight = tester
+          .getTopRight(find.byType(DropdownButton<ReaderFontFamily>))
+          .dx;
+      expect(stepperRight, moreOrLessEquals(dropdownRight, epsilon: 1));
+
+      // The texts keep most of the row (Figma: 172 of 286 dp).
+      final textColumn = find
+          .ancestor(of: find.text('Font'), matching: find.byType(Column))
+          .first;
+      expect(tester.getSize(textColumn).width, greaterThan(150));
     });
 
     testWidgets('fits a 390dp phone at 2x text scale in Portuguese', (

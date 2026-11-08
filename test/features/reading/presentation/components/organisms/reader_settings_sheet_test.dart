@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/reader_palette.dart';
 import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/text_reader_settings_section.dart';
@@ -7,6 +8,7 @@ import 'package:gatuno/features/reading/data/data_sources/reader_preferences_sto
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_settings_sheet.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../helpers/pump_app.dart';
@@ -26,20 +28,28 @@ void main() {
     List<Widget> Function(ReaderPreferences) sections, {
     ThemeData? theme,
   }) => tester.pumpApp(
-    Scaffold(
-      body: Builder(
-        builder: (context) => TextButton(
-          onPressed: () => ReaderSettingsSheet.show(
-            context,
-            service: service,
-            sections: sections,
+    Provider<ReaderPreferencesService>.value(
+      value: service,
+      child: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                ReaderSettingsSheet.show(context, sections: sections),
+            child: const Text('open'),
           ),
-          child: const Text('open'),
         ),
       ),
     ),
     theme: theme ?? AppTheme.lightTheme,
   );
+
+  List<Widget> textSection(ReaderPreferences prefs) => [
+    TextReaderSettingsSection(
+      preferences: prefs.text,
+      onChanged: (change) =>
+          service.update((p) => p.copyWith(text: change(p.text))),
+    ),
+  ];
 
   testWidgets('ReaderSettingsSheet.show opens a titled sheet that follows '
       'the service', (tester) async {
@@ -61,16 +71,7 @@ void main() {
     tester,
   ) async {
     await service.update((p) => p.copyWith(theme: ReaderTheme.sepia));
-    await pumpOpener(
-      tester,
-      (prefs) => [
-        TextReaderSettingsSection(
-          preferences: prefs,
-          onChanged: service.update,
-        ),
-      ],
-      theme: AppTheme.darkTheme,
-    );
+    await pumpOpener(tester, textSection, theme: AppTheme.darkTheme);
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
@@ -86,16 +87,19 @@ void main() {
     );
   });
 
+  testWidgets('Padrão subtitles stay readable on the Dracula sheet surface', (
+    tester,
+  ) async {
+    await pumpOpener(tester, textSection, theme: AppTheme.draculaTheme);
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    final subtitle = tester.widget<Text>(find.text('Text family'));
+    expect(subtitle.style?.color, draculaPalette.text.withAlpha(0x9E));
+  });
+
   testWidgets('two stepper taps in one frame both apply', (tester) async {
-    await pumpOpener(
-      tester,
-      (prefs) => [
-        TextReaderSettingsSection(
-          preferences: prefs,
-          onChanged: service.update,
-        ),
-      ],
-    );
+    await pumpOpener(tester, textSection);
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 

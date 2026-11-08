@@ -218,6 +218,8 @@
     }
   },
   "readingFontSizeDesc": "A- / A+",
+  "readingDecreaseFontSize": "Diminuir tamanho da fonte",
+  "readingIncreaseFontSize": "Aumentar tamanho da fonte",
   "readingLineHeight": "Espaçamento de linhas ({value})",
   "@readingLineHeight": {
     "placeholders": {
@@ -231,6 +233,8 @@
     }
   },
   "readingLineHeightDesc": "Distância entre linhas",
+  "readingDecreaseLineHeight": "Diminuir espaçamento de linhas",
+  "readingIncreaseLineHeight": "Aumentar espaçamento de linhas",
   "readingAlignment": "Alinhamento",
   "readingAlignmentDesc": "Esquerda, centro ou justificado",
   "readingAlignLeft": "Esquerda",
@@ -294,13 +298,7 @@
   "mfaStatusEnabled": "A autenticação em dois fatores está ativada",
   "mfaStatusDisabled": "A autenticação em dois fatores está desativada",
   "mfaBackupCodesRemaining": "{count, plural, =0{Nenhum código de backup restante} =1{1 código de backup restante} other{{count} códigos de backup restantes}}",
-  "@mfaBackupCodesRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@mfaBackupCodesRemaining": {"placeholders": {"count": {"type": "int"}}},
   "mfaEnableButton": "Ativar",
   "mfaDisableButton": "Desativar",
   "mfaReconfigureButton": "Reconfigurar",
@@ -334,9 +332,5 @@
   "mfaErrorUnknown": "Algo deu errado. Tente novamente.",
   "settingsMfaDesc": "Proteja sua conta com um aplicativo autenticador",
   "mfaNoAuthenticatorApp": "Não foi possível abrir um aplicativo autenticador. Copie o segredo e adicione manualmente.",
-  "mfaSaveCodesFirst": "Guarde seus códigos de backup antes de sair desta tela.",
-  "readingDecreaseFontSize": "Diminuir tamanho da fonte",
-  "readingIncreaseFontSize": "Aumentar tamanho da fonte",
-  "readingDecreaseLineHeight": "Diminuir espaçamento de linhas",
-  "readingIncreaseLineHeight": "Aumentar espaçamento de linhas"
+  "mfaSaveCodesFirst": "Guarde seus códigos de backup antes de sair desta tela."
 }

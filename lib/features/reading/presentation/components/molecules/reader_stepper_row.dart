@@ -31,6 +31,7 @@ class ReaderStepperRow extends StatelessWidget {
       icon: icon,
       title: title,
       subtitle: subtitle,
+      liveTitle: true,
       trailing: AppStepper(
         onDecrement: onDecrement,
         onIncrement: onIncrement,

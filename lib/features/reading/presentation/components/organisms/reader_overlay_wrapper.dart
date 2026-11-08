@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../../domain/entities/reading_chapter.dart';
-import '../../../domain/use_cases/reader_preferences_service.dart';
 import 'reader_settings_sheet.dart';
 import 'reading_bottom_overlay.dart';
 import 'reading_top_overlay.dart';
@@ -15,9 +13,8 @@ class ReaderOverlayWrapper extends StatefulWidget {
   final void Function(Offset position)? onDoubleTap;
 
   /// The reader's rows of the settings sheet. When set, both bars show the
-  /// settings action and the wrapper opens [ReaderSettingsSheet] with the
-  /// [ReaderPreferencesService] from the tree; a reader without settings
-  /// leaves it null.
+  /// settings action and the wrapper opens [ReaderSettingsSheet]; a reader
+  /// without settings leaves it null.
   final ReaderSettingsSections? settingsSections;
 
   const ReaderOverlayWrapper({
@@ -42,21 +39,13 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
     });
   }
 
-  void _openSettings(ReaderSettingsSections sections) {
-    ReaderSettingsSheet.show(
-      context,
-      service: context.read<ReaderPreferencesService>(),
-      sections: sections,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final onDoubleTap = widget.onDoubleTap;
     final sections = widget.settingsSections;
     final onSettingsPressed = sections == null
         ? null
-        : () => _openSettings(sections);
+        : () => ReaderSettingsSheet.show(context, sections: sections);
     return Stack(
       children: [
         GestureDetector(

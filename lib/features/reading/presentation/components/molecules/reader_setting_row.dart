@@ -8,13 +8,23 @@ class ReaderSettingRow extends StatelessWidget {
   final String subtitle;
   final Widget trailing;
 
+  /// Announces [title] changes to screen readers (a title that carries the
+  /// current value of a stepper).
+  final bool liveTitle;
+
   const ReaderSettingRow({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.trailing,
+    this.liveTitle = false,
   });
+
+  // Figma `Leitor/Item de ajuste`: texts take 172 of the 286 dp left after
+  // the icon tile, the control 114 (3:2).
+  static const int _textFlex = 3;
+  static const int _controlFlex = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +47,14 @@ class ReaderSettingRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
+            flex: _textFlex,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.labelLarge),
+                Semantics(
+                  liveRegion: liveTitle,
+                  child: Text(title, style: theme.textTheme.labelLarge),
+                ),
                 Text(
                   subtitle,
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -52,8 +66,15 @@ class ReaderSettingRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           // Bounded, so a wide control (a dropdown with long labels at a
-          // large text scale) shrinks instead of overflowing the row.
-          Flexible(child: trailing),
+          // large text scale) shrinks instead of overflowing; right-aligned
+          // so narrow controls (the stepper) share the edge of wide ones.
+          Flexible(
+            flex: _controlFlex,
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: trailing,
+            ),
+          ),
         ],
       ),
     );

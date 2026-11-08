@@ -33,6 +33,7 @@ class ReaderChoiceRow<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ReaderSettingRow(
       icon: icon,
       title: title,
@@ -44,6 +45,11 @@ class ReaderChoiceRow<T> extends StatelessWidget {
           child: DropdownButton<T>(
             value: value,
             isExpanded: true,
+            // `Interface/Botão`; the default titleMedium is an unmapped role.
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+            iconEnabledColor: theme.colorScheme.onSurfaceVariant,
             underline: const SizedBox.shrink(),
             items: [
               for (final option in options)

@@ -38,6 +38,10 @@ enum ReaderTheme {
       values.firstWhere((v) => v.name == name, orElse: () => standard);
 }
 
+/// Applies a change to the current [TextReaderPreferences].
+typedef TextReaderPreferencesChange =
+    TextReaderPreferences Function(TextReaderPreferences current);
+
 /// Typography preferences of the text reader. [copyWith] and the `step*`
 /// methods clamp their results; the constructor asserts the same ranges.
 class TextReaderPreferences extends Equatable {
@@ -86,19 +90,13 @@ class TextReaderPreferences extends Equatable {
   TextReaderPreferences stepLineHeight(int steps) =>
       copyWith(lineHeight: _stepped(lineHeight, lineHeightStep, steps));
 
-  /// `value + steps * step`, rounded to the step's own precision so `1.8 +
-  /// 0.1` is `1.9`, not `1.9000000000000001`. Clamping happens in [copyWith].
-  static double _stepped(double value, double step, int steps) {
-    final decimals = _decimalsOf(step);
-    return double.parse((value + steps * step).toStringAsFixed(decimals));
-  }
+  /// `value + steps * step` quantised to tenths, so `1.8 + 0.1` is `1.9`,
+  /// not `1.9000000000000001`. Both steps are multiples of 0.1; clamping
+  /// happens in [copyWith].
+  static double _stepped(double value, double step, int steps) =>
+      ((value + steps * step) * _quantum).roundToDouble() / _quantum;
 
-  static int _decimalsOf(double step) {
-    final text = step.toString();
-    final dot = text.indexOf('.');
-    if (dot == -1 || text.endsWith('.0')) return 0;
-    return text.length - dot - 1;
-  }
+  static const double _quantum = 10;
 
   TextReaderPreferences copyWith({
     ReaderFontFamily? fontFamily,

@@ -11,7 +11,8 @@ void main() {
       expect(p.background, draculaPalette.appBackground);
       expect(p.surface, draculaPalette.secondary);
       expect(p.text, draculaPalette.text);
-      expect(p.textSoft, draculaPalette.textSecondary);
+      // Figma Padrão `leitura/texto-suave` is the text at 62% (0x9E).
+      expect(p.textSoft, draculaPalette.text.withAlpha(0x9E));
       expect(p.accent, draculaPalette.primary);
       expect(p.highlight, draculaPalette.primary.withAlpha(0x1F));
       expect(p.border, draculaPalette.border);
