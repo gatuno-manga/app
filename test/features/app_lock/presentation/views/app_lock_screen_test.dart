@@ -79,6 +79,24 @@ void main() {
     expect(idle, lessThanOrEqualTo(480));
   });
 
+  testWidgets('a sensorless outcome on the cover does not mention settings', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        allowDeviceCredential: false,
+        lastOutcome: DeviceAuthOutcome.noBiometricHardware,
+        onUnlock: () {},
+      ),
+    );
+
+    expect(
+      find.text('No fingerprint or face sensor is available on this device.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('shows the failure reason and a Try again button', (
     tester,
   ) async {

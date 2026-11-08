@@ -26,16 +26,8 @@ String? appLockOutcomeText(AppLocalizations l10n, DeviceAuthOutcome? outcome) {
   }
 }
 
-/// Subtitle of the OS sheet; mentions the PIN only when it is an option.
-String appLockPromptHint(
-  AppLocalizations l10n, {
-  required bool allowDeviceCredential,
-}) => allowDeviceCredential
-    ? l10n.appLockPromptHintWithCredential
-    : l10n.appLockPromptHint;
-
 /// The OS sheet strings for one prompt; only the reason and title differ
-/// between callers.
+/// between callers. The hint mentions the PIN only when it is an option.
 DeviceAuthMessages appLockPromptMessages(
   AppLocalizations l10n, {
   required String reason,
@@ -44,7 +36,9 @@ DeviceAuthMessages appLockPromptMessages(
 }) => DeviceAuthMessages(
   reason: reason,
   title: title,
-  hint: appLockPromptHint(l10n, allowDeviceCredential: allowDeviceCredential),
+  hint: allowDeviceCredential
+      ? l10n.appLockPromptHintWithCredential
+      : l10n.appLockPromptHint,
   cancel: l10n.commonCancel,
 );
 

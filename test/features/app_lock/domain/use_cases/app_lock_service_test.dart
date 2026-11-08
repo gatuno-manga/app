@@ -279,12 +279,8 @@ void main() {
       ).thenAnswer((_) async => false);
       await service.init();
 
-      final outcome = await service.setDeviceCredentialAllowed(
-        true,
-        messages: testMessages,
-      );
+      await service.allowDeviceCredential();
 
-      expect(outcome, DeviceAuthOutcome.success);
       expect(service.state.deviceCredentialAllowed, isTrue);
       verify(() => storage.setDeviceCredentialAllowed(true)).called(1);
       verifyNever(
@@ -301,10 +297,7 @@ void main() {
         await service.init();
         stubPrompt(DeviceAuthOutcome.success);
 
-        final outcome = await service.setDeviceCredentialAllowed(
-          false,
-          messages: testMessages,
-        );
+        final outcome = await service.requireBiometrics(messages: testMessages);
 
         expect(outcome, DeviceAuthOutcome.success);
         expect(service.state.deviceCredentialAllowed, isFalse);
@@ -324,10 +317,7 @@ void main() {
         await service.init();
         stubPrompt(DeviceAuthOutcome.noBiometrics);
 
-        final outcome = await service.setDeviceCredentialAllowed(
-          false,
-          messages: testMessages,
-        );
+        final outcome = await service.requireBiometrics(messages: testMessages);
 
         expect(outcome, DeviceAuthOutcome.noBiometrics);
         expect(service.state.deviceCredentialAllowed, isTrue);
@@ -493,6 +483,64 @@ void main() {
       expect(service.state.locked, isFalse);
       service.onForegrounded();
       expect(service.state.locked, isFalse);
+    });
+  });
+
+  group('onForegrounded prompt decision', () {
+    test('asks for a prompt when the lock just engaged', () async {
+      await initEnabled(grace: AppLockGrace.immediately);
+      stubPrompt(DeviceAuthOutcome.success);
+      await service.unlock(messages: testMessages);
+
+      service.onBackgrounded();
+      expect(service.onForegrounded(), isTrue);
+      expect(service.state.locked, isTrue);
+    });
+
+    test('asks again when still locked after a real background', () async {
+      await initEnabled();
+      stubPrompt(DeviceAuthOutcome.cancelled);
+      await service.unlock(messages: testMessages);
+
+      service.onBackgrounded();
+      expect(service.onForegrounded(), isTrue);
+    });
+
+    test('never asks on a resume without a preceding pause', () async {
+      // The OS sheet itself yields inactive -> resumed with no pause.
+      await initEnabled();
+      stubPrompt(DeviceAuthOutcome.cancelled);
+      await service.unlock(messages: testMessages);
+
+      expect(service.onForegrounded(), isFalse);
+      expect(service.state.locked, isTrue);
+    });
+
+    test('never asks while a prompt is open', () async {
+      await initEnabled();
+      final prompt = Completer<DeviceAuthOutcome>();
+      when(
+        () => authenticator.authenticate(
+          messages: any(named: 'messages'),
+          allowDeviceCredential: any(named: 'allowDeviceCredential'),
+        ),
+      ).thenAnswer((_) => prompt.future);
+      final unlocking = service.unlock(messages: testMessages);
+
+      service.onBackgrounded();
+      expect(service.onForegrounded(), isFalse);
+      prompt.complete(DeviceAuthOutcome.success);
+      await unlocking;
+    });
+
+    test('never asks when the lock did not engage', () async {
+      await initEnabled();
+      stubPrompt(DeviceAuthOutcome.success);
+      await service.unlock(messages: testMessages);
+
+      service.onBackgrounded();
+      now = now.add(const Duration(seconds: 10));
+      expect(service.onForegrounded(), isFalse);
     });
   });
 

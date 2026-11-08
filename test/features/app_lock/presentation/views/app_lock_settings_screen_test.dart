@@ -52,8 +52,10 @@ void main() {
 
     expect(find.text('App lock'), findsOneWidget);
     expect(find.text('Lock Gatuno'), findsOneWidget);
-    expect(find.byType(Switch), findsOneWidget);
     expect(find.text('Lock after leaving the app'), findsNothing);
+    // The fallback stays reachable so a biometric-only refusal has a way out.
+    expect(find.text('Allow device PIN, pattern or passcode'), findsOneWidget);
+    expect(find.byType(Switch), findsNWidgets(2));
   });
 
   testWidgets('shows grace options and fallback while the lock is on', (
@@ -146,6 +148,40 @@ void main() {
     expect(find.text("Could not verify it's you. Try again."), findsNothing);
   });
 
+  testWidgets('enabling refused for lack of a biometric points at the fallback', (
+    tester,
+  ) async {
+    await pumpPage(
+      tester,
+      supportedOff.copyWith(deviceCredentialAllowed: false),
+    );
+    when(
+      () => fake.mock.setEnabled(any(), messages: any(named: 'messages')),
+    ).thenAnswer((_) async => DeviceAuthOutcome.noBiometrics);
+
+    await tester.tap(switchWithTitle('Lock Gatuno'));
+    await tester.pump();
+
+    expect(
+      find.text(
+        'Allow the device PIN below, or enroll a fingerprint or face in the system settings.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('the lock switch subtitle follows the fallback', (tester) async {
+    await pumpPage(
+      tester,
+      supportedOff.copyWith(deviceCredentialAllowed: false),
+    );
+
+    expect(
+      find.text('Ask for your fingerprint or face when you open the app'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('choosing a grace period persists it', (tester) async {
     await pumpPage(tester, supportedOn);
 
@@ -173,12 +209,7 @@ void main() {
     await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
     await tester.pump();
 
-    verify(
-      () => fake.mock.setDeviceCredentialAllowed(
-        true,
-        messages: any(named: 'messages'),
-      ),
-    ).called(1);
+    verify(() => fake.mock.allowDeviceCredential()).called(1);
   });
 
   testWidgets('turning the fallback off asks for a biometric first', (
@@ -190,10 +221,7 @@ void main() {
     await tester.pump();
 
     verify(
-      () => fake.mock.setDeviceCredentialAllowed(
-        false,
-        messages: biometricOnlyMessages,
-      ),
+      () => fake.mock.requireBiometrics(messages: biometricOnlyMessages),
     ).called(1);
   });
 
@@ -202,10 +230,7 @@ void main() {
   ) async {
     await pumpPage(tester, supportedOn);
     when(
-      () => fake.mock.setDeviceCredentialAllowed(
-        any(),
-        messages: any(named: 'messages'),
-      ),
+      () => fake.mock.requireBiometrics(messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.noBiometricHardware);
 
     await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
@@ -224,10 +249,7 @@ void main() {
   ) async {
     await pumpPage(tester, supportedOn);
     when(
-      () => fake.mock.setDeviceCredentialAllowed(
-        any(),
-        messages: any(named: 'messages'),
-      ),
+      () => fake.mock.requireBiometrics(messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.noBiometrics);
 
     await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));

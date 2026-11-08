@@ -763,6 +763,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Pedir sua digital, rosto ou PIN do aparelho ao abrir o app';
 
   @override
+  String get appLockSwitchDescBiometricOnly =>
+      'Pedir sua digital ou rosto ao abrir o app';
+
+  @override
   String get appLockUnsupportedDesc =>
       'Este aparelho não tem bloqueio de tela, então o Gatuno não pode ser bloqueado.';
 
@@ -809,6 +813,14 @@ class AppLocalizationsPt extends AppLocalizations {
       'Cadastre uma digital ou rosto nos ajustes do sistema antes de desativar o PIN do aparelho.';
 
   @override
+  String get appLockFallbackNoSensor =>
+      'Este aparelho não tem sensor de digital ou rosto, então o PIN do aparelho precisa continuar permitido.';
+
+  @override
+  String get appLockEnableNeedsBiometric =>
+      'Permita o PIN do aparelho abaixo ou cadastre uma digital ou rosto nos ajustes do sistema.';
+
+  @override
   String get appLockPromptHint => 'Use sua digital ou rosto';
 
   @override
@@ -852,7 +864,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockErrorNoBiometricHardware =>
-      'Este aparelho não tem sensor de digital ou rosto, então o PIN do aparelho precisa continuar permitido.';
+      'Nenhum sensor de digital ou rosto está disponível neste aparelho.';
 
   @override
   String get appLockErrorSave =>

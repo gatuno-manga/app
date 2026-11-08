@@ -96,7 +96,10 @@ void main() {
     fake.emit(unlocked);
     await pumpGate(tester);
     // The service engages the lock from onForegrounded; mirror that.
-    when(() => fake.mock.onForegrounded()).thenAnswer((_) => fake.emit(locked));
+    when(() => fake.mock.onForegrounded()).thenAnswer((_) {
+      fake.emit(locked);
+      return true;
+    });
 
     await cycleBackground(tester);
     verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
@@ -144,7 +147,10 @@ void main() {
     final field = tester.state<EditableTextState>(find.byType(EditableText));
     expect(field.widget.focusNode.hasFocus, isTrue);
 
-    when(() => fake.mock.onForegrounded()).thenAnswer((_) => fake.emit(locked));
+    when(() => fake.mock.onForegrounded()).thenAnswer((_) {
+      fake.emit(locked);
+      return true;
+    });
     await cycleBackground(tester);
 
     expect(field.widget.focusNode.hasFocus, isFalse);
@@ -159,6 +165,8 @@ void main() {
     await pumpGate(tester);
     await tester.pump();
     verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
+    // The service reports a real background with the lock still on.
+    when(() => fake.mock.onForegrounded()).thenReturn(true);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
@@ -169,6 +177,23 @@ void main() {
     await tester.pump();
 
     verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
+  });
+
+  testWidgets('does not prompt on an inactive-resumed cycle after a cancel', (
+    tester,
+  ) async {
+    fake.emit(locked.copyWith(lastOutcome: () => DeviceAuthOutcome.cancelled));
+    await pumpGate(tester);
+    await tester.pump();
+    clearInteractions(fake.mock);
+
+    // The OS sheet closing: focus comes back without a pause.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    verifyNever(() => fake.mock.unlock(messages: any(named: 'messages')));
+    expect(find.text('Try again'), findsOneWidget);
   });
 
   testWidgets('does not prompt on resume while a prompt is open', (

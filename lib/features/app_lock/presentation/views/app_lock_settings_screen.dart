@@ -48,18 +48,31 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
         allowDeviceCredential: _service.state.deviceCredentialAllowed,
       ),
     ),
+    // With the fallback off, a missing biometric has a way out right below.
+    explain: (l10n, outcome) => switch (outcome) {
+      DeviceAuthOutcome.noBiometrics ||
+      DeviceAuthOutcome.noBiometricHardware => l10n.appLockEnableNeedsBiometric,
+      _ => appLockOutcomeText(l10n, outcome),
+    },
   );
 
   // Turning the fallback off proves a biometric works first, so the hint
   // must not mention the PIN, and a refusal is explained in those terms.
   Future<void> _toggleFallback(bool allowed) => _apply(
-    (l10n) => _service.setDeviceCredentialAllowed(
-      allowed,
-      messages: _confirmMessages(l10n, allowDeviceCredential: allowed),
-    ),
-    explain: (l10n, outcome) => outcome == DeviceAuthOutcome.noBiometrics
-        ? l10n.appLockFallbackNeedsBiometric
-        : appLockOutcomeText(l10n, outcome),
+    (l10n) async {
+      if (allowed) {
+        await _service.allowDeviceCredential();
+        return null;
+      }
+      return _service.requireBiometrics(
+        messages: _confirmMessages(l10n, allowDeviceCredential: false),
+      );
+    },
+    explain: (l10n, outcome) => switch (outcome) {
+      DeviceAuthOutcome.noBiometrics => l10n.appLockFallbackNeedsBiometric,
+      DeviceAuthOutcome.noBiometricHardware => l10n.appLockFallbackNoSensor,
+      _ => appLockOutcomeText(l10n, outcome),
+    },
   );
 
   Future<void> _chooseGrace(AppLockGrace grace) => _apply((_) async {
@@ -132,9 +145,21 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
     return [
       AppSwitch(
         title: l10n.appLockSwitchTitle,
-        subtitle: l10n.appLockSwitchDesc,
+        subtitle: state.deviceCredentialAllowed
+            ? l10n.appLockSwitchDesc
+            : l10n.appLockSwitchDescBiometricOnly,
         value: state.enabled,
         onChanged: _toggleLock,
+      ),
+      // The fallback stays reachable while the lock is off: a biometric-only
+      // refusal when enabling must have a way out.
+      AppSwitch(
+        title: l10n.appLockFallbackTitle,
+        subtitle: state.deviceCredentialAllowed
+            ? l10n.appLockFallbackOnDesc
+            : l10n.appLockFallbackOffDesc,
+        value: state.deviceCredentialAllowed,
+        onChanged: _toggleFallback,
       ),
       if (state.enabled) ...[
         const Divider(height: 32),
@@ -153,15 +178,6 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
                 ),
             ],
           ),
-        ),
-        const Divider(height: 32),
-        AppSwitch(
-          title: l10n.appLockFallbackTitle,
-          subtitle: state.deviceCredentialAllowed
-              ? l10n.appLockFallbackOnDesc
-              : l10n.appLockFallbackOffDesc,
-          value: state.deviceCredentialAllowed,
-          onChanged: _toggleFallback,
         ),
       ],
     ];

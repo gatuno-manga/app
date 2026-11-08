@@ -58,14 +58,12 @@ class FakeAppLockService {
       () => mock.setEnabled(any(), messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(() => mock.setGrace(any())).thenAnswer((_) async {});
+    when(() => mock.allowDeviceCredential()).thenAnswer((_) async {});
     when(
-      () => mock.setDeviceCredentialAllowed(
-        any(),
-        messages: any(named: 'messages'),
-      ),
+      () => mock.requireBiometrics(messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(() => mock.onBackgrounded()).thenReturn(null);
-    when(() => mock.onForegrounded()).thenReturn(null);
+    when(() => mock.onForegrounded()).thenReturn(false);
   }
 
   AppLockState get state => _state;

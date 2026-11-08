@@ -23,14 +23,15 @@ void main() {
   test(
     'the OS sheet hint mentions the PIN only when the fallback is allowed',
     () {
-      expect(
-        appLockPromptHint(l10n, allowDeviceCredential: true),
-        l10n.appLockPromptHintWithCredential,
+      DeviceAuthMessages build(bool allow) => appLockPromptMessages(
+        l10n,
+        reason: 'r',
+        title: 't',
+        allowDeviceCredential: allow,
       );
-      expect(
-        appLockPromptHint(l10n, allowDeviceCredential: false),
-        l10n.appLockPromptHint,
-      );
+      expect(build(true).hint, l10n.appLockPromptHintWithCredential);
+      expect(build(false).hint, l10n.appLockPromptHint);
+      expect(build(false).cancel, l10n.commonCancel);
     },
   );
 

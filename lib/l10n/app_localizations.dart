@@ -1490,6 +1490,12 @@ abstract class AppLocalizations {
   /// **'Ask for your fingerprint, face or device PIN when you open the app'**
   String get appLockSwitchDesc;
 
+  /// No description provided for @appLockSwitchDescBiometricOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for your fingerprint or face when you open the app'**
+  String get appLockSwitchDescBiometricOnly;
+
   /// No description provided for @appLockUnsupportedDesc.
   ///
   /// In en, this message translates to:
@@ -1568,6 +1574,18 @@ abstract class AppLocalizations {
   /// **'Enroll a fingerprint or face in the system settings before turning off the device PIN.'**
   String get appLockFallbackNeedsBiometric;
 
+  /// No description provided for @appLockFallbackNoSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no fingerprint or face sensor, so the device PIN must stay allowed.'**
+  String get appLockFallbackNoSensor;
+
+  /// No description provided for @appLockEnableNeedsBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the device PIN below, or enroll a fingerprint or face in the system settings.'**
+  String get appLockEnableNeedsBiometric;
+
   /// No description provided for @appLockPromptHint.
   ///
   /// In en, this message translates to:
@@ -1643,7 +1661,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLockErrorNoBiometricHardware.
   ///
   /// In en, this message translates to:
-  /// **'This device has no fingerprint or face sensor, so the device PIN must stay allowed.'**
+  /// **'No fingerprint or face sensor is available on this device.'**
   String get appLockErrorNoBiometricHardware;
 
   /// No description provided for @appLockErrorSave.

@@ -110,10 +110,16 @@ class AppLockService {
     if (state.isInitialized) return;
     var next = state;
     try {
+      // Three platform reads on the cold-start path; run them together.
+      final (enabled, grace, deviceCredentialAllowed) = await (
+        _storage.isEnabled(),
+        _storage.getGrace(),
+        _storage.isDeviceCredentialAllowed(),
+      ).wait;
       next = next.copyWith(
-        enabled: await _storage.isEnabled(),
-        grace: await _storage.getGrace(),
-        deviceCredentialAllowed: await _storage.isDeviceCredentialAllowed(),
+        enabled: enabled,
+        grace: grace,
+        deviceCredentialAllowed: deviceCredentialAllowed,
       );
     } catch (e, stackTrace) {
       AppLogger.e('Error reading app lock settings', e, stackTrace, _logTag);
@@ -171,22 +177,26 @@ class AppLockService {
     _emit(state.copyWith(grace: grace));
   }
 
-  /// Refusing the device credential first proves a biometric works, so a
-  /// PIN-only device can never lock itself out. Allowing it needs no prompt.
-  Future<DeviceAuthOutcome> setDeviceCredentialAllowed(
-    bool allowed, {
+  /// Lets the OS prompt fall back to the device PIN; needs no prompt.
+  Future<void> allowDeviceCredential() => _setDeviceCredentialAllowed(true);
+
+  /// Makes prompts biometric-only. Proves a biometric works first, so a
+  /// PIN-only device can never lock itself out.
+  Future<DeviceAuthOutcome> requireBiometrics({
     required DeviceAuthMessages messages,
   }) async {
-    if (!allowed) {
-      final outcome = await _prompt(messages, allowDeviceCredential: false);
-      if (outcome != DeviceAuthOutcome.success) return outcome;
-    }
+    final outcome = await _prompt(messages, allowDeviceCredential: false);
+    if (outcome != DeviceAuthOutcome.success) return outcome;
+    await _setDeviceCredentialAllowed(false);
+    return DeviceAuthOutcome.success;
+  }
+
+  Future<void> _setDeviceCredentialAllowed(bool allowed) async {
     await _persist(
       'device credential',
       () => _storage.setDeviceCredentialAllowed(allowed),
     );
     _emit(state.copyWith(deviceCredentialAllowed: allowed));
-    return DeviceAuthOutcome.success;
   }
 
   /// The single definition of "the preference could not be saved": log it
@@ -207,18 +217,25 @@ class AppLockService {
   }
 
   /// Call when the app returns to the foreground; locks once the grace
-  /// period has elapsed. Lifecycle churn caused by an open OS prompt
-  /// (Android's device-credential screen pauses the activity) is ignored.
-  void onForegrounded() {
+  /// period has elapsed. Returns whether the caller should open the OS
+  /// prompt now: only after a real background (the lock just engaged, or it
+  /// was still locked when the user left). The OS sheet itself yields
+  /// inactive/resumed without a pause, and Android's device-credential
+  /// screen pauses the activity while a prompt is open; neither must
+  /// re-open a prompt.
+  bool onForegrounded() {
     unawaited(_refreshSupport());
     final since = _backgroundedAt;
     _backgroundedAt = null;
-    if (since == null || !state.enabled || state.isAuthenticating) return;
+    if (since == null || !state.enabled || state.isAuthenticating) {
+      return false;
+    }
     final away = _clock().difference(since);
-    if (away >= state.grace.duration) {
+    if (away >= state.grace.duration && !state.locked) {
       AppLogger.i('App lock engaged after ${away.inSeconds}s away', _logTag);
       _emit(state.copyWith(locked: true));
     }
+    return state.locked;
   }
 
   /// Shows the OS prompt and unlocks on success. Concurrent callers share

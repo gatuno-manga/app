@@ -69,12 +69,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         widget.service.onBackgrounded();
       case AppLifecycleState.resumed:
-        // The lock only ever engages here (or at start-up), so this is the
-        // one place that opens the prompt; it also re-offers a prompt the
-        // system cancelled on backgrounding.
-        widget.service.onForegrounded();
-        final current = widget.service.state;
-        if (current.locked && !current.isAuthenticating) {
+        // The service decides; the lock only ever engages here (or at
+        // start-up), and a prompt cancelled by backgrounding is re-offered.
+        if (widget.service.onForegrounded()) {
           // Offstage children keep focus, so the IME would stay open over
           // the cover and keystrokes would reach the hidden field.
           FocusManager.instance.primaryFocus?.unfocus();

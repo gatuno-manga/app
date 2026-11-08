@@ -761,6 +761,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Ask for your fingerprint, face or device PIN when you open the app';
 
   @override
+  String get appLockSwitchDescBiometricOnly =>
+      'Ask for your fingerprint or face when you open the app';
+
+  @override
   String get appLockUnsupportedDesc =>
       'This device has no screen lock, so Gatuno cannot be locked.';
 
@@ -803,6 +807,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLockFallbackNeedsBiometric =>
       'Enroll a fingerprint or face in the system settings before turning off the device PIN.';
+
+  @override
+  String get appLockFallbackNoSensor =>
+      'This device has no fingerprint or face sensor, so the device PIN must stay allowed.';
+
+  @override
+  String get appLockEnableNeedsBiometric =>
+      'Allow the device PIN below, or enroll a fingerprint or face in the system settings.';
 
   @override
   String get appLockPromptHint => 'Use your fingerprint or face';
@@ -848,7 +860,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockErrorNoBiometricHardware =>
-      'This device has no fingerprint or face sensor, so the device PIN must stay allowed.';
+      'No fingerprint or face sensor is available on this device.';
 
   @override
   String get appLockErrorSave => 'Could not save the setting. Try again.';
