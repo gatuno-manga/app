@@ -35,10 +35,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Authenticated default only. The signed-out case is a redirect to `/auth/signin` in code and has no frame.
 
 ## Accessibility
-- Secondary text about 4.9:1 on `color/app-background` (Dark). Avatar shows initials only; no photo state is drawn.
+- Secondary text about 5.0:1 (little headroom) on `color/app-background` (Dark). Avatar shows initials only; no photo state is drawn.
 
 ## Gaps (Figma vs code)
 - Profile (`/settings/profile`) and settings (`/settings`) are separate screens in code; settings holds the profile card, sensitive-content switch and API, certificate and log entries.
 - Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.
 - The sensitive-content switch is not on the profile screen: code puts it on settings (`settings_screen.dart`), so the profile frame omits it.
-- Avatar has no image, loading or error state; there is no logout-confirmation frame.
+- Avatar has no image, loading or error state drawn (code has a grey placeholder circle when the name is null, and uses `colorScheme.onPrimary`, which differs from Figma `color/on-primary`, see `on-primary-dark`); there is no logout-confirmation frame.

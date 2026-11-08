@@ -38,7 +38,7 @@ No code exists for `/library`. The closest code surface is `/books` (`lib/featur
 - No loading or error frame.
 
 ## Accessibility
-- Secondary text about 4.9:1 on `color/app-background` (Dark). Empty-state icon uses `color/text-muted`; check its contrast manually.
+- Secondary text about 5.0:1 (little headroom) on `color/app-background` (Dark). Empty-state icon uses `color/text-muted`; check its contrast manually.
 - `Livro/Aba` tabs are 40 dp high and 43-77 dp wide, below the 44 dp tap target; the component is shared with the book page, so it is recorded here, not changed.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the `Explorar livros` button and the chapter badges.
 

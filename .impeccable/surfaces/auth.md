@@ -42,14 +42,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## States in Figma
 - Hints: sign-in password shows "Informe a senha da sua conta."; sign-up shows the full rule. The loading frame dims the action but leaves fields looking active.
 - Default, error and loading for sign-in; default for sign-up. The `Foco` field state exists in the component but no frame shows it.
-- Copy follows `lib/l10n/app_pt.arb` (`authSignInTitle`, `authEmailLabel`, `authPasswordError`, and so on).
+- Titles, labels, button text and error messages follow `lib/l10n/app_pt.arb` (`authSignInTitle`, `authEmailLabel`, `authPasswordError`, and so on). Helper hints ("Use o email da sua conta.", "Informe a senha da sua conta.", the sign-up rule hint) and the subtitle are placeholder copy with no l10n key.
 
 ## Accessibility
 - Code supports password-manager autofill (autofillHints) and a 'go back' action that pops the route, falling back to `/home`; preserve both when implementing. `/home` is also the post-login destination unless a redirect URL is set.
 - Sign-up password rules: 8+ characters, uppercase, digit, symbol. Sign-in only checks that the password is not empty (`authPasswordError`).
 - Error text uses `color/danger` (about 4.9:1 on `color/app-background`) and also a red field border and message copy, so color is not the only cue.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the ENTRAR and CRIAR CONTA buttons.
-- Placeholder text is about 4.3:1.
+- Placeholder text (`color/text-muted`) is about 4.4:1, just below the AA 4.5:1 minimum for normal text.
 
 ## Gaps (Figma vs code)
 - The Figma section title names the routes /auth/login and /auth/register; code uses `/auth/signin` and `/auth/signup`. The new frames are named after the code routes.

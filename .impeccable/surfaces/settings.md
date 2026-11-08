@@ -44,10 +44,11 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
-- Measured in Figma against `color/app-background` (Dark): secondary text about 4.9:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
+- Measured in Figma against `color/app-background` (Dark): secondary text about 5.0:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
 - `Leitor/Item de ajuste` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 
 ## Gaps (Figma vs code)
+- Signed-out state is not drawn: code shows the profile card as `commonGuest` ("Visitante") with no email, and tapping it opens `/auth/signin` (`settings_screen.dart`).
 - The page header has no subtitle, unlike library and profile; code does not show one either.
 - Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.
 - Figma route /user differs from code `/settings`.
