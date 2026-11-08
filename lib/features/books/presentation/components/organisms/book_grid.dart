@@ -26,7 +26,8 @@ class BookGrid extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.all(8),
+          // Same side inset as the toolbar and the list rows.
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,

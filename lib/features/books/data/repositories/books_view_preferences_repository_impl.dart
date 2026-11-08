@@ -35,9 +35,11 @@ class BooksViewPreferencesRepositoryImpl
   @override
   Future<void> save(BooksViewPreferences preferences) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_layoutKey, preferences.layout.name);
-    await prefs.setInt(_columnsKey, preferences.columns);
-    await prefs.setString(_navigationKey, preferences.navigation.name);
+    await Future.wait([
+      prefs.setString(_layoutKey, preferences.layout.name),
+      prefs.setInt(_columnsKey, preferences.columns),
+      prefs.setString(_navigationKey, preferences.navigation.name),
+    ]);
   }
 
   static T? _enumByName<T extends Enum>(List<T> values, String? name) {

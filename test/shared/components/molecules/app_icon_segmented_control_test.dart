@@ -34,6 +34,23 @@ void main() {
     expect(segments.map((s) => s.selected), [false, true, false]);
   });
 
+  testWidgets('draws the pill with the outline border', (tester) async {
+    await tester.pumpWidget(
+      wrap(
+        AppIconSegmentedControl<_Mode>(
+          options: options,
+          value: _Mode.a,
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    final box = tester.widget<DecoratedBox>(find.byType(DecoratedBox).first);
+    final decoration = box.decoration as BoxDecoration;
+    final context = tester.element(find.byType(AppIconSegmentedControl<_Mode>));
+    expect(decoration.border?.top.color, Theme.of(context).colorScheme.outline);
+  });
+
   testWidgets('calls onChanged with the tapped value', (tester) async {
     _Mode? changed;
     await tester.pumpWidget(

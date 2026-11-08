@@ -28,8 +28,8 @@ class BookTitleScrim extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
       child: BookTitle(
         title: title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
       ),

@@ -7,18 +7,22 @@ class HorizontalBookList extends StatelessWidget {
   final List<Book> books;
   final bool isLoading;
   final double cardWidth;
-  final double cardHeight;
+
+  /// Defaults to the grid card's own ratio so the title below fits.
+  final double? cardHeight;
 
   const HorizontalBookList({
     super.key,
     required this.books,
     this.isLoading = false,
     this.cardWidth = 140,
-    this.cardHeight = 210,
+    this.cardHeight,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cardHeight = this.cardHeight ?? cardWidth / BookCard.aspectRatio;
+
     if (isLoading) {
       return SizedBox(
         height: cardHeight,

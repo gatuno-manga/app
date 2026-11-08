@@ -8,6 +8,9 @@ import '../atoms/book_type_badge.dart';
 
 /// Cover-only card: the title sits over the art (Figma `/books — capa`).
 class BookCoverCard extends StatelessWidget {
+  /// Figma Livro/Card, cover variant: 200x270.
+  static const double aspectRatio = 0.74;
+
   final Book book;
 
   const BookCoverCard({super.key, required this.book});

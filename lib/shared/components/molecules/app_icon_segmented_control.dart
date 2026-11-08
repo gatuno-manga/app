@@ -34,6 +34,7 @@ class AppIconSegmentedControl<T> extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surfaceContainerHighest,
+        border: Border.all(color: colors.outline),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(

@@ -40,7 +40,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Web only: no results, filter combinations (`919:3451` section). Cover mode is drawn on web only (`920:5249`) but the mobile selector carries the segment, so code implements it on mobile too.
 
 ## Accessibility
-- Not audited.
+- Selected view-selector glyph is `color/on-primary` on `color/primary` (2.5:1 in Dark, True-dark, Slate; 2.4:1 Dracula; 4.0:1 Light), the documented `figma-contrast` gap; selection also reads from the tile fill. Needs a Figma decision.
+- Selector tiles are 36 dp (Figma size), like the pagination buttons.
 
 ## Gaps (Figma vs code)
 - Mobile has no empty/no-results or loading frame (web has `920:5605`).

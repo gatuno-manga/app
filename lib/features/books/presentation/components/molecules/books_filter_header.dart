@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
+import '../../../../../shared/components/atoms/app_sheet_title.dart';
+
 class BooksFilterHeader extends StatelessWidget {
   final VoidCallback onClear;
 
@@ -9,12 +11,11 @@ class BooksFilterHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(l10n.booksFilterTitle, style: theme.textTheme.titleLarge),
+        AppSheetTitle(text: l10n.booksFilterTitle),
         TextButton(onPressed: onClear, child: Text(l10n.booksClearFilters)),
       ],
     );

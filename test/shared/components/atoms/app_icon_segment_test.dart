@@ -64,6 +64,15 @@ void main() {
 
     final context = tester.element(find.byIcon(Icons.image));
     final icon = tester.widget<Icon>(find.byIcon(Icons.image));
+    final tile = tester.widget<Material>(
+      find
+          .ancestor(
+            of: find.byIcon(Icons.image),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
     expect(icon.color, Theme.of(context).colorScheme.onPrimary);
+    expect(tile.color, Theme.of(context).colorScheme.primary);
   });
 }

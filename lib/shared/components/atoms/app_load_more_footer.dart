@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../atoms/app_loading_indicator.dart';
+import 'app_loading_indicator.dart';
 
 /// Loading row appended to a list while the next page is fetched.
 class AppLoadMoreFooter extends StatelessWidget {

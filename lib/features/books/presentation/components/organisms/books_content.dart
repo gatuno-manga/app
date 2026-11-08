@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import 'package:gatuno/shared/components/molecules/app_load_more_footer.dart';
-import 'package:gatuno/shared/components/molecules/load_more_listener.dart';
-import 'package:gatuno/shared/components/molecules/pagination.dart';
-import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
-import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
+
+import '../../../../../shared/components/atoms/app_load_more_footer.dart';
+import '../../../../../shared/components/molecules/pagination.dart';
+import '../../../../../shared/utils/load_more_listener.dart';
+import '../../../domain/entities/books_view_preferences.dart';
+import '../../view_models/books_view_model.dart';
 import 'books_collection.dart';
 import 'books_view_options_sheet.dart';
 import 'books_view_toolbar.dart';
@@ -24,7 +25,7 @@ class BooksContent extends StatelessWidget {
     return Column(
       children: [
         BooksViewToolbar(
-          layout: viewModel.layoutMode,
+          layout: viewModel.preferences.layout,
           onLayoutChanged: viewModel.setLayoutMode,
           onOptionsPressed: () =>
               BooksViewOptionsSheet.show(context, viewModel),
@@ -74,16 +75,14 @@ class BooksContent extends StatelessWidget {
         child: BooksCollection(
           books: viewModel.bookList!.data,
           preferences: viewModel.preferences,
-          footer: _infinite && viewModel.isLoading
-              ? const AppLoadMoreFooter()
-              : null,
+          footer: viewModel.isLoadingMore ? const AppLoadMoreFooter() : null,
         ),
       ),
     );
   }
 
-  // Infinite mode holds pages 1..N, so a refresh starts over from page 1;
-  // pages mode keeps the page the user is on.
+  // The view model restarts from page 1 in infinite mode; pages mode keeps
+  // the page the user is on.
   Future<void> _refresh() =>
-      viewModel.fetchBooks(refresh: true, resetPage: _infinite);
+      viewModel.fetchBooks(refresh: true, resetPage: false);
 }

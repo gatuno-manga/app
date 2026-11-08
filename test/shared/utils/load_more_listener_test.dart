@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gatuno/shared/components/molecules/load_more_listener.dart';
+import 'package:gatuno/shared/utils/load_more_listener.dart';
 
 void main() {
   Widget build({

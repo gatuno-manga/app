@@ -9,10 +9,6 @@ import 'book_list.dart';
 
 /// The scrollable book list in whichever layout the preferences ask for.
 class BooksCollection extends StatelessWidget {
-  // Figma Livro/Card: grid 171x295, cover 200x270.
-  static const double gridAspectRatio = 0.58;
-  static const double coverAspectRatio = 0.74;
-
   final List<Book> books;
   final BooksViewPreferences preferences;
   final Widget? footer;
@@ -32,7 +28,7 @@ class BooksCollection extends StatelessWidget {
       BooksLayoutMode.grid => BookGrid(
         books: books,
         columns: preferences.columns,
-        childAspectRatio: gridAspectRatio,
+        childAspectRatio: BookCard.aspectRatio,
         itemBuilder: (book) => BookCard(book: book),
         footer: footer,
         scrollController: scrollController,
@@ -40,7 +36,7 @@ class BooksCollection extends StatelessWidget {
       BooksLayoutMode.cover => BookGrid(
         books: books,
         columns: preferences.columns,
-        childAspectRatio: coverAspectRatio,
+        childAspectRatio: BookCoverCard.aspectRatio,
         itemBuilder: (book) => BookCoverCard(book: book),
         footer: footer,
         scrollController: scrollController,

@@ -76,6 +76,35 @@ void main() {
     expect(picker.onChanged, isNull);
   });
 
+  testWidgets('does not overflow on a short screen with large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 320);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await pump(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SingleChildScrollView), findsOneWidget);
+  });
+
+  testWidgets('dims the Columns label when the picker is disabled', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      prefs: const BooksViewPreferences(layout: BooksLayoutMode.list),
+    );
+
+    final label = tester.widget<Text>(find.text('Columns'));
+    final context = tester.element(find.text('Columns'));
+    expect(label.style?.color, Theme.of(context).disabledColor);
+  });
+
   testWidgets('reflects a newer state from the stream', (tester) async {
     await pump(tester);
 

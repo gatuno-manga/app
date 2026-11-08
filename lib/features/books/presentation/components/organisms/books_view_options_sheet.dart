@@ -46,7 +46,7 @@ class BooksViewOptionsSheet extends StatelessWidget {
         final preferences = snapshot.data!.preferences;
         final hasColumns = preferences.layout != BooksLayoutMode.list;
 
-        return Padding(
+        return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,

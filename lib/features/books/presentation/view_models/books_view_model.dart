@@ -15,6 +15,9 @@ import '../models/filter_option.dart';
 class BooksState extends Equatable {
   final BookList? bookList;
   final bool isLoading;
+
+  /// True while a page is being appended after the current books.
+  final bool isLoadingMore;
   final String? error;
   final BooksViewPreferences preferences;
   final BookPageOptions options;
@@ -22,6 +25,7 @@ class BooksState extends Equatable {
   const BooksState({
     this.bookList,
     required this.isLoading,
+    this.isLoadingMore = false,
     this.error,
     required this.preferences,
     required this.options,
@@ -37,8 +41,6 @@ class BooksState extends Equatable {
     );
   }
 
-  BooksLayoutMode get layoutMode => preferences.layout;
-
   /// Whether a page after the current one exists.
   bool get hasMore =>
       bookList != null && options.page.value < bookList!.totalPages.value;
@@ -46,6 +48,7 @@ class BooksState extends Equatable {
   BooksState copyWith({
     BookList? Function()? bookList,
     bool? isLoading,
+    bool? isLoadingMore,
     String? Function()? error,
     BooksViewPreferences? preferences,
     BookPageOptions? options,
@@ -53,6 +56,7 @@ class BooksState extends Equatable {
     return BooksState(
       bookList: bookList != null ? bookList() : this.bookList,
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: error != null ? error() : this.error,
       preferences: preferences ?? this.preferences,
       options: options ?? this.options,
@@ -60,8 +64,18 @@ class BooksState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [bookList, isLoading, error, preferences, options];
+  List<Object?> get props => [
+    bookList,
+    isLoading,
+    isLoadingMore,
+    error,
+    preferences,
+    options,
+  ];
 }
+
+typedef _PreferencesChange =
+    BooksViewPreferences Function(BooksViewPreferences);
 
 class BooksViewModel extends BaseStreamViewModel<BooksState> {
   final BooksRepository _repository;
@@ -83,25 +97,30 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   BookList? get bookList => state.bookList;
   bool get isLoading => state.isLoading;
   String? get error => state.error;
+  bool get isLoadingMore => state.isLoadingMore;
   BooksViewPreferences get preferences => state.preferences;
-  BooksLayoutMode get layoutMode => state.layoutMode;
   bool get hasMore => state.hasMore;
   BookPageOptions get options => state.options;
 
-  bool _refetchQueued = false;
+  bool get _infinite =>
+      state.preferences.navigation == BooksNavigationMode.infinite;
+
+  ({bool refresh, bool resetPage})? _queuedFetch;
 
   /// Fetches the list. A call made while a fetch is in flight is not dropped:
-  /// one follow-up fetch runs afterwards with the latest options (page and
-  /// filters are read from state, so `refresh`/`resetPage`/`append` are not
-  /// replayed). With [append] the result is added after the current books
-  /// and, on failure, the page is rolled back so the next attempt retries it.
+  /// one follow-up fetch runs afterwards with that call's `refresh`/`resetPage`
+  /// (the latest wins) and the options then in state. In infinite navigation
+  /// the list holds pages 1..N, so any refresh restarts from page 1 whatever
+  /// [resetPage] says. With [append] the result is added after the current
+  /// books and, on failure, the page is rolled back so the next attempt
+  /// retries it.
   Future<void> fetchBooks({
     bool refresh = false,
     bool resetPage = true,
     bool append = false,
   }) async {
     if (state.isLoading) {
-      _refetchQueued = true;
+      _queuedFetch = (refresh: refresh, resetPage: resetPage);
       return;
     }
 
@@ -111,12 +130,18 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     );
 
     var newOptions = state.options;
-    if (refresh && resetPage) {
+    if (refresh && (resetPage || _infinite)) {
       newOptions = newOptions.copyWith(page: const PositiveInt(1));
     }
+    final requestedPage = newOptions.page;
 
     emit(
-      state.copyWith(isLoading: true, error: () => null, options: newOptions),
+      state.copyWith(
+        isLoading: true,
+        isLoadingMore: append,
+        error: () => null,
+        options: newOptions,
+      ),
     );
 
     try {
@@ -148,26 +173,34 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
               totalPages: result.totalPages,
             )
           : result;
-      emit(state.copyWith(isLoading: false, bookList: () => merged));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          bookList: () => merged,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching books', e, stackTrace, _logTag);
-      final rolledBack = append
-          ? state.options.copyWith(
-              page: PositiveInt(state.options.page.value - 1),
-            )
+      // Only undo the bump this append made; a sort or filter change that
+      // happened meanwhile already moved the page elsewhere.
+      final rolledBack = append && state.options.page == requestedPage
+          ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
           : state.options;
       emit(
         state.copyWith(
           isLoading: false,
+          isLoadingMore: false,
           error: () => e.toString(),
           options: rolledBack,
         ),
       );
     }
 
-    if (_refetchQueued) {
-      _refetchQueued = false;
-      await fetchBooks();
+    final queued = _queuedFetch;
+    if (queued != null) {
+      _queuedFetch = null;
+      await fetchBooks(refresh: queued.refresh, resetPage: queued.resetPage);
     }
   }
 
@@ -203,22 +236,25 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     await fetchBooks(refresh: false, resetPage: false, append: true);
   }
 
-  bool _preferencesChanged = false;
+  /// Changes made before the stored preferences arrive; replayed on top of
+  /// them so neither the user's taps nor the untouched stored fields are lost.
+  List<_PreferencesChange>? _pendingChanges = [];
 
   Future<void> _loadPreferences() async {
     try {
       final loaded = await _viewPreferencesRepository.load();
-      // A change the user made while loading is newer than what was stored.
-      if (_preferencesChanged) return;
-      emit(state.copyWith(preferences: loaded));
+      final pending = _pendingChanges ?? const <_PreferencesChange>[];
+      _pendingChanges = null;
+      final merged = pending.fold(loaded, (prefs, change) => change(prefs));
+      emit(state.copyWith(preferences: merged));
+      if (pending.isNotEmpty) _save(merged);
     } catch (e, stackTrace) {
+      _pendingChanges = null;
       AppLogger.e('Error loading view preferences', e, stackTrace, _logTag);
     }
   }
 
-  void _updatePreferences(BooksViewPreferences preferences) {
-    _preferencesChanged = true;
-    emit(state.copyWith(preferences: preferences));
+  void _save(BooksViewPreferences preferences) {
     _viewPreferencesRepository.save(preferences).catchError((
       Object e,
       StackTrace stackTrace,
@@ -227,9 +263,21 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     });
   }
 
+  /// Applies [change] to the preferences, persists them and emits once,
+  /// with [extra] applied to the same state.
+  void _updatePreferences(
+    _PreferencesChange change, {
+    BooksState Function(BooksState)? extra,
+  }) {
+    _pendingChanges?.add(change);
+    final updated = state.copyWith(preferences: change(state.preferences));
+    emit(extra == null ? updated : extra(updated));
+    _save(updated.preferences);
+  }
+
   void setLayoutMode(BooksLayoutMode mode) {
     AppLogger.i('Setting layout mode to: $mode', _logTag);
-    _updatePreferences(state.preferences.copyWith(layout: mode));
+    _updatePreferences((p) => p.copyWith(layout: mode));
   }
 
   void setColumns(int columns) {
@@ -238,18 +286,18 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       BooksViewPreferences.maxColumns,
     );
     AppLogger.i('Setting columns to: $clamped', _logTag);
-    _updatePreferences(state.preferences.copyWith(columns: clamped));
+    _updatePreferences((p) => p.copyWith(columns: clamped));
   }
 
   /// Switching mode drops the loaded list and starts again from page 1.
   void setNavigationMode(BooksNavigationMode mode) {
     if (mode == state.preferences.navigation) return;
     AppLogger.i('Setting navigation mode to: $mode', _logTag);
-    _updatePreferences(state.preferences.copyWith(navigation: mode));
-    emit(
-      state.copyWith(
+    _updatePreferences(
+      (p) => p.copyWith(navigation: mode),
+      extra: (s) => s.copyWith(
         bookList: () => null,
-        options: state.options.copyWith(page: const PositiveInt(1)),
+        options: s.options.copyWith(page: const PositiveInt(1)),
       ),
     );
     fetchBooks(refresh: true);

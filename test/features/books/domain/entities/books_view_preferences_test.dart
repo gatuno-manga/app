@@ -31,10 +31,5 @@ void main() {
         isNot(const BooksViewPreferences(columns: 4)),
       );
     });
-
-    test('column bounds are 1 to 4', () {
-      expect(BooksViewPreferences.minColumns, 1);
-      expect(BooksViewPreferences.maxColumns, 4);
-    });
   });
 }

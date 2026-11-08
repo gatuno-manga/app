@@ -35,6 +35,8 @@ void main() {
 
     expect(find.byType(BookCard), findsNWidgets(4));
     expect(find.byType(BookCoverCard), findsNothing);
+    final padding = tester.widget<SliverPadding>(find.byType(SliverPadding));
+    expect(padding.padding.horizontal, 32);
     final grid = tester.widget<SliverGrid>(find.byType(SliverGrid));
     final delegate =
         grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;

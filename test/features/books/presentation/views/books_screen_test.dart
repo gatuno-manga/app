@@ -11,7 +11,7 @@ import 'package:gatuno/features/books/presentation/view_models/books_view_model.
 import 'package:gatuno/features/books/presentation/components/organisms/books_view_toolbar.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/books_view_mode_selector.dart';
 import 'package:gatuno/features/books/presentation/views/books_screen.dart';
-import 'package:gatuno/shared/components/molecules/app_load_more_footer.dart';
+import 'package:gatuno/shared/components/atoms/app_load_more_footer.dart';
 import 'package:gatuno/shared/components/molecules/pagination.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
@@ -42,11 +42,11 @@ void main() {
     ).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
-    when(() => mockViewModel.layoutMode).thenReturn(BooksLayoutMode.grid);
     when(
       () => mockViewModel.preferences,
     ).thenReturn(const BooksViewPreferences());
     when(() => mockViewModel.hasMore).thenReturn(false);
+    when(() => mockViewModel.isLoadingMore).thenReturn(false);
     when(() => mockViewModel.loadMore()).thenAnswer((_) async {});
     const options = BookPageOptions();
     when(() => mockViewModel.options).thenReturn(options);
@@ -155,8 +155,8 @@ void main() {
     when(() => mockViewModel.error).thenReturn(state.error);
     when(() => mockViewModel.isLoading).thenReturn(state.isLoading);
     when(() => mockViewModel.preferences).thenReturn(state.preferences);
-    when(() => mockViewModel.layoutMode).thenReturn(state.layoutMode);
     when(() => mockViewModel.hasMore).thenReturn(state.hasMore);
+    when(() => mockViewModel.isLoadingMore).thenReturn(state.isLoadingMore);
     when(() => mockViewModel.options).thenReturn(state.options);
   }
 
@@ -207,6 +207,7 @@ void main() {
         BooksState.initial().copyWith(
           bookList: () => listOf(1, totalPages: 5),
           isLoading: true,
+          isLoadingMore: true,
           preferences: const BooksViewPreferences(
             navigation: BooksNavigationMode.infinite,
             columns: 4,
@@ -217,6 +218,55 @@ void main() {
       await tester.pumpApp(createWidgetUnderTest());
 
       expect(find.byType(AppLoadMoreFooter), findsOneWidget);
+    });
+
+    testWidgets('hides the load-more footer during a refresh', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 5),
+          isLoading: true,
+          preferences: const BooksViewPreferences(columns: 4),
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(AppLoadMoreFooter), findsNothing);
+    });
+
+    testWidgets('scrolling to the end asks the view model for more', (
+      tester,
+    ) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(30, totalPages: 5),
+          preferences: const BooksViewPreferences(columns: 4),
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -6000));
+      await tester.pump();
+
+      verify(() => mockViewModel.loadMore()).called(1);
+    });
+
+    testWidgets('pull-to-refresh refreshes without replaying the page', (
+      tester,
+    ) async {
+      stubState(BooksState.initial().copyWith(bookList: () => listOf(1)));
+
+      await tester.pumpApp(createWidgetUnderTest());
+      await tester.fling(
+        find.byType(CustomScrollView),
+        const Offset(0, 400),
+        1000,
+      );
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.fetchBooks(refresh: true, resetPage: false),
+      ).called(1);
     });
 
     testWidgets('tapping a layout segment calls setLayoutMode', (tester) async {

@@ -96,7 +96,7 @@ Flat with glass. Figma effect styles: `Vidro/Leve` (blur 4), `Vidro/Médio` (blu
 
 ## Shapes
 
-Radius scale: `radius/sm` 4, `radius/md` 8, `radius/lg` 12, `radius/xl` 16, `radius/pill` 999 dp. Code uses a literal 8 (md) only in `snackBarTheme`.
+Radius scale: `radius/sm` 4, `radius/md` 8, `radius/lg` 12, `radius/xl` 16, `radius/pill` 999 dp. Code has no radius tokens; literals on this scale appear in `snackBarTheme` (8) and the icon segmented control (8 tile, 12 pill).
 
 ## Components
 

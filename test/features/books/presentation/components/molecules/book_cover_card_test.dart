@@ -87,6 +87,22 @@ void main() {
     );
   });
 
+  testWidgets('uses the same label size as the grid card title', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      SizedBox(width: 200, height: 270, child: BookCoverCard(book: testBook)),
+    );
+
+    final text = tester.widget<Text>(find.text('Test Book Title'));
+    final context = tester.element(find.text('Test Book Title'));
+    expect(
+      text.style?.fontSize,
+      Theme.of(context).textTheme.labelMedium?.fontSize,
+    );
+    expect(text.style?.color, Colors.white);
+  });
+
   testWidgets('shows the book type badge', (tester) async {
     await tester.pumpApp(
       SizedBox(width: 200, height: 270, child: BookCoverCard(book: testBook)),

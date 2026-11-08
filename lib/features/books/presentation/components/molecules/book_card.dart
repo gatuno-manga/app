@@ -8,6 +8,9 @@ import '../atoms/book_type_badge.dart';
 
 /// Grid card: cover with the title below it (Figma `Livro/Card`).
 class BookCard extends StatelessWidget {
+  /// Figma Livro/Card, grid variant: 171x295.
+  static const double aspectRatio = 0.58;
+
   final Book book;
 
   const BookCard({super.key, required this.book});
