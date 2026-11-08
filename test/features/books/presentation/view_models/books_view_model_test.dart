@@ -5,6 +5,7 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
+import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
 import 'package:gatuno/features/books/domain/entities/tag.dart';
 import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';

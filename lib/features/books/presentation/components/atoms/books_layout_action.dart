@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../view_models/books_view_model.dart';
+import '../../../domain/entities/books_view_preferences.dart';
 
 class BooksLayoutAction extends StatelessWidget {
   final BooksLayoutMode layoutMode;

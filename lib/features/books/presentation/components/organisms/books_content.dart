@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/shared/components/molecules/pagination.dart';
+import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
 import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
 import 'book_grid.dart';
 import 'book_list.dart';

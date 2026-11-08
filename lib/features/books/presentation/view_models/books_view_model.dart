@@ -6,11 +6,10 @@ import '../../../settings/domain/use_cases/settings_service.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_page_options.dart';
 import '../../domain/entities/book_type.dart';
+import '../../domain/entities/books_view_preferences.dart';
 import '../../domain/repositories/books_repository.dart';
 import 'package:equatable/equatable.dart';
 import '../models/filter_option.dart';
-
-enum BooksLayoutMode { grid, list }
 
 class BooksState extends Equatable {
   final BookList? bookList;

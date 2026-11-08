@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/book_page_options.dart';
-import '../../view_models/books_view_model.dart';
+import '../../../domain/entities/books_view_preferences.dart';
 import '../atoms/books_filter_action.dart';
 import '../atoms/books_layout_action.dart';
 import '../molecules/books_search_field.dart';

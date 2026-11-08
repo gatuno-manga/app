@@ -5,6 +5,7 @@ import '../components/organisms/books_app_bar.dart';
 import '../components/organisms/books_content.dart';
 import '../components/organisms/books_filter_sheet.dart';
 import '../components/templates/books_template.dart';
+import '../../domain/entities/books_view_preferences.dart';
 import '../view_models/books_view_model.dart';
 
 class BooksPage extends StatefulWidget {
@@ -60,7 +61,7 @@ class _BooksPageState extends State<BooksPage> {
       initialData: _viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return BooksTemplate(
           appBar: BooksAppBar(
             searchController: _searchController,

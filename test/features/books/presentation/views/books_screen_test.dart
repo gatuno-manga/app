@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
+import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
 import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
 import 'package:gatuno/features/books/presentation/views/books_screen.dart';
 import 'package:mocktail/mocktail.dart';
@@ -17,14 +18,14 @@ class MockBooksViewModel extends Mock implements BooksViewModel {}
 void main() {
   late MockBooksViewModel mockViewModel;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(BookId('dummy'));
     registerFallbackValue(const BookPageOptions());
   });
 
   late StreamController<BooksState> stateController;
 
-setUp(() {
+  setUp(() {
     mockViewModel = MockBooksViewModel();
 
     // Default mock behavior
@@ -32,14 +33,17 @@ setUp(() {
     stateController = StreamController<BooksState>.broadcast();
     stateController.add(mockState);
     when(() => mockViewModel.state).thenReturn(mockState);
-    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.layoutMode).thenReturn(BooksLayoutMode.grid);
     const options = BookPageOptions();
     when(() => mockViewModel.options).thenReturn(options);
     when(() => mockViewModel.bookList).thenReturn(null);
-    when(() => mockViewModel.fetchBooks(
+    when(
+      () => mockViewModel.fetchBooks(
         refresh: any(named: 'refresh'),
         resetPage: any(named: 'resetPage'),
       ),
@@ -62,15 +66,16 @@ setUp(() {
   ) async {
     final bookList = BookList(
       data: [
-        Book(id: const BookId('1'),
+        Book(
+          id: const BookId('1'),
           title: const BookTitle('Test Book'),
           type: null,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         ),
       ],
-        total: const PositiveInt(1),
-        page: const PositiveInt(1),
+      total: const PositiveInt(1),
+      page: const PositiveInt(1),
       limit: const PositiveInt(20),
       totalPages: const PositiveInt(1),
     );
@@ -106,7 +111,9 @@ setUp(() {
   testWidgets(
     'shows full screen error when error occurs and there is NO content',
     (tester) async {
-      final mockState4 = BooksState.initial().copyWith(error: () => 'Initial load failed');
+      final mockState4 = BooksState.initial().copyWith(
+        error: () => 'Initial load failed',
+      );
       stateController.add(mockState4);
       when(() => mockViewModel.state).thenReturn(mockState4);
       when(() => mockViewModel.bookList).thenReturn(null);
