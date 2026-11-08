@@ -1456,7 +1456,7 @@
     },
     {
       "id": "figma-surfaces-empty",
-      "summary": "Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames; the web section 1 has no /library or /users/:userId frame. Surface files for library, profile, auth and settings therefore have no Figma frame anchors."
+      "summary": "Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings) have frames since issue #52 (Dark theme only, key states). Still without frames: web sections 3 (Auth) and 4 (Settings), web /library and /users/:userId, and the code-only welcome and certificates screens."
     },
     {
       "id": "routes-differ",

@@ -1,31 +1,52 @@
 # Surface: Settings
 
-Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; nothing here is new design. Token keys refer to `.impeccable/design.json`.
+Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: /user (mobile section 5 and web section 4 are empty)
+- Figma: /user (mobile section `859:38`, "5 · Configurações")
 - Code: `/settings` (`lib/features/settings`), certificates under `/settings/certificates`
 
-> Designed-but-empty section: Figma mobile section `859:38` and web section `859:28` have no frames.
-
 ## Figma frames
-- None. No frame exists in Figma for this surface yet (see gap `figma-surfaces-empty`).
+- `954:2732` /settings — mobile (profile card, general, API, certificates, diagnostics)
 
 ## Figma components used
-- None drawn.
+- `Shell/Header` (Plataforma=Mobile)
+- `Avatar/Perfil` (new local component, `951:870`) → profile card
+- `Leitor/Item de ajuste` (Controle=Switch) → sensitive-content switch
+- `Campo/Texto` (new local component, `951:869`) → API base URL
+- `Lista/Item` (new local component, `951:872`) → certificates, export logs, open logs
 
 ## Code
 `lib/features/settings/presentation/views/settings_screen.dart`, components under `presentation/components/{molecules,organisms,templates}`; certificates in `lib/features/certificates`.
 
 ## Tokens used
-- Not designed. Use only the shared tokens in `design.json`.
+- `color/app-background`
+- `color/text`
+- `color/text-secondary`
+- `color/text-muted`
+- `color/primary`
+- `color/primary-15`
+- `color/primary-40`
+- `color/divider`
+- `color/app-background-3`
+- `radius/md`
+- `radius/pill`
+- `Título/2`
+- `Título/3`
+- `Corpo/Padrão`
+- `Corpo/Pequeno`
+- `Interface/Rótulo`
+- `Interface/Legenda`
 
 ## States in Figma
-- None drawn.
+- Default only. Copy follows `lib/l10n/app_pt.arb` (`settingsTitle`, `settingsGeneralSection`, `settingsApiSection`, `settingsDiagnosticsSection`).
+- No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
-- Not audited.
+- Not audited. Section labels use `Interface/Rótulo` in `color/text-secondary`; check contrast and row tap targets (56 dp rows) manually.
 
 ## Gaps (Figma vs code)
-- No Figma frame for settings; Figma route `/user` differs from code `/settings`.
-- Code settings include API URL, sensitive-content toggle and certificates; none appear in Figma.
+- Figma route /user differs from code `/settings`.
+- `/settings/certificates` (list, add and remove allowed URLs) has no frame; tracked in a follow-up issue.
+- No web frame exists (web section `859:28` is empty).
+- Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.

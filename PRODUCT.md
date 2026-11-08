@@ -23,7 +23,7 @@ Self-hosted: the user supplies their own server URL on first launch (`/welcome`)
 - Sensitive content: books can be flagged sensitive; a Settings toggle controls whether it is shown. Default behaviour is not recorded here (undecided in this file; check code before relying on it).
 - Languages: English and Portuguese (ARB keys, feature-prefixed). Portuguese strings run longer.
 - Book requests exist as a feature (`/requests`).
-- Design source of truth: the Gatuno Figma file (see `DESIGN.md`). Some surfaces (library, profile, auth, settings) have no Figma frames yet.
+- Design source of truth: the Gatuno Figma file (see `DESIGN.md`). Library, profile, auth and settings have mobile frames (Dark theme only); web frames for them and the welcome and certificates screens are still missing.
 
 ## Brand Commitments
 - Name: Gatuno. Brand orange `#F18522`.
