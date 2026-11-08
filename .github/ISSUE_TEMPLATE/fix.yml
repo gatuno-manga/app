@@ -1,0 +1,31 @@
+name: Bug
+description: Something is broken
+labels: ["type:fix"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Maintainers will apply the matching `area:*` label.
+      options:
+        - area:app
+        - area:reader
+        - area:library
+        - area:auth
+        - area:sync
+        - area:ci
+        - area:docs
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happens
+      description: Observed behaviour, expected behaviour and steps to reproduce.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: App version or commit, platform and OS version.
