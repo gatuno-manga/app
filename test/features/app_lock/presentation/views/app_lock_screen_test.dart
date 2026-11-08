@@ -8,11 +8,34 @@ import 'package:gatuno/shared/components/atoms/app_loading_indicator.dart';
 import '../../../../helpers/pump_app.dart';
 
 void main() {
+  testWidgets('omits the PIN from the message when the fallback is off', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        allowDeviceCredential: false,
+        lastOutcome: null,
+        onUnlock: () {},
+      ),
+    );
+
+    expect(
+      find.text('Use your fingerprint or face to continue'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Use your fingerprint, face or device PIN to continue'),
+      findsNothing,
+    );
+  });
+
   testWidgets('shows the locked message and an Unlock button', (tester) async {
     var taps = 0;
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: null,
         onUnlock: () => taps++,
       ),
@@ -35,13 +58,19 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: null,
         onUnlock: () {},
       ),
     );
     final idle = tester.getSize(find.byType(AppButton)).width;
     await tester.pumpApp(
-      AppLockScreen(isAuthenticating: true, lastOutcome: null, onUnlock: () {}),
+      AppLockScreen(
+        isAuthenticating: true,
+        allowDeviceCredential: true,
+        lastOutcome: null,
+        onUnlock: () {},
+      ),
     );
     final busy = tester.getSize(find.byType(AppButton)).width;
 
@@ -56,6 +85,7 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: DeviceAuthOutcome.lockedOut,
         onUnlock: () {},
       ),
@@ -75,6 +105,7 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: DeviceAuthOutcome.cancelled,
         onUnlock: () {},
       ),
@@ -88,6 +119,7 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: DeviceAuthOutcome.failed,
         onUnlock: () {},
       ),
@@ -105,6 +137,7 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: false,
+        allowDeviceCredential: true,
         lastOutcome: null,
         onUnlock: () {},
       ),
@@ -119,6 +152,7 @@ void main() {
     await tester.pumpApp(
       AppLockScreen(
         isAuthenticating: true,
+        allowDeviceCredential: true,
         lastOutcome: null,
         onUnlock: () => taps++,
       ),

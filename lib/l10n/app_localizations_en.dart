@@ -822,6 +822,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use your fingerprint, face or device PIN to continue';
 
   @override
+  String get appLockLockedDescBiometricOnly =>
+      'Use your fingerprint or face to continue';
+
+  @override
   String get appLockUnlockButton => 'Unlock';
 
   @override
@@ -841,6 +845,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLockErrorNoBiometrics =>
       'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.';
+
+  @override
+  String get appLockErrorNoBiometricHardware =>
+      'This device has no fingerprint or face sensor, so the device PIN must stay allowed.';
 
   @override
   String get appLockErrorSave => 'Could not save the setting. Try again.';

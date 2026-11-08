@@ -31,7 +31,13 @@ class LocalAuthDeviceAuthenticator implements DeviceAuthenticator {
             signInHint: messages.hint,
             cancelButton: messages.cancel,
           ),
-          IOSAuthMessages(cancelButton: messages.cancel),
+          IOSAuthMessages(
+            cancelButton: messages.cancel,
+            // Biometric-only: an empty title hides iOS's own "Enter
+            // Password" fallback button, which would otherwise surface as
+            // userRequestedFallback, i.e. a failure the app invited.
+            localizedFallbackTitle: allowDeviceCredential ? null : '',
+          ),
         ],
       );
       return ok ? DeviceAuthOutcome.success : DeviceAuthOutcome.failed;
@@ -56,9 +62,9 @@ class LocalAuthDeviceAuthenticator implements DeviceAuthenticator {
       case LocalAuthExceptionCode.noCredentialsSet:
         return DeviceAuthOutcome.noCredentials;
       case LocalAuthExceptionCode.noBiometricsEnrolled:
-      // No sensor at all is permanent too; "try again" would mislead.
-      case LocalAuthExceptionCode.noBiometricHardware:
         return DeviceAuthOutcome.noBiometrics;
+      case LocalAuthExceptionCode.noBiometricHardware:
+        return DeviceAuthOutcome.noBiometricHardware;
       case LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
       case LocalAuthExceptionCode.uiUnavailable:
         return DeviceAuthOutcome.unavailable;

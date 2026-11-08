@@ -18,23 +18,21 @@ class AppLockSettingsTile extends StatefulWidget {
 
 class _AppLockSettingsTileState extends State<AppLockSettingsTile> {
   late final AppLockService _service;
-  late final Stream<bool> _supported;
+  late final Stream<bool> _manageable;
 
   @override
   void initState() {
     super.initState();
     _service = sl<AppLockService>();
-    _supported = _service.stateStream.map(_reachable).distinct();
+    _manageable = _service.stateStream.map((s) => s.isManageable).distinct();
   }
-
-  static bool _reachable(AppLockState s) => s.isSupported || s.enabled;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<bool>(
-      stream: _supported,
-      initialData: _reachable(_service.state),
+      stream: _manageable,
+      initialData: _service.state.isManageable,
       builder: (context, snapshot) {
         if (snapshot.data != true) return const SizedBox.shrink();
         return ListTile(

@@ -10,12 +10,16 @@ import '../app_lock_texts.dart';
 /// Full-screen cover shown while the app is locked.
 class AppLockScreen extends StatelessWidget {
   final bool isAuthenticating;
+
+  /// Whether the OS prompt may fall back to the device PIN; shapes the copy.
+  final bool allowDeviceCredential;
   final DeviceAuthOutcome? lastOutcome;
   final VoidCallback onUnlock;
 
   const AppLockScreen({
     super.key,
     required this.isAuthenticating,
+    required this.allowDeviceCredential,
     required this.lastOutcome,
     required this.onUnlock,
   });
@@ -56,7 +60,9 @@ class AppLockScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n.appLockLockedDesc,
+                    allowDeviceCredential
+                        ? l10n.appLockLockedDesc
+                        : l10n.appLockLockedDescBiometricOnly,
                     style: theme.textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),

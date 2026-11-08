@@ -16,6 +16,9 @@ enum DeviceAuthOutcome {
   /// Biometrics were required (fallback off) but none is enrolled.
   noBiometrics,
 
+  /// Biometrics were required but the device has no sensor at all.
+  noBiometricHardware,
+
   /// Hardware missing or temporarily unavailable.
   unavailable,
 

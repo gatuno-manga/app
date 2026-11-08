@@ -826,6 +826,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Use sua digital, rosto ou PIN do aparelho para continuar';
 
   @override
+  String get appLockLockedDescBiometricOnly =>
+      'Use sua digital ou rosto para continuar';
+
+  @override
   String get appLockUnlockButton => 'Desbloquear';
 
   @override
@@ -845,6 +849,10 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get appLockErrorNoBiometrics =>
       'Nenhuma digital ou rosto está cadastrado neste aparelho. Cadastre um nos ajustes do sistema para desbloquear o Gatuno.';
+
+  @override
+  String get appLockErrorNoBiometricHardware =>
+      'Este aparelho não tem sensor de digital ou rosto, então o PIN do aparelho precisa continuar permitido.';
 
   @override
   String get appLockErrorSave =>

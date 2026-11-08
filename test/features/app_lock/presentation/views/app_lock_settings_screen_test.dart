@@ -197,6 +197,28 @@ void main() {
     ).called(1);
   });
 
+  testWidgets('a sensorless device is told the PIN must stay allowed', (
+    tester,
+  ) async {
+    await pumpPage(tester, supportedOn);
+    when(
+      () => fake.mock.setDeviceCredentialAllowed(
+        any(),
+        messages: any(named: 'messages'),
+      ),
+    ).thenAnswer((_) async => DeviceAuthOutcome.noBiometricHardware);
+
+    await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
+    await tester.pump();
+
+    expect(
+      find.text(
+        'This device has no fingerprint or face sensor, so the device PIN must stay allowed.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a failed biometric check keeps the fallback on and explains', (
     tester,
   ) async {

@@ -17,6 +17,8 @@ String? appLockOutcomeText(AppLocalizations l10n, DeviceAuthOutcome? outcome) {
       return l10n.appLockErrorNoCredentials;
     case DeviceAuthOutcome.noBiometrics:
       return l10n.appLockErrorNoBiometrics;
+    case DeviceAuthOutcome.noBiometricHardware:
+      return l10n.appLockErrorNoBiometricHardware;
     case DeviceAuthOutcome.unavailable:
       return l10n.appLockErrorUnavailable;
     case DeviceAuthOutcome.failed:
@@ -31,6 +33,20 @@ String appLockPromptHint(
 }) => allowDeviceCredential
     ? l10n.appLockPromptHintWithCredential
     : l10n.appLockPromptHint;
+
+/// The OS sheet strings for one prompt; only the reason and title differ
+/// between callers.
+DeviceAuthMessages appLockPromptMessages(
+  AppLocalizations l10n, {
+  required String reason,
+  required String title,
+  required bool allowDeviceCredential,
+}) => DeviceAuthMessages(
+  reason: reason,
+  title: title,
+  hint: appLockPromptHint(l10n, allowDeviceCredential: allowDeviceCredential),
+  cancel: l10n.commonCancel,
+);
 
 String appLockGraceLabel(AppLocalizations l10n, AppLockGrace grace) {
   switch (grace) {

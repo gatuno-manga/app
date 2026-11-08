@@ -56,6 +56,10 @@ class AppLockState extends Equatable {
     isInitialized: isInitialized ?? this.isInitialized,
   );
 
+  /// The lock's page and entry stay reachable while it is on, even after
+  /// the device lost its screen lock, so it can still be turned off.
+  bool get isManageable => isSupported || enabled;
+
   @override
   List<Object?> get props => [
     isSupported,
@@ -247,21 +251,24 @@ class AppLockService {
   }) async {
     // Clearing the old outcome lets the cover re-announce an identical one.
     _emit(state.copyWith(isAuthenticating: true, lastOutcome: () => null));
-    var outcome = DeviceAuthOutcome.failed;
+    DeviceAuthOutcome outcome;
     try {
       outcome = await _authenticator.authenticate(
         messages: messages,
         allowDeviceCredential: allowDeviceCredential,
       );
-      return outcome;
-    } finally {
-      // A pass has no time away to count, whatever lifecycle churn the
-      // prompt caused; any other outcome leaves the pause timestamp as
-      // onBackgrounded/onForegrounded left it (Home pressed during the
-      // prompt keeps it, so the grace period still applies on return).
-      if (outcome == DeviceAuthOutcome.success) _backgroundedAt = null;
-      _emit(state.copyWith(isAuthenticating: false));
+    } catch (e, stackTrace) {
+      // The adapter maps its own errors; this only guards the port contract.
+      AppLogger.e('Device authenticator threw', e, stackTrace, _logTag);
+      outcome = DeviceAuthOutcome.failed;
     }
+    // A pass has no time away to count, whatever lifecycle churn the prompt
+    // caused; any other outcome leaves the pause timestamp as
+    // onBackgrounded/onForegrounded left it (Home pressed during the prompt
+    // keeps it, so the grace period still applies on return).
+    if (outcome == DeviceAuthOutcome.success) _backgroundedAt = null;
+    _emit(state.copyWith(isAuthenticating: false));
+    return outcome;
   }
 
   void _emit(AppLockState next) {

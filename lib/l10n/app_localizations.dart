@@ -1598,6 +1598,12 @@ abstract class AppLocalizations {
   /// **'Use your fingerprint, face or device PIN to continue'**
   String get appLockLockedDesc;
 
+  /// No description provided for @appLockLockedDescBiometricOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint or face to continue'**
+  String get appLockLockedDescBiometricOnly;
+
   /// No description provided for @appLockUnlockButton.
   ///
   /// In en, this message translates to:
@@ -1633,6 +1639,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.'**
   String get appLockErrorNoBiometrics;
+
+  /// No description provided for @appLockErrorNoBiometricHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no fingerprint or face sensor, so the device PIN must stay allowed.'**
+  String get appLockErrorNoBiometricHardware;
 
   /// No description provided for @appLockErrorSave.
   ///

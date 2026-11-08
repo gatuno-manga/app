@@ -75,6 +75,27 @@ void main() {
     },
   );
 
+  test(
+    'hides the iOS fallback button only for biometric-only prompts',
+    () async {
+      stubAuthenticate(result: true);
+      await authenticate(allowDeviceCredential: false);
+      await authenticate(allowDeviceCredential: true);
+      final captured = verify(
+        () => localAuth.authenticate(
+          localizedReason: any(named: 'localizedReason'),
+          biometricOnly: any(named: 'biometricOnly'),
+          authMessages: captureAny(named: 'authMessages'),
+        ),
+      ).captured.cast<List<AuthMessages>>();
+
+      IOSAuthMessages ios(List<AuthMessages> m) =>
+          m.whereType<IOSAuthMessages>().single;
+      expect(ios(captured[0]).localizedFallbackTitle, '');
+      expect(ios(captured[1]).localizedFallbackTitle, isNull);
+    },
+  );
+
   test('translates the OS sheet on both platforms', () async {
     stubAuthenticate(result: true);
     await authenticate();
@@ -107,7 +128,7 @@ void main() {
       LocalAuthExceptionCode.noBiometricsEnrolled:
           DeviceAuthOutcome.noBiometrics,
       LocalAuthExceptionCode.noBiometricHardware:
-          DeviceAuthOutcome.noBiometrics,
+          DeviceAuthOutcome.noBiometricHardware,
       LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
           DeviceAuthOutcome.unavailable,
       LocalAuthExceptionCode.uiUnavailable: DeviceAuthOutcome.unavailable,

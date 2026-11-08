@@ -33,11 +33,11 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
   DeviceAuthMessages _confirmMessages(
     AppLocalizations l10n, {
     required bool allowDeviceCredential,
-  }) => DeviceAuthMessages(
+  }) => appLockPromptMessages(
+    l10n,
     reason: l10n.appLockConfirmReason,
     title: l10n.appLockTitle,
-    hint: appLockPromptHint(l10n, allowDeviceCredential: allowDeviceCredential),
-    cancel: l10n.commonCancel,
+    allowDeviceCredential: allowDeviceCredential,
   );
 
   Future<void> _toggleLock(bool enabled) => _apply(
@@ -107,15 +107,19 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
                 // A lock enabled before the screen lock was removed must
                 // still be switchable off.
                 if (!state.isSupported) ...[
-                  Text(
-                    state.enabled
-                        ? l10n.appLockUnsupportedEnabledDesc
-                        : l10n.appLockUnsupportedDesc,
+                  // Support is re-probed on every resume, so this can swap
+                  // while the page is open.
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      state.enabled
+                          ? l10n.appLockUnsupportedEnabledDesc
+                          : l10n.appLockUnsupportedDesc,
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
-                if (state.isSupported || state.enabled)
-                  ..._controls(l10n, state),
+                if (state.isManageable) ..._controls(l10n, state),
               ],
             ),
           ),
