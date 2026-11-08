@@ -1,31 +1,44 @@
 # Surface: Profile
 
-Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; nothing here is new design. Token keys refer to `.impeccable/design.json`.
+Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: /users/:userId (mobile section 3 is empty)
+- Figma: `/users/:userId` (mobile section `859:36`, "3 · Biblioteca e Perfil")
 - Code: `/settings/profile` (`lib/features/users`, `me_screen.dart`)
 
-> Designed-but-empty section: Figma mobile section `859:36` has no frames.
-
 ## Figma frames
-- None. No frame exists in Figma for this surface yet (see gap `figma-surfaces-empty`).
+- `953:2544` /users/:userId — mobile · Meu Perfil (avatar, name, email, logout)
 
 ## Figma components used
-- None drawn.
+- `Shell/Header` (Plataforma=Mobile)
+- `Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
+- `Botão` (Contorno) → logout
 
 ## Code
 `lib/features/users/presentation/views/me_screen.dart`, components under `lib/features/users/presentation/components/{molecules,templates}`. Redirects to `/auth/signin` when unauthenticated.
 
 ## Tokens used
-- Not designed. Use only the shared tokens in `design.json`.
+- `color/app-background`
+- `color/text`
+- `color/text-secondary`
+- `color/primary`
+- `color/primary-15`
+- `color/primary-40`
+- `radius/pill`
+- `Título/1`
+- `Título/2`
+- `Título/3`
+- `Corpo/Padrão`
+- `Interface/Botão`
 
 ## States in Figma
-- None drawn.
+- Authenticated default only. The signed-out case is a redirect to `/auth/signin` in code and has no frame.
 
 ## Accessibility
-- Not audited.
+- Secondary text about 5.0:1 (little headroom) on `color/app-background` (Dark). Avatar shows initials only; no photo state is drawn.
 
 ## Gaps (Figma vs code)
-- No Figma frame for profile (mobile section `859:36` is empty).
-- Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only).
+- Profile (`/settings/profile`) and settings (`/settings`) are separate screens in code; settings holds the profile card, sensitive-content switch and API, certificate and log entries.
+- Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.
+- The sensitive-content switch is not on the profile screen: code puts it on settings (`settings_screen.dart`), so the profile frame omits it.
+- Avatar has no image, loading or error state drawn (code has a grey placeholder circle when the name is null, and uses `colorScheme.onPrimary`, which differs from Figma `color/on-primary`, see `on-primary-dark`); there is no logout-confirmation frame.

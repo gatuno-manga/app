@@ -118,7 +118,9 @@ Figma component library (page "02 · Componentes", node `857:6123`), mapped to c
 | `Leitor/*` | Reader chrome | `features/reading/presentation/components/{molecules,organisms,templates}/` |
 | `Avaliação/*`, `Histórico/*` | Ratings, reading history | no code counterpart found |
 
-Also in code but not in Figma: `app_text_field`, `app_switch`, `app_avatar`, `app_skeleton`, `app_loading_indicator`, `app_error_view`, `app_cta_card`, `certificate_trust_dialog`.
+Added in issue #52 (page "02 · Componentes", local, not yet published): `Campo/Texto` (`app_text_field`, Estado=Padrão/Foco/Erro), `Avatar/Perfil` (`app_avatar`, initials only) and `Lista/Item` (settings row). Switch rows reuse the reader's `Leitor/Item de ajuste`.
+
+Also in code but not in Figma: `app_switch`, `app_skeleton`, `app_loading_indicator`, `app_error_view`, `app_cta_card`, `certificate_trust_dialog`.
 
 States: only states drawn in Figma are specified. Figma defines the tokens `color/hover` and the `-10`/`-15`/`-40` tints for interaction states, but per-component state mapping has not been audited here; do not invent pressed, disabled or focus treatments, flag them as missing instead.
 
@@ -148,6 +150,6 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 - **tokens-without-code**: text-secondary, text-muted, hover, warning, lilac, cyan, alpha ramps, radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and AppColors.gray*/badge* constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.
 - **degrader-not-in-figma**: GatunoColors.degrader gradient has no Figma style.
-- **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings), and web sections 3 (Auth) and 4 (Settings), contain no frames; the web section 1 has no /library or /users/:userId frame. Surface files for library, profile, auth and settings therefore have no Figma frame anchors.
-- **routes-differ**: Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /settings/certificates, /auth/signin, /auth/signup, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome which have no Figma frames.
+- **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings) have frames since issue #52 (Dark theme only, key states). Still without frames: web sections 3 (Auth) and 4 (Settings), web /library and /users/:userId, and the code-only welcome and certificates screens.
+- **routes-differ**: Figma routes /library, /users/:userId and /latest-reads have no matching code routes; Figma /auth/login, /auth/register, /user and /users/:userId map to code /auth/signin, /auth/signup, /settings and /settings/profile under different names. Code-only routes without Figma frames: /settings/certificates, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome.
 - **cheap-weekly-exploration**: Collection 'Gatuno / The Cheap Weekly' (press-black palette) is a redesign exploration and is excluded from tokens.
