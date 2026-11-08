@@ -46,11 +46,13 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Accessibility
 - Code supports password-manager autofill (autofillHints) and a 'go back' action to `/home`; preserve both when implementing.
 - Password rules: 8+ characters, uppercase, digit, symbol.
-- Not audited. Error text relies on `color/danger` plus message copy; check contrast of `color/danger` on `color/app-background` manually.
+- Error text uses `color/danger` (about 4.9:1 on `color/app-background`) and also a red field border and message copy, so color is not the only cue.
+- `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the ENTRAR and CRIAR CONTA buttons.
+- Placeholder text is about 4.3:1.
 
 ## Gaps (Figma vs code)
 - Figma routes /auth/login and /auth/register differ from code `/auth/signin` and `/auth/signup`.
 - `/welcome` (API URL setup) has no frame; tracked in a follow-up issue.
 - Sign-up validation errors (password rules) and server errors are not drawn; no web frame exists (web section `859:27` is empty).
 - Neither Figma nor code has a show/hide control on the password field (`obscureText: true`).
-- Autofill hints and the go-back action are not visible in Figma.
+- Autofill hints and the go-back action to `/home` (guest use) are not visible in Figma; the frames have no guest back affordance.
