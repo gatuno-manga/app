@@ -54,5 +54,6 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.
 - Figma route /user differs from code `/settings`.
 - `/settings/certificates` (list, add and remove allowed URLs) has no frame; tracked in a follow-up issue.
+- `/settings/app-lock` (issue #4) and its General-section entry (`app_lock_settings_tile.dart`, a `Lista/Item` row hidden on devices without a screen lock) have no frame; the lock cover screen has none either (see `app-lock-not-in-figma` in DESIGN.md).
 - No web frame exists (web section `859:28` is empty).
 - Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.

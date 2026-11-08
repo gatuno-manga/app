@@ -747,4 +747,134 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get mfaSaveCodesFirst =>
       'Guarde seus códigos de backup antes de sair desta tela.';
+
+  @override
+  String get appLockTitle => 'Bloqueio do app';
+
+  @override
+  String get settingsAppLockDesc =>
+      'Exigir sua digital, rosto ou PIN do aparelho para abrir o Gatuno';
+
+  @override
+  String get appLockSwitchTitle => 'Bloquear o Gatuno';
+
+  @override
+  String get appLockSwitchDesc =>
+      'Pedir sua digital, rosto ou PIN do aparelho ao abrir o app';
+
+  @override
+  String get appLockSwitchDescBiometricOnly =>
+      'Pedir sua digital ou rosto ao abrir o app';
+
+  @override
+  String get appLockUnsupportedDesc =>
+      'Este aparelho não tem bloqueio de tela, então o Gatuno não pode ser bloqueado.';
+
+  @override
+  String get appLockUnsupportedEnabledDesc =>
+      'Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema para desbloquear o Gatuno ou desativar o bloqueio.';
+
+  @override
+  String get appLockGraceTitle => 'Bloquear depois de sair do app';
+
+  @override
+  String get appLockGraceImmediately => 'Imediatamente';
+
+  @override
+  String get appLockGraceThirtySeconds => 'Após 30 segundos';
+
+  @override
+  String get appLockGraceOneMinute => 'Após 1 minuto';
+
+  @override
+  String get appLockGraceFiveMinutes => 'Após 5 minutos';
+
+  @override
+  String get appLockGraceFifteenMinutes => 'Após 15 minutos';
+
+  @override
+  String get appLockFallbackTitle =>
+      'Permitir PIN, padrão ou senha do aparelho';
+
+  @override
+  String get appLockFallbackOnDesc =>
+      'Usado quando sua digital ou rosto não estiver disponível. Desativar isto pode deixar você sem acesso ao Gatuno após um bloqueio da biometria.';
+
+  @override
+  String get appLockFallbackOffDesc =>
+      'Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo.';
+
+  @override
+  String get appLockConfirmReason =>
+      'Confirme que é você para alterar o bloqueio do app';
+
+  @override
+  String get appLockFallbackNeedsBiometric =>
+      'Cadastre uma digital ou rosto nos ajustes do sistema antes de desativar o PIN do aparelho.';
+
+  @override
+  String get appLockFallbackNoSensor =>
+      'Este aparelho não tem sensor de digital ou rosto, então o PIN do aparelho precisa continuar permitido.';
+
+  @override
+  String get appLockEnableNeedsBiometric =>
+      'Permita o PIN do aparelho abaixo ou cadastre uma digital ou rosto nos ajustes do sistema.';
+
+  @override
+  String get appLockPromptHint => 'Use sua digital ou rosto';
+
+  @override
+  String get appLockPromptHintWithCredential =>
+      'Use sua digital, rosto ou PIN do aparelho';
+
+  @override
+  String get appLockPromptReason => 'Desbloquear o Gatuno';
+
+  @override
+  String get appLockLockedTitle => 'O Gatuno está bloqueado';
+
+  @override
+  String get appLockLockedDesc =>
+      'Use sua digital, rosto ou PIN do aparelho para continuar';
+
+  @override
+  String get appLockLockedDescBiometricOnly =>
+      'Use sua digital ou rosto para continuar';
+
+  @override
+  String get appLockUnlockButton => 'Desbloquear';
+
+  @override
+  String get appLockRetryButton => 'Tentar novamente';
+
+  @override
+  String get appLockErrorCancelled => 'Desbloqueio cancelado';
+
+  @override
+  String get appLockErrorLockedOut =>
+      'Muitas tentativas. A biometria está bloqueada por enquanto.';
+
+  @override
+  String get appLockErrorNoCredentials =>
+      'Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema.';
+
+  @override
+  String get appLockErrorNoBiometrics =>
+      'Nenhuma digital ou rosto está cadastrado neste aparelho. Cadastre um nos ajustes do sistema para desbloquear o Gatuno.';
+
+  @override
+  String get appLockErrorNoBiometricHardware =>
+      'Nenhum sensor de digital ou rosto está disponível neste aparelho.';
+
+  @override
+  String get appLockErrorSave =>
+      'Não foi possível salvar a configuração. Tente novamente.';
+
+  @override
+  String get appLockErrorUnavailable =>
+      'A autenticação do aparelho não está disponível agora. Tente novamente em instantes.';
+
+  @override
+  String get appLockErrorFailed =>
+      'Não foi possível confirmar que é você. Tente novamente.';
 }

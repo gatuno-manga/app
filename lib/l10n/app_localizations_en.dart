@@ -745,4 +745,130 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mfaSaveCodesFirst =>
       'Save your backup codes before leaving this screen.';
+
+  @override
+  String get appLockTitle => 'App lock';
+
+  @override
+  String get settingsAppLockDesc =>
+      'Require your fingerprint, face or device PIN to open Gatuno';
+
+  @override
+  String get appLockSwitchTitle => 'Lock Gatuno';
+
+  @override
+  String get appLockSwitchDesc =>
+      'Ask for your fingerprint, face or device PIN when you open the app';
+
+  @override
+  String get appLockSwitchDescBiometricOnly =>
+      'Ask for your fingerprint or face when you open the app';
+
+  @override
+  String get appLockUnsupportedDesc =>
+      'This device has no screen lock, so Gatuno cannot be locked.';
+
+  @override
+  String get appLockUnsupportedEnabledDesc =>
+      'This device has no screen lock. Set one in the system settings to unlock Gatuno or turn the lock off.';
+
+  @override
+  String get appLockGraceTitle => 'Lock after leaving the app';
+
+  @override
+  String get appLockGraceImmediately => 'Immediately';
+
+  @override
+  String get appLockGraceThirtySeconds => 'After 30 seconds';
+
+  @override
+  String get appLockGraceOneMinute => 'After 1 minute';
+
+  @override
+  String get appLockGraceFiveMinutes => 'After 5 minutes';
+
+  @override
+  String get appLockGraceFifteenMinutes => 'After 15 minutes';
+
+  @override
+  String get appLockFallbackTitle => 'Allow device PIN, pattern or passcode';
+
+  @override
+  String get appLockFallbackOnDesc =>
+      'Used when your fingerprint or face is unavailable. Turning this off can lock you out of Gatuno after a biometric lockout.';
+
+  @override
+  String get appLockFallbackOffDesc =>
+      'If biometrics get locked out, Gatuno stays locked until the device allows them again.';
+
+  @override
+  String get appLockConfirmReason => 'Confirm it\'s you to change the app lock';
+
+  @override
+  String get appLockFallbackNeedsBiometric =>
+      'Enroll a fingerprint or face in the system settings before turning off the device PIN.';
+
+  @override
+  String get appLockFallbackNoSensor =>
+      'This device has no fingerprint or face sensor, so the device PIN must stay allowed.';
+
+  @override
+  String get appLockEnableNeedsBiometric =>
+      'Allow the device PIN below, or enroll a fingerprint or face in the system settings.';
+
+  @override
+  String get appLockPromptHint => 'Use your fingerprint or face';
+
+  @override
+  String get appLockPromptHintWithCredential =>
+      'Use your fingerprint, face or device PIN';
+
+  @override
+  String get appLockPromptReason => 'Unlock Gatuno';
+
+  @override
+  String get appLockLockedTitle => 'Gatuno is locked';
+
+  @override
+  String get appLockLockedDesc =>
+      'Use your fingerprint, face or device PIN to continue';
+
+  @override
+  String get appLockLockedDescBiometricOnly =>
+      'Use your fingerprint or face to continue';
+
+  @override
+  String get appLockUnlockButton => 'Unlock';
+
+  @override
+  String get appLockRetryButton => 'Try again';
+
+  @override
+  String get appLockErrorCancelled => 'Unlock cancelled';
+
+  @override
+  String get appLockErrorLockedOut =>
+      'Too many attempts. Biometrics are locked for now.';
+
+  @override
+  String get appLockErrorNoCredentials =>
+      'No screen lock is set on this device. Set one in the system settings.';
+
+  @override
+  String get appLockErrorNoBiometrics =>
+      'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.';
+
+  @override
+  String get appLockErrorNoBiometricHardware =>
+      'No fingerprint or face sensor is available on this device.';
+
+  @override
+  String get appLockErrorSave => 'Could not save the setting. Try again.';
+
+  @override
+  String get appLockErrorUnavailable =>
+      'Device authentication is not available right now. Try again in a moment.';
+
+  @override
+  String get appLockErrorFailed => 'Could not verify it\'s you. Try again.';
 }

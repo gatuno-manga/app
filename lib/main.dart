@@ -6,6 +6,8 @@ import 'l10n/app_localizations.dart';
 import 'core/theme/app_theme_choice.dart';
 import 'core/theme/theme.dart';
 import 'core/di/injection.dart';
+import 'features/app_lock/domain/use_cases/app_lock_service.dart';
+import 'features/app_lock/presentation/components/organisms/app_lock_gate.dart';
 import 'features/authentication/domain/use_cases/auth_service.dart';
 import 'features/settings/domain/use_cases/settings_service.dart';
 import 'shared/utils/app_activity_observer.dart';
@@ -53,6 +55,10 @@ class App extends StatelessWidget {
             darkTheme: choice.darkTheme,
             themeMode: choice.themeMode,
             routerConfig: router,
+            // Above the router so the route stack survives a lock, below the
+            // localizations so the cover and prompt reason are translated.
+            builder: (context, child) =>
+                AppLockGate(service: sl<AppLockService>(), child: child!),
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,

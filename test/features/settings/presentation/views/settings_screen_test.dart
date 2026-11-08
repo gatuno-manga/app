@@ -13,8 +13,12 @@ import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
+import 'package:gatuno/features/app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
+import '../../../app_lock/helpers/app_lock_mocks.dart';
 
 class MockUserService extends Mock implements UserService {}
 
@@ -58,6 +62,25 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
     );
+    final appLock = FakeAppLockService(
+      const AppLockState(isSupported: true, isInitialized: true),
+    );
+    addTearDown(appLock.close);
+    sl.registerLazySingleton<AppLockService>(() => appLock.mock);
+  });
+
+  testWidgets('SettingsPage shows the App lock entry in General', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      Provider<SettingsViewModel>.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+
+    expect(find.byType(AppLockSettingsTile), findsOneWidget);
+    expect(find.text('App lock'), findsOneWidget);
   });
 
   testWidgets('SettingsPage renders correctly for guest', (tester) async {
