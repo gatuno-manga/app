@@ -8,8 +8,8 @@ import 'package:analyzer/error/error.dart';
 import '../flutter_utils.dart';
 
 /// Flags all-literal `Color(...)` constructors and `Colors.*` outside the
-/// theme layer. `Colors.transparent` is allowed: it is the absence of a color, not a
-/// design token.
+/// theme layer. `Colors.transparent` is allowed: it is the absence of a
+/// color, not a design token.
 class HardcodedColor extends AnalysisRule {
   static const LintCode code = LintCode(
     'hardcoded_color',

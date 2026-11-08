@@ -38,6 +38,8 @@ extension SemanticThemeColors on ThemeData {
 
   /// [status] mixed toward the text color so it stays legible as text or an
   /// icon: raw status fills (amber, dark green) fail contrast on surfaces.
+  /// 70% reaches 4.5:1 for small text on every theme, amber on light
+  /// included.
   Color legible(Color status) =>
-      Color.lerp(status, colorScheme.onSurface, 0.5)!;
+      Color.lerp(status, colorScheme.onSurface, 0.7)!;
 }

@@ -25,6 +25,8 @@ class MissingSemantics extends AnalysisRule {
   );
 
   static const _tappable = {'GestureDetector', 'InkWell', 'InkResponse'};
+  // `Text`/`RichText` only matter in the subtree scan; they cannot enclose a
+  // tappable widget.
   static const _labelling = {
     'Semantics',
     'MergeSemantics',
