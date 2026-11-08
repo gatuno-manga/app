@@ -5,15 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/books_view_preferences.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/books_columns_picker.dart';
 import 'package:gatuno/features/books/presentation/components/organisms/books_view_options_sheet.dart';
-import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
 
 import '../../../../../helpers/pump_app.dart';
 
 void main() {
-  late StreamController<BooksState> states;
+  late StreamController<BooksViewPreferences> states;
 
   setUp(() {
-    states = StreamController<BooksState>.broadcast();
+    states = StreamController<BooksViewPreferences>.broadcast();
   });
 
   tearDown(() => states.close());
@@ -27,8 +26,8 @@ void main() {
     return tester.pumpApp(
       Scaffold(
         body: BooksViewOptionsSheet(
-          stateStream: states.stream,
-          initialState: BooksState.initial().copyWith(preferences: prefs),
+          preferences: states.stream,
+          initial: prefs,
           onColumnsChanged: onColumnsChanged ?? (_) {},
           onNavigationChanged: onNavigationChanged ?? (_) {},
         ),
@@ -111,11 +110,7 @@ void main() {
   testWidgets('reflects a newer state from the stream', (tester) async {
     await pump(tester);
 
-    states.add(
-      BooksState.initial().copyWith(
-        preferences: const BooksViewPreferences(columns: 4),
-      ),
-    );
+    states.add(const BooksViewPreferences(columns: 4));
     await tester.pump();
 
     final picker = tester.widget<BooksColumnsPicker>(

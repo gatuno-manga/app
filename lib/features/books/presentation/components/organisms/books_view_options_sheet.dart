@@ -10,15 +10,15 @@ import '../molecules/books_navigation_mode_picker.dart';
 
 /// Columns and navigation mode; every change applies at once.
 class BooksViewOptionsSheet extends StatelessWidget {
-  final Stream<BooksState> stateStream;
-  final BooksState initialState;
+  final Stream<BooksViewPreferences> preferences;
+  final BooksViewPreferences initial;
   final ValueChanged<int> onColumnsChanged;
   final ValueChanged<BooksNavigationMode> onNavigationChanged;
 
   const BooksViewOptionsSheet({
     super.key,
-    required this.stateStream,
-    required this.initialState,
+    required this.preferences,
+    required this.initial,
     required this.onColumnsChanged,
     required this.onNavigationChanged,
   });
@@ -27,8 +27,8 @@ class BooksViewOptionsSheet extends StatelessWidget {
     return showAppModalBottomSheet<void>(
       context: context,
       builder: (_) => BooksViewOptionsSheet(
-        stateStream: viewModel.stateStream,
-        initialState: viewModel.state,
+        preferences: viewModel.stateStream.map((s) => s.preferences),
+        initial: viewModel.preferences,
         onColumnsChanged: viewModel.setColumns,
         onNavigationChanged: viewModel.setNavigationMode,
       ),
@@ -39,11 +39,11 @@ class BooksViewOptionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return StreamBuilder<BooksState>(
-      stream: stateStream,
-      initialData: initialState,
+    return StreamBuilder<BooksViewPreferences>(
+      stream: preferences,
+      initialData: initial,
       builder: (context, snapshot) {
-        final preferences = snapshot.data!.preferences;
+        final preferences = snapshot.data!;
         final hasColumns = preferences.layout != BooksLayoutMode.list;
 
         return SingleChildScrollView(

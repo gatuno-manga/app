@@ -291,27 +291,75 @@ void main() {
       verifyNever(() => mockRepository.getBooks(any()));
     });
 
-    test('setNavigationMode clears the list and refetches page 1', () async {
+    test(
+      'switching infinite to pages drops the list and fetches page 1',
+      () async {
+        when(
+          () => mockSettingsService.sensitiveContentEnabled,
+        ).thenReturn(true);
+        final seen = <int>[];
+        when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
+          final o = inv.positionalArguments.first as BookPageOptions;
+          seen.add(o.page.value);
+          return page(number: o.page.value, totalPages: 3, ids: ['p${o.page}']);
+        });
+        await viewModel.fetchBooks();
+        await viewModel.loadMore();
+        expect(viewModel.options.page.value, 2);
+        final states = <BooksState>[];
+        final sub = viewModel.stateStream.listen(states.add);
+
+        viewModel.setNavigationMode(BooksNavigationMode.pages);
+        await flush();
+        await sub.cancel();
+
+        expect(viewModel.preferences.navigation, BooksNavigationMode.pages);
+        expect(states.any((s) => s.bookList == null), isTrue);
+        expect(seen.last, 1);
+        expect(viewModel.options.page.value, 1);
+        expect(viewModel.bookList!.data.length, 1);
+      },
+    );
+
+    test(
+      'switching pages to infinite drops the page and fetches page 1',
+      () async {
+        when(
+          () => mockSettingsService.sensitiveContentEnabled,
+        ).thenReturn(true);
+        final seen = <int>[];
+        when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
+          final o = inv.positionalArguments.first as BookPageOptions;
+          seen.add(o.page.value);
+          return page(number: o.page.value, totalPages: 3, ids: ['p${o.page}']);
+        });
+        viewModel.setNavigationMode(BooksNavigationMode.pages);
+        await flush();
+        viewModel.setPage(2);
+        await flush();
+        expect(seen.last, 2);
+
+        viewModel.setNavigationMode(BooksNavigationMode.infinite);
+        await flush();
+
+        expect(seen.last, 1);
+        expect(viewModel.options.page.value, 1);
+      },
+    );
+
+    test('setPage is ignored in infinite mode', () async {
       when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
-      final seen = <BookPageOptions>[];
-      when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
-        seen.add(inv.positionalArguments.first as BookPageOptions);
-        return page(number: 1, totalPages: 3, ids: ['a']);
-      });
+      when(
+        () => mockRepository.getBooks(any()),
+      ).thenAnswer((_) async => page(number: 1, totalPages: 3, ids: ['a']));
       await viewModel.fetchBooks();
+      clearInteractions(mockRepository);
+
       viewModel.setPage(3);
       await flush();
-      final states = <BooksState>[];
-      final sub = viewModel.stateStream.listen(states.add);
 
-      viewModel.setNavigationMode(BooksNavigationMode.pages);
-      await flush();
-      await sub.cancel();
-
-      expect(viewModel.preferences.navigation, BooksNavigationMode.pages);
-      expect(states.any((s) => s.bookList == null), isTrue);
-      expect(seen.last.page.value, 1);
-      expect(viewModel.bookList, isNotNull);
+      expect(viewModel.options.page.value, 1);
+      verifyNever(() => mockRepository.getBooks(any()));
     });
   });
 

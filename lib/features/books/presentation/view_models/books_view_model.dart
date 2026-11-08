@@ -196,8 +196,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     }
   }
 
+  /// Pages mode only: infinite mode appends through [loadMore].
   void setPage(int page) {
-    if (page < 1 ||
+    if (_infinite ||
+        page < 1 ||
         (state.bookList != null && page > state.bookList!.totalPages.value)) {
       return;
     }

@@ -9,7 +9,7 @@ import 'domain/repositories/books_view_preferences_repository.dart';
 import 'presentation/view_models/books_view_model.dart';
 import 'presentation/view_models/book_details_view_model.dart';
 
-void initBooksInjection(GetIt sl) {
+Future<void> initBooksInjection(GetIt sl) async {
   // Repositories
   sl.registerLazySingleton<BooksRepository>(
     () => BooksRepositoryImpl(sl<DioClient>()),
@@ -17,6 +17,8 @@ void initBooksInjection(GetIt sl) {
   sl.registerLazySingleton<BooksViewPreferencesRepository>(
     BooksViewPreferencesRepositoryImpl.new,
   );
+  // Read once so BooksViewModel can seed its state synchronously.
+  await sl<BooksViewPreferencesRepository>().init();
 
   // View Models
   sl.registerFactory<BooksViewModel>(

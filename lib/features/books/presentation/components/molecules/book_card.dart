@@ -22,9 +22,11 @@ class BookCard extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     // Always reserve two title lines so covers in one grid row stay level.
-    final lineHeight =
-        (titleStyle?.fontSize ?? 12) * (titleStyle?.height ?? 1.3);
-    final titleHeight = MediaQuery.textScalerOf(context).scale(lineHeight) * 2;
+    // Flutter scales the font size and then applies the line height.
+    final titleHeight =
+        MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 12) *
+        (titleStyle?.height ?? 1.3) *
+        2;
 
     return Card(
       margin: EdgeInsets.zero,
