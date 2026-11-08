@@ -91,10 +91,7 @@ void main() {
     await tester.pump();
 
     verify(
-      () => fake.mock.setEnabled(
-        true,
-        reason: "Confirm it's you to change the app lock",
-      ),
+      () => fake.mock.setEnabled(true, messages: confirmMessages),
     ).called(1);
   });
 
@@ -103,7 +100,7 @@ void main() {
   ) async {
     await pumpPage(tester, supportedOff);
     when(
-      () => fake.mock.setEnabled(any(), reason: any(named: 'reason')),
+      () => fake.mock.setEnabled(any(), messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.noCredentials);
 
     await tester.tap(switchWithTitle('Lock Gatuno'));
@@ -122,7 +119,7 @@ void main() {
   ) async {
     await pumpPage(tester, supportedOff);
     when(
-      () => fake.mock.setEnabled(any(), reason: any(named: 'reason')),
+      () => fake.mock.setEnabled(any(), messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.cancelled);
 
     await tester.tap(switchWithTitle('Lock Gatuno'));
@@ -130,6 +127,21 @@ void main() {
 
     expect(find.byType(SnackBar), findsNothing);
     expect(find.text('Unlock cancelled'), findsNothing);
+  });
+
+  testWidgets('a persistence failure shows a save error, not a prompt error', (
+    tester,
+  ) async {
+    await pumpPage(tester, supportedOff);
+    when(
+      () => fake.mock.setEnabled(any(), messages: any(named: 'messages')),
+    ).thenThrow(Exception('disk'));
+
+    await tester.tap(switchWithTitle('Lock Gatuno'));
+    await tester.pump();
+
+    expect(find.text('Could not save the setting. Try again.'), findsOneWidget);
+    expect(find.text("Could not verify it's you. Try again."), findsNothing);
   });
 
   testWidgets('choosing a grace period persists it', (tester) async {

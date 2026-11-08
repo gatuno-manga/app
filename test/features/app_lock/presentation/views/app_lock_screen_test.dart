@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/app_lock/domain/device_authenticator.dart';
 import 'package:gatuno/features/app_lock/presentation/views/app_lock_screen.dart';
@@ -45,6 +46,36 @@ void main() {
     );
     expect(find.widgetWithText(AppButton, 'Try again'), findsOneWidget);
     expect(find.text('Unlock'), findsNothing);
+  });
+
+  testWidgets('a cancel reads as neutral, a failure as an error', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        lastOutcome: DeviceAuthOutcome.cancelled,
+        onUnlock: () {},
+      ),
+    );
+    final cancelText = find.text('Unlock cancelled');
+    expect(
+      tester.widget<Text>(cancelText).style?.color,
+      isNot(Theme.of(tester.element(cancelText)).colorScheme.error),
+    );
+
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        lastOutcome: DeviceAuthOutcome.failed,
+        onUnlock: () {},
+      ),
+    );
+    final failText = find.text("Could not verify it's you. Try again.");
+    expect(
+      tester.widget<Text>(failText).style?.color,
+      Theme.of(tester.element(failText)).colorScheme.error,
+    );
   });
 
   testWidgets('disables the button while the prompt is open', (tester) async {

@@ -801,6 +801,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Confirme que é você para alterar o bloqueio do app';
 
   @override
+  String get appLockPromptHint => 'Use sua digital ou rosto';
+
+  @override
   String get appLockPromptReason => 'Desbloquear o Gatuno';
 
   @override
@@ -828,8 +831,16 @@ class AppLocalizationsPt extends AppLocalizations {
       'Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema.';
 
   @override
+  String get appLockErrorNoBiometrics =>
+      'Nenhuma digital ou rosto está cadastrado neste aparelho. Cadastre um nos ajustes do sistema para desbloquear o Gatuno.';
+
+  @override
+  String get appLockErrorSave =>
+      'Não foi possível salvar a configuração. Tente novamente.';
+
+  @override
   String get appLockErrorUnavailable =>
-      'A autenticação do aparelho não está disponível agora';
+      'A autenticação do aparelho não está disponível agora. Tente novamente em instantes.';
 
   @override
   String get appLockErrorFailed =>

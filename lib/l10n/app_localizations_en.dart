@@ -797,6 +797,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLockConfirmReason => 'Confirm it\'s you to change the app lock';
 
   @override
+  String get appLockPromptHint => 'Use your fingerprint or face';
+
+  @override
   String get appLockPromptReason => 'Unlock Gatuno';
 
   @override
@@ -824,8 +827,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'No screen lock is set on this device. Set one in the system settings.';
 
   @override
+  String get appLockErrorNoBiometrics =>
+      'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.';
+
+  @override
+  String get appLockErrorSave => 'Could not save the setting. Try again.';
+
+  @override
   String get appLockErrorUnavailable =>
-      'Device authentication is not available right now';
+      'Device authentication is not available right now. Try again in a moment.';
 
   @override
   String get appLockErrorFailed => 'Could not verify it\'s you. Try again.';

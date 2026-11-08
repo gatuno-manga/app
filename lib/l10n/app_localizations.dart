@@ -1556,6 +1556,12 @@ abstract class AppLocalizations {
   /// **'Confirm it\'s you to change the app lock'**
   String get appLockConfirmReason;
 
+  /// No description provided for @appLockPromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint or face'**
+  String get appLockPromptHint;
+
   /// No description provided for @appLockPromptReason.
   ///
   /// In en, this message translates to:
@@ -1604,10 +1610,22 @@ abstract class AppLocalizations {
   /// **'No screen lock is set on this device. Set one in the system settings.'**
   String get appLockErrorNoCredentials;
 
+  /// No description provided for @appLockErrorNoBiometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.'**
+  String get appLockErrorNoBiometrics;
+
+  /// No description provided for @appLockErrorSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the setting. Try again.'**
+  String get appLockErrorSave;
+
   /// No description provided for @appLockErrorUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Device authentication is not available right now'**
+  /// **'Device authentication is not available right now. Try again in a moment.'**
   String get appLockErrorUnavailable;
 
   /// No description provided for @appLockErrorFailed.

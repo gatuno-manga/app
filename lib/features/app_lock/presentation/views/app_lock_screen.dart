@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
+import '../../../../core/theme/theme.dart';
 import '../../../../shared/components/atoms/app_button.dart';
 import '../../../../shared/icons/icons.dart';
 import '../../domain/device_authenticator.dart';
@@ -24,6 +25,12 @@ class AppLockScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final error = appLockOutcomeText(l10n, lastOutcome);
+    // The user's own cancel is not a failure; keep the danger colour for
+    // outcomes they did not choose.
+    final errorColor = lastOutcome == DeviceAuthOutcome.cancelled
+        ? theme.extension<GatunoColors>()?.palette.textSecondary ??
+              theme.colorScheme.onSurfaceVariant
+        : theme.colorScheme.error;
 
     return Scaffold(
       body: SafeArea(
@@ -56,7 +63,7 @@ class AppLockScreen extends StatelessWidget {
                     child: Text(
                       error,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.error,
+                        color: errorColor,
                       ),
                       textAlign: TextAlign.center,
                     ),

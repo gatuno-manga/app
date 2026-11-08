@@ -303,6 +303,7 @@
   "appLockFallbackOnDesc": "Usado quando sua digital ou rosto não estiver disponível",
   "appLockFallbackOffDesc": "Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo",
   "appLockConfirmReason": "Confirme que é você para alterar o bloqueio do app",
+  "appLockPromptHint": "Use sua digital ou rosto",
   "appLockPromptReason": "Desbloquear o Gatuno",
   "appLockLockedTitle": "O Gatuno está bloqueado",
   "appLockLockedDesc": "Use sua digital, rosto ou PIN do aparelho para continuar",
@@ -311,6 +312,8 @@
   "appLockErrorCancelled": "Desbloqueio cancelado",
   "appLockErrorLockedOut": "Muitas tentativas. A biometria está bloqueada por enquanto.",
   "appLockErrorNoCredentials": "Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema.",
-  "appLockErrorUnavailable": "A autenticação do aparelho não está disponível agora",
+  "appLockErrorNoBiometrics": "Nenhuma digital ou rosto está cadastrado neste aparelho. Cadastre um nos ajustes do sistema para desbloquear o Gatuno.",
+  "appLockErrorSave": "Não foi possível salvar a configuração. Tente novamente.",
+  "appLockErrorUnavailable": "A autenticação do aparelho não está disponível agora. Tente novamente em instantes.",
   "appLockErrorFailed": "Não foi possível confirmar que é você. Tente novamente."
 }

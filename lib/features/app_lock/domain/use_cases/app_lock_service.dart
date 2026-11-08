@@ -140,23 +140,24 @@ class AppLockService {
   }
 
   /// Turns the lock on or off after the user passes the OS prompt.
-  /// Returns the prompt outcome; state only changes on [DeviceAuthOutcome.success].
+  /// Returns the prompt outcome; state only changes on
+  /// [DeviceAuthOutcome.success]. Throws when the preference cannot be
+  /// persisted: the outcome only ever describes the prompt.
   Future<DeviceAuthOutcome> setEnabled(
     bool enabled, {
-    required String reason,
+    required DeviceAuthMessages messages,
   }) async {
     if (state.enabled == enabled) return DeviceAuthOutcome.success;
 
-    final outcome = await _prompt(reason);
+    final outcome = await _prompt(messages);
     if (outcome != DeviceAuthOutcome.success) return outcome;
 
     try {
       await _storage.setEnabled(enabled);
     } catch (e, stackTrace) {
       AppLogger.e('Error persisting app lock', e, stackTrace, _logTag);
-      return DeviceAuthOutcome.failed;
+      rethrow;
     }
-    _backgroundedAt = null;
     _emit(state.copyWith(enabled: enabled, locked: false));
     await _privacyScreen.setEnabled(enabled);
     AppLogger.i('App lock ${enabled ? 'enabled' : 'disabled'}', _logTag);
@@ -198,38 +199,43 @@ class AppLockService {
 
   /// Shows the OS prompt and unlocks on success. Concurrent callers share
   /// the prompt already on screen.
-  Future<DeviceAuthOutcome> unlock({required String reason}) {
+  Future<DeviceAuthOutcome> unlock({required DeviceAuthMessages messages}) {
     if (!state.locked) return Future.value(DeviceAuthOutcome.success);
     return _inFlightUnlock ??= _runUnlock(
-      reason,
+      messages,
     ).whenComplete(() => _inFlightUnlock = null);
   }
 
-  Future<DeviceAuthOutcome> _runUnlock(String reason) async {
+  Future<DeviceAuthOutcome> _runUnlock(DeviceAuthMessages messages) async {
     // Clearing the old outcome lets the cover re-announce an identical one.
     _emit(state.copyWith(lastOutcome: () => null));
-    final outcome = await _prompt(reason);
+    final outcome = await _prompt(messages);
+    final success = outcome == DeviceAuthOutcome.success;
     _emit(
       state.copyWith(
-        locked: outcome != DeviceAuthOutcome.success,
-        lastOutcome: () =>
-            outcome == DeviceAuthOutcome.success ? null : outcome,
+        locked: !success,
+        lastOutcome: () => success ? null : outcome,
       ),
     );
     return outcome;
   }
 
-  Future<DeviceAuthOutcome> _prompt(String reason) async {
+  Future<DeviceAuthOutcome> _prompt(DeviceAuthMessages messages) async {
     _emit(state.copyWith(isAuthenticating: true));
+    var outcome = DeviceAuthOutcome.failed;
     try {
-      return await _authenticator.authenticate(
-        reason: reason,
+      outcome = await _authenticator.authenticate(
+        messages: messages,
         allowDeviceCredential: state.deviceCredentialAllowed,
       );
+      return outcome;
     } finally {
-      // If the user really left (Home during the prompt) the timestamp set
-      // on pause must survive so the grace period still applies on return.
-      if (!_inBackground) _backgroundedAt = null;
+      // A pass has no time away to count, whatever lifecycle churn the
+      // prompt caused. A prompt that ended while the app is really in the
+      // background (Home pressed during it) keeps the timestamp set on
+      // pause so the grace period still applies on return.
+      final keepAway = _inBackground && outcome != DeviceAuthOutcome.success;
+      if (!keepAway) _backgroundedAt = null;
       _emit(state.copyWith(isAuthenticating: false));
     }
   }

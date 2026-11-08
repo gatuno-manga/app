@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
+import '../../../domain/device_authenticator.dart';
 import '../../../domain/use_cases/app_lock_service.dart';
 import '../../views/app_lock_screen.dart';
 
@@ -56,8 +57,17 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
 
   void _prompt() {
     if (!mounted) return;
-    final reason = AppLocalizations.of(context)!.appLockPromptReason;
-    unawaited(widget.service.unlock(reason: reason));
+    final l10n = AppLocalizations.of(context)!;
+    unawaited(
+      widget.service.unlock(
+        messages: DeviceAuthMessages(
+          reason: l10n.appLockPromptReason,
+          title: l10n.appLockLockedTitle,
+          hint: l10n.appLockPromptHint,
+          cancel: l10n.commonCancel,
+        ),
+      ),
+    );
   }
 
   @override

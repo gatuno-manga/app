@@ -15,6 +15,8 @@ String? appLockOutcomeText(AppLocalizations l10n, DeviceAuthOutcome? outcome) {
       return l10n.appLockErrorLockedOut;
     case DeviceAuthOutcome.noCredentials:
       return l10n.appLockErrorNoCredentials;
+    case DeviceAuthOutcome.noBiometrics:
+      return l10n.appLockErrorNoBiometrics;
     case DeviceAuthOutcome.unavailable:
       return l10n.appLockErrorUnavailable;
     case DeviceAuthOutcome.failed:

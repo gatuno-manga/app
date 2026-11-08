@@ -65,7 +65,7 @@ void main() {
 
     expect(find.text('go second'), findsOneWidget);
     expect(find.byType(AppLockScreen), findsNothing);
-    verifyNever(() => fake.mock.unlock(reason: any(named: 'reason')));
+    verifyNever(() => fake.mock.unlock(messages: any(named: 'messages')));
   });
 
   testWidgets('covers the child and prompts once when locked at start', (
@@ -77,7 +77,7 @@ void main() {
 
     expect(find.byType(AppLockScreen), findsOneWidget);
     expect(find.text('go second'), findsNothing);
-    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(1);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
   });
 
   testWidgets('prompts again each time the lock engages', (tester) async {
@@ -93,7 +93,7 @@ void main() {
     fake.emit(locked);
     await tester.pump();
 
-    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(2);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(2);
   });
 
   testWidgets('the Unlock button prompts again after a failure', (
@@ -104,7 +104,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('Try again'));
-    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(2);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(2);
   });
 
   testWidgets('forwards background and foreground to the service', (
@@ -147,7 +147,7 @@ void main() {
     fake.emit(locked.copyWith(lastOutcome: () => DeviceAuthOutcome.cancelled));
     await pumpGate(tester);
     await tester.pump();
-    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(1);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
@@ -157,7 +157,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
 
-    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(1);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
   });
 
   testWidgets('does not prompt on resume while a prompt is open', (
@@ -176,7 +176,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
 
-    verifyNever(() => fake.mock.unlock(reason: any(named: 'reason')));
+    verifyNever(() => fake.mock.unlock(messages: any(named: 'messages')));
   });
 
   testWidgets('swallows the back button while locked', (tester) async {

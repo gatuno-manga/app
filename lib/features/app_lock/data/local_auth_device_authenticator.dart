@@ -1,4 +1,6 @@
 import 'package:local_auth/local_auth.dart';
+import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_darwin/local_auth_darwin.dart';
 
 import '../../../core/logging/logger.dart';
 import '../domain/device_authenticator.dart';
@@ -15,13 +17,22 @@ class LocalAuthDeviceAuthenticator implements DeviceAuthenticator {
 
   @override
   Future<DeviceAuthOutcome> authenticate({
-    required String reason,
+    required DeviceAuthMessages messages,
     required bool allowDeviceCredential,
   }) async {
     try {
       final ok = await _localAuth.authenticate(
-        localizedReason: reason,
+        localizedReason: messages.reason,
         biometricOnly: !allowDeviceCredential,
+        // The plugin's own defaults are English only.
+        authMessages: [
+          AndroidAuthMessages(
+            signInTitle: messages.title,
+            signInHint: messages.hint,
+            cancelButton: messages.cancel,
+          ),
+          IOSAuthMessages(cancelButton: messages.cancel),
+        ],
       );
       return ok ? DeviceAuthOutcome.success : DeviceAuthOutcome.failed;
     } on LocalAuthException catch (e) {
@@ -43,8 +54,9 @@ class LocalAuthDeviceAuthenticator implements DeviceAuthenticator {
       case LocalAuthExceptionCode.biometricLockout:
         return DeviceAuthOutcome.lockedOut;
       case LocalAuthExceptionCode.noCredentialsSet:
-      case LocalAuthExceptionCode.noBiometricsEnrolled:
         return DeviceAuthOutcome.noCredentials;
+      case LocalAuthExceptionCode.noBiometricsEnrolled:
+        return DeviceAuthOutcome.noBiometrics;
       case LocalAuthExceptionCode.noBiometricHardware:
       case LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
       case LocalAuthExceptionCode.uiUnavailable:

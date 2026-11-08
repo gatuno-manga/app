@@ -31,13 +31,23 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
   Future<void> _toggleLock(bool enabled) async {
     if (_service.state.isAuthenticating) return;
     final l10n = AppLocalizations.of(context)!;
-    final outcome = await _service.setEnabled(
-      enabled,
-      reason: l10n.appLockConfirmReason,
-    );
-    // A dismissed prompt simply leaves the switch where it was.
-    if (outcome == DeviceAuthOutcome.cancelled) return;
-    final message = appLockOutcomeText(l10n, outcome);
+    String? message;
+    try {
+      final outcome = await _service.setEnabled(
+        enabled,
+        messages: DeviceAuthMessages(
+          reason: l10n.appLockConfirmReason,
+          title: l10n.appLockTitle,
+          hint: l10n.appLockPromptHint,
+          cancel: l10n.commonCancel,
+        ),
+      );
+      // A dismissed prompt simply leaves the switch where it was.
+      if (outcome == DeviceAuthOutcome.cancelled) return;
+      message = appLockOutcomeText(l10n, outcome);
+    } catch (_) {
+      message = l10n.appLockErrorSave;
+    }
     if (message == null || !mounted) return;
     ScaffoldMessenger.of(
       context,

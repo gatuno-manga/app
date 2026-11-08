@@ -83,18 +83,6 @@ final class PrivacyScreen {
         ? UIColor(red: 0, green: 2 / 255, blue: 18 / 255, alpha: 1)
         : UIColor(red: 238 / 255, green: 238 / 255, blue: 238 / 255, alpha: 1)
     }
-    if let image = UIImage(named: "LaunchImage") {
-      let imageView = UIImageView(image: image)
-      imageView.contentMode = .scaleAspectFit
-      imageView.translatesAutoresizingMaskIntoConstraints = false
-      view.addSubview(imageView)
-      NSLayoutConstraint.activate([
-        imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-        imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-        imageView.widthAnchor.constraint(equalToConstant: 96),
-        imageView.heightAnchor.constraint(equalToConstant: 96),
-      ])
-    }
     window.addSubview(view)
     cover = view
   }

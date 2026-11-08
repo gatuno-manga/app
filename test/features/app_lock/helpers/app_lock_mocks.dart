@@ -7,6 +7,29 @@ import 'package:mocktail/mocktail.dart';
 
 class MockAppLockService extends Mock implements AppLockService {}
 
+const testMessages = DeviceAuthMessages(
+  reason: 'r',
+  title: 't',
+  hint: 'h',
+  cancel: 'c',
+);
+
+/// What the gate builds from the EN strings.
+const unlockMessages = DeviceAuthMessages(
+  reason: 'Unlock Gatuno',
+  title: 'Gatuno is locked',
+  hint: 'Use your fingerprint or face',
+  cancel: 'Cancel',
+);
+
+/// What the settings page builds from the EN strings.
+const confirmMessages = DeviceAuthMessages(
+  reason: "Confirm it's you to change the app lock",
+  title: 'App lock',
+  hint: 'Use your fingerprint or face',
+  cancel: 'Cancel',
+);
+
 /// A mock service backed by a broadcast controller so tests can push states.
 class FakeAppLockService {
   final MockAppLockService mock = MockAppLockService();
@@ -17,13 +40,14 @@ class FakeAppLockService {
   FakeAppLockService([AppLockState initial = const AppLockState()])
     : _state = initial {
     registerFallbackValue(AppLockGrace.oneMinute);
+    registerFallbackValue(testMessages);
     when(() => mock.stateStream).thenAnswer((_) => controller.stream);
     when(() => mock.state).thenAnswer((_) => _state);
     when(
-      () => mock.unlock(reason: any(named: 'reason')),
+      () => mock.unlock(messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(
-      () => mock.setEnabled(any(), reason: any(named: 'reason')),
+      () => mock.setEnabled(any(), messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(() => mock.setGrace(any())).thenAnswer((_) async {});
     when(() => mock.setDeviceCredentialAllowed(any())).thenAnswer((_) async {});

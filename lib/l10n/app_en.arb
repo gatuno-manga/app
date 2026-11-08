@@ -303,6 +303,7 @@
   "appLockFallbackOnDesc": "Used when your fingerprint or face is unavailable",
   "appLockFallbackOffDesc": "If biometrics get locked out, Gatuno stays locked until the device allows them again",
   "appLockConfirmReason": "Confirm it's you to change the app lock",
+  "appLockPromptHint": "Use your fingerprint or face",
   "appLockPromptReason": "Unlock Gatuno",
   "appLockLockedTitle": "Gatuno is locked",
   "appLockLockedDesc": "Use your fingerprint, face or device PIN to continue",
@@ -311,6 +312,8 @@
   "appLockErrorCancelled": "Unlock cancelled",
   "appLockErrorLockedOut": "Too many attempts. Biometrics are locked for now.",
   "appLockErrorNoCredentials": "No screen lock is set on this device. Set one in the system settings.",
-  "appLockErrorUnavailable": "Device authentication is not available right now",
+  "appLockErrorNoBiometrics": "No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.",
+  "appLockErrorSave": "Could not save the setting. Try again.",
+  "appLockErrorUnavailable": "Device authentication is not available right now. Try again in a moment.",
   "appLockErrorFailed": "Could not verify it's you. Try again."
 }

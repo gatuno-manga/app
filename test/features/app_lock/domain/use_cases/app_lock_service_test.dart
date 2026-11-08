@@ -8,6 +8,8 @@ import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart'
 import 'package:gatuno/features/app_lock/domain/value_objects/app_lock_grace.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../helpers/app_lock_mocks.dart';
+
 class MockAppLockStorage extends Mock implements AppLockStorage {}
 
 class MockDeviceAuthenticator extends Mock implements DeviceAuthenticator {}
@@ -23,6 +25,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(AppLockGrace.oneMinute);
+    registerFallbackValue(testMessages);
   });
 
   setUp(() {
@@ -59,7 +62,7 @@ void main() {
   void stubPrompt(DeviceAuthOutcome outcome) {
     when(
       () => authenticator.authenticate(
-        reason: any(named: 'reason'),
+        messages: any(named: 'messages'),
         allowDeviceCredential: any(named: 'allowDeviceCredential'),
       ),
     ).thenAnswer((_) async => outcome);
@@ -150,7 +153,7 @@ void main() {
       await service.init();
       stubPrompt(DeviceAuthOutcome.success);
 
-      final outcome = await service.setEnabled(true, reason: 'r');
+      final outcome = await service.setEnabled(true, messages: testMessages);
 
       expect(outcome, DeviceAuthOutcome.success);
       expect(service.state.enabled, isTrue);
@@ -159,7 +162,7 @@ void main() {
       verify(() => privacyScreen.setEnabled(true)).called(1);
       verify(
         () => authenticator.authenticate(
-          reason: 'r',
+          messages: testMessages,
           allowDeviceCredential: true,
         ),
       ).called(1);
@@ -169,7 +172,7 @@ void main() {
       await service.init();
       stubPrompt(DeviceAuthOutcome.cancelled);
 
-      final outcome = await service.setEnabled(true, reason: 'r');
+      final outcome = await service.setEnabled(true, messages: testMessages);
 
       expect(outcome, DeviceAuthOutcome.cancelled);
       expect(service.state.enabled, isFalse);
@@ -180,7 +183,7 @@ void main() {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.success);
 
-      final outcome = await service.setEnabled(false, reason: 'r');
+      final outcome = await service.setEnabled(false, messages: testMessages);
 
       expect(outcome, DeviceAuthOutcome.success);
       expect(service.state.enabled, isFalse);
@@ -193,7 +196,7 @@ void main() {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.failed);
 
-      await service.setEnabled(false, reason: 'r');
+      await service.setEnabled(false, messages: testMessages);
 
       expect(service.state.enabled, isTrue);
       verifyNever(() => storage.setEnabled(any()));
@@ -208,11 +211,11 @@ void main() {
         await service.init();
         stubPrompt(DeviceAuthOutcome.success);
 
-        await service.setEnabled(true, reason: 'r');
+        await service.setEnabled(true, messages: testMessages);
 
         verify(
           () => authenticator.authenticate(
-            reason: 'r',
+            messages: testMessages,
             allowDeviceCredential: false,
           ),
         ).called(1);
@@ -221,25 +224,27 @@ void main() {
 
     test('is a no-op when the value does not change', () async {
       await service.init();
-      final outcome = await service.setEnabled(false, reason: 'r');
+      final outcome = await service.setEnabled(false, messages: testMessages);
       expect(outcome, DeviceAuthOutcome.success);
       verifyNever(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       );
     });
 
-    test('reports failed and keeps state when persisting throws', () async {
+    test('rethrows a persistence failure and keeps state', () async {
       await service.init();
       stubPrompt(DeviceAuthOutcome.success);
       when(() => storage.setEnabled(any())).thenThrow(Exception('disk'));
 
-      final outcome = await service.setEnabled(true, reason: 'r');
-
-      expect(outcome, DeviceAuthOutcome.failed);
+      await expectLater(
+        service.setEnabled(true, messages: testMessages),
+        throwsException,
+      );
       expect(service.state.enabled, isFalse);
+      verifyNever(() => privacyScreen.setEnabled(true));
     });
   });
 
@@ -251,7 +256,7 @@ void main() {
       verify(() => storage.setGrace(AppLockGrace.fifteenMinutes)).called(1);
       verifyNever(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       );
@@ -269,7 +274,7 @@ void main() {
     test('does not lock when foregrounded before the grace period', () async {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.success);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
 
       service.onBackgrounded();
       now = now.add(const Duration(seconds: 59));
@@ -281,7 +286,7 @@ void main() {
     test('locks when foregrounded at or after the grace period', () async {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.success);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
 
       service.onBackgrounded();
       now = now.add(const Duration(seconds: 60));
@@ -293,7 +298,7 @@ void main() {
     test('locks on every return when grace is immediately', () async {
       await initEnabled(grace: AppLockGrace.immediately);
       stubPrompt(DeviceAuthOutcome.success);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
 
       service.onBackgrounded();
       service.onForegrounded();
@@ -312,7 +317,7 @@ void main() {
     test('ignores a foreground without a preceding background', () async {
       await initEnabled(grace: AppLockGrace.immediately);
       stubPrompt(DeviceAuthOutcome.success);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
 
       service.onForegrounded();
 
@@ -324,12 +329,12 @@ void main() {
       final prompt = Completer<DeviceAuthOutcome>();
       when(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).thenAnswer((_) => prompt.future);
 
-      final unlocking = service.unlock(reason: 'r');
+      final unlocking = service.unlock(messages: testMessages);
       expect(service.state.isAuthenticating, isTrue);
       service.onBackgrounded();
       service.onForegrounded();
@@ -351,16 +356,16 @@ void main() {
       () async {
         await initEnabled();
         stubPrompt(DeviceAuthOutcome.success);
-        await service.unlock(reason: 'r');
+        await service.unlock(messages: testMessages);
 
         final prompt = Completer<DeviceAuthOutcome>();
         when(
           () => authenticator.authenticate(
-            reason: any(named: 'reason'),
+            messages: any(named: 'messages'),
             allowDeviceCredential: any(named: 'allowDeviceCredential'),
           ),
         ).thenAnswer((_) => prompt.future);
-        final disabling = service.setEnabled(false, reason: 'r');
+        final disabling = service.setEnabled(false, messages: testMessages);
         service.onBackgrounded();
         prompt.complete(DeviceAuthOutcome.cancelled);
         await disabling;
@@ -373,21 +378,46 @@ void main() {
       },
     );
 
+    test(
+      'a successful unlock while paused does not re-lock on resume',
+      () async {
+        // Android API 21-29: the device-credential screen pauses the activity,
+        // the success arrives, and only then does `resumed` fire.
+        await initEnabled(grace: AppLockGrace.immediately);
+        final prompt = Completer<DeviceAuthOutcome>();
+        when(
+          () => authenticator.authenticate(
+            messages: any(named: 'messages'),
+            allowDeviceCredential: any(named: 'allowDeviceCredential'),
+          ),
+        ).thenAnswer((_) => prompt.future);
+
+        final unlocking = service.unlock(messages: testMessages);
+        service.onBackgrounded();
+        now = now.add(const Duration(seconds: 20));
+        prompt.complete(DeviceAuthOutcome.success);
+        await unlocking;
+        service.onForegrounded();
+
+        expect(service.state.locked, isFalse);
+      },
+    );
+
     test('does not lock when the app stayed in the foreground', () async {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.success);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
 
       // Android: the device-credential screen pauses and resumes the
       // activity while the user is still "here".
       final prompt = Completer<DeviceAuthOutcome>();
       when(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).thenAnswer((_) => prompt.future);
-      final disabling = service.setEnabled(false, reason: 'r');
+      final disabling = service.setEnabled(false, messages: testMessages);
       service.onBackgrounded();
       now = now.add(const Duration(hours: 1));
       service.onForegrounded();
@@ -423,11 +453,11 @@ void main() {
     test('succeeds and clears the last outcome', () async {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.failed);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
       expect(service.state.lastOutcome, DeviceAuthOutcome.failed);
 
       stubPrompt(DeviceAuthOutcome.success);
-      final outcome = await service.unlock(reason: 'r');
+      final outcome = await service.unlock(messages: testMessages);
 
       expect(outcome, DeviceAuthOutcome.success);
       expect(service.state.locked, isFalse);
@@ -437,17 +467,17 @@ void main() {
     test('clears the previous outcome while a new prompt is open', () async {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.cancelled);
-      await service.unlock(reason: 'r');
+      await service.unlock(messages: testMessages);
       expect(service.state.lastOutcome, DeviceAuthOutcome.cancelled);
 
       final prompt = Completer<DeviceAuthOutcome>();
       when(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).thenAnswer((_) => prompt.future);
-      final unlocking = service.unlock(reason: 'r');
+      final unlocking = service.unlock(messages: testMessages);
       expect(service.state.lastOutcome, isNull);
       prompt.complete(DeviceAuthOutcome.cancelled);
       await unlocking;
@@ -458,7 +488,7 @@ void main() {
       await initEnabled();
       stubPrompt(DeviceAuthOutcome.lockedOut);
 
-      final outcome = await service.unlock(reason: 'r');
+      final outcome = await service.unlock(messages: testMessages);
 
       expect(outcome, DeviceAuthOutcome.lockedOut);
       expect(service.state.locked, isTrue);
@@ -467,11 +497,11 @@ void main() {
 
     test('returns success without a prompt when not locked', () async {
       await service.init();
-      final outcome = await service.unlock(reason: 'r');
+      final outcome = await service.unlock(messages: testMessages);
       expect(outcome, DeviceAuthOutcome.success);
       verifyNever(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       );
@@ -482,20 +512,20 @@ void main() {
       final prompt = Completer<DeviceAuthOutcome>();
       when(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).thenAnswer((_) => prompt.future);
 
-      final first = service.unlock(reason: 'r');
-      final second = service.unlock(reason: 'r');
+      final first = service.unlock(messages: testMessages);
+      final second = service.unlock(messages: testMessages);
       prompt.complete(DeviceAuthOutcome.success);
 
       expect(await first, DeviceAuthOutcome.success);
       expect(await second, DeviceAuthOutcome.success);
       verify(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).called(1);
@@ -506,7 +536,7 @@ void main() {
       final prompt = Completer<DeviceAuthOutcome>();
       when(
         () => authenticator.authenticate(
-          reason: any(named: 'reason'),
+          messages: any(named: 'messages'),
           allowDeviceCredential: any(named: 'allowDeviceCredential'),
         ),
       ).thenAnswer((_) => prompt.future);
@@ -516,7 +546,7 @@ void main() {
           .distinct()
           .listen(seen.add);
 
-      final unlocking = service.unlock(reason: 'r');
+      final unlocking = service.unlock(messages: testMessages);
       await Future<void>.delayed(Duration.zero);
       prompt.complete(DeviceAuthOutcome.success);
       await unlocking;
