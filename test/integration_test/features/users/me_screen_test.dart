@@ -35,6 +35,7 @@ void main() {
         name: const UserDisplayName('Test User'),
       ),
     );
+    when(() => mockUserService.refreshProfile()).thenAnswer((_) async => null);
   });
 
   testWidgets('MePage renders correctly and handles logout', (tester) async {

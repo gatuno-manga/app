@@ -206,5 +206,21 @@
   },
   "bookRequestStatusPending": "PENDING",
   "bookRequestStatusApproved": "APPROVED",
-  "bookRequestStatusRejected": "REJECTED"
+  "bookRequestStatusRejected": "REJECTED",
+  "userImageEditAvatar": "Change profile photo",
+  "userImageEditBanner": "Change banner image",
+  "userImageSourceGallery": "Choose from gallery",
+  "userImageSourceCamera": "Take a photo",
+  "userImageErrorType": "Use a PNG, JPEG or WebP image.",
+  "userImageErrorTooLarge": "This image is too large. The limit is {maxMb} MB.",
+  "@userImageErrorTooLarge": {
+    "placeholders": {
+      "maxMb": {
+        "type": "int"
+      }
+    }
+  },
+  "userImageErrorForbidden": "You don't have permission to change this image.",
+  "userImageErrorNetwork": "Could not upload the image. Check your connection and try again.",
+  "userImageErrorUnknown": "Something went wrong with this image. Please try again."
 }

@@ -501,4 +501,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookRequestStatusRejected => 'REJECTED';
+
+  @override
+  String get userImageEditAvatar => 'Change profile photo';
+
+  @override
+  String get userImageEditBanner => 'Change banner image';
+
+  @override
+  String get userImageSourceGallery => 'Choose from gallery';
+
+  @override
+  String get userImageSourceCamera => 'Take a photo';
+
+  @override
+  String get userImageErrorType => 'Use a PNG, JPEG or WebP image.';
+
+  @override
+  String userImageErrorTooLarge(int maxMb) {
+    return 'This image is too large. The limit is $maxMb MB.';
+  }
+
+  @override
+  String get userImageErrorForbidden =>
+      'You don\'t have permission to change this image.';
+
+  @override
+  String get userImageErrorNetwork =>
+      'Could not upload the image. Check your connection and try again.';
+
+  @override
+  String get userImageErrorUnknown =>
+      'Something went wrong with this image. Please try again.';
 }

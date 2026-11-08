@@ -1027,6 +1027,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'REJECTED'**
   String get bookRequestStatusRejected;
+
+  /// No description provided for @userImageEditAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get userImageEditAvatar;
+
+  /// No description provided for @userImageEditBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Change banner image'**
+  String get userImageEditBanner;
+
+  /// No description provided for @userImageSourceGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get userImageSourceGallery;
+
+  /// No description provided for @userImageSourceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get userImageSourceCamera;
+
+  /// No description provided for @userImageErrorType.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a PNG, JPEG or WebP image.'**
+  String get userImageErrorType;
+
+  /// No description provided for @userImageErrorTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'This image is too large. The limit is {maxMb} MB.'**
+  String userImageErrorTooLarge(int maxMb);
+
+  /// No description provided for @userImageErrorForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to change this image.'**
+  String get userImageErrorForbidden;
+
+  /// No description provided for @userImageErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload the image. Check your connection and try again.'**
+  String get userImageErrorNetwork;
+
+  /// No description provided for @userImageErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with this image. Please try again.'**
+  String get userImageErrorUnknown;
 }
 
 class _AppLocalizationsDelegate
