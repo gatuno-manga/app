@@ -39,6 +39,31 @@
           # Gradle files in android/ target Java 17.
           jdk = pkgs.jdk17;
 
+          # Gradle asks for the NDK in `flutter.ndkVersion`, which Flutter
+          # hard-codes in this file. The Nix store is read-only, so Gradle cannot
+          # install a missing NDK itself. Reading the version from the Flutter SDK
+          # the shell ships (import-from-derivation) keeps the NDK in sync when
+          # flake.lock bumps Flutter. If Flutter moves the constant, fail loudly
+          # rather than ship an NDK that Gradle will reject.
+          flutterNdkFile = "${pkgs.flutter.unwrapped}/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt";
+          flutterNdkPattern = ''[[:space:]]*val ndkVersion: String = "([0-9]+\.[0-9]+\.[0-9]+)".*'';
+          flutterNdkMatches = builtins.filter (m: m != null) (
+            map (builtins.match flutterNdkPattern) (
+              pkgs.lib.splitString "\n" (builtins.readFile flutterNdkFile)
+            )
+          );
+          flutterNdkVersion =
+            if builtins.length flutterNdkMatches == 1 then
+              builtins.head (builtins.head flutterNdkMatches)
+            else
+              throw ''
+                flake.nix: expected exactly one line matching
+                  ${flutterNdkPattern}
+                in ${flutterNdkFile}, found ${toString (builtins.length flutterNdkMatches)}.
+                Flutter moved its NDK version constant: update flutterNdkPattern, or
+                set ndkVersions to the value of `flutter.ndkVersion` by hand.
+              '';
+
           androidComposition = pkgs.androidenv.composeAndroidPackages {
             platformVersions = [
               "34"
@@ -66,6 +91,12 @@
               "mips-android-sysimage-license"
             ];
             includeNDK = true;
+            ndkVersions = [ flutterNdkVersion ];
+            # CMake for plugins with native code (e.g. jni). They leave the version
+            # to the Android Gradle Plugin, whose default is 3.22.1 for the AGP in
+            # android/settings.gradle.kts (8.11.1). Re-check when bumping AGP.
+            includeCmake = true;
+            cmakeVersions = [ "3.22.1" ];
             includeEmulator = false;
             includeSystemImages = false;
           };
