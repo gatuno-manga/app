@@ -47,10 +47,11 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md):
 ```text
 lib/
   main.dart, router.dart   Entry point and root GoRouter
-  core/                    Config, DI, network, logging, theme, image loading,
-                           base classes, shared utils
+  core/                    Config, DI, network, exceptions, logging, theme,
+                           router keys, image loading, base classes, utils
   features/<feature>/      One folder per feature (see below)
-  shared/                  Cross-feature components, domain, data, validators,
+  shared/                  Cross-feature components, presentation (ErrorScreen,
+                           NavigationViewModel), domain, data, validators,
                            icons, utils
   l10n/                    ARB files and generated AppLocalizations (en, pt)
 test/                      Mirrors lib/ (test/core, test/features, test/shared);
@@ -63,8 +64,8 @@ A feature folder:
 
 ```text
 lib/features/<feature>/
-  <feature>_injection.dart  Registers the feature in GetIt
-  <feature>_router.dart     GoRoute(s) / StatefulShellBranch for the feature
+  <feature>_injection.dart  Registers the feature in GetIt (usually)
+  <feature>_router.dart     GoRoute(s) / StatefulShellBranch (when it has routes)
   domain/                   entities/, value_objects/, repositories/ (abstract),
                             use_cases/ (services)
   data/                     models/, repositories/ (implementations),
@@ -73,40 +74,56 @@ lib/features/<feature>/
   exceptions/               Feature-specific exceptions (when needed)
 ```
 
-Not every feature has every folder (`home` and `welcome` have no domain).
+Not every feature has every file or folder: `home` and `welcome` have no
+domain, `users`, `sync` and `app_lock` have no router, `settings` is
+registered inline in `initDI()`, and `authentication` pairs
+`authentication_injection.dart` with `auth_router.dart`.
 
 ## Architecture rules
 
 - **Layers.** `domain` is the contract: abstract repositories, entities, value
   objects and use cases. `data` implements it. `presentation` depends on
-  `domain`, not on `data`. Some existing files break this (use cases importing
-  local data sources, view models importing `UserModel`); do not add more.
+  `domain`, not on `data`. Many existing files break this (use cases in
+  several features import `data/` sources, some view models import
+  `UserModel`); do not add more. New code depends on an abstract interface in
+  `domain/repositories/` instead.
 - **Dependency injection.** GetIt, via the global `sl` in
-  `lib/core/di/injection.dart`. `initDI()` registers core services first, then
-  each feature through its `init<Feature>Injection(sl)` function, then sets up
-  the Dio interceptors. Order matters; read the comments in `initDI()` before
-  moving anything. Services and repositories are lazy singletons; view models
-  are factories (`registerFactory` / `registerFactoryParam`).
+  `lib/core/di/injection.dart`. `initDI()` registers core services, then the
+  features (mostly through `init<Feature>Injection(sl)`; reading and sync use
+  `initReadingDI` / `initSyncDI`), then the Dio interceptors. Order matters;
+  read the comments in `initDI()` before moving anything. Services and
+  repositories are lazy singletons. Prefer registering view models as
+  factories (`registerFactory` / `registerFactoryParam`); some features still
+  construct them directly in the router or screen.
 - **View models.** Extend `BaseStreamViewModel<State>`
   (`lib/core/base/base_stream_view_model.dart`). State is an immutable
   `Equatable` class with `copyWith` and an `initial()` factory; the view model
   calls `emit()` and the UI reads `stateStream` (usually with `StreamBuilder`)
-  or `state`. Call `dispose()` when the owner goes away, and cancel stream
+  or `state`. A view model is not a `ChangeNotifier`, so nothing closes it
+  for you: whoever creates it calls `dispose()` (see Routing). Cancel stream
   subscriptions in `State.dispose`. `SafeChangeNotifier` in the same folder is
   no longer used by any view model; do not build new ones on it.
 - **Routing.** go_router. `lib/router.dart` builds the root router with a
   `StatefulShellRoute` for the bottom navigation; each feature exposes its
-  routes or branch from `<feature>_router.dart`. Route builders create the view
-  model from `sl` and provide it with `Provider<ViewModel>`; screens read it
-  with `context.read`.
+  routes or branch from `<feature>_router.dart`. For new routes, provide the
+  view model from the route builder with
+  `Provider<VM>(create: (_) => sl<VM>(), dispose: (_, vm) => vm.dispose(), child: ...)`
+  and read it in the screen with `context.read`. Existing routes omit
+  `dispose:`; do not copy that. There is no global redirect, so guests can
+  browse. Protect a route with its own `redirect:` that returns
+  `'/auth/signin'` when `!sl<AuthService>().authenticated` (see
+  `settings_router.dart`).
 - **Network.** All HTTP goes through `DioClient` (`lib/core/network/`).
-  Endpoints are `static const` strings in `api_constants.dart`. Interceptors
+  Endpoints are `static const` strings in `api_constants.dart` (a few
+  repositories still hardcode paths; do not add more). Interceptors
   (auth with token refresh, cache, cookies, logging, bad certificate) live in
   `lib/core/network/interceptors/`. The server URL is set at runtime by the
   user (welcome screen, then `SettingsService`), never at compile time;
   `AppConfig` only holds `--dart-define` values such as `REFERER`.
-- **Models.** Every model that reads or writes JSON uses `json_serializable`
-  (`@JsonSerializable`, generated `*.g.dart` via `just gen`). Use
+- **Models.** New models that read or write JSON use `json_serializable`
+  (`@JsonSerializable`, generated `*.g.dart` via `just gen`); `UserModel` and
+  the MFA models are older hand-written exceptions. Value objects expose
+  `fromJson` / `toJson` so generated code can use them. Use
   `explicitToJson: true` when a model nests other custom objects. Data models
   extend or convert to domain entities; repositories return domain types.
   Commit the generated files.
@@ -127,7 +144,8 @@ Not every feature has every folder (`home` and `welcome` have no domain).
   tag: `AppLogger.i('message', _logTag)`; for errors,
   `AppLogger.e('message', error, stackTrace, _logTag)`.
 - Never log PII in release builds: wrap emails in
-  `AppLogger.redactEmail(email)`. `print` is a lint error (`avoid_print`).
+  `AppLogger.redactEmail(email)`. `print` is flagged by `avoid_print` and
+  fails `just analyze`.
 
 ## Code style
 
@@ -137,8 +155,8 @@ Not every feature has every folder (`home` and `welcome` have no domain).
   `dart format` is the formatter.
 - File names are `snake_case.dart`; classes are PascalCase with role suffixes
   (`...Service`, `...ViewModel`, `...Repository` / `...RepositoryImpl`,
-  `...Exception`). Screen files are `*_screen.dart` and hold a `...Page`
-  widget.
+  `...Exception`). Screens live in `presentation/views/`, mostly as
+  `*_screen.dart` holding a `...Page` widget.
 - Single quotes. Private members start with `_`. Prefer named parameters and
   `required` for mandatory ones.
 - Inside `lib/`, use relative imports (the dominant style); tests import
@@ -148,12 +166,14 @@ Not every feature has every folder (`home` and `welcome` have no domain).
 
 ## UI, theme and localization
 
-- **Design tokens.** `DESIGN.md` is the source of truth (it mirrors the
-  Figma file); `lib/core/theme/` implements it (`theme.dart`,
+- **Design tokens.** The Gatuno Figma file is the source of truth;
+  `DESIGN.md` documents it, including known gaps, and `lib/core/theme/`
+  implements it (`theme.dart`,
   `app_palette.dart`, `app_typography.dart`, the `GatunoColors` extension).
   Use theme colors and text styles, never raw hex values in widgets. If you
   change tokens, keep `DESIGN.md` and `.impeccable/design.json` in sync and run
-  `just design-tokens`.
+  `just design-tokens`. For design work, the tool-neutral `impeccable` skill
+  lives in `.agents/skills/` (linked from `.claude/` and `.gemini/`).
 - **Strings.** Every user-facing string goes in `lib/l10n/app_en.arb` and
   `lib/l10n/app_pt.arb`. Keys are camelCase with a feature prefix
   (`authSignInTitle`, `booksSearchHint`, `settingsTitle`, `commonLoading`). Run
@@ -165,15 +185,15 @@ UI components follow Atomic Design:
 
 | Tier | Where | Example |
 | --- | --- | --- |
-| Atoms | `lib/shared/components/atoms/`, `lib/features/<feature>/presentation/components/atoms/` | `AppButton`, `BookCover` |
+| Atoms | `lib/shared/components/atoms/`, `lib/features/<feature>/presentation/components/atoms/` | `AppButton`, `BookTypeBadge` |
 | Molecules | `lib/shared/components/molecules/`, `.../components/molecules/` | `AppErrorView`, `BookCard` |
 | Organisms | `lib/shared/components/organisms/`, `.../components/organisms/` | `NavigationShell`, `BooksAppBar` |
 | Templates | `lib/features/<feature>/presentation/components/templates/` | `BooksTemplate` |
 | Pages | `lib/features/<feature>/presentation/views/` | `BooksPage` (`books_screen.dart`) |
 
 Shared tiers live in `lib/shared/components/`; feature-specific ones in the
-feature's `presentation/components/`. Pages wire the view model to a template;
-templates arrange organisms.
+feature's `presentation/components/`. About half the pages delegate layout to
+a template (`BooksPage` → `BooksTemplate`); the rest build it directly.
 
 <!-- Atomic Design composition rules: see issue #67. -->
 
