@@ -50,6 +50,15 @@ class IconButton extends Widget {
 class TextField extends Widget {
   const TextField();
 }
+class TextFormField extends Widget {
+  const TextFormField();
+}
+class OutlinedButton extends Widget {
+  const OutlinedButton({Widget? child, void Function()? onPressed});
+}
+class FilledButton extends Widget {
+  const FilledButton({Widget? child, void Function()? onPressed});
+}
 enum MaterialTapTargetSize { padded, shrinkWrap }
 class TextButton extends Widget {
   const TextButton({Widget? child, MaterialTapTargetSize? materialTapTargetSize});

@@ -246,10 +246,14 @@ a template (`BooksPage` → `BooksTemplate`); the rest build it directly.
 
 **Anti-patterns.**
 
-- An organism, template or page that builds `ElevatedButton`, `TextButton`,
-  `OutlinedButton`, `IconButton` or `TextField` directly instead of `AppButton`,
-  `AppIconButton` or `AppTextField` (`signin_form.dart` still does; do not copy
-  it). `gatuno_lints` flags this as `raw_widget_outside_atoms`.
+- A molecule, organism, template or page that builds `ElevatedButton`,
+  `TextButton`, `OutlinedButton`, `FilledButton`, `IconButton`, `TextField` or
+  `TextFormField` directly (`signin_form.dart` still does; do not copy it).
+  Use `AppButton`, `AppIconButton` or `AppTextField` when they fit. When none
+  does (`AppButton` is only a filled button, so there is no text or outlined
+  variant yet), add the variant as an atom under `components/atoms/` instead of
+  building the raw widget inline. `gatuno_lints` flags this as
+  `raw_widget_outside_atoms`; it only checks those widgets built directly.
 - A field, row, badge or card written inline and repeated, instead of an atom or
   molecule.
 - A molecule that reads a view model, or an atom that holds feature state.

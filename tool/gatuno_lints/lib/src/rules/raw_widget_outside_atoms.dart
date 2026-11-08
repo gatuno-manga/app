@@ -7,18 +7,22 @@ import 'package:analyzer/error/error.dart';
 
 import '../flutter_utils.dart';
 
-/// Flags Material buttons and text fields built directly in a molecule,
-/// organism, template or page. Those tiers compose the app atoms
-/// (`AppButton`, `AppIconButton`, `AppTextField`); only an atom may wrap the
-/// raw Flutter widget.
+/// Flags Material buttons and text fields built directly in any app code
+/// outside an atom (`components/atoms/`). Molecules, organisms, templates and
+/// pages compose the app atoms; only an atom wraps the raw Flutter widget.
+///
+/// Only direct constructor calls are checked (tear-offs and `styleFrom` are
+/// not), and only the widgets in [rawWidgets]; other raw widgets such as
+/// `Switch`, `SegmentedButton` or `PopupMenuButton` are out of scope.
 class RawWidgetOutsideAtoms extends AnalysisRule {
   static const LintCode code = LintCode(
     'raw_widget_outside_atoms',
     'Raw Material widget built outside an atom.',
     severity: DiagnosticSeverity.INFO,
     correctionMessage:
-        'Use AppButton, AppIconButton or AppTextField, or extract a new atom '
-        'under components/atoms/.',
+        'Use AppButton, AppIconButton or AppTextField when they fit; otherwise '
+        'add the missing variant (for example a text button) as an atom under '
+        'components/atoms/.',
   );
 
   /// Flutter widgets that only atoms may build.
@@ -58,15 +62,10 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    if (!appliesTo(context) || _isAtom()) return;
+    if (!appliesTo(context) || isAtomFile(context)) return;
     if (!RawWidgetOutsideAtoms.rawWidgets.contains(flutterTypeName(node))) {
       return;
     }
     rule.reportAtNode(node.constructorName);
-  }
-
-  bool _isAtom() {
-    final path = context.currentUnit?.file.path.replaceAll(r'\', '/') ?? '';
-    return path.contains('/components/atoms/');
   }
 }
