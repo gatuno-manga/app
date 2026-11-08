@@ -152,8 +152,8 @@ class _MePageState extends State<MePage> {
                 icon: const Icon(Icons.logout),
                 label: Text(l10n.commonLogout),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade900,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Theme.of(context).colorScheme.onError,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
               ),

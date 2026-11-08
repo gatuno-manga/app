@@ -42,7 +42,7 @@ class ReadingTopBar extends StatelessWidget {
               children: [
                 Text(
                   chapter.bookTitle.value,
-                  style: TextStyle(
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                   ),
@@ -50,9 +50,8 @@ class ReadingTopBar extends StatelessWidget {
                 ),
                 Text(
                   chapter.title?.value ?? 'Chapter ${chapter.index.value}',
-                  style: TextStyle(
+                  style: theme.textTheme.labelSmall?.copyWith(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    fontSize: 12,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -5,6 +5,7 @@ import '../../../../../shared/components/atoms/app_status_badge.dart';
 import '../../../domain/entities/book_request_entity.dart';
 import '../../../domain/value_objects/request_status.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 class BookRequestCard extends StatelessWidget {
   final BookRequestEntity request;
@@ -21,20 +22,21 @@ class BookRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     Color statusColor;
     String statusLabel;
-    
+
     switch (request.status) {
       case RequestStatus.approved:
-        statusColor = Colors.green;
+        statusColor = theme.successColor;
         statusLabel = l10n.bookRequestStatusApproved;
         break;
       case RequestStatus.rejected:
-        statusColor = Colors.red;
+        statusColor = theme.colorScheme.error;
         statusLabel = l10n.bookRequestStatusRejected;
         break;
       case RequestStatus.pending:
-        statusColor = Colors.orange;
+        statusColor = theme.warningColor;
         statusLabel = l10n.bookRequestStatusPending;
         break;
     }
@@ -56,14 +58,15 @@ class BookRequestCard extends StatelessWidget {
                   child: Text(
                     request.title.value,
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 AppStatusBadge(
                   label: statusLabel,
                   color: statusColor,
+                  textColor: theme.legible(statusColor),
                 ),
               ],
             ),
@@ -85,9 +88,9 @@ class BookRequestCard extends StatelessWidget {
                       child: Text(
                         request.url.value,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              decoration: TextDecoration.underline,
-                            ),
+                          color: Theme.of(context).colorScheme.primary,
+                          decoration: TextDecoration.underline,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -96,12 +99,13 @@ class BookRequestCard extends StatelessWidget {
                 ),
               ),
             ),
-            if (request.reason.value != null && request.reason.value!.isNotEmpty) ...[
+            if (request.reason.value != null &&
+                request.reason.value!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline, size: 16, color: Colors.grey),
+                  Icon(Icons.info_outline, size: 16, color: theme.mutedColor),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -118,13 +122,18 @@ class BookRequestCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, size: 16, color: Colors.red),
+                  Icon(
+                    Icons.error_outline,
+                    size: 16,
+                    color: theme.colorScheme.error,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${l10n.bookRequestsCardRejection}: ${request.rejectionMessage.value}',
-                      style: Theme.of(context).textTheme.bodyMedium
-                          ?.copyWith(color: Colors.red),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
                     ),
                   ),
                 ],
@@ -133,16 +142,15 @@ class BookRequestCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
+                Icon(Icons.calendar_today, size: 14, color: theme.mutedColor),
                 const SizedBox(width: 6),
                 Text(
                   l10n.bookRequestsCardDate(
                     DateFormat.yMMMd().format(request.createdAt.value),
                   ),
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: Colors.grey),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: theme.mutedColor),
                 ),
               ],
             ),

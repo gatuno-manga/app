@@ -4,6 +4,7 @@ import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/shared/components/atoms/app_text_skeleton.dart';
 import 'user_banner.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 class UserProfileHeader extends StatelessWidget {
   static const double _bannerHeight = 140;
@@ -98,7 +99,7 @@ class UserProfileHeader extends StatelessWidget {
           text: email,
           width: 200,
           height: 16,
-          style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey),
+          style: theme.textTheme.bodyLarge?.copyWith(color: theme.mutedColor),
           textAlign: TextAlign.center,
         ),
       ],

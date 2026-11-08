@@ -1,0 +1,35 @@
+name: Lints
+
+# Runs the gatuno_lints analyzer rules on pull requests. The shared flutter-ci
+# workflow runs `flutter analyze`, which exits before analyzer plugins report,
+# so the rules are enforced here with `dart analyze`.
+on:
+  push:
+    branches:
+      - main
+      - developer
+  pull_request:
+    branches:
+      - main
+      - developer
+
+jobs:
+  lints:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze (includes gatuno_lints rules)
+        run: dart analyze
+
+      - name: Test lint rules
+        run: cd tool/gatuno_lints && dart pub get && dart test

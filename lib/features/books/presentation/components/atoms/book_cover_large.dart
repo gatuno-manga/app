@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_cover.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 class BookCoverLarge extends StatelessWidget {
   final String? coverUrl;
@@ -24,7 +25,7 @@ class BookCoverLarge extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: OnImageColors.scrim.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

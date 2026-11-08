@@ -32,6 +32,9 @@ extension ReaderTextAlignmentValue on ReaderTextAlignment {
 
 extension TextReaderPreferencesStyle on TextReaderPreferences {
   /// Body style of the text reader for these preferences.
+  // The reader owns its typography: the family and size are the user's
+  // choice, not the app theme's.
+  // ignore: gatuno_lints/inline_text_style
   TextStyle textStyle({required Color color}) => TextStyle(
     fontFamily: fontFamily.family,
     fontSize: fontSize,

@@ -4,6 +4,7 @@ import '../../../../books/domain/entities/book.dart';
 import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/image/image_loading_strategy.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 class FeaturedCarouselBackground extends StatelessWidget {
   final Book book;
@@ -14,7 +15,9 @@ class FeaturedCarouselBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bgColor = book.metadata?.dominantColor != null
-        ? Color(int.parse(book.metadata!.dominantColor!.replaceFirst('#', '0xFF')))
+        ? Color(
+            int.parse(book.metadata!.dominantColor!.replaceFirst('#', '0xFF')),
+          )
         : theme.colorScheme.surfaceContainerHighest;
 
     return Stack(
@@ -30,17 +33,15 @@ class FeaturedCarouselBackground extends StatelessWidget {
           )
         else
           Container(color: bgColor),
-          
+
         // Blur Overlay
         ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.5),
-            ),
+            child: Container(color: OnImageColors.scrim.withValues(alpha: 0.5)),
           ),
         ),
-        
+
         // Gradient
         Container(
           decoration: BoxDecoration(
@@ -49,7 +50,7 @@ class FeaturedCarouselBackground extends StatelessWidget {
               end: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.black.withValues(alpha: 0.8),
+                OnImageColors.scrim.withValues(alpha: 0.8),
               ],
             ),
           ),

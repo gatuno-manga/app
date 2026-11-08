@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'book_title.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 /// Title over a dark bottom gradient, for text laid on top of a cover.
 ///
@@ -20,8 +21,8 @@ class BookTitleScrim extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            Colors.black.withValues(alpha: 0.7),
-            Colors.black.withValues(alpha: 0.9),
+            OnImageColors.scrim.withValues(alpha: 0.7),
+            OnImageColors.scrim.withValues(alpha: 0.9),
           ],
         ),
       ),
@@ -30,7 +31,7 @@ class BookTitleScrim extends StatelessWidget {
         title: title,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: OnImageColors.content,
         ),
       ),
     );

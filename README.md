@@ -32,11 +32,12 @@ Run `just` to list every task. Common ones:
 | `just l10n` | Generate localization files |
 | `just fmt` | Format Dart files |
 | `just fix` | Apply automated Dart fixes |
-| `just analyze` | Static analysis (`flutter analyze`) |
+| `just analyze` | Static analysis (`dart analyze`), including the `gatuno_lints` UI rules |
 | `just test` | Unit and widget tests |
 | `just coverage` | Tests with coverage (`coverage/lcov.info`) |
+| `just test-lints` | Unit tests of the `gatuno_lints` analyzer plugin |
 | `just design-tokens` | Check design token consistency |
-| `just check` | Analyze, tests and design tokens |
+| `just check` | Analyze, tests, lint-rule tests and design tokens |
 | `just repo-check` | Verify repo settings, labels and milestones against `tools.toml` |
 
 ### Git hooks

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 class CarouselIndicator extends StatelessWidget {
   final int itemCount;
@@ -25,7 +26,7 @@ class CarouselIndicator extends StatelessWidget {
           decoration: BoxDecoration(
             color: currentIndex == index
                 ? Theme.of(context).colorScheme.primary
-                : Colors.white.withValues(alpha: 0.5),
+                : OnImageColors.content.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(4),
           ),
         ),

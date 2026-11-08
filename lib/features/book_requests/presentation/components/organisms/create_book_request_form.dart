@@ -86,7 +86,9 @@ class _CreateBookRequestFormState extends State<CreateBookRequestForm> {
                   padding: const EdgeInsets.only(bottom: 16.0),
                   child: Text(
                     state.error!,
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
               AppTextField(
@@ -131,7 +133,7 @@ class _CreateBookRequestFormState extends State<CreateBookRequestForm> {
             ],
           ),
         );
-      }
+      },
     );
   }
 }

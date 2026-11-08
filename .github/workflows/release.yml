@@ -92,10 +92,13 @@ jobs:
         run: flutter pub get
 
       - name: Run static analysis
-        run: flutter analyze
+        run: dart analyze
 
       - name: Run tests
         run: flutter test
+
+      - name: Test lint rules
+        run: cd tool/gatuno_lints && dart pub get && dart test
 
   build_android:
     name: Build Android (APK & AAB)
