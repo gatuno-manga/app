@@ -19,7 +19,7 @@ Reasons, in order of weight:
 
 | Concern | Mechanism | Evidence |
 | --- | --- | --- |
-| Global DI | `get_it` (`sl`) | `lib/core/di/injection.dart`, 33 `register*` calls |
+| Global DI | `get_it` (`sl`) | `lib/core/di/injection.dart` plus per-feature `*_injection.dart` (33 `register*` calls in total); `Provider.value`/`MultiProvider` for `AuthService`/`SettingsService` at `lib/main.dart:22-25` |
 | Scoped DI / lifetime of a view model | `provider`'s `Provider<VM>(create:)` per route | e.g. `lib/features/certificates/certificates_router.dart:11`, `lib/features/books/books_router.dart:18`, `lib/shared/components/organisms/navigation_shell.dart:19` |
 | Screen state | `BaseStreamViewModel<State>` + `Equatable` state + `copyWith` | `lib/core/base/base_stream_view_model.dart:6`, `lib/features/certificates/presentation/view_models/certificates_view_model.dart:54` |
 | Rendering | `StreamBuilder<State>` with `initialData: vm.state` | `lib/features/certificates/presentation/views/certificates_screen.dart:67` |
@@ -27,7 +27,7 @@ Reasons, in order of weight:
 
 `BaseStreamViewModel` already gives what Riverpod's `Notifier` gives for this app: immutable state, synchronous read (`state`), explicit disposal, and view models that are unit-testable without Flutter (`test/features/certificates/presentation/view_models/certificates_view_model_test.dart`).
 
-## 3. `StatefulWidget` inventory (24 files, 26 `State` classes, 14 `setState` call sites)
+## 3. `StatefulWidget` inventory (24 files, 25 `State` classes, 14 `setState` call sites)
 
 Each row is the `State` class declaration line at `5394918`. "Replaceable by Riverpod?" asks whether the *state* could move into a provider; controllers/timers still need a widget-owned lifecycle (Riverpod has no equivalent besides `flutter_hooks`, which would be a second new dependency).
 
@@ -38,7 +38,7 @@ Each row is the `State` class declaration line at `5394918`. "Replaceable by Riv
 - `lib/features/authentication/presentation/components/organisms/signin_form.dart:23`
 - `lib/features/authentication/presentation/components/organisms/signup_form.dart:23`
 - `lib/features/book_requests/presentation/components/organisms/create_book_request_form.dart:17` (`setState(() {})` at `:41` only to refresh the submit-button enablement)
-- `lib/features/books/presentation/components/molecules/books_search_field.dart:18`
+- `lib/features/books/presentation/components/molecules/books_search_field.dart:18` (`setState` at `:33`)
 - `lib/features/books/presentation/components/organisms/books_filter_sheet.dart:52` (4 `setState` calls, `:72-103`; local draft of filter options, committed on apply)
 - `lib/features/certificates/presentation/components/molecules/certificate_add_dialog.dart:24` (`_isLoading`, `_isValid`)
 - `lib/features/settings/presentation/components/organisms/settings_api_form.dart:20`
@@ -82,7 +82,7 @@ Replaceable by Riverpod? Yes, mechanically (spike in §5). Gain: about 15 lines 
 - `lib/features/users/presentation/views/me_screen.dart:17` (`context.read<MeViewModel>().init()` in a post-frame callback, `:22`)
 - `lib/features/reading/presentation/views/reading_screen.dart:50` (`didUpdateWidget` → `loadChapter`, `:52-55`)
 
-With a Riverpod `Notifier.build()` or a `family` provider keyed by chapter id the load could be declarative and the widgets could become stateless. Real but small gain; `reading_screen` also owns the `Provider<ReadingViewModel>` at `:25`, so it is the one place where `family` semantics would actually remove a lifecycle bug class (stale view model when the chapter id changes).
+With a Riverpod `Notifier.build()` or a `family` provider keyed by chapter id the load could be declarative and the widgets could become stateless. Real but small gain; `reading_screen` also owns the `Provider<ReadingViewModel>` at `:25` and reloads by hand in `didUpdateWidget` when the chapter id changes, so it is the one place where `family` semantics would replace manual reload plumbing (it is not a current bug).
 
 ### Summary
 
@@ -110,7 +110,7 @@ Done on `main` @ `5394918` in this worktree, then discarded (`git checkout -- .`
 
 | Metric | Value |
 | --- | --- |
-| Files touched | 5 (+ `pubspec.yaml`/`pubspec.lock`) |
+| Files touched | 5 under `lib/` and `test/` (router, view model, screen, `main.dart`, test) + `pubspec.yaml`/`pubspec.lock`; the service provider lives in the view-model file |
 | Lines | +55 / −75 (net −20) |
 | `certificates_screen.dart` | 99 → ~72 lines: `State` class, `initState`/`dispose`, `StreamSubscription`, `StreamBuilder` removed |
 | `certificates_router.dart` | `Provider<…>(create:)` wrapper removed (−8 lines) |
@@ -121,10 +121,10 @@ Friction found (each would repeat across the app):
 
 1. **Name collision while both libraries coexist.** `Provider` is exported by both `provider` and `flutter_riverpod`; `lib/main.dart` failed `analyze` (`ambiguous_import`) until `flutter_riverpod` was imported with `hide Provider`. Every file that imports both needs the same treatment until `provider` is removed entirely.
 2. **`late final` fields in a `Notifier` break on rebuild** (`LateInitializationError: Field '_certificatesService' has already been initialized`, because `build()` runs again when a watched provider changes or the provider is invalidated). They must be plain `late`/getters. This is a documented Riverpod gotcha and is easy to hit when porting view models that were written with `final` constructor injection.
-3. **`get_it` is not replaced, it is wrapped.** The service still comes from `sl<…>()`; a `Provider` shim was needed per injected dependency. Dropping `get_it` too would turn this into a full DI rewrite (33 registrations in `lib/core/di/injection.dart`).
+3. **`get_it` is not replaced, it is wrapped.** The service still comes from `sl<…>()`; a `Provider` shim was needed per injected dependency. Dropping `get_it` too would turn this into a full DI rewrite (33 registrations across `injection.dart` and the per-feature `*_injection.dart` files).
 4. **Lifetime semantics change.** `Provider<VM>(create:)` ties the view model to the route's widget subtree; `NotifierProvider.autoDispose` ties it to listeners, and tests now need `ProviderContainer`/overrides instead of `Mock` constructor injection.
 
-Extrapolation to the whole app (13 view models, 4 category-B + 2 category-C screens, 20 files using `provider`/`context.read`): roughly 13 × (one view model + one router + one screen + one test) ≈ 50–60 files and a coordinated change of the DI model, for an estimated ~300–400 net removed lines (≈ the −20/feature observed). This is an extrapolation from one feature, not a measurement; the certificates feature has no parameterized (`family`) state, which is where the effort would grow.
+Extrapolation to the whole app (13 view models, 4 category-B + 2 category-C screens, 20 files using `provider`/`context.read`): roughly 13 × (one view model + one router + one screen + one test) ≈ 50–60 files and a coordinated change of the DI model, for an estimated ~260 net removed lines (13 × the −20 observed per feature). This is an extrapolation from one feature, not a measurement; the certificates feature has no parameterized (`family`) state, which is where the effort would grow.
 
 ## 6. Impact, gains and risks
 
@@ -147,7 +147,7 @@ Revisit the verdict if any of these becomes true:
 ## 7. Recommended next steps (not part of this PR)
 
 1. **Optional, low risk, no new dependency:** add a small `StreamListener<T>` widget (or a base-class helper) and convert the four category-B screens to stateless widgets. This captures most of the boilerplate reduction Riverpod would give.
-2. **Optional:** convert `reading_screen.dart` so the view model lifetime follows the chapter id (the one lifecycle-correctness gain identified in §3 C).
+2. **Optional:** convert `reading_screen.dart` so the view model follows the chapter id declaratively (the one plumbing simplification identified in §3 C).
 3. **If the team still wants Riverpod:** migrate one feature at a time, coexisting with `provider` (`hide Provider` in files importing both), `get_it` kept as the service locator behind `Provider` shims, starting with certificates (the spike path above); remove `provider` last.
 4. Leave all category A files untouched.
 
@@ -155,5 +155,5 @@ These would be separate issues; this PR changes documentation only.
 
 ## 8. Verification
 
-- Inventory: `grep -rnE "extends State<|StatefulWidget|ChangeNotifier|setState\(" lib` at `5394918` (24 files with `State`, 26 `State` classes, 14 `setState` call sites, 4 `ChangeNotifier` files).
+- Inventory: `grep -rnE "extends State<|StatefulWidget|ChangeNotifier|setState\(" lib` at `5394918` (24 files with `State`, 25 `State` classes, 14 `setState` call sites, 4 `ChangeNotifier` files).
 - Spike: `flutter analyze lib test` clean and `flutter test test/features/certificates` 14/14 passing on the spike tree; spike discarded, no `lib/`, `test/` or dependency change is part of this PR.
