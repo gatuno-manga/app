@@ -20,10 +20,11 @@ Run `just` to list every task. The ones you need most:
 | `just gen` | You changed a `@JsonSerializable` model or the drift database |
 | `just l10n` | You added or changed strings in `lib/l10n/*.arb` |
 | `just fmt` / `just fix` | Formatting and automated fixes (the pre-commit hook runs both on staged files) |
-| `just analyze` | Static analysis |
+| `just analyze` | Static analysis (`dart analyze`, including the `gatuno_lints` UI rules) |
 | `just test` | Unit and widget tests |
+| `just test-lints` | You changed the `gatuno_lints` plugin in `tool/gatuno_lints/` |
 | `just design-tokens` | You touched `DESIGN.md`, `PRODUCT.md`, anything under `.impeccable/`, or `lib/core/theme/` |
-| `just check` | Before pushing: analyze, tests and design tokens |
+| `just check` | Before pushing: analyze, tests, lint-rule tests and design tokens |
 
 Git hooks (`lefthook.yml`): pre-commit runs `just fmt` and `just fix` on staged
 `lib/` and `test/` Dart files, then `just analyze`; pre-push runs
@@ -58,7 +59,8 @@ test/                      Mirrors lib/ (test/core, test/features, test/shared);
                            helpers in test/helpers/
 specs/                     Feature specifications
 docs/                      Reports and checklists
-tool/                      Repository scripts (design token check)
+tool/                      Repository scripts (design token check) and the
+                           gatuno_lints analyzer plugin
 ```
 
 A feature folder:
@@ -150,8 +152,8 @@ registered inline in `initDI()`, and `authentication` pairs
   tag: `AppLogger.i('message', _logTag)`; for errors,
   `AppLogger.e('message', error, stackTrace, _logTag)`.
 - Never log PII in release builds: wrap emails in
-  `AppLogger.redactEmail(email)`. `print` is flagged by `avoid_print` and
-  fails `just analyze`.
+  `AppLogger.redactEmail(email)`. Do not use `print`; `avoid_print`
+  flags it (as an info, so `just analyze` still exits 0: read the output).
 
 ## Code style
 
@@ -159,6 +161,10 @@ registered inline in `initDI()`, and `authentication` pairs
   `strict-raw-types`, and requires trailing commas, explicit return types,
   `sort_child_properties_last`, and cancelled subscriptions and closed sinks.
   `dart format` is the formatter.
+- The `gatuno_lints` plugin (`tool/gatuno_lints/`, enabled in
+  `analysis_options.yaml`) flags hardcoded colors, inline `TextStyle`, small
+  tap targets and missing `Semantics`. Fix the warning; for a justified
+  exception use `// ignore: gatuno_lints/<rule>` with a reason.
 - File names are `snake_case.dart`; classes are PascalCase with role suffixes
   (`...Service`, `...ViewModel`, `...Repository` / `...RepositoryImpl`,
   `...Exception`). Screens live in `presentation/views/`, mostly as
@@ -177,7 +183,8 @@ registered inline in `initDI()`, and `authentication` pairs
   `DESIGN.md` documents it, including known gaps, and `lib/core/theme/`
   implements it (`theme.dart`,
   `app_palette.dart`, `app_typography.dart`, the `GatunoColors` extension).
-  Use theme colors and text styles, never raw hex values in widgets. If you
+  Use theme colors and text styles, never raw values in widgets (the
+  `gatuno_lints` rules enforce this). If you
   change tokens, keep `DESIGN.md` and `.impeccable/design.json` in sync and run
   `just design-tokens`. For design work, the tool-neutral `impeccable` skill
   lives in `.agents/skills/` (linked from `.claude/` and `.gemini/`).
