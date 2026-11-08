@@ -27,12 +27,7 @@ class AppButton extends StatelessWidget {
       ),
       child: isLoading
           ? AppLoadingIndicator(size: 20, color: colorScheme.onPrimary)
-          : Text(
-              text,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
+          : Text(text),
     );
   }
 }

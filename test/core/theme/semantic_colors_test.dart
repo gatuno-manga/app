@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/semantic_colors.dart';
 import 'package:gatuno/core/theme/theme.dart';
 
@@ -11,15 +12,23 @@ void main() {
 
       expect(theme.successColor, palette.success);
       expect(theme.warningColor, palette.warning);
-      expect(theme.dangerColor, theme.colorScheme.error);
-      expect(theme.mutedColor, theme.colorScheme.onSurfaceVariant);
+      expect(theme.infoColor, palette.cyan);
+      expect(theme.mutedColor, palette.textSecondary);
     });
 
-    test('falls back to the color scheme without GatunoColors', () {
+    test('falls back to the light palette without GatunoColors', () {
       final theme = ThemeData();
 
-      expect(theme.successColor, theme.colorScheme.tertiary);
-      expect(theme.warningColor, theme.colorScheme.secondary);
+      expect(theme.successColor, lightPalette.success);
+      expect(theme.warningColor, lightPalette.warning);
+    });
+
+    test('legible moves a status color toward the text color', () {
+      final theme = AppTheme.lightTheme;
+      final amber = theme.warningColor;
+      final legible = theme.legible(amber);
+
+      expect(legible.computeLuminance(), lessThan(amber.computeLuminance()));
     });
   });
 }

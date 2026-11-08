@@ -32,6 +32,7 @@ class Tooltip extends Widget {
 }
 class SizedBox extends Widget {
   const SizedBox({double? width, double? height, Widget? child});
+  const SizedBox.square({double? dimension, Widget? child});
 }
 class InkWell extends Widget {
   const InkWell({Widget? child, void Function()? onTap});

@@ -31,8 +31,10 @@ class ChapterTile extends StatelessWidget {
             color: onTap == null
                 ? theme.disabledColor
                 : (chapter.completed
-                      ? theme.successColor
-                      : (chapter.read ? theme.warningColor : theme.mutedColor)),
+                      ? theme.legible(theme.successColor)
+                      : (chapter.read
+                            ? theme.legible(theme.warningColor)
+                            : theme.mutedColor)),
             size: 20,
           ),
           if (chapter.scrapingStatus != null) ...[
@@ -55,17 +57,20 @@ class ChapterTile extends StatelessWidget {
       case ScrapingStatus.process:
         return AppStatusBadge(
           label: l10n.scrapingStatusProcess,
-          color: theme.warningColor,
+          color: theme.infoColor,
+          textColor: theme.legible(theme.infoColor),
         );
       case ScrapingStatus.ready:
         return AppStatusBadge(
           label: l10n.scrapingStatusReady,
           color: theme.successColor,
+          textColor: theme.legible(theme.successColor),
         );
       case ScrapingStatus.error:
         return AppStatusBadge(
           label: l10n.scrapingStatusError,
-          color: theme.dangerColor,
+          color: theme.colorScheme.error,
+          textColor: theme.legible(theme.colorScheme.error),
         );
     }
   }

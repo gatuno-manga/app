@@ -15,8 +15,8 @@ bool appliesTo(RuleContext context) {
 bool isFlutterElement(Element? element) {
   final uri = element?.library?.uri;
   if (uri == null) return false;
-  return uri.scheme == 'dart' && uri.path == 'ui' ||
-      uri.scheme == 'package' && uri.pathSegments.first == 'flutter';
+  return (uri.scheme == 'dart' && uri.path == 'ui') ||
+      (uri.scheme == 'package' && uri.pathSegments.first == 'flutter');
 }
 
 /// Name of the Flutter class [node] constructs, or null when it is not a
@@ -35,6 +35,11 @@ num? numericLiteral(Expression? expression) {
   if (e is DoubleLiteral) return e.value;
   return null;
 }
+
+/// The expression of [argument], named or positional.
+Expression argumentExpression(Argument argument) => argument is NamedArgument
+    ? argument.argumentExpression
+    : argument as Expression;
 
 /// The named argument [name] of [node], or null.
 Expression? namedArgument(InstanceCreationExpression node, String name) {

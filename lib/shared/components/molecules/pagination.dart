@@ -110,7 +110,7 @@ class _PageButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.outlineVariant,
+                  : theme.colorScheme.outline,
             ),
             borderRadius: BorderRadius.circular(4),
           ),

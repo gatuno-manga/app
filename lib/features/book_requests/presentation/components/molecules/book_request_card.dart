@@ -32,7 +32,7 @@ class BookRequestCard extends StatelessWidget {
         statusLabel = l10n.bookRequestStatusApproved;
         break;
       case RequestStatus.rejected:
-        statusColor = theme.dangerColor;
+        statusColor = theme.colorScheme.error;
         statusLabel = l10n.bookRequestStatusRejected;
         break;
       case RequestStatus.pending:
@@ -63,7 +63,11 @@ class BookRequestCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                AppStatusBadge(label: statusLabel, color: statusColor),
+                AppStatusBadge(
+                  label: statusLabel,
+                  color: statusColor,
+                  textColor: theme.legible(statusColor),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -118,13 +122,17 @@ class BookRequestCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.error_outline, size: 16, color: theme.dangerColor),
+                  Icon(
+                    Icons.error_outline,
+                    size: 16,
+                    color: theme.colorScheme.error,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       '${l10n.bookRequestsCardRejection}: ${request.rejectionMessage.value}',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: theme.dangerColor,
+                        color: theme.colorScheme.error,
                       ),
                     ),
                   ),

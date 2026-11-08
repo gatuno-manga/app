@@ -7,8 +7,11 @@ import 'package:analyzer/error/error.dart';
 
 import '../flutter_utils.dart';
 
-/// Flags interactive widgets whose tap target is below 48dp. Only literal
-/// sizes are inspected; computed sizes are out of scope.
+/// Flags interactive widgets whose tap target is below 48dp: a literal
+/// `width`/`height` (or `SizedBox.square` dimension) on a `SizedBox` or
+/// `Container` directly wrapping a tappable widget, and
+/// `MaterialTapTargetSize.shrinkWrap` on a button. Computed sizes, `constraints`
+/// and `visualDensity` are out of scope.
 class SmallTapTarget extends AnalysisRule {
   static const LintCode code = LintCode(
     'small_tap_target',
@@ -33,7 +36,7 @@ class SmallTapTarget extends AnalysisRule {
   };
 
   /// Widgets that impose a fixed size on their child.
-  static const _sizers = {'SizedBox', 'Container', 'ConstrainedBox'};
+  static const _sizers = {'SizedBox', 'Container'};
 
   SmallTapTarget()
     : super(
@@ -80,7 +83,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (childType == null || !SmallTapTarget.tappable.contains(childType)) {
       return;
     }
-    for (final name in const ['width', 'height']) {
+    for (final name in const ['width', 'height', 'dimension']) {
       final size = numericLiteral(namedArgument(sizer, name));
       if (size != null && size < SmallTapTarget.minimum) {
         rule.reportAtNode(sizer);
@@ -93,7 +96,9 @@ class _Visitor extends SimpleAstVisitor<void> {
   /// button below the minimum.
   void _checkShrinkWrap(InstanceCreationExpression button) {
     final size = namedArgument(button, 'materialTapTargetSize');
-    if (size is PrefixedIdentifier && size.identifier.name == 'shrinkWrap') {
+    if (size is PrefixedIdentifier &&
+        size.prefix.name == 'MaterialTapTargetSize' &&
+        size.identifier.name == 'shrinkWrap') {
       rule.reportAtNode(size);
     }
   }

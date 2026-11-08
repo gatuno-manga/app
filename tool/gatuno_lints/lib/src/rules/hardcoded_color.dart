@@ -7,8 +7,8 @@ import 'package:analyzer/error/error.dart';
 
 import '../flutter_utils.dart';
 
-/// Flags `Color(0x…)` literals (all-literal arguments) and `Colors.*` outside the theme layer.
-/// `Colors.transparent` is allowed: it is the absence of a color, not a
+/// Flags all-literal `Color(...)` constructors and `Colors.*` outside the
+/// theme layer. `Colors.transparent` is allowed: it is the absence of a color, not a
 /// design token.
 class HardcodedColor extends AnalysisRule {
   static const LintCode code = LintCode(
@@ -62,15 +62,8 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (flutterTypeName(node) != 'Color') return;
     // Color(int.parse(...)) is data (e.g. a cover's dominant color), not a
     // design decision; only fully literal colors are hardcoded.
-    final arguments = node.argumentList.arguments;
-    final allLiteral = arguments.every(
-      (argument) =>
-          numericLiteral(
-            argument is NamedArgument
-                ? argument.argumentExpression
-                : argument as Expression,
-          ) !=
-          null,
+    final allLiteral = node.argumentList.arguments.every(
+      (argument) => numericLiteral(argumentExpression(argument)) != null,
     );
     if (allLiteral) rule.reportAtNode(node);
   }

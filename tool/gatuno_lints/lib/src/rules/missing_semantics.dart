@@ -8,10 +8,12 @@ import 'package:analyzer/error/error.dart';
 import '../flutter_utils.dart';
 
 /// Heuristic: a bare `GestureDetector`/`InkWell` exposes a tap action but no
-/// label. Flags it when neither an enclosing widget in the same expression
-/// nor its own subtree supplies a label, and the subtree is fully visible
-/// (no app widgets or externally built children) (`Semantics`, `Tooltip`, `Text`, or a
-/// `semanticLabel`/`tooltip` argument).
+/// label. A label is a `Semantics`, `Tooltip` or `Text` widget, or a
+/// `semanticLabel`/`tooltip` argument, in an enclosing widget of the same
+/// expression or in the widget's own subtree.
+///
+/// Flags only when no label is found and the subtree is fully visible: app
+/// widgets and children built elsewhere are not inspected.
 class MissingSemantics extends AnalysisRule {
   static const LintCode code = LintCode(
     'missing_semantics',

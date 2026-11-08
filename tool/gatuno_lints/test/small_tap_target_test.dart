@@ -58,4 +58,11 @@ ${FlutterRuleTest.import}
 Widget f(double size) => SizedBox(width: size, child: InkWell());
 ''');
   }
+
+  void test_small_square() async {
+    const code = 'final w = SizedBox.square(dimension: 32, child: InkWell());';
+    await assertDiagnostics('${FlutterRuleTest.import}$code', [
+      lint(FlutterRuleTest.import.length + 10, 48),
+    ]);
+  }
 }
