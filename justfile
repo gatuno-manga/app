@@ -41,3 +41,7 @@ fix *files='.':
     for f in {{ files }}; do
         dart fix --apply "$f"
     done
+
+# Verify repo settings, labels and milestones against tools.toml (needs a token that can read merge settings)
+repo-check:
+    repo-sync --check
