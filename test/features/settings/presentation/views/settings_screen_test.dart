@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:gatuno/features/settings/presentation/views/settings_screen.dart';
@@ -14,15 +15,24 @@ void main() {
   late MockAuthService mockAuthService;
   late SettingsViewModel viewModel;
 
+  setUpAll(() => registerFallbackValue(AppThemeChoice.system));
+
   setUp(() async {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
 
-    when(() => mockSettingsService.settingsStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockSettingsService.settingsStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAuthService.authStateStream,
+    ).thenAnswer((_) => const Stream.empty());
 
     when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
     when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(false);
+    when(
+      () => mockSettingsService.themeChoice,
+    ).thenReturn(AppThemeChoice.system);
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
 
@@ -38,6 +48,9 @@ void main() {
   });
 
   testWidgets('SettingsPage renders correctly for guest', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpApp(
       Provider<SettingsViewModel>.value(
         value: viewModel,
@@ -73,6 +86,9 @@ void main() {
   });
 
   testWidgets('SettingsPage can update API URL', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     when(
       () => mockSettingsService.validateApiUrl(any()),
     ).thenAnswer((_) async => true);
@@ -99,5 +115,28 @@ void main() {
 
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.text('API URL updated successfully'), findsOneWidget);
+  });
+
+  testWidgets('SettingsPage persists the picked theme', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    when(
+      () => mockSettingsService.setThemeChoice(any()),
+    ).thenAnswer((_) async {});
+
+    await tester.pumpApp(
+      Provider<SettingsViewModel>.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('theme-swatch-dracula')));
+    await tester.pump();
+
+    verify(
+      () => mockSettingsService.setThemeChoice(AppThemeChoice.dracula),
+    ).called(1);
   });
 }

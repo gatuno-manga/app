@@ -10,6 +10,7 @@ import '../../../../shared/components/atoms/app_switch.dart';
 import '../components/molecules/settings_profile_card.dart';
 import '../components/molecules/settings_section_header.dart';
 import '../components/organisms/settings_api_form.dart';
+import '../components/organisms/theme_swatch_grid.dart';
 import '../components/templates/settings_template.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -72,6 +73,10 @@ class SettingsPage extends StatelessWidget {
           ),
           generalSectionHeader: SettingsSectionHeader(
             title: l10n.settingsGeneralSection,
+          ),
+          themePicker: ThemeSwatchGrid(
+            selected: state.themeChoice,
+            onSelected: viewModel.setThemeChoice,
           ),
           sensitiveContentToggle: AppSwitch(
             title: l10n.userMeSensitiveContent,

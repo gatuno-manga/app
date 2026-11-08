@@ -4,6 +4,7 @@ class SettingsTemplate extends StatelessWidget {
   final Widget appBarTitle;
   final Widget profileCard;
   final Widget generalSectionHeader;
+  final Widget themePicker;
   final Widget sensitiveContentToggle;
   final Widget apiSectionHeader;
   final Widget apiForm;
@@ -19,6 +20,7 @@ class SettingsTemplate extends StatelessWidget {
     required this.appBarTitle,
     required this.profileCard,
     required this.generalSectionHeader,
+    required this.themePicker,
     required this.sensitiveContentToggle,
     required this.apiSectionHeader,
     required this.apiForm,
@@ -40,6 +42,8 @@ class SettingsTemplate extends StatelessWidget {
           profileCard,
           const Divider(height: 32),
           generalSectionHeader,
+          themePicker,
+          const SizedBox(height: 16),
           sensitiveContentToggle,
           ?securityTile,
           const Divider(height: 32),

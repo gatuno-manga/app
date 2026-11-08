@@ -30,9 +30,9 @@
   "themeImplementation": {
     "Dark": "AppTheme.darkTheme",
     "Light": "AppTheme.lightTheme",
-    "True-dark": "AppTheme.trueDarkTheme (no selection mechanism, #51)",
-    "Dracula": "AppTheme.draculaTheme (no selection mechanism, #51)",
-    "Slate": "AppTheme.slateTheme (no selection mechanism, #51)"
+    "True-dark": "AppTheme.trueDarkTheme",
+    "Dracula": "AppTheme.draculaTheme",
+    "Slate": "AppTheme.slateTheme"
   },
   "colors": {
     "color/app-background": {
@@ -1352,10 +1352,6 @@
     {
       "id": "fallback-text-roles",
       "summary": "Material text roles Figma does not define (displayMedium, displaySmall, headlineLarge, titleMedium, titleSmall) keep Material default sizes but render in Inknut Antiqua through ThemeData.fontFamily; bodySmall and other roles use onSurface, not color/text-secondary or color/text-muted. The mapped roles also change Material default sizes globally (bodyLarge 16->18, bodyMedium 14->16, bodySmall 12->14, labelMedium 12->13, labelSmall 11->12) with 150-160% line heights, so ListTile, TextField, dialog and chip text grow; check fixed-height rows at large text scales."
-    },
-    {
-      "id": "themes-missing",
-      "summary": "AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51)."
     },
     {
       "id": "tokens-without-code",

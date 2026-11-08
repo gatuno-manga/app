@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/settings/data/data_sources/settings_local_data_source.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
@@ -16,6 +17,8 @@ void main() {
   late MockSettingsStorage mockStorage;
   late MockDioClient mockDioClient;
   late MockDio mockDio;
+
+  setUpAll(() => registerFallbackValue(AppThemeChoice.system));
 
   setUp(() {
     mockStorage = MockSettingsStorage();
@@ -36,14 +39,27 @@ void main() {
       when(
         () => mockStorage.isSensitiveContentEnabled(),
       ).thenAnswer((_) async => true);
+      when(
+        () => mockStorage.getThemeChoice(),
+      ).thenAnswer((_) async => AppThemeChoice.dracula);
       when(() => mockDioClient.updateBaseUrl(any())).thenAnswer((_) {});
 
       await settingsService.init();
+      expect(settingsService.themeChoice, AppThemeChoice.dracula);
 
       expect(settingsService.apiUrl, 'http://test.com');
       expect(settingsService.sensitiveContentEnabled, isTrue);
       expect(settingsService.isInitialized, isTrue);
       verify(() => mockDioClient.updateBaseUrl('http://test.com')).called(1);
+    });
+
+    test('setThemeChoice should update storage and state', () async {
+      when(() => mockStorage.setThemeChoice(any())).thenAnswer((_) async {});
+
+      await settingsService.setThemeChoice(AppThemeChoice.slate);
+
+      expect(settingsService.themeChoice, AppThemeChoice.slate);
+      verify(() => mockStorage.setThemeChoice(AppThemeChoice.slate)).called(1);
     });
 
     test('setApiUrl should update storage and dio client', () async {

@@ -1,4 +1,4 @@
-
+import '../../../../core/theme/app_theme_choice.dart';
 import '../../data/data_sources/settings_local_data_source.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/logging/logger.dart';
@@ -8,22 +8,27 @@ import 'package:rxdart/rxdart.dart';
 class SettingsState {
   final String? apiUrl;
   final bool sensitiveContentEnabled;
+  final AppThemeChoice themeChoice;
   final bool isInitialized;
 
   SettingsState({
     this.apiUrl,
     this.sensitiveContentEnabled = false,
+    this.themeChoice = AppThemeChoice.system,
     this.isInitialized = false,
   });
 
   SettingsState copyWith({
     String? apiUrl,
     bool? sensitiveContentEnabled,
+    AppThemeChoice? themeChoice,
     bool? isInitialized,
   }) {
     return SettingsState(
       apiUrl: apiUrl ?? this.apiUrl,
-      sensitiveContentEnabled: sensitiveContentEnabled ?? this.sensitiveContentEnabled,
+      sensitiveContentEnabled:
+          sensitiveContentEnabled ?? this.sensitiveContentEnabled,
+      themeChoice: themeChoice ?? this.themeChoice,
       isInitialized: isInitialized ?? this.isInitialized,
     );
   }
@@ -42,6 +47,7 @@ class SettingsService {
 
   String? get apiUrl => state.apiUrl;
   bool get sensitiveContentEnabled => state.sensitiveContentEnabled;
+  AppThemeChoice get themeChoice => state.themeChoice;
   bool get isInitialized => state.isInitialized;
 
   void dispose() {
@@ -53,17 +59,22 @@ class SettingsService {
 
     try {
       final apiUrl = await _storage.getApiUrl();
-      final sensitiveContentEnabled = await _storage.isSensitiveContentEnabled();
+      final sensitiveContentEnabled = await _storage
+          .isSensitiveContentEnabled();
+      final themeChoice = await _storage.getThemeChoice();
 
       if (apiUrl != null) {
         _dioClient.updateBaseUrl(apiUrl);
       }
 
-      _stateSubject.add(state.copyWith(
-        apiUrl: apiUrl,
-        sensitiveContentEnabled: sensitiveContentEnabled,
-        isInitialized: true,
-      ));
+      _stateSubject.add(
+        state.copyWith(
+          apiUrl: apiUrl,
+          sensitiveContentEnabled: sensitiveContentEnabled,
+          themeChoice: themeChoice,
+          isInitialized: true,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error initializing SettingsService', e, stackTrace, _logTag);
     }
@@ -91,6 +102,16 @@ class SettingsService {
         stackTrace,
         _logTag,
       );
+      rethrow;
+    }
+  }
+
+  Future<void> setThemeChoice(AppThemeChoice choice) async {
+    try {
+      await _storage.setThemeChoice(choice);
+      _stateSubject.add(state.copyWith(themeChoice: choice));
+    } catch (e, stackTrace) {
+      AppLogger.e('Error setting theme choice', e, stackTrace, _logTag);
       rethrow;
     }
   }
