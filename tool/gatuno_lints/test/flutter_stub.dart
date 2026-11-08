@@ -40,6 +40,16 @@ class InkWell extends Widget {
 class GestureDetector extends Widget {
   const GestureDetector({Widget? child, void Function()? onTap});
 }
+class ElevatedButton extends Widget {
+  const ElevatedButton({Widget? child, void Function()? onPressed});
+}
+class IconButton extends Widget {
+  const IconButton({Widget? icon, void Function()? onPressed});
+  const IconButton.filled({Widget? icon, void Function()? onPressed});
+}
+class TextField extends Widget {
+  const TextField();
+}
 enum MaterialTapTargetSize { padded, shrinkWrap }
 class TextButton extends Widget {
   const TextButton({Widget? child, MaterialTapTargetSize? materialTapTargetSize});
