@@ -17,6 +17,7 @@ void main() {
           body: SettingsProfileCard(
             name: 'John Doe',
             email: 'john@example.com',
+            imageUrl: null,
             onTap: () {},
           ),
         ),
@@ -31,7 +32,11 @@ void main() {
     testWidgets('renders only name when email is null', (tester) async {
       await tester.pumpApp(
         Scaffold(
-          body: SettingsProfileCard(name: 'Guest', onTap: () {}),
+          body: SettingsProfileCard(
+            name: 'Guest',
+            imageUrl: null,
+            onTap: () {},
+          ),
         ),
       );
 
@@ -65,6 +70,7 @@ void main() {
           body: SettingsProfileCard(
             name: 'John Doe',
             email: 'john@example.com',
+            imageUrl: null,
             onTap: () {},
           ),
         ),
@@ -80,6 +86,7 @@ void main() {
         Scaffold(
           body: SettingsProfileCard(
             name: 'John Doe',
+            imageUrl: null,
             onTap: () => tapped = true,
           ),
         ),

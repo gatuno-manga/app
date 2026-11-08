@@ -23,6 +23,10 @@ class UserService {
   );
   StreamSubscription<AuthState>? _authSubscription;
 
+  /// Bumped on every sign-out so a `/me` (or cache read) that was in flight
+  /// for the previous session is dropped instead of re-published.
+  int _sessionEpoch = 0;
+
   /// The current profile, replayed to new listeners: guest until sign-in,
   /// then the cached `/me` user, then every refresh or upload.
   Stream<UserModel> get profileStream => _profileSubject.stream;
@@ -49,13 +53,21 @@ class UserService {
   Future<void> _onAuthChanged(AuthState authState) async {
     switch (authState) {
       case AuthState.authenticated:
-        _profileSubject.add(await getCurrentUser());
+        final epoch = _sessionEpoch;
+        final user = await getCurrentUser();
+        if (epoch != _sessionEpoch) return;
+        _profileSubject.add(user);
         await refreshProfile();
       case AuthState.unauthenticated:
-        _profileSubject.add(UserModel.guest);
+        _endSession();
       case AuthState.uninitialized:
         break;
     }
+  }
+
+  void _endSession() {
+    _sessionEpoch++;
+    _profileSubject.add(UserModel.guest);
   }
 
   /// The signed-in user from the JWT, enriched with the cached `/me` profile
@@ -103,8 +115,9 @@ class UserService {
   /// or when the account signed out while the request was in flight.
   Future<UserModel?> refreshProfile() async {
     try {
+      final epoch = _sessionEpoch;
       final profile = await _remote.fetchMe();
-      if (!_authService.authenticated) {
+      if (epoch != _sessionEpoch) {
         AppLogger.i('Dropping /me fetched after sign-out', _logTag);
         return null;
       }
@@ -151,7 +164,7 @@ class UserService {
     await _storage.clear();
     // Drop the avatar now; AuthService only reports the sign-out after the
     // backend round-trip.
-    _profileSubject.add(UserModel.guest);
+    _endSession();
     await _authService.logout();
   }
 

@@ -6,6 +6,8 @@ import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 class SettingsProfileCard extends StatelessWidget {
   final String name;
   final String? email;
+
+  /// Profile picture over the initials; null keeps the initials.
   final String? imageUrl;
   final VoidCallback onTap;
 
@@ -13,7 +15,7 @@ class SettingsProfileCard extends StatelessWidget {
     super.key,
     required this.name,
     this.email,
-    this.imageUrl,
+    required this.imageUrl,
     required this.onTap,
   });
 

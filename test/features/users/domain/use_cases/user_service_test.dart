@@ -46,7 +46,6 @@ void main() {
     when(
       () => mockAuthService.authStateStream,
     ).thenAnswer((_) => const Stream.empty());
-    when(() => mockAuthService.authenticated).thenReturn(true);
     userService = UserService(
       mockAuthService,
       remote: MockRemote(),
@@ -397,14 +396,12 @@ void main() {
     test('drops a /me that resolves after sign-out', () async {
       final fetched = Completer<Map<String, dynamic>>();
       when(() => remote.fetchMe()).thenAnswer((_) => fetched.future);
-      when(() => mockAuthService.authenticated).thenReturn(true);
       final events = <UserModel>[];
       final sub = service.profileStream.skip(1).listen(events.add);
       service.init();
 
       auth.add(AuthState.authenticated);
       await Future<void>.delayed(Duration.zero);
-      when(() => mockAuthService.authenticated).thenReturn(false);
       auth.add(AuthState.unauthenticated);
       await Future<void>.delayed(Duration.zero);
       fetched.complete(profile('1'));
@@ -412,6 +409,33 @@ void main() {
 
       expect(events.last, same(UserModel.guest));
       verifyNever(() => storage.writeProfile(any()));
+      await sub.cancel();
+    });
+
+    test('drops a /me that resolves during the logout round-trip', () async {
+      final fetched = Completer<Map<String, dynamic>>();
+      final backendLogout = Completer<void>();
+      when(() => remote.fetchMe()).thenAnswer((_) => fetched.future);
+      when(
+        () => mockAuthService.logout(),
+      ).thenAnswer((_) => backendLogout.future);
+      when(() => storage.clear()).thenAnswer((_) async {});
+      final events = <UserModel>[];
+      final sub = service.profileStream.skip(1).listen(events.add);
+      service.init();
+
+      auth.add(AuthState.authenticated);
+      await Future<void>.delayed(Duration.zero);
+      final logout = service.logout();
+      await Future<void>.delayed(Duration.zero);
+      // AuthService still reports authenticated here.
+      fetched.complete(profile('1'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.last, same(UserModel.guest));
+      verifyNever(() => storage.writeProfile(any()));
+      backendLogout.complete();
+      await logout;
       await sub.cancel();
     });
 
