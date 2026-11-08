@@ -2,14 +2,14 @@ import 'dart:ui' show Color;
 
 // Opacity bytes of the `-N` suffixes in design.json (`_a40` = `-40`, ...).
 // Figma stores the ramps as 8-bit alpha, so they are not exactly N percent.
+const int _a2 = 0x05; // 5/255
+const int _a3 = 0x08; // 8/255
 const int _a10 = 0x1a; // 26/255
 const int _a15 = 0x26; // 38/255
 const int _a40 = 0x66; // 102/255
 const int _a45 = 0x73; // 115/255
 const int _a60 = 0x99; // 153/255
 const int _a75 = 0xbf; // 191/255
-const int _a2 = 0x05; // 5/255
-const int _a3 = 0x08; // 8/255
 
 /// Color tokens of one Figma theme (`.impeccable/design.json`, collection
 /// "Gatuno"). Values are copied from the Figma variables; the alpha ramps
@@ -46,6 +46,10 @@ class AppPalette {
 
   /// `color/text-muted`
   final Color textMuted;
+
+  /// Text on `color/lilac` (a fixed accent): the Dark `color/app-background`,
+  /// 6.4:1. `color/on-primary` (#fdfdfd) is only 3.2:1 on lilac.
+  static const Color onLilac = Color(0xFF000212);
 
   /// `color/primary`
   final Color primary;

@@ -5,7 +5,7 @@ import 'app_typography.dart';
 
 /// Badge text colors for dark themes. Badges have no Figma variable (gap
 /// `badge-colors-not-in-figma`); every other color comes from [AppPalette].
-class AppColors {
+abstract final class AppColors {
   static const Color badgeBlueLight = Color(0xFFBEDBFF);
   static const Color badgeGreenLight = Color(0xFFA0EEBB);
   static const Color badgeOrangeLight = Color(0xFFFFCC99);
@@ -168,11 +168,11 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: palette.lilac,
-        // Lilac is the same in every theme and `onPrimary` (#fdfdfd) is only
-        // 3.2:1 on it, so use the darkest background token (6.4:1).
         contentTextStyle: AppTypography.bodySmall.copyWith(
-          color: darkPalette.appBackground,
+          color: AppPalette.onLilac,
         ),
+        actionTextColor: AppPalette.onLilac,
+        closeIconColor: AppPalette.onLilac,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -205,9 +205,6 @@ class AppTheme {
   }
 }
 
-/// Badge colors have no Figma variable (gap `badge-colors-not-in-figma`), so
-/// they stay per brightness rather than per theme.
-/// What differs between light and dark builds beyond the palette.
 class _Variant {
   const _Variant({
     required this.brightness,
@@ -220,6 +217,9 @@ class _Variant {
   final Color shadowColor;
 }
 
+/// Badge colors have no Figma variable (gap `badge-colors-not-in-figma`), so
+/// they stay per brightness rather than per theme.
+/// What differs between light and dark builds beyond the palette.
 class _BadgeSet {
   const _BadgeSet({
     required this.badgeDefault,

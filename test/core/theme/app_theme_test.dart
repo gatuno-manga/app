@@ -152,6 +152,10 @@ void main() {
     });
   }
 
+  test('onLilac equals the Dark app-background token', () {
+    expect(AppPalette.onLilac, darkPalette.appBackground);
+  });
+
   test('AppPalette.lerp returns its endpoints and blends between them', () {
     expect(
       AppPalette.lerp(lightPalette, darkPalette, 0).appBackground,
