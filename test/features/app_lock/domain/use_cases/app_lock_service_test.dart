@@ -262,12 +262,67 @@ void main() {
       );
     });
 
-    test('setDeviceCredentialAllowed persists and emits', () async {
+    test('allowing the device credential needs no prompt', () async {
+      when(
+        () => storage.isDeviceCredentialAllowed(),
+      ).thenAnswer((_) async => false);
       await service.init();
-      await service.setDeviceCredentialAllowed(false);
-      expect(service.state.deviceCredentialAllowed, isFalse);
-      verify(() => storage.setDeviceCredentialAllowed(false)).called(1);
+
+      final outcome = await service.setDeviceCredentialAllowed(
+        true,
+        messages: testMessages,
+      );
+
+      expect(outcome, DeviceAuthOutcome.success);
+      expect(service.state.deviceCredentialAllowed, isTrue);
+      verify(() => storage.setDeviceCredentialAllowed(true)).called(1);
+      verifyNever(
+        () => authenticator.authenticate(
+          messages: any(named: 'messages'),
+          allowDeviceCredential: any(named: 'allowDeviceCredential'),
+        ),
+      );
     });
+
+    test(
+      'refusing the device credential first proves a biometric works',
+      () async {
+        await service.init();
+        stubPrompt(DeviceAuthOutcome.success);
+
+        final outcome = await service.setDeviceCredentialAllowed(
+          false,
+          messages: testMessages,
+        );
+
+        expect(outcome, DeviceAuthOutcome.success);
+        expect(service.state.deviceCredentialAllowed, isFalse);
+        verify(() => storage.setDeviceCredentialAllowed(false)).called(1);
+        verify(
+          () => authenticator.authenticate(
+            messages: testMessages,
+            allowDeviceCredential: false,
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'keeps the device credential allowed when no biometric passes',
+      () async {
+        await service.init();
+        stubPrompt(DeviceAuthOutcome.noBiometrics);
+
+        final outcome = await service.setDeviceCredentialAllowed(
+          false,
+          messages: testMessages,
+        );
+
+        expect(outcome, DeviceAuthOutcome.noBiometrics);
+        expect(service.state.deviceCredentialAllowed, isTrue);
+        verifyNever(() => storage.setDeviceCredentialAllowed(any()));
+      },
+    );
   });
 
   group('lifecycle', () {

@@ -20,7 +20,9 @@ import UIKit
 
 /// App-switcher cover for the app lock: while enabled, a solid view hides the
 /// UI whenever the scene stops being active, so the system snapshot shown in
-/// the switcher contains nothing. Driven by Flutter over
+/// the switcher contains nothing. The Face ID / passcode sheet also
+/// deactivates the scene, so the cover briefly replaces the lock screen behind
+/// the system HUD during a prompt; accepted, nothing sensitive is behind it. Driven by Flutter over
 /// `com.gatuno.app/privacy_screen`; observes scene notifications instead of
 /// overriding FlutterSceneDelegate so Flutter's own lifecycle forwarding stays
 /// untouched.

@@ -56,8 +56,9 @@ class LocalAuthDeviceAuthenticator implements DeviceAuthenticator {
       case LocalAuthExceptionCode.noCredentialsSet:
         return DeviceAuthOutcome.noCredentials;
       case LocalAuthExceptionCode.noBiometricsEnrolled:
-        return DeviceAuthOutcome.noBiometrics;
+      // No sensor at all is permanent too; "try again" would mislead.
       case LocalAuthExceptionCode.noBiometricHardware:
+        return DeviceAuthOutcome.noBiometrics;
       case LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
       case LocalAuthExceptionCode.uiUnavailable:
         return DeviceAuthOutcome.unavailable;

@@ -28,20 +28,46 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
     _service = widget.service ?? sl<AppLockService>();
   }
 
-  Future<void> _toggleLock(bool enabled) async {
+  DeviceAuthMessages _confirmMessages(
+    AppLocalizations l10n, {
+    required bool allowDeviceCredential,
+  }) => DeviceAuthMessages(
+    reason: l10n.appLockConfirmReason,
+    title: l10n.appLockTitle,
+    hint: allowDeviceCredential
+        ? l10n.appLockPromptHintWithCredential
+        : l10n.appLockPromptHint,
+    cancel: l10n.commonCancel,
+  );
+
+  Future<void> _toggleLock(bool enabled) => _confirm(
+    (l10n) => _service.setEnabled(
+      enabled,
+      messages: _confirmMessages(
+        l10n,
+        allowDeviceCredential: _service.state.deviceCredentialAllowed,
+      ),
+    ),
+  );
+
+  // Turning the fallback off proves a biometric works first, so the hint
+  // must not mention the PIN.
+  Future<void> _toggleFallback(bool allowed) => _confirm(
+    (l10n) => _service.setDeviceCredentialAllowed(
+      allowed,
+      messages: _confirmMessages(l10n, allowDeviceCredential: allowed),
+    ),
+  );
+
+  /// Runs a change guarded by the OS prompt and explains any refusal.
+  Future<void> _confirm(
+    Future<DeviceAuthOutcome> Function(AppLocalizations l10n) change,
+  ) async {
     if (_service.state.isAuthenticating) return;
     final l10n = AppLocalizations.of(context)!;
     String? message;
     try {
-      final outcome = await _service.setEnabled(
-        enabled,
-        messages: DeviceAuthMessages(
-          reason: l10n.appLockConfirmReason,
-          title: l10n.appLockTitle,
-          hint: l10n.appLockPromptHint,
-          cancel: l10n.commonCancel,
-        ),
-      );
+      final outcome = await change(l10n);
       // A dismissed prompt simply leaves the switch where it was.
       if (outcome == DeviceAuthOutcome.cancelled) return;
       message = appLockOutcomeText(l10n, outcome);
@@ -67,9 +93,13 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
           body: SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(24),
-              children: state.isSupported
-                  ? _controls(l10n, state)
-                  : [Text(l10n.appLockUnsupportedDesc)],
+              children: [
+                // A lock enabled before the screen lock was removed must
+                // still be switchable off.
+                if (!state.isSupported) Text(l10n.appLockUnsupportedDesc),
+                if (state.isSupported || state.enabled)
+                  ..._controls(l10n, state),
+              ],
             ),
           ),
         );
@@ -110,7 +140,7 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
               ? l10n.appLockFallbackOnDesc
               : l10n.appLockFallbackOffDesc,
           value: state.deviceCredentialAllowed,
-          onChanged: _service.setDeviceCredentialAllowed,
+          onChanged: _toggleFallback,
         ),
       ],
     ];

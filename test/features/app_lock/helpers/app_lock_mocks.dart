@@ -14,16 +14,24 @@ const testMessages = DeviceAuthMessages(
   cancel: 'c',
 );
 
-/// What the gate builds from the EN strings.
+/// What the gate builds from the EN strings (fallback allowed).
 const unlockMessages = DeviceAuthMessages(
   reason: 'Unlock Gatuno',
   title: 'Gatuno is locked',
-  hint: 'Use your fingerprint or face',
+  hint: 'Use your fingerprint, face or device PIN',
   cancel: 'Cancel',
 );
 
-/// What the settings page builds from the EN strings.
+/// What the settings page builds from the EN strings (fallback allowed).
 const confirmMessages = DeviceAuthMessages(
+  reason: "Confirm it's you to change the app lock",
+  title: 'App lock',
+  hint: 'Use your fingerprint, face or device PIN',
+  cancel: 'Cancel',
+);
+
+/// What the settings page builds when a biometric must be proven.
+const biometricOnlyMessages = DeviceAuthMessages(
   reason: "Confirm it's you to change the app lock",
   title: 'App lock',
   hint: 'Use your fingerprint or face',
@@ -50,7 +58,12 @@ class FakeAppLockService {
       () => mock.setEnabled(any(), messages: any(named: 'messages')),
     ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(() => mock.setGrace(any())).thenAnswer((_) async {});
-    when(() => mock.setDeviceCredentialAllowed(any())).thenAnswer((_) async {});
+    when(
+      () => mock.setDeviceCredentialAllowed(
+        any(),
+        messages: any(named: 'messages'),
+      ),
+    ).thenAnswer((_) async => DeviceAuthOutcome.success);
     when(() => mock.onBackgrounded()).thenReturn(null);
     when(() => mock.onForegrounded()).thenReturn(null);
   }

@@ -45,14 +45,7 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   }
 
   void _onState(AppLockState next) {
-    final engaged = next.locked && !_state.locked;
     if (next != _state) setState(() => _state = next);
-    if (engaged) {
-      // Offstage children keep focus, so the IME would stay open over the
-      // cover and keystrokes would reach the hidden field.
-      FocusManager.instance.primaryFocus?.unfocus();
-      _prompt();
-    }
   }
 
   void _prompt() {
@@ -63,7 +56,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
         messages: DeviceAuthMessages(
           reason: l10n.appLockPromptReason,
           title: l10n.appLockLockedTitle,
-          hint: l10n.appLockPromptHint,
+          hint: widget.service.state.deviceCredentialAllowed
+              ? l10n.appLockPromptHintWithCredential
+              : l10n.appLockPromptHint,
           cancel: l10n.commonCancel,
         ),
       ),
@@ -76,10 +71,17 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         widget.service.onBackgrounded();
       case AppLifecycleState.resumed:
+        // The lock only ever engages here (or at start-up), so this is the
+        // one place that opens the prompt; it also re-offers a prompt the
+        // system cancelled on backgrounding.
         widget.service.onForegrounded();
         final current = widget.service.state;
-        // A prompt the system cancelled on backgrounding is offered again.
-        if (current.locked && !current.isAuthenticating) _prompt();
+        if (current.locked && !current.isAuthenticating) {
+          // Offstage children keep focus, so the IME would stay open over
+          // the cover and keystrokes would reach the hidden field.
+          FocusManager.instance.primaryFocus?.unfocus();
+          _prompt();
+        }
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:

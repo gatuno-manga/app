@@ -77,7 +77,9 @@ void main() {
     expect(group.groupValue, AppLockGrace.oneMinute);
     expect(find.text('Allow device PIN, pattern or passcode'), findsOneWidget);
     expect(
-      find.text('Used when your fingerprint or face is unavailable'),
+      find.text(
+        'Used when your fingerprint or face is unavailable. Turning this off can lock you out of Gatuno after a biometric lockout.',
+      ),
       findsOneWidget,
     );
   });
@@ -171,6 +173,83 @@ void main() {
     await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
     await tester.pump();
 
-    verify(() => fake.mock.setDeviceCredentialAllowed(true)).called(1);
+    verify(
+      () => fake.mock.setDeviceCredentialAllowed(
+        true,
+        messages: any(named: 'messages'),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('turning the fallback off asks for a biometric first', (
+    tester,
+  ) async {
+    await pumpPage(tester, supportedOn);
+
+    await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
+    await tester.pump();
+
+    verify(
+      () => fake.mock.setDeviceCredentialAllowed(
+        false,
+        messages: biometricOnlyMessages,
+      ),
+    ).called(1);
+  });
+
+  testWidgets('a failed biometric check keeps the fallback on and explains', (
+    tester,
+  ) async {
+    await pumpPage(tester, supportedOn);
+    when(
+      () => fake.mock.setDeviceCredentialAllowed(
+        any(),
+        messages: any(named: 'messages'),
+      ),
+    ).thenAnswer((_) async => DeviceAuthOutcome.noBiometrics);
+
+    await tester.tap(switchWithTitle('Allow device PIN, pattern or passcode'));
+    await tester.pump();
+
+    expect(
+      find.text(
+        'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'a lock left on after the screen lock was removed can be turned off',
+    (tester) async {
+      await pumpPage(
+        tester,
+        const AppLockState(enabled: true, isInitialized: true),
+      );
+
+      expect(
+        find.text(
+          'This device has no screen lock, so Gatuno cannot be locked.',
+        ),
+        findsOneWidget,
+      );
+      expect(switchWithTitle('Lock Gatuno'), findsOneWidget);
+    },
+  );
+
+  testWidgets('the OS sheet hint omits the PIN when the fallback is off', (
+    tester,
+  ) async {
+    await pumpPage(
+      tester,
+      supportedOff.copyWith(deviceCredentialAllowed: false),
+    );
+
+    await tester.tap(switchWithTitle('Lock Gatuno'));
+    await tester.pump();
+
+    verify(
+      () => fake.mock.setEnabled(true, messages: biometricOnlyMessages),
+    ).called(1);
   });
 }

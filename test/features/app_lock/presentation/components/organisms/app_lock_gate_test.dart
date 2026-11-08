@@ -56,6 +56,16 @@ void main() {
     );
   }
 
+  Future<void> cycleBackground(WidgetTester tester) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+  }
+
   const locked = AppLockState(enabled: true, locked: true, isInitialized: true);
   const unlocked = AppLockState(enabled: true, isInitialized: true);
 
@@ -80,20 +90,21 @@ void main() {
     verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
   });
 
-  testWidgets('prompts again each time the lock engages', (tester) async {
+  testWidgets('prompts exactly once each time the lock engages on resume', (
+    tester,
+  ) async {
     fake.emit(unlocked);
     await pumpGate(tester);
+    // The service engages the lock from onForegrounded; mirror that.
+    when(() => fake.mock.onForegrounded()).thenAnswer((_) => fake.emit(locked));
 
-    fake.emit(locked);
-    await tester.pump();
-    fake.emit(locked.copyWith(isAuthenticating: true));
-    await tester.pump();
+    await cycleBackground(tester);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
+
     fake.emit(unlocked);
     await tester.pump();
-    fake.emit(locked);
-    await tester.pump();
-
-    verify(() => fake.mock.unlock(messages: unlockMessages)).called(2);
+    await cycleBackground(tester);
+    verify(() => fake.mock.unlock(messages: unlockMessages)).called(1);
   });
 
   testWidgets('the Unlock button prompts again after a failure', (
@@ -133,8 +144,8 @@ void main() {
     final field = tester.state<EditableTextState>(find.byType(EditableText));
     expect(field.widget.focusNode.hasFocus, isTrue);
 
-    fake.emit(locked);
-    await tester.pump();
+    when(() => fake.mock.onForegrounded()).thenAnswer((_) => fake.emit(locked));
+    await cycleBackground(tester);
 
     expect(field.widget.focusNode.hasFocus, isFalse);
     expect(

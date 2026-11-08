@@ -787,7 +787,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockFallbackOnDesc =>
-      'Used when your fingerprint or face is unavailable';
+      'Used when your fingerprint or face is unavailable. Turning this off can lock you out of Gatuno after a biometric lockout.';
 
   @override
   String get appLockFallbackOffDesc =>
@@ -798,6 +798,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockPromptHint => 'Use your fingerprint or face';
+
+  @override
+  String get appLockPromptHintWithCredential =>
+      'Use your fingerprint, face or device PIN';
 
   @override
   String get appLockPromptReason => 'Unlock Gatuno';

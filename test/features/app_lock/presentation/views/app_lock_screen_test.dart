@@ -29,6 +29,27 @@ void main() {
     expect(taps, 1);
   });
 
+  testWidgets('the button keeps a full, bounded width across states', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        lastOutcome: null,
+        onUnlock: () {},
+      ),
+    );
+    final idle = tester.getSize(find.byType(AppButton)).width;
+    await tester.pumpApp(
+      AppLockScreen(isAuthenticating: true, lastOutcome: null, onUnlock: () {}),
+    );
+    final busy = tester.getSize(find.byType(AppButton)).width;
+
+    expect(idle, busy);
+    expect(idle, greaterThan(300));
+    expect(idle, lessThanOrEqualTo(480));
+  });
+
   testWidgets('shows the failure reason and a Try again button', (
     tester,
   ) async {

@@ -790,7 +790,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockFallbackOnDesc =>
-      'Usado quando sua digital ou rosto não estiver disponível';
+      'Usado quando sua digital ou rosto não estiver disponível. Desativar isto pode deixar você sem acesso ao Gatuno após um bloqueio da biometria.';
 
   @override
   String get appLockFallbackOffDesc =>
@@ -802,6 +802,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockPromptHint => 'Use sua digital ou rosto';
+
+  @override
+  String get appLockPromptHintWithCredential =>
+      'Use sua digital, rosto ou PIN do aparelho';
 
   @override
   String get appLockPromptReason => 'Desbloquear o Gatuno';

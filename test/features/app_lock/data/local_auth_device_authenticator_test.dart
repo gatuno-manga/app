@@ -106,7 +106,8 @@ void main() {
       LocalAuthExceptionCode.noCredentialsSet: DeviceAuthOutcome.noCredentials,
       LocalAuthExceptionCode.noBiometricsEnrolled:
           DeviceAuthOutcome.noBiometrics,
-      LocalAuthExceptionCode.noBiometricHardware: DeviceAuthOutcome.unavailable,
+      LocalAuthExceptionCode.noBiometricHardware:
+          DeviceAuthOutcome.noBiometrics,
       LocalAuthExceptionCode.biometricHardwareTemporarilyUnavailable:
           DeviceAuthOutcome.unavailable,
       LocalAuthExceptionCode.uiUnavailable: DeviceAuthOutcome.unavailable,

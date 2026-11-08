@@ -83,7 +83,6 @@ class AppLockService {
     const AppLockState(),
   );
   DateTime? _backgroundedAt;
-  bool _inBackground = false;
   Future<DeviceAuthOutcome>? _inFlightUnlock;
 
   AppLockService({
@@ -169,14 +168,23 @@ class AppLockService {
     _emit(state.copyWith(grace: grace));
   }
 
-  Future<void> setDeviceCredentialAllowed(bool allowed) async {
+  /// Refusing the device credential first proves a biometric works, so a
+  /// PIN-only device can never lock itself out. Allowing it needs no prompt.
+  Future<DeviceAuthOutcome> setDeviceCredentialAllowed(
+    bool allowed, {
+    required DeviceAuthMessages messages,
+  }) async {
+    if (!allowed) {
+      final outcome = await _prompt(messages, allowDeviceCredential: false);
+      if (outcome != DeviceAuthOutcome.success) return outcome;
+    }
     await _storage.setDeviceCredentialAllowed(allowed);
     _emit(state.copyWith(deviceCredentialAllowed: allowed));
+    return DeviceAuthOutcome.success;
   }
 
   /// Call when the app leaves the foreground.
   void onBackgrounded() {
-    _inBackground = true;
     if (!state.enabled) return;
     _backgroundedAt = _clock();
   }
@@ -185,7 +193,6 @@ class AppLockService {
   /// period has elapsed. Lifecycle churn caused by an open OS prompt
   /// (Android's device-credential screen pauses the activity) is ignored.
   void onForegrounded() {
-    _inBackground = false;
     unawaited(_refreshSupport());
     final since = _backgroundedAt;
     _backgroundedAt = null;
@@ -207,8 +214,6 @@ class AppLockService {
   }
 
   Future<DeviceAuthOutcome> _runUnlock(DeviceAuthMessages messages) async {
-    // Clearing the old outcome lets the cover re-announce an identical one.
-    _emit(state.copyWith(lastOutcome: () => null));
     final outcome = await _prompt(messages);
     final success = outcome == DeviceAuthOutcome.success;
     _emit(
@@ -220,22 +225,26 @@ class AppLockService {
     return outcome;
   }
 
-  Future<DeviceAuthOutcome> _prompt(DeviceAuthMessages messages) async {
-    _emit(state.copyWith(isAuthenticating: true));
+  Future<DeviceAuthOutcome> _prompt(
+    DeviceAuthMessages messages, {
+    bool? allowDeviceCredential,
+  }) async {
+    // Clearing the old outcome lets the cover re-announce an identical one.
+    _emit(state.copyWith(isAuthenticating: true, lastOutcome: () => null));
     var outcome = DeviceAuthOutcome.failed;
     try {
       outcome = await _authenticator.authenticate(
         messages: messages,
-        allowDeviceCredential: state.deviceCredentialAllowed,
+        allowDeviceCredential:
+            allowDeviceCredential ?? state.deviceCredentialAllowed,
       );
       return outcome;
     } finally {
       // A pass has no time away to count, whatever lifecycle churn the
-      // prompt caused. A prompt that ended while the app is really in the
-      // background (Home pressed during it) keeps the timestamp set on
-      // pause so the grace period still applies on return.
-      final keepAway = _inBackground && outcome != DeviceAuthOutcome.success;
-      if (!keepAway) _backgroundedAt = null;
+      // prompt caused; any other outcome leaves the pause timestamp as
+      // onBackgrounded/onForegrounded left it (Home pressed during the
+      // prompt keeps it, so the grace period still applies on return).
+      if (outcome == DeviceAuthOutcome.success) _backgroundedAt = null;
       _emit(state.copyWith(isAuthenticating: false));
     }
   }

@@ -37,47 +37,51 @@ class AppLockScreen extends StatelessWidget {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ExcludeSemantics(child: AppIcons.logo(height: 96)),
-                const SizedBox(height: 24),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    l10n.appLockLockedTitle,
-                    style: theme.textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.appLockLockedDesc,
-                  style: theme.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                if (error != null) ...[
-                  const SizedBox(height: 16),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ExcludeSemantics(child: AppIcons.logo(height: 96)),
+                  const SizedBox(height: 24),
                   Semantics(
                     liveRegion: true,
                     child: Text(
-                      error,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: errorColor,
-                      ),
+                      l10n.appLockLockedTitle,
+                      style: theme.textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.appLockLockedDesc,
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  if (error != null) ...[
+                    const SizedBox(height: 16),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        error,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: errorColor,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  AppButton(
+                    text: error == null
+                        ? l10n.appLockUnlockButton
+                        : l10n.appLockRetryButton,
+                    isLoading: isAuthenticating,
+                    onPressed: onUnlock,
+                  ),
                 ],
-                const SizedBox(height: 24),
-                AppButton(
-                  text: error == null
-                      ? l10n.appLockUnlockButton
-                      : l10n.appLockRetryButton,
-                  isLoading: isAuthenticating,
-                  onPressed: onUnlock,
-                ),
-              ],
+              ),
             ),
           ),
         ),

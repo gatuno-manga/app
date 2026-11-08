@@ -1541,7 +1541,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLockFallbackOnDesc.
   ///
   /// In en, this message translates to:
-  /// **'Used when your fingerprint or face is unavailable'**
+  /// **'Used when your fingerprint or face is unavailable. Turning this off can lock you out of Gatuno after a biometric lockout.'**
   String get appLockFallbackOnDesc;
 
   /// No description provided for @appLockFallbackOffDesc.
@@ -1561,6 +1561,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use your fingerprint or face'**
   String get appLockPromptHint;
+
+  /// No description provided for @appLockPromptHintWithCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your fingerprint, face or device PIN'**
+  String get appLockPromptHintWithCredential;
 
   /// No description provided for @appLockPromptReason.
   ///
