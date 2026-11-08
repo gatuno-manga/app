@@ -190,7 +190,7 @@ class _PalettePreview extends StatelessWidget {
     return ColoredBox(
       color: palette.appBackground,
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,

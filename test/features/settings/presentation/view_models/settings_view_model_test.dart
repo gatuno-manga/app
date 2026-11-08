@@ -19,6 +19,8 @@ void main() {
   late MockSettingsService mockSettingsService;
   late MockAuthService mockAuthService;
 
+  setUpAll(() => registerFallbackValue(AppThemeChoice.system));
+
   setUp(() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
@@ -107,6 +109,17 @@ void main() {
         () => mockSettingsService.validateApiUrl('http://invalid.com'),
       ).called(1);
       verifyNever(() => mockSettingsService.setApiUrl(any()));
+    });
+
+    test('setThemeChoice swallows and logs a failed write', () async {
+      when(
+        () => mockSettingsService.setThemeChoice(any()),
+      ).thenThrow(Exception('disk full'));
+
+      await expectLater(
+        viewModel.setThemeChoice(AppThemeChoice.slate),
+        completes,
+      );
     });
   });
 }

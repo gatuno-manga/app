@@ -109,8 +109,20 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
     await _settingsService.setSensitiveContentEnabled(enabled);
   }
 
-  Future<void> setThemeChoice(AppThemeChoice choice) =>
-      _settingsService.setThemeChoice(choice);
+  /// Fire-and-forget from the picker: a failed write is logged, and the
+  /// previous choice stays selected because the state never changed.
+  Future<void> setThemeChoice(AppThemeChoice choice) async {
+    try {
+      await _settingsService.setThemeChoice(choice);
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        'Error setting theme choice in ViewModel',
+        e,
+        stackTrace,
+        'SettingsViewModel',
+      );
+    }
+  }
 
   Future<bool> updateApiUrl(String url) async {
     emit(state.copyWith(isLoading: true));

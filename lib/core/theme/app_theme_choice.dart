@@ -35,13 +35,18 @@ enum AppThemeChoice {
     AppThemeChoice.trueDark => AppTheme.trueDarkTheme,
     AppThemeChoice.dracula => AppTheme.draculaTheme,
     AppThemeChoice.slate => AppTheme.slateTheme,
-    _ => AppTheme.darkTheme,
+    AppThemeChoice.system ||
+    AppThemeChoice.light ||
+    AppThemeChoice.dark => AppTheme.darkTheme,
   };
 
   /// `MaterialApp.themeMode`.
   ThemeMode get themeMode => switch (this) {
     AppThemeChoice.system => ThemeMode.system,
     AppThemeChoice.light => ThemeMode.light,
-    _ => ThemeMode.dark,
+    AppThemeChoice.dark ||
+    AppThemeChoice.trueDark ||
+    AppThemeChoice.dracula ||
+    AppThemeChoice.slate => ThemeMode.dark,
   };
 }
