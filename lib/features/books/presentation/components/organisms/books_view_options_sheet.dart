@@ -27,7 +27,8 @@ class BooksViewOptionsSheet extends StatelessWidget {
     return showAppModalBottomSheet<void>(
       context: context,
       builder: (_) => BooksViewOptionsSheet(
-        preferences: viewModel.stateStream.map((s) => s.preferences),
+        // Rebuild only when the preferences change, not on every fetch.
+        preferences: viewModel.stateStream.map((s) => s.preferences).distinct(),
         initial: viewModel.preferences,
         onColumnsChanged: viewModel.setColumns,
         onNavigationChanged: viewModel.setNavigationMode,

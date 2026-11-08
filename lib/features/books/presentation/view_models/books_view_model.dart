@@ -107,16 +107,21 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   bool _fetchQueued = false;
 
   /// Fetches the list. A call made while a fetch is in flight is not dropped:
-  /// one follow-up fetch runs afterwards with the options then in state. In
-  /// infinite navigation the list holds pages 1..N, so a plain fetch restarts
-  /// from page 1; with [append] the result is added after the current books
-  /// and, on failure, the page is rolled back so the next attempt retries it.
-  Future<void> fetchBooks({bool append = false}) async {
+  /// one follow-up fetch runs afterwards with the options then in state, and
+  /// the in-flight result is discarded because state no longer describes it.
+  /// In infinite navigation the list holds pages 1..N, so a plain fetch
+  /// restarts from page 1; with [append] the result is added after the
+  /// current books and, on failure, the page is rolled back so the next
+  /// attempt retries it.
+  Future<void> fetchBooks({bool append = false}) {
     if (state.isLoading) {
       _fetchQueued = true;
-      return;
+      return Future.value();
     }
+    return _fetch(append: append);
+  }
 
+  Future<void> _fetch({required bool append}) async {
     AppLogger.i(
       'Fetching books: append=$append, page=${state.options.page}',
       _logTag,
@@ -150,6 +155,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       );
 
       final result = await _repository.getBooks(currentOptions);
+      if (_takeQueued()) return await _fetch(append: false);
 
       AppLogger.i(
         'Books fetched successfully: page=${result.page}, count=${result.data.length}, total=${result.total}',
@@ -175,6 +181,8 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching books', e, stackTrace, _logTag);
+      if (_takeQueued()) return await _fetch(append: false);
+
       // Only undo the bump this append made; a sort or filter change that
       // happened meanwhile already moved the page elsewhere.
       final rolledBack = append && state.options.page == requestedPage
@@ -189,11 +197,13 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       );
     }
+  }
 
-    if (_fetchQueued) {
-      _fetchQueued = false;
-      await fetchBooks();
-    }
+  /// Whether a follow-up fetch was requested meanwhile; clears the flag.
+  bool _takeQueued() {
+    if (!_fetchQueued) return false;
+    _fetchQueued = false;
+    return true;
   }
 
   /// Pages mode only: infinite mode appends through [loadMore].
@@ -210,16 +220,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     fetchBooks();
   }
 
-  void loadNextPage() => setPage(state.options.page.value + 1);
-
-  void loadPreviousPage() => setPage(state.options.page.value - 1);
-
   /// Appends the next page in infinite mode; a no-op otherwise, while a fetch
   /// is in flight, or when the last page is already loaded.
   Future<void> loadMore() async {
-    if (state.preferences.navigation != BooksNavigationMode.infinite ||
-        state.isLoading ||
-        !state.hasMore) {
+    if (!_infinite || state.isLoading || !state.hasMore) {
       return;
     }
     final next = state.options.page.value + 1;

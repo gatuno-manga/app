@@ -24,14 +24,13 @@ class BooksViewPreferencesRepositoryImpl
       const defaults = BooksViewPreferences();
       _current = BooksViewPreferences(
         layout:
-            _enumByName(BooksLayoutMode.values, prefs.getString(_layoutKey)) ??
+            BooksLayoutMode.values.asNameMap()[prefs.getString(_layoutKey)] ??
             defaults.layout,
         columns: _columnsInRange(prefs.getInt(_columnsKey)) ?? defaults.columns,
         navigation:
-            _enumByName(
-              BooksNavigationMode.values,
-              prefs.getString(_navigationKey),
-            ) ??
+            BooksNavigationMode.values.asNameMap()[prefs.getString(
+              _navigationKey,
+            )] ??
             defaults.navigation,
       );
       AppLogger.d('Loaded view preferences: $_current', _logTag);
@@ -50,14 +49,6 @@ class BooksViewPreferencesRepositoryImpl
       prefs.setInt(_columnsKey, preferences.columns),
       prefs.setString(_navigationKey, preferences.navigation.name),
     ]);
-  }
-
-  static T? _enumByName<T extends Enum>(List<T> values, String? name) {
-    if (name == null) return null;
-    for (final value in values) {
-      if (value.name == name) return value;
-    }
-    return null;
   }
 
   static int? _columnsInRange(int? columns) {

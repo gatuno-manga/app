@@ -385,6 +385,30 @@ void main() {
       expect(viewModel.hasMore, isFalse);
     });
 
+    test('a result that lands while a fetch is queued is not shown', () async {
+      final second = Completer<BookList>();
+      when(() => mockRepository.getBooks(any())).thenAnswer((inv) {
+        final o = inv.positionalArguments.first as BookPageOptions;
+        if (o.page.value == 2) return second.future;
+        return Future.value(page(number: 1, totalPages: 3, ids: ['a']));
+      });
+      await viewModel.fetchBooks();
+      final append = viewModel.loadMore();
+      final states = <BooksState>[];
+      final sub = viewModel.stateStream.listen(states.add);
+
+      viewModel.setNavigationMode(BooksNavigationMode.pages);
+      second.complete(page(number: 2, totalPages: 3, ids: ['stale']));
+      await append;
+      await flush();
+      await sub.cancel();
+
+      final shown = states.expand((s) => s.bookList?.data ?? const <Book>[]);
+      expect(shown.map((b) => b.id.value), isNot(contains('stale')));
+      expect(viewModel.bookList!.data.map((b) => b.id.value), ['a']);
+      expect(viewModel.isLoading, isFalse);
+    });
+
     test('is ignored in pages mode', () async {
       when(
         () => mockRepository.getBooks(any()),
