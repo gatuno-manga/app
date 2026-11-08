@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
