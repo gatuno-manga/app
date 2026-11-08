@@ -23,6 +23,7 @@ void initBooksInjection(GetIt sl) {
     () => BooksViewModel(
       repository: sl<BooksRepository>(),
       settingsService: sl<SettingsService>(),
+      viewPreferencesRepository: sl<BooksViewPreferencesRepository>(),
     ),
   );
 
