@@ -753,7 +753,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get settingsAppLockDesc =>
-      'Exigir sua digital ou o PIN do aparelho para abrir o Gatuno';
+      'Exigir sua digital, rosto ou PIN do aparelho para abrir o Gatuno';
 
   @override
   String get appLockSwitchTitle => 'Bloquear o Gatuno';
@@ -797,6 +797,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo';
 
   @override
+  String get appLockConfirmReason =>
+      'Confirme que é você para alterar o bloqueio do app';
+
+  @override
   String get appLockPromptReason => 'Desbloquear o Gatuno';
 
   @override
@@ -810,7 +814,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appLockUnlockButton => 'Desbloquear';
 
   @override
-  String get appLockRetryButton => 'Tentar de novo';
+  String get appLockRetryButton => 'Tentar novamente';
 
   @override
   String get appLockErrorCancelled => 'Desbloqueio cancelado';
@@ -821,7 +825,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockErrorNoCredentials =>
-      'Este aparelho não tem bloqueio de tela. Configure um nas configurações do sistema.';
+      'Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema.';
 
   @override
   String get appLockErrorUnavailable =>
@@ -829,5 +833,5 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockErrorFailed =>
-      'Não foi possível confirmar que é você. Tente de novo.';
+      'Não foi possível confirmar que é você. Tente novamente.';
 }

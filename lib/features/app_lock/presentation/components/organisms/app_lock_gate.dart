@@ -8,8 +8,9 @@ import '../../views/app_lock_screen.dart';
 
 /// Covers [child] with [AppLockScreen] while the app is locked, feeds app
 /// lifecycle into [AppLockService] and opens the OS prompt whenever the lock
-/// engages. Mount it in `MaterialApp.builder` so it sits above the router
-/// (the route stack survives a lock) yet below the localizations.
+/// engages or the app resumes still locked. Mount it in `MaterialApp.builder`
+/// so it sits above the router (the route stack survives a lock) yet below
+/// the localizations.
 class AppLockGate extends StatefulWidget {
   final AppLockService service;
   final Widget child;
@@ -22,15 +23,15 @@ class AppLockGate extends StatefulWidget {
 
 class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
   late final StreamSubscription<AppLockState> _subscription;
-  late bool _wasLocked;
+  late AppLockState _state;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _wasLocked = widget.service.state.locked;
+    _state = widget.service.state;
     _subscription = widget.service.stateStream.listen(_onState);
-    if (_wasLocked) {
+    if (_state.locked) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _prompt());
     }
   }
@@ -42,10 +43,15 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  void _onState(AppLockState state) {
-    final engaged = state.locked && !_wasLocked;
-    _wasLocked = state.locked;
-    if (engaged) _prompt();
+  void _onState(AppLockState next) {
+    final engaged = next.locked && !_state.locked;
+    if (next != _state) setState(() => _state = next);
+    if (engaged) {
+      // Offstage children keep focus, so the IME would stay open over the
+      // cover and keystrokes would reach the hidden field.
+      FocusManager.instance.primaryFocus?.unfocus();
+      _prompt();
+    }
   }
 
   void _prompt() {
@@ -61,6 +67,9 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
         widget.service.onBackgrounded();
       case AppLifecycleState.resumed:
         widget.service.onForegrounded();
+        final current = widget.service.state;
+        // A prompt the system cancelled on backgrounding is offered again.
+        if (current.locked && !current.isAuthenticating) _prompt();
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
@@ -75,26 +84,23 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<AppLockState>(
-      stream: widget.service.stateStream,
-      initialData: widget.service.state,
-      builder: (context, snapshot) {
-        final state = snapshot.data!;
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            // Offstage keeps the route stack alive but paints nothing beneath
-            // the cover and drops it from semantics.
-            Offstage(offstage: state.locked, child: widget.child),
-            if (state.locked)
-              AppLockScreen(
-                isAuthenticating: state.isAuthenticating,
-                lastOutcome: state.lastOutcome,
-                onUnlock: _prompt,
-              ),
-          ],
-        );
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Offstage keeps the route stack alive but paints nothing beneath
+        // the cover and drops it from semantics; ExcludeFocus keeps keyboard
+        // input out of it.
+        ExcludeFocus(
+          excluding: _state.locked,
+          child: Offstage(offstage: _state.locked, child: widget.child),
+        ),
+        if (_state.locked)
+          AppLockScreen(
+            isAuthenticating: _state.isAuthenticating,
+            lastOutcome: _state.lastOutcome,
+            onUnlock: _prompt,
+          ),
+      ],
     );
   }
 }

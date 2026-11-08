@@ -26,7 +26,6 @@ void main() async {
       providers: [
         Provider.value(value: sl<AuthService>()),
         Provider.value(value: settingsService),
-        Provider.value(value: sl<AppLockService>()),
       ],
       child: App(router: router),
     ),
@@ -58,10 +57,8 @@ class App extends StatelessWidget {
             routerConfig: router,
             // Above the router so the route stack survives a lock, below the
             // localizations so the cover and prompt reason are translated.
-            builder: (context, child) => AppLockGate(
-              service: context.read<AppLockService>(),
-              child: child!,
-            ),
+            builder: (context, child) =>
+                AppLockGate(service: sl<AppLockService>(), child: child!),
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,

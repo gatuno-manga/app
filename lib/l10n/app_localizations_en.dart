@@ -751,7 +751,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAppLockDesc =>
-      'Require your fingerprint or device PIN to open Gatuno';
+      'Require your fingerprint, face or device PIN to open Gatuno';
 
   @override
   String get appLockSwitchTitle => 'Lock Gatuno';
@@ -792,6 +792,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLockFallbackOffDesc =>
       'If biometrics get locked out, Gatuno stays locked until the device allows them again';
+
+  @override
+  String get appLockConfirmReason => 'Confirm it\'s you to change the app lock';
 
   @override
   String get appLockPromptReason => 'Unlock Gatuno';

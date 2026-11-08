@@ -1475,7 +1475,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsAppLockDesc.
   ///
   /// In en, this message translates to:
-  /// **'Require your fingerprint or device PIN to open Gatuno'**
+  /// **'Require your fingerprint, face or device PIN to open Gatuno'**
   String get settingsAppLockDesc;
 
   /// No description provided for @appLockSwitchTitle.
@@ -1549,6 +1549,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If biometrics get locked out, Gatuno stays locked until the device allows them again'**
   String get appLockFallbackOffDesc;
+
+  /// No description provided for @appLockConfirmReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you to change the app lock'**
+  String get appLockConfirmReason;
 
   /// No description provided for @appLockPromptReason.
   ///

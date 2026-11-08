@@ -38,7 +38,7 @@ void main() {
 
     expect(find.text('App lock'), findsOneWidget);
     expect(
-      find.text('Require your fingerprint or device PIN to open Gatuno'),
+      find.text('Require your fingerprint, face or device PIN to open Gatuno'),
       findsOneWidget,
     );
     await tester.tap(find.byType(ListTile));

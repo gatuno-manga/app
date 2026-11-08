@@ -12,7 +12,8 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-    let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PrivacyScreen")
+    guard let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PrivacyScreen")
+    else { return }
     PrivacyScreen.shared.register(with: registrar.messenger())
   }
 }

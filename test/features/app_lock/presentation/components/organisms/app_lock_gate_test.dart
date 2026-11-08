@@ -23,9 +23,14 @@ void main() {
         GoRoute(
           path: '/',
           builder: (context, _) => Scaffold(
-            body: TextButton(
-              onPressed: () => context.push('/second'),
-              child: const Text('go second'),
+            body: Column(
+              children: [
+                TextButton(
+                  onPressed: () => context.push('/second'),
+                  child: const Text('go second'),
+                ),
+                const TextField(key: Key('field')),
+              ],
             ),
           ),
         ),
@@ -118,6 +123,60 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     verify(() => fake.mock.onForegrounded()).called(1);
+  });
+
+  testWidgets('drops keyboard focus from the covered UI', (tester) async {
+    fake.emit(unlocked);
+    await pumpGate(tester);
+    await tester.tap(find.byKey(const Key('field')));
+    await tester.pump();
+    final field = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(field.widget.focusNode.hasFocus, isTrue);
+
+    fake.emit(locked);
+    await tester.pump();
+
+    expect(field.widget.focusNode.hasFocus, isFalse);
+    expect(
+      tester.binding.focusManager.primaryFocus?.context?.widget,
+      isNot(isA<EditableText>()),
+    );
+  });
+
+  testWidgets('prompts again on resume while still locked', (tester) async {
+    fake.emit(locked.copyWith(lastOutcome: () => DeviceAuthOutcome.cancelled));
+    await pumpGate(tester);
+    await tester.pump();
+    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(1);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    verify(() => fake.mock.unlock(reason: 'Unlock Gatuno')).called(1);
+  });
+
+  testWidgets('does not prompt on resume while a prompt is open', (
+    tester,
+  ) async {
+    fake.emit(locked.copyWith(isAuthenticating: true));
+    await pumpGate(tester);
+    await tester.pump();
+    clearInteractions(fake.mock);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    verifyNever(() => fake.mock.unlock(reason: any(named: 'reason')));
   });
 
   testWidgets('swallows the back button while locked', (tester) async {

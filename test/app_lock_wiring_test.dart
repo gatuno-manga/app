@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/app_lock/presentation/components/organisms/app_lock_gate.dart';
@@ -21,17 +22,16 @@ void main() {
     when(() => settings.themeChoice).thenReturn(AppThemeChoice.system);
     final fake = FakeAppLockService(const AppLockState(isInitialized: true));
     addTearDown(fake.close);
+    await sl.reset();
+    sl.registerSingleton<AppLockService>(fake.mock);
 
     final router = GoRouter(
       routes: [GoRoute(path: '/', builder: (_, _) => const Text('home'))],
     );
 
     await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          Provider<SettingsService>.value(value: settings),
-          Provider<AppLockService>.value(value: fake.mock),
-        ],
+      Provider<SettingsService>.value(
+        value: settings,
         child: App(router: router),
       ),
     );

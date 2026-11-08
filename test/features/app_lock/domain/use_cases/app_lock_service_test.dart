@@ -122,6 +122,20 @@ void main() {
       expect(service.state.isSupported, isFalse);
     });
 
+    test('still starts locked when the support probe throws', () async {
+      when(() => storage.isEnabled()).thenAnswer((_) async => true);
+      when(
+        () => authenticator.isDeviceSupported(),
+      ).thenThrow(Exception('plugin'));
+
+      await service.init();
+
+      expect(service.state.isInitialized, isTrue);
+      expect(service.state.isSupported, isFalse);
+      expect(service.state.enabled, isTrue);
+      expect(service.state.locked, isTrue);
+    });
+
     test('survives a storage failure and stays unlocked', () async {
       when(() => storage.isEnabled()).thenThrow(Exception('storage'));
       await service.init();
@@ -331,6 +345,80 @@ void main() {
     });
   });
 
+  group('prompt interrupted by backgrounding', () {
+    test(
+      'counts the time away when the prompt was cancelled by the system',
+      () async {
+        await initEnabled();
+        stubPrompt(DeviceAuthOutcome.success);
+        await service.unlock(reason: 'r');
+
+        final prompt = Completer<DeviceAuthOutcome>();
+        when(
+          () => authenticator.authenticate(
+            reason: any(named: 'reason'),
+            allowDeviceCredential: any(named: 'allowDeviceCredential'),
+          ),
+        ).thenAnswer((_) => prompt.future);
+        final disabling = service.setEnabled(false, reason: 'r');
+        service.onBackgrounded();
+        prompt.complete(DeviceAuthOutcome.cancelled);
+        await disabling;
+        expect(service.state.enabled, isTrue);
+
+        now = now.add(const Duration(hours: 1));
+        service.onForegrounded();
+
+        expect(service.state.locked, isTrue);
+      },
+    );
+
+    test('does not lock when the app stayed in the foreground', () async {
+      await initEnabled();
+      stubPrompt(DeviceAuthOutcome.success);
+      await service.unlock(reason: 'r');
+
+      // Android: the device-credential screen pauses and resumes the
+      // activity while the user is still "here".
+      final prompt = Completer<DeviceAuthOutcome>();
+      when(
+        () => authenticator.authenticate(
+          reason: any(named: 'reason'),
+          allowDeviceCredential: any(named: 'allowDeviceCredential'),
+        ),
+      ).thenAnswer((_) => prompt.future);
+      final disabling = service.setEnabled(false, reason: 'r');
+      service.onBackgrounded();
+      now = now.add(const Duration(hours: 1));
+      service.onForegrounded();
+      prompt.complete(DeviceAuthOutcome.cancelled);
+      await disabling;
+
+      expect(service.state.locked, isFalse);
+      service.onForegrounded();
+      expect(service.state.locked, isFalse);
+    });
+  });
+
+  group('device support', () {
+    test('is re-checked when the app returns to the foreground', () async {
+      when(
+        () => authenticator.isDeviceSupported(),
+      ).thenAnswer((_) async => false);
+      await service.init();
+      expect(service.state.isSupported, isFalse);
+
+      when(
+        () => authenticator.isDeviceSupported(),
+      ).thenAnswer((_) async => true);
+      service.onBackgrounded();
+      service.onForegrounded();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(service.state.isSupported, isTrue);
+    });
+  });
+
   group('unlock', () {
     test('succeeds and clears the last outcome', () async {
       await initEnabled();
@@ -344,6 +432,26 @@ void main() {
       expect(outcome, DeviceAuthOutcome.success);
       expect(service.state.locked, isFalse);
       expect(service.state.lastOutcome, isNull);
+    });
+
+    test('clears the previous outcome while a new prompt is open', () async {
+      await initEnabled();
+      stubPrompt(DeviceAuthOutcome.cancelled);
+      await service.unlock(reason: 'r');
+      expect(service.state.lastOutcome, DeviceAuthOutcome.cancelled);
+
+      final prompt = Completer<DeviceAuthOutcome>();
+      when(
+        () => authenticator.authenticate(
+          reason: any(named: 'reason'),
+          allowDeviceCredential: any(named: 'allowDeviceCredential'),
+        ),
+      ).thenAnswer((_) => prompt.future);
+      final unlocking = service.unlock(reason: 'r');
+      expect(service.state.lastOutcome, isNull);
+      prompt.complete(DeviceAuthOutcome.cancelled);
+      await unlocking;
+      expect(service.state.lastOutcome, DeviceAuthOutcome.cancelled);
     });
 
     test('stays locked and records the outcome on failure', () async {

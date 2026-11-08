@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -81,6 +83,7 @@ class AppLockService {
     const AppLockState(),
   );
   DateTime? _backgroundedAt;
+  bool _inBackground = false;
   Future<DeviceAuthOutcome>? _inFlightUnlock;
 
   AppLockService({
@@ -105,16 +108,35 @@ class AppLockService {
     var next = state;
     try {
       next = next.copyWith(
-        isSupported: await _authenticator.isDeviceSupported(),
         enabled: await _storage.isEnabled(),
         grace: await _storage.getGrace(),
         deviceCredentialAllowed: await _storage.isDeviceCredentialAllowed(),
       );
     } catch (e, stackTrace) {
-      AppLogger.e('Error initializing AppLockService', e, stackTrace, _logTag);
+      AppLogger.e('Error reading app lock settings', e, stackTrace, _logTag);
     }
+    // The capability probe is separate on purpose: a failure there must not
+    // switch off a lock the user enabled.
+    next = next.copyWith(isSupported: await _probeSupport());
     _emit(next.copyWith(locked: next.enabled, isInitialized: true));
     await _privacyScreen.setEnabled(next.enabled);
+  }
+
+  Future<bool> _probeSupport() async {
+    try {
+      return await _authenticator.isDeviceSupported();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error probing device support', e, stackTrace, _logTag);
+      return false;
+    }
+  }
+
+  /// The user may add or remove a screen lock while the app is away.
+  Future<void> _refreshSupport() async {
+    final supported = await _probeSupport();
+    if (supported != state.isSupported) {
+      _emit(state.copyWith(isSupported: supported));
+    }
   }
 
   /// Turns the lock on or off after the user passes the OS prompt.
@@ -153,13 +175,17 @@ class AppLockService {
 
   /// Call when the app leaves the foreground.
   void onBackgrounded() {
-    if (!state.enabled || state.isAuthenticating) return;
+    _inBackground = true;
+    if (!state.enabled) return;
     _backgroundedAt = _clock();
   }
 
   /// Call when the app returns to the foreground; locks once the grace
-  /// period has elapsed.
+  /// period has elapsed. Lifecycle churn caused by an open OS prompt
+  /// (Android's device-credential screen pauses the activity) is ignored.
   void onForegrounded() {
+    _inBackground = false;
+    unawaited(_refreshSupport());
     final since = _backgroundedAt;
     _backgroundedAt = null;
     if (since == null || !state.enabled || state.isAuthenticating) return;
@@ -180,6 +206,8 @@ class AppLockService {
   }
 
   Future<DeviceAuthOutcome> _runUnlock(String reason) async {
+    // Clearing the old outcome lets the cover re-announce an identical one.
+    _emit(state.copyWith(lastOutcome: () => null));
     final outcome = await _prompt(reason);
     _emit(
       state.copyWith(
@@ -199,8 +227,9 @@ class AppLockService {
         allowDeviceCredential: state.deviceCredentialAllowed,
       );
     } finally {
-      // The prompt's own lifecycle churn must not count as time away.
-      _backgroundedAt = null;
+      // If the user really left (Home during the prompt) the timestamp set
+      // on pause must survive so the grace period still applies on return.
+      if (!_inBackground) _backgroundedAt = null;
       _emit(state.copyWith(isAuthenticating: false));
     }
   }

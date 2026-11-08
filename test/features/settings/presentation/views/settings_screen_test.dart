@@ -62,11 +62,11 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
     );
-    sl.registerLazySingleton<AppLockService>(
-      () => FakeAppLockService(
-        const AppLockState(isSupported: true, isInitialized: true),
-      ).mock,
+    final appLock = FakeAppLockService(
+      const AppLockState(isSupported: true, isInitialized: true),
     );
+    addTearDown(appLock.close);
+    sl.registerLazySingleton<AppLockService>(() => appLock.mock);
   });
 
   testWidgets('SettingsPage shows the App lock entry in General', (

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/app_lock/domain/device_authenticator.dart';
 import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/app_lock/domain/value_objects/app_lock_grace.dart';
-import 'package:gatuno/features/app_lock/presentation/view_models/app_lock_settings_view_model.dart';
 import 'package:gatuno/features/app_lock/presentation/views/app_lock_settings_screen.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -25,9 +24,7 @@ void main() {
 
   Future<void> pumpPage(WidgetTester tester, AppLockState state) async {
     fake = FakeAppLockService(state);
-    await tester.pumpApp(
-      AppLockSettingsPage(viewModel: AppLockSettingsViewModel(fake.mock)),
-    );
+    await tester.pumpApp(AppLockSettingsPage(service: fake.mock));
   }
 
   Finder switchWithTitle(String title) => find.descendant(
@@ -93,7 +90,12 @@ void main() {
     await tester.tap(switchWithTitle('Lock Gatuno'));
     await tester.pump();
 
-    verify(() => fake.mock.setEnabled(true, reason: 'Unlock Gatuno')).called(1);
+    verify(
+      () => fake.mock.setEnabled(
+        true,
+        reason: "Confirm it's you to change the app lock",
+      ),
+    ).called(1);
   });
 
   testWidgets('a refused prompt shows the reason in a snackbar', (
@@ -113,6 +115,21 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a cancelled prompt leaves the switch alone silently', (
+    tester,
+  ) async {
+    await pumpPage(tester, supportedOff);
+    when(
+      () => fake.mock.setEnabled(any(), reason: any(named: 'reason')),
+    ).thenAnswer((_) async => DeviceAuthOutcome.cancelled);
+
+    await tester.tap(switchWithTitle('Lock Gatuno'));
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.text('Unlock cancelled'), findsNothing);
   });
 
   testWidgets('choosing a grace period persists it', (tester) async {

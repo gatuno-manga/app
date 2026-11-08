@@ -33,12 +33,15 @@ class AppLockScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppIcons.logo(height: 96),
+                ExcludeSemantics(child: AppIcons.logo(height: 96)),
                 const SizedBox(height: 24),
-                Text(
-                  l10n.appLockLockedTitle,
-                  style: theme.textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    l10n.appLockLockedTitle,
+                    style: theme.textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
