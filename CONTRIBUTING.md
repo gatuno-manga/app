@@ -34,8 +34,9 @@ The pre-push hook runs `issues-check`, which validates the label and cycle rules
 
 ## Checks
 
-Run `just check` before pushing. It runs `flutter analyze`,
-`flutter test` and the design token check.
+Run `just check` before pushing. It runs `dart analyze` (which, unlike
+`flutter analyze`, reports the `gatuno_lints` plugin diagnostics), the tests, the
+lint-rule tests and the design token check.
 
 If you add or change user-facing strings, run `just l10n`. If you change
 generated code inputs, run `just gen`.

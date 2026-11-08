@@ -163,8 +163,13 @@ registered inline in `initDI()`, and `authentication` pairs
   `dart format` is the formatter.
 - The `gatuno_lints` plugin (`tool/gatuno_lints/`, enabled in
   `analysis_options.yaml`) flags hardcoded colors, inline `TextStyle`, small
-  tap targets and missing `Semantics`. Fix the warning; for a justified
-  exception use `// ignore: gatuno_lints/<rule>` with a reason.
+  tap targets and missing `Semantics` as warnings, and raw Material buttons and
+  text fields outside `components/atoms/` (`raw_widget_outside_atoms`) as an
+  info. Fix the diagnostic; for a justified exception use
+  `// ignore: gatuno_lints/<rule>` with a reason. `dart analyze` is the gate:
+  `flutter analyze` exits before analyzer plugins report, so it drops the
+  `gatuno_lints` diagnostics. `dart analyze` fails on warnings but not on infos,
+  so read the info output too.
 - File names are `snake_case.dart`; classes are PascalCase with role suffixes
   (`...Service`, `...ViewModel`, `...Repository` / `...RepositoryImpl`,
   `...Exception`). Screens live in `presentation/views/`, mostly as
@@ -183,8 +188,8 @@ registered inline in `initDI()`, and `authentication` pairs
   `DESIGN.md` documents it, including known gaps, and `lib/core/theme/`
   implements it (`theme.dart`,
   `app_palette.dart`, `app_typography.dart`, the `GatunoColors` extension).
-  Use theme colors and text styles, never raw values in widgets (the
-  `gatuno_lints` rules enforce this). If you
+  Use theme colors and text styles, never raw colors or fonts in widgets (the
+  `gatuno_lints` rules enforce this). Spacing and sizes may be literals. If you
   change tokens, keep `DESIGN.md` and `.impeccable/design.json` in sync and run
   `just design-tokens`. For design work, the tool-neutral `impeccable` skill
   lives in `.agents/skills/` (linked from `.claude/` and `.gemini/`).
@@ -210,7 +215,57 @@ Shared tiers live in `lib/shared/components/`; feature-specific ones in the
 feature's `presentation/components/`. About half the pages delegate layout to
 a template (`BooksPage` → `BooksTemplate`); the rest build it directly.
 
-<!-- Atomic Design composition rules: see issue #67. -->
+**Deciding the tier.** Ask in this order and stop at the first yes:
+
+1. Does it read a view model, own a route or fetch data? It is a **page**.
+2. Does it only arrange regions (app bar, body, sheet) and receive them as
+   widgets or plain data? It is a **template**.
+3. Does it combine several molecules or atoms into a self-contained section
+   with its own layout and state (a form, a list, a sheet, a toolbar)? It is an
+   **organism**.
+4. Does it combine two or more atoms for one small job (a card, a labelled
+   field, a list row)? It is a **molecule**.
+5. Otherwise it wraps a single Flutter widget or draws one thing (a button, a
+   badge, a cover, a title). It is an **atom**.
+
+**Compose from the bottom.**
+
+- Before writing a widget, look in `lib/shared/components/` and in the
+  feature's `components/atoms/` and `components/molecules/` for one that
+  already does the job. Reuse it, or extend it with a parameter, rather than
+  copying it.
+- If a piece appears twice, or an organism would hold more than a screenful of
+  inline layout, extract it into an atom or molecule in the same change. A
+  piece used by two features goes to `shared/components/`.
+- An organism assembles molecules and atoms; it does not draw them. Keep it
+  thin: layout, wiring and callbacks only. Atoms and molecules take plain data
+  and callbacks, not view models.
+- Create the `atoms/` and `molecules/` folders when you need them. A feature
+  with only `organisms/` and `templates/` (like `authentication` today) is a
+  sign that the lower tiers were skipped.
+
+**Anti-patterns.**
+
+- An organism, template or page that builds `ElevatedButton`, `TextButton`,
+  `OutlinedButton`, `IconButton` or `TextField` directly instead of `AppButton`,
+  `AppIconButton` or `AppTextField` (`signin_form.dart` still does; do not copy
+  it). `gatuno_lints` flags this as `raw_widget_outside_atoms`.
+- A field, row, badge or card written inline and repeated, instead of an atom or
+  molecule.
+- A molecule that reads a view model, or an atom that holds feature state.
+- A new widget dropped into `organisms/` because it was the nearest folder.
+- A shared widget placed in a feature folder, or a feature-specific one placed
+  in `shared/`.
+
+**Review checklist** for a change that adds or edits UI (the PR template has the
+matching checkbox):
+
+- [ ] Searched `shared/components/` and the feature's lower tiers before adding
+      a widget.
+- [ ] Each new widget sits in the right tier by the decision rules above.
+- [ ] No buttons, fields or rows built inline in an organism, template or page.
+- [ ] Repeated pieces are extracted.
+- [ ] `just analyze` shows no new `raw_widget_outside_atoms` output.
 
 ## Tests
 
