@@ -77,9 +77,11 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
 
   bool _refetchQueued = false;
 
+  /// Fetches the list. A call made while a fetch is in flight is not dropped:
+  /// one follow-up fetch runs afterwards with the latest options (page and
+  /// filters are read from state, so `refresh`/`resetPage` are not replayed).
   Future<void> fetchBooks({bool refresh = false, bool resetPage = true}) async {
     if (state.isLoading) {
-      // Options may have changed mid-flight; refetch once with the latest.
       _refetchQueued = true;
       return;
     }
@@ -248,34 +250,35 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   Future<List<FilterOption>>? _tagOptions;
   Future<List<FilterOption>>? _authorOptions;
 
-  /// Tags for the filter picker; cached per view model, retried after failure.
-  Future<List<FilterOption>> loadTagOptions() => _tagOptions ??= _repository
-      .getTags()
-      .then(
-        (tags) => [
-          for (final t in tags)
-            FilterOption(id: t.id.value, label: t.name.value),
-        ],
-      )
-      .catchError((Object e) {
-        _tagOptions = null;
-        throw e;
-      });
+  /// Tags for the filter picker; cached, and re-requested after a failure.
+  Future<List<FilterOption>> loadTagOptions() => _tagOptions ??= _cached(
+    () async => [
+      for (final t in await _repository.getTags())
+        FilterOption(id: t.id.value, label: t.name.value),
+    ],
+    () => _tagOptions = null,
+  );
 
-  /// Authors for the filter picker; cached per view model, retried after failure.
-  Future<List<FilterOption>> loadAuthorOptions() =>
-      _authorOptions ??= _repository
-          .getAuthors()
-          .then(
-            (authors) => [
-              for (final a in authors)
-                FilterOption(id: a.id.value, label: a.name.value),
-            ],
-          )
-          .catchError((Object e) {
-            _authorOptions = null;
-            throw e;
-          });
+  /// Authors for the filter picker; cached, and re-requested after a failure.
+  Future<List<FilterOption>> loadAuthorOptions() => _authorOptions ??= _cached(
+    () async => [
+      for (final a in await _repository.getAuthors())
+        FilterOption(id: a.id.value, label: a.name.value),
+    ],
+    () => _authorOptions = null,
+  );
+
+  Future<List<FilterOption>> _cached(
+    Future<List<FilterOption>> Function() load,
+    void Function() reset,
+  ) async {
+    try {
+      return await load();
+    } catch (_) {
+      reset();
+      rethrow;
+    }
+  }
 
   void clearError() {
     AppLogger.d('Clearing books error', _logTag);

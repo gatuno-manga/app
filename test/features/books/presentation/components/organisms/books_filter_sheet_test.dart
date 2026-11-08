@@ -224,5 +224,41 @@ void main() {
 
       expect(applied?.tags, isNull);
     });
+
+    testWidgets('picker Retry re-requests options after a failed load', (
+      tester,
+    ) async {
+      var calls = 0;
+      Future<List<FilterOption>> flaky() async {
+        calls++;
+        if (calls <= 1) throw Exception('boom');
+        return const [FilterOption(id: 'tag-1', label: 'Action')];
+      }
+
+      await tester.pumpApp(
+        Scaffold(
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute(
+              builder: (context) => BooksFilterSheet(
+                initialOptions: const BookPageOptions(),
+                onApply: (_) {},
+                onClear: () {},
+                loadTags: flaky,
+                loadAuthors: _authors,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Could not load options'), findsOneWidget);
+
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+      expect(find.text('Action'), findsOneWidget);
+    });
   });
 }

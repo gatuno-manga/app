@@ -5,6 +5,9 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
+import 'package:gatuno/features/books/domain/entities/tag.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/tag_name.dart';
 import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
 import 'package:gatuno/features/books/presentation/view_models/books_view_model.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
@@ -185,6 +188,22 @@ void main() {
       expect(o.tags, isNull);
       expect(o.authors, isNull);
       expect(o.page.value, 1);
+    });
+
+    test('loadTagOptions caches success and retries after failure', () async {
+      var calls = 0;
+      when(() => mockRepository.getTags()).thenAnswer((_) async {
+        calls++;
+        if (calls == 1) throw Exception('boom');
+        return [const Tag(id: TagId('t1'), name: TagName('Action'))];
+      });
+
+      await expectLater(viewModel.loadTagOptions(), throwsException);
+      final ok = await viewModel.loadTagOptions();
+      await viewModel.loadTagOptions();
+
+      expect(ok.single.label, 'Action');
+      expect(calls, 2);
     });
   });
 }

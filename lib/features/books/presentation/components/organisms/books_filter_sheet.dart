@@ -59,16 +59,11 @@ class BooksFilterSheet extends StatefulWidget {
 class _BooksFilterSheetState extends State<BooksFilterSheet> {
   late BookPageOptions _currentOptions;
   final TextEditingController _yearController = TextEditingController();
-  late final Future<List<FilterOption>> _tagsFuture;
-  late final Future<List<FilterOption>> _authorsFuture;
 
   @override
   void initState() {
     super.initState();
     _currentOptions = widget.initialOptions;
-    // Load once so chip labels and pickers share a single request.
-    _tagsFuture = widget.loadTags();
-    _authorsFuture = widget.loadAuthors();
     if (_currentOptions.publication != null) {
       _yearController.text = _currentOptions.publication!.value.toString();
     }
@@ -127,42 +122,9 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
     });
   }
 
-  List<String>? _nullIfEmpty(List<String> values) =>
-      values.isEmpty ? null : values;
-
-  void _onTagsChanged(List<String> ids) => setState(() {
-    _currentOptions = _currentOptions.copyWith(
-      tags: Optional.ofNullable(_nullIfEmpty(ids)),
-    );
-  });
-
-  void _onTagsLogicChanged(String value) => setState(() {
-    _currentOptions = _currentOptions.copyWith(tagsLogic: Optional.of(value));
-  });
-
-  void _onExcludeTagsChanged(List<String> ids) => setState(() {
-    _currentOptions = _currentOptions.copyWith(
-      excludeTags: Optional.ofNullable(_nullIfEmpty(ids)),
-    );
-  });
-
-  void _onExcludeTagsLogicChanged(String value) => setState(() {
-    _currentOptions = _currentOptions.copyWith(
-      excludeTagsLogic: Optional.of(value),
-    );
-  });
-
-  void _onAuthorsChanged(List<String> ids) => setState(() {
-    _currentOptions = _currentOptions.copyWith(
-      authors: Optional.ofNullable(_nullIfEmpty(ids)),
-    );
-  });
-
-  void _onAuthorsLogicChanged(String value) => setState(() {
-    _currentOptions = _currentOptions.copyWith(
-      authorsLogic: Optional.of(value),
-    );
-  });
+  void _onUpdate(BookPageOptions Function(BookPageOptions) change) {
+    setState(() => _currentOptions = change(_currentOptions));
+  }
 
   void _onClear() {
     widget.onClear();
@@ -203,14 +165,9 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
                 onYearChanged: _onYearChanged,
                 onTypeSelected: _onTypeSelected,
                 onSensitiveContentSelected: _onSensitiveContentSelected,
-                loadTags: () => _tagsFuture,
-                loadAuthors: () => _authorsFuture,
-                onTagsChanged: _onTagsChanged,
-                onTagsLogicChanged: _onTagsLogicChanged,
-                onExcludeTagsChanged: _onExcludeTagsChanged,
-                onExcludeTagsLogicChanged: _onExcludeTagsLogicChanged,
-                onAuthorsChanged: _onAuthorsChanged,
-                onAuthorsLogicChanged: _onAuthorsLogicChanged,
+                loadTags: widget.loadTags,
+                loadAuthors: widget.loadAuthors,
+                onUpdate: _onUpdate,
               ),
             ),
             const SizedBox(height: 16),

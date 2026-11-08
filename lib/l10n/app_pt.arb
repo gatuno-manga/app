@@ -44,7 +44,7 @@
   "booksFilterLoadError": "Não foi possível carregar as opções",
   "booksFilterRetry": "Tentar novamente",
   "booksFilterDone": "Concluir",
-  "booksFilterLogicAll": "Todas",
+  "booksFilterLogicAll": "Todos",
   "booksFilterLogicAny": "Qualquer",
   "booksOperatorBefore": "Antes de",
   "booksOperatorBeforeEqual": "Antes ou igual a",

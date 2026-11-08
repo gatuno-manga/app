@@ -51,7 +51,11 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
     _future = widget.loadOptions();
   }
 
-  void _retry() => setState(() => _future = widget.loadOptions());
+  void _retry() {
+    setState(() {
+      _future = widget.loadOptions();
+    });
+  }
 
   void _toggle(String id, bool value) {
     setState(() => value ? _selected.add(id) : _selected.remove(id));
@@ -64,14 +68,14 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.8,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
       ),
       child: Padding(
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
           top: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

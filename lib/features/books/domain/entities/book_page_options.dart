@@ -7,6 +7,12 @@ part 'book_page_options.g.dart';
 
 enum SortOrder { asc, desc }
 
+/// Values accepted by the API's `*Logic` query params.
+abstract final class FilterLogic {
+  static const String and = 'and';
+  static const String or = 'or';
+}
+
 class SortOption {
   final String orderBy;
   final SortOrder order;

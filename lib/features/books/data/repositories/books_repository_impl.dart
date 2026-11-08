@@ -69,10 +69,9 @@ class BooksRepositoryImpl implements BooksRepository {
       final response = await _dioClient.dio.get<List<dynamic>>(path);
       final data = response.data;
       if (response.statusCode == 200 && data is List) {
-        return data
-            .cast<Map<String, dynamic>>()
-            .map(fromJson)
-            .toList(growable: false);
+        return [
+          for (final item in data) fromJson(item as Map<String, dynamic>),
+        ];
       }
       throw ServerException(
         message: 'Failed to fetch $path: Invalid response format',

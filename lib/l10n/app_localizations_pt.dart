@@ -144,7 +144,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksFilterDone => 'Concluir';
 
   @override
-  String get booksFilterLogicAll => 'Todas';
+  String get booksFilterLogicAll => 'Todos';
 
   @override
   String get booksFilterLogicAny => 'Qualquer';
