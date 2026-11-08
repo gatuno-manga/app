@@ -78,17 +78,20 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
           child: ClipRect(
             child: ListenableBuilder(
               listenable: widget.zoom,
-              builder: (context, _) => Stack(
+              // The list is built once per viewport build; zoom changes only
+              // move/resize the Positioned around it (no item rebuilds).
+              child: widget.builder(
+                context,
+                _pinching ? const NeverScrollableScrollPhysics() : null,
+              ),
+              builder: (context, list) => Stack(
                 children: [
                   Positioned(
                     left: widget.zoom.dx,
                     width: width * widget.zoom.scale,
                     top: 0,
                     bottom: 0,
-                    child: widget.builder(
-                      context,
-                      _pinching ? const NeverScrollableScrollPhysics() : null,
-                    ),
+                    child: list!,
                   ),
                 ],
               ),

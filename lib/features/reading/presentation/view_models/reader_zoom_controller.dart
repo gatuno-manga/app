@@ -84,6 +84,7 @@ class ReaderZoomController extends ChangeNotifier {
     if (_scale == 1.0 && _dx == 0.0) return;
     _scale = 1.0;
     _dx = 0.0;
+    _pendingRatio = 1.0;
     notifyListeners();
   }
 
