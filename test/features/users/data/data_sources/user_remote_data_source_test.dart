@@ -69,7 +69,7 @@ void main() {
     413: ProfileImageFailureReason.tooLarge,
     401: ProfileImageFailureReason.forbidden,
     403: ProfileImageFailureReason.forbidden,
-    500: ProfileImageFailureReason.network,
+    500: ProfileImageFailureReason.unknown,
   }.entries) {
     test('maps HTTP ${entry.key} to ${entry.value}', () async {
       adapter

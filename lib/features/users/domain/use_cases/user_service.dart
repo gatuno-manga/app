@@ -11,14 +11,14 @@ import '../value_objects/profile_image_kind.dart';
 
 class UserService {
   final AuthService _authService;
-  final UserRemoteDataSource? _remote;
-  final UserStorage? _storage;
+  final UserRemoteDataSource _remote;
+  final UserStorage _storage;
   static const String _logTag = 'UserService';
 
   UserService(
     this._authService, {
-    UserRemoteDataSource? remote,
-    UserStorage? storage,
+    required UserRemoteDataSource remote,
+    required UserStorage storage,
   }) : _remote = remote,
        _storage = storage;
 
@@ -28,6 +28,7 @@ class UserService {
     try {
       final token = await _authService.getToken();
       if (token == null || token.isEmpty) {
+        await _storage.clear();
         return UserModel.guest;
       }
 
@@ -51,7 +52,7 @@ class UserService {
   }
 
   Future<UserModel?> _cachedProfileFor(UserModel jwtUser) async {
-    final cached = await _storage?.readProfile();
+    final cached = await _storage.readProfile();
     if (cached == null) return null;
     try {
       final profile = UserModel.fromJson(cached);
@@ -64,10 +65,8 @@ class UserService {
 
   /// Fetches `/me`, caches it and returns it; null when offline or failing.
   Future<UserModel?> refreshProfile() async {
-    final remote = _remote;
-    if (remote == null) return null;
     try {
-      return await _storeProfile(await remote.fetchMe());
+      return await _storeProfile(await _remote.fetchMe());
     } catch (e) {
       AppLogger.w('Could not refresh profile: $e', _logTag);
       return null;
@@ -87,11 +86,7 @@ class UserService {
       sizeBytes: bytes.length,
     );
     if (invalid != null) throw invalid;
-    final remote = _remote;
-    if (remote == null) {
-      throw ProfileImageFailure(ProfileImageFailureReason.network, kind);
-    }
-    final profile = await remote.uploadImage(
+    final profile = await _remote.uploadImage(
       kind: kind,
       bytes: bytes,
       fileName: fileName,
@@ -99,18 +94,18 @@ class UserService {
     try {
       return await _storeProfile(profile);
     } catch (e) {
-      throw ProfileImageFailure(ProfileImageFailureReason.network, kind);
+      throw ProfileImageFailure(ProfileImageFailureReason.unknown, kind);
     }
   }
 
   Future<UserModel> _storeProfile(Map<String, dynamic> profile) async {
     final user = UserModel.fromJson(profile);
-    await _storage?.writeProfile(profile);
+    await _storage.writeProfile(profile);
     return user;
   }
 
   Future<void> logout() async {
-    await _storage?.clear();
+    await _storage.clear();
     await _authService.logout();
   }
 }

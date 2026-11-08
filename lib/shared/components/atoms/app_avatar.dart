@@ -66,8 +66,12 @@ class AppAvatar extends StatelessWidget {
 
     final size = radius * 2;
     return Semantics(
-      button: onEdit != null,
+      container: true,
+      button: onEdit != null && !isBusy,
       label: editLabel,
+      onTap: isBusy ? null : onEdit,
+      liveRegion: isBusy,
+      excludeSemantics: true,
       child: SizedBox(
         width: size,
         height: size,

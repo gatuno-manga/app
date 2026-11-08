@@ -1,6 +1,12 @@
 import 'profile_image_kind.dart';
 
-enum ProfileImageFailureReason { unsupportedType, tooLarge, forbidden, network }
+enum ProfileImageFailureReason {
+  unsupportedType,
+  tooLarge,
+  forbidden,
+  network,
+  unknown,
+}
 
 /// Why a profile image upload was rejected, before or after reaching the API.
 class ProfileImageFailure implements Exception {

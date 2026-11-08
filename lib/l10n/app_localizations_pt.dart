@@ -529,4 +529,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get userImageErrorNetwork =>
       'Não foi possível enviar a imagem. Verifique sua conexão e tente novamente.';
+
+  @override
+  String get userImageErrorUnknown =>
+      'Algo deu errado com esta imagem. Tente novamente.';
 }

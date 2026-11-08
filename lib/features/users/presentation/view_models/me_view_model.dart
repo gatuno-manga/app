@@ -87,7 +87,7 @@ class MeViewModel extends BaseStreamViewModel<MeState> {
     } catch (e, stackTrace) {
       AppLogger.e('Unexpected upload error', e, stackTrace, _logTag);
       emit(state.copyWith(uploading: _without(kind)));
-      return ProfileImageFailure(ProfileImageFailureReason.network, kind);
+      return ProfileImageFailure(ProfileImageFailureReason.unknown, kind);
     }
   }
 

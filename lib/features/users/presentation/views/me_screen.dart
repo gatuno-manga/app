@@ -1,10 +1,11 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import '../../../../core/logging/logger.dart';
 import '../../domain/value_objects/profile_image_failure.dart';
 import '../../domain/value_objects/profile_image_kind.dart';
 import '../view_models/me_view_model.dart';
@@ -30,7 +31,10 @@ class _MePageState extends State<MePage> {
 
   final ImagePicker _picker = ImagePicker();
 
-  bool get _hasCamera => !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+  bool get _hasCamera =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   Future<ImageSource?> _chooseSource() async {
     if (!_hasCamera) return ImageSource.gallery;
@@ -61,27 +65,34 @@ class _MePageState extends State<MePage> {
     final viewModel = context.read<MeViewModel>();
     final source = await _chooseSource();
     if (source == null || !mounted) return;
-    final XFile? file;
+    final ProfileImageFailure? failure;
     try {
-      file = await _picker.pickImage(source: source);
-    } catch (_) {
+      final file = await _picker.pickImage(
+        source: source,
+        // Downscale camera photos so they stay under the API size limits.
+        maxWidth: kind == ProfileImageKind.avatar ? 1024 : 2048,
+        imageQuality: 85,
+      );
+      if (file == null || !mounted) return;
+      failure = await viewModel.uploadImage(
+        kind: kind,
+        fileName: file.name,
+        bytes: await file.readAsBytes(),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not pick a profile image', e, stackTrace, 'MePage');
+      if (mounted) {
+        _showFailure(
+          ProfileImageFailure(ProfileImageFailureReason.unknown, kind),
+        );
+      }
       return;
     }
-    if (file == null || !mounted) return;
-    final size = await file.length();
-    final tooBigOrWrong = validateProfileImage(
-      kind: kind,
-      fileName: file.name,
-      sizeBytes: size,
-    );
-    final failure =
-        tooBigOrWrong ??
-        await viewModel.uploadImage(
-          kind: kind,
-          fileName: file.name,
-          bytes: await file.readAsBytes(),
-        );
     if (failure == null || !mounted) return;
+    _showFailure(failure);
+  }
+
+  void _showFailure(ProfileImageFailure failure) {
     final l10n = AppLocalizations.of(context)!;
     final message = switch (failure.reason) {
       ProfileImageFailureReason.unsupportedType => l10n.userImageErrorType,
@@ -90,6 +101,7 @@ class _MePageState extends State<MePage> {
       ),
       ProfileImageFailureReason.forbidden => l10n.userImageErrorForbidden,
       ProfileImageFailureReason.network => l10n.userImageErrorNetwork,
+      ProfileImageFailureReason.unknown => l10n.userImageErrorUnknown,
     };
     ScaffoldMessenger.of(
       context,

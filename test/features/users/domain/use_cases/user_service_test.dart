@@ -26,10 +26,18 @@ void main() {
 
   late UserService userService;
   late MockAuthService mockAuthService;
+  late MockUserStorage mockStorage;
 
   setUp(() {
     mockAuthService = MockAuthService();
-    userService = UserService(mockAuthService);
+    mockStorage = MockUserStorage();
+    when(() => mockStorage.readProfile()).thenAnswer((_) async => null);
+    when(() => mockStorage.clear()).thenAnswer((_) async {});
+    userService = UserService(
+      mockAuthService,
+      remote: MockRemote(),
+      storage: mockStorage,
+    );
   });
 
   String createMockToken(Map<String, dynamic> payload) {
@@ -91,6 +99,7 @@ void main() {
         final user = await userService.getCurrentUser();
 
         expect(user, equals(UserModel.guest));
+        verify(() => mockStorage.clear()).called(1);
       },
     );
 

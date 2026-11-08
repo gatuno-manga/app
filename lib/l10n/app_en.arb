@@ -221,5 +221,6 @@
     }
   },
   "userImageErrorForbidden": "You don't have permission to change this image.",
-  "userImageErrorNetwork": "Could not upload the image. Check your connection and try again."
+  "userImageErrorNetwork": "Could not upload the image. Check your connection and try again.",
+  "userImageErrorUnknown": "Something went wrong with this image. Please try again."
 }

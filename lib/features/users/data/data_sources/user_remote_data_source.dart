@@ -52,6 +52,7 @@ class UserRemoteDataSource {
   }
 
   static ProfileImageFailureReason _reasonFor(DioException e) {
+    // Connection-level errors have no response; any other status is the server's.
     switch (e.response?.statusCode) {
       case 400:
         return ProfileImageFailureReason.unsupportedType;
@@ -60,8 +61,10 @@ class UserRemoteDataSource {
       case 401:
       case 403:
         return ProfileImageFailureReason.forbidden;
-      default:
+      case null:
         return ProfileImageFailureReason.network;
+      default:
+        return ProfileImageFailureReason.unknown;
     }
   }
 

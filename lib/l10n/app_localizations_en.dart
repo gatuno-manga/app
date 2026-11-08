@@ -529,4 +529,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get userImageErrorNetwork =>
       'Could not upload the image. Check your connection and try again.';
+
+  @override
+  String get userImageErrorUnknown =>
+      'Something went wrong with this image. Please try again.';
 }

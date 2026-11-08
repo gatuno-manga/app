@@ -1075,6 +1075,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not upload the image. Check your connection and try again.'**
   String get userImageErrorNetwork;
+
+  /// No description provided for @userImageErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with this image. Please try again.'**
+  String get userImageErrorUnknown;
 }
 
 class _AppLocalizationsDelegate

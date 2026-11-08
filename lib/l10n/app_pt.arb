@@ -221,5 +221,6 @@
     }
   },
   "userImageErrorForbidden": "Você não tem permissão para alterar esta imagem.",
-  "userImageErrorNetwork": "Não foi possível enviar a imagem. Verifique sua conexão e tente novamente."
+  "userImageErrorNetwork": "Não foi possível enviar a imagem. Verifique sua conexão e tente novamente.",
+  "userImageErrorUnknown": "Algo deu errado com esta imagem. Tente novamente."
 }
