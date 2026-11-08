@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 
+import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_overlay_wrapper.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_top_overlay.dart';
@@ -12,6 +15,7 @@ import 'package:gatuno/features/reading/presentation/view_models/reading_view_mo
 import 'package:mocktail/mocktail.dart';
 
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../helpers/pump_app.dart';
 
 class MockReadingViewModel extends Mock implements ReadingViewModel {}
@@ -102,17 +106,49 @@ void main() {
     expect(getShowOverlay(bottomOverlayFinder), isFalse);
   });
 
-  testWidgets('ReaderOverlayWrapper passes the settings callback to the bars', (
+  testWidgets('ReaderOverlayWrapper shows the settings action and opens the '
+      'sheet when a reader provides sections', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = ReaderPreferencesService(ReaderPreferencesStorage());
+    addTearDown(preferences.dispose);
+
+    await tester.pumpApp(
+      MultiProvider(
+        providers: [
+          Provider<ReadingViewModel>.value(value: mockViewModel),
+          Provider<ReaderPreferencesService>.value(value: preferences),
+        ],
+        child: Scaffold(
+          body: ReaderOverlayWrapper(
+            chapter: _MockChapter(),
+            settingsSections: (_) => const [Text('my section')],
+            child: const Center(child: Text('Content')),
+          ),
+        ),
+      ),
+      theme: AppTheme.darkTheme,
+    );
+
+    await tester.tap(find.text('Content'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.settings_outlined), findsNWidgets(2));
+    await tester.tap(find.byIcon(Icons.settings_outlined).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reading settings'), findsOneWidget);
+    expect(find.text('my section'), findsOneWidget);
+  });
+
+  testWidgets('ReaderOverlayWrapper has no settings action without sections', (
     tester,
   ) async {
-    var taps = 0;
     await tester.pumpApp(
       Provider<ReadingViewModel>.value(
         value: mockViewModel,
         child: Scaffold(
           body: ReaderOverlayWrapper(
             chapter: _MockChapter(),
-            onSettingsPressed: () => taps++,
             child: const Center(child: Text('Content')),
           ),
         ),
@@ -122,8 +158,6 @@ void main() {
     await tester.tap(find.text('Content'));
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.settings_outlined), findsNWidgets(2));
-    await tester.tap(find.byIcon(Icons.settings_outlined).last);
-    expect(taps, 1);
+    expect(find.byIcon(Icons.settings_outlined), findsNothing);
   });
 }

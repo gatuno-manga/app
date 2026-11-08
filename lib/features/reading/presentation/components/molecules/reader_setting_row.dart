@@ -21,12 +21,13 @@ class ReaderSettingRow extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
+              // `color/hover`: text at 8%, visible on every reader surface.
+              color: scheme.onSurface.withValues(alpha: 0.08),
               borderRadius: const BorderRadius.all(Radius.circular(8)),
             ),
             child: SizedBox.square(
@@ -39,18 +40,20 @@ class ReaderSettingRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.bodyMedium),
+                Text(title, style: theme.textTheme.labelLarge),
                 Text(
                   subtitle,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurface.withValues(alpha: 0.7),
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          trailing,
+          // Bounded, so a wide control (a dropdown with long labels at a
+          // large text scale) shrinks instead of overflowing the row.
+          Flexible(child: trailing),
         ],
       ),
     );

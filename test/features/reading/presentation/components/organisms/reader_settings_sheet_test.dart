@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/reader_palette.dart';
+import 'package:gatuno/core/theme/theme.dart';
+import 'package:gatuno/features/reading/presentation/components/organisms/text_reader_settings_section.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
@@ -18,22 +21,29 @@ void main() {
 
   tearDown(() => service.dispose());
 
-  testWidgets('ReaderSettingsSheet.show opens a titled sheet that follows '
-      'the service', (tester) async {
-    await tester.pumpApp(
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => ReaderSettingsSheet.show(
-              context,
-              service: service,
-              sections: (prefs) => [Text('section ${prefs.theme.name}')],
-            ),
-            child: const Text('open'),
+  Future<void> pumpOpener(
+    WidgetTester tester,
+    List<Widget> Function(ReaderPreferences) sections, {
+    ThemeData? theme,
+  }) => tester.pumpApp(
+    Scaffold(
+      body: Builder(
+        builder: (context) => TextButton(
+          onPressed: () => ReaderSettingsSheet.show(
+            context,
+            service: service,
+            sections: sections,
           ),
+          child: const Text('open'),
         ),
       ),
-    );
+    ),
+    theme: theme ?? AppTheme.lightTheme,
+  );
+
+  testWidgets('ReaderSettingsSheet.show opens a titled sheet that follows '
+      'the service', (tester) async {
+    await pumpOpener(tester, (prefs) => [Text('section ${prefs.theme.name}')]);
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
@@ -41,29 +51,64 @@ void main() {
     expect(find.text('Reading settings'), findsOneWidget);
     expect(find.text('section standard'), findsOneWidget);
 
-    await service.update(
-      ReaderPreferences.defaults.copyWith(theme: ReaderTheme.sepia),
-    );
+    await service.update((p) => p.copyWith(theme: ReaderTheme.sepia));
     await tester.pumpAndSettle();
 
     expect(find.text('section sepia'), findsOneWidget);
   });
 
-  testWidgets('the shared theme picker updates the service', (tester) async {
-    await tester.pumpApp(
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => ReaderSettingsSheet.show(
-              context,
-              service: service,
-              sections: (_) => const [],
-            ),
-            child: const Text('open'),
-          ),
+  testWidgets('sheet text is readable on Sépia under a dark app theme', (
+    tester,
+  ) async {
+    await service.update((p) => p.copyWith(theme: ReaderTheme.sepia));
+    await pumpOpener(
+      tester,
+      (prefs) => [
+        TextReaderSettingsSection(
+          preferences: prefs,
+          onChanged: service.update,
         ),
-      ),
+      ],
+      theme: AppTheme.darkTheme,
     );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    final title = tester.widget<Text>(find.text('Reading settings'));
+    expect(title.style?.color, ReaderPalette.sepia.text);
+    final rowTitle = tester.widget<Text>(find.text('Font'));
+    expect(rowTitle.style?.color, ReaderPalette.sepia.text);
+    final dropdown = tester.widget<Text>(find.text('Serif'));
+    expect(
+      DefaultTextStyle.of(tester.element(find.text('Serif'))).style.color ??
+          dropdown.style?.color,
+      ReaderPalette.sepia.text,
+    );
+  });
+
+  testWidgets('two stepper taps in one frame both apply', (tester) async {
+    await pumpOpener(
+      tester,
+      (prefs) => [
+        TextReaderSettingsSection(
+          preferences: prefs,
+          onChanged: service.update,
+        ),
+      ],
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Increase font size'));
+    await tester.tap(find.byTooltip('Increase font size'));
+    await tester.pumpAndSettle();
+
+    expect(service.current.text.fontSize, 21);
+    expect(find.text('Font size (21px)'), findsOneWidget);
+  });
+
+  testWidgets('the shared theme picker updates the service', (tester) async {
+    await pumpOpener(tester, (_) => const []);
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 

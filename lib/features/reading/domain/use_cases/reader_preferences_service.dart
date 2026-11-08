@@ -20,26 +20,35 @@ class ReaderPreferencesService {
   Stream<ReaderPreferences> get stream => _subject.stream;
   ReaderPreferences get current => _subject.value;
 
+  /// Loads the stored preferences once; a failed read is retried on the
+  /// next call.
   Future<void> init() async {
     if (_initialized) return;
-    _initialized = true;
     try {
       _subject.add(await _storage.read());
+      _initialized = true;
     } catch (e, stackTrace) {
       AppLogger.e('Error loading reader preferences', e, stackTrace, _logTag);
     }
   }
 
-  /// Persists [preferences] and emits them. On a failed write the previous
-  /// value stays current and `false` is returned.
-  Future<bool> update(ReaderPreferences preferences) async {
+  /// Applies [change] to the current value, emits the result at once (so
+  /// the reader repaints without waiting for disk) and then persists it.
+  /// Deriving from [current] inside the service means rapid changes never
+  /// overwrite each other. A failed write logs and restores the previous
+  /// value.
+  Future<void> update(
+    ReaderPreferences Function(ReaderPreferences current) change,
+  ) async {
+    final previous = current;
+    final next = change(previous);
+    if (next == previous) return;
+    _subject.add(next);
     try {
-      await _storage.write(preferences);
-      _subject.add(preferences);
-      return true;
+      await _storage.write(next);
     } catch (e, stackTrace) {
       AppLogger.e('Error saving reader preferences', e, stackTrace, _logTag);
-      return false;
+      if (current == next) _subject.add(previous);
     }
   }
 

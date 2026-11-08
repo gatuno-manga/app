@@ -38,8 +38,8 @@ enum ReaderTheme {
       values.firstWhere((v) => v.name == name, orElse: () => standard);
 }
 
-/// Typography preferences of the text reader. Values are clamped by
-/// [copyWith], so any instance built through it is within range.
+/// Typography preferences of the text reader. [copyWith] and the `step*`
+/// methods clamp their results; the constructor asserts the same ranges.
 class TextReaderPreferences extends Equatable {
   static const double minFontSize = 14;
   static const double maxFontSize = 28;
@@ -70,7 +70,35 @@ class TextReaderPreferences extends Equatable {
     required this.fontSize,
     required this.lineHeight,
     required this.alignment,
-  });
+  }) : assert(fontSize >= minFontSize && fontSize <= maxFontSize),
+       assert(lineHeight >= minLineHeight && lineHeight <= maxLineHeight);
+
+  bool get canIncreaseFontSize => fontSize < maxFontSize;
+  bool get canDecreaseFontSize => fontSize > minFontSize;
+  bool get canIncreaseLineHeight => lineHeight < maxLineHeight;
+  bool get canDecreaseLineHeight => lineHeight > minLineHeight;
+
+  /// Moves the font size by [steps] of [fontSizeStep], clamped.
+  TextReaderPreferences stepFontSize(int steps) =>
+      copyWith(fontSize: _stepped(fontSize, fontSizeStep, steps));
+
+  /// Moves the line height by [steps] of [lineHeightStep], clamped.
+  TextReaderPreferences stepLineHeight(int steps) =>
+      copyWith(lineHeight: _stepped(lineHeight, lineHeightStep, steps));
+
+  /// `value + steps * step`, rounded to the step's own precision so `1.8 +
+  /// 0.1` is `1.9`, not `1.9000000000000001`. Clamping happens in [copyWith].
+  static double _stepped(double value, double step, int steps) {
+    final decimals = _decimalsOf(step);
+    return double.parse((value + steps * step).toStringAsFixed(decimals));
+  }
+
+  static int _decimalsOf(double step) {
+    final text = step.toString();
+    final dot = text.indexOf('.');
+    if (dot == -1 || text.endsWith('.0')) return 0;
+    return text.length - dot - 1;
+  }
 
   TextReaderPreferences copyWith({
     ReaderFontFamily? fontFamily,

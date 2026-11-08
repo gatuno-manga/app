@@ -57,6 +57,30 @@ void main() {
       expect(theme.extension<GatunoColors>(), isNotNull);
     });
 
+    test('re-derives the baked text, icon and canvas colours', () {
+      final theme = ReaderPalette.sepia.themeData(AppTheme.darkTheme);
+      expect(theme.textTheme.bodyMedium?.color, ReaderPalette.sepia.text);
+      expect(theme.textTheme.titleMedium?.color, ReaderPalette.sepia.text);
+      expect(theme.textTheme.headlineSmall?.color, ReaderPalette.sepia.text);
+      expect(
+        theme.primaryTextTheme.bodyMedium?.color,
+        ReaderPalette.sepia.text,
+      );
+      expect(theme.iconTheme.color, ReaderPalette.sepia.text);
+      expect(theme.canvasColor, ReaderPalette.sepia.surface);
+      expect(theme.dividerColor, ReaderPalette.sepia.border);
+      expect(theme.hintColor, ReaderPalette.sepia.textSoft);
+      expect(theme.colorScheme.onSurfaceVariant, ReaderPalette.sepia.textSoft);
+      expect(theme.colorScheme.onPrimary, ReaderPalette.sepia.onAccent);
+
+      final mirror = ReaderPalette.highContrast.themeData(AppTheme.lightTheme);
+      expect(
+        mirror.textTheme.bodyMedium?.color,
+        ReaderPalette.highContrast.text,
+      );
+      expect(mirror.colorScheme.onPrimary, const Color(0xFF000000));
+    });
+
     test('dark backgrounds produce a dark brightness', () {
       final theme = ReaderPalette.highContrast.themeData(AppTheme.lightTheme);
       expect(theme.brightness, Brightness.dark);
@@ -64,7 +88,28 @@ void main() {
   });
 
   test('lerp interpolates colors', () {
-    final mid = ReaderPalette.highContrast.lerp(ReaderPalette.cream, 1.0);
-    expect(mid, ReaderPalette.cream);
+    final mid = ReaderPalette.highContrast.lerp(ReaderPalette.cream, 0.5);
+    expect(
+      mid.background,
+      Color.lerp(
+        ReaderPalette.highContrast.background,
+        ReaderPalette.cream.background,
+        0.5,
+      ),
+    );
+    expect(
+      mid.accent,
+      Color.lerp(
+        ReaderPalette.highContrast.accent,
+        ReaderPalette.cream.accent,
+        0.5,
+      ),
+    );
+  });
+
+  test('onAccent is readable on the accent', () {
+    expect(ReaderPalette.sepia.onAccent, const Color(0xFFFDFDFD));
+    expect(ReaderPalette.cream.onAccent, const Color(0xFFFDFDFD));
+    expect(ReaderPalette.highContrast.onAccent, const Color(0xFF000000));
   });
 }

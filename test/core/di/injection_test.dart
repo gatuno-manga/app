@@ -30,8 +30,9 @@ void main() {
             if (methodCall.method == 'getApplicationCacheDirectory') {
               return '.';
             }
-            // The reading database opens eagerly (MQTT handler) and needs a
-            // writable temporary directory.
+            // initDI awaits ReaderPreferencesService.init(), which yields to
+            // the event loop, so the eagerly opened reading database (MQTT
+            // handler) now runs inside the test and needs a temp directory.
             if (methodCall.method == 'getTemporaryDirectory') {
               return tempDir.path;
             }

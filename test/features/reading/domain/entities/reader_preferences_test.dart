@@ -51,6 +51,34 @@ void main() {
     });
   });
 
+  group('TextReaderPreferences stepping', () {
+    test('stepFontSize moves by whole steps and clamps', () {
+      const prefs = TextReaderPreferences.defaults;
+      expect(prefs.stepFontSize(1).fontSize, 20);
+      expect(prefs.stepFontSize(-1).fontSize, 18);
+      expect(prefs.stepFontSize(100).fontSize, 28);
+      expect(prefs.stepFontSize(-100).fontSize, 14);
+    });
+
+    test('stepLineHeight moves by 0.1 without float noise', () {
+      const prefs = TextReaderPreferences.defaults;
+      expect(prefs.stepLineHeight(1).lineHeight, 1.9);
+      expect(prefs.stepLineHeight(-1).lineHeight, 1.7);
+      expect(prefs.stepLineHeight(3).stepLineHeight(-3).lineHeight, 1.8);
+      expect(prefs.stepLineHeight(100).lineHeight, 2.2);
+    });
+
+    test('can* flags reflect the bounds', () {
+      const prefs = TextReaderPreferences.defaults;
+      expect(prefs.canIncreaseFontSize, isTrue);
+      expect(prefs.canDecreaseFontSize, isTrue);
+      expect(prefs.copyWith(fontSize: 28).canIncreaseFontSize, isFalse);
+      expect(prefs.copyWith(fontSize: 14).canDecreaseFontSize, isFalse);
+      expect(prefs.copyWith(lineHeight: 2.2).canIncreaseLineHeight, isFalse);
+      expect(prefs.copyWith(lineHeight: 1.2).canDecreaseLineHeight, isFalse);
+    });
+  });
+
   group('ReaderPreferences', () {
     test('defaults to the standard theme and default text preferences', () {
       const prefs = ReaderPreferences.defaults;

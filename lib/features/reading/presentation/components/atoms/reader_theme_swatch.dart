@@ -18,7 +18,8 @@ class ReaderThemeSwatch extends StatelessWidget {
     required this.onTap,
   });
 
-  static const BorderRadius _radius = BorderRadius.all(Radius.circular(12));
+  /// `radius/md`
+  static const BorderRadius _radius = BorderRadius.all(Radius.circular(8));
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +66,10 @@ class ReaderThemeSwatch extends StatelessWidget {
               label,
               maxLines: 2,
               textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium?.copyWith(
+              // Weight is the non-colour cue for the selected state (Figma).
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: isSelected ? scheme.primary : scheme.onSurface,
+                fontWeight: isSelected ? FontWeight.w600 : null,
               ),
             ),
           ],

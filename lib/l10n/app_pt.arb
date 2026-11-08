@@ -222,7 +222,11 @@
   "@readingLineHeight": {
     "placeholders": {
       "value": {
-        "type": "String"
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
       }
     }
   },
@@ -232,8 +236,6 @@
   "readingAlignLeft": "Esquerda",
   "readingAlignCenter": "Centro",
   "readingAlignJustify": "Justificado",
-  "readingDecrease": "Diminuir",
-  "readingIncrease": "Aumentar",
   "booksDocumentFormat": "Formato: {format}",
   "@booksDocumentFormat": {
     "placeholders": {
@@ -332,5 +334,9 @@
   "mfaErrorUnknown": "Algo deu errado. Tente novamente.",
   "settingsMfaDesc": "Proteja sua conta com um aplicativo autenticador",
   "mfaNoAuthenticatorApp": "Não foi possível abrir um aplicativo autenticador. Copie o segredo e adicione manualmente.",
-  "mfaSaveCodesFirst": "Guarde seus códigos de backup antes de sair desta tela."
+  "mfaSaveCodesFirst": "Guarde seus códigos de backup antes de sair desta tela.",
+  "readingDecreaseFontSize": "Diminuir tamanho da fonte",
+  "readingIncreaseFontSize": "Aumentar tamanho da fonte",
+  "readingDecreaseLineHeight": "Diminuir espaçamento de linhas",
+  "readingIncreaseLineHeight": "Aumentar espaçamento de linhas"
 }

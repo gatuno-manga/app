@@ -26,6 +26,10 @@ void main() {
       expect(find.text('Aa'), findsOneWidget);
       final sample = tester.widget<Text>(find.text('Aa'));
       expect(sample.style?.color, ReaderPalette.sepia.text);
+      expect(
+        tester.widget<Text>(find.text('Sepia')).style?.fontWeight,
+        isNot(FontWeight.w600),
+      );
       final box = tester.widget<DecoratedBox>(
         find.byKey(const ValueKey('reader-theme-swatch-sample')),
       );
@@ -51,6 +55,10 @@ void main() {
         ),
       );
 
+      expect(
+        tester.widget<Text>(find.text('Cream')).style?.fontWeight,
+        FontWeight.w600,
+      );
       expect(
         tester.getSemantics(find.bySemanticsLabel('Cream')),
         isSemantics(

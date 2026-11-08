@@ -29,22 +29,47 @@ class ReaderChoiceRow<T> extends StatelessWidget {
     required this.onChanged,
   });
 
+  static const double _maxWidth = 180;
+
   @override
   Widget build(BuildContext context) {
     return ReaderSettingRow(
       icon: icon,
       title: title,
       subtitle: subtitle,
-      trailing: DropdownButton<T>(
-        value: value,
-        underline: const SizedBox.shrink(),
-        items: [
-          for (final option in options)
-            DropdownMenuItem(value: option.value, child: Text(option.label)),
-        ],
-        onChanged: (picked) {
-          if (picked != null) onChanged(picked);
-        },
+      trailing: Semantics(
+        label: title,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxWidth),
+          child: DropdownButton<T>(
+            value: value,
+            isExpanded: true,
+            underline: const SizedBox.shrink(),
+            items: [
+              for (final option in options)
+                DropdownMenuItem(
+                  value: option.value,
+                  child: Text(option.label),
+                ),
+            ],
+            // The closed button shows only the current label, ellipsised,
+            // instead of reserving the width of the widest option.
+            selectedItemBuilder: (context) => [
+              for (final option in options)
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Text(
+                    option.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+            ],
+            onChanged: (picked) {
+              if (picked != null) onChanged(picked);
+            },
+          ),
+        ),
       ),
     );
   }

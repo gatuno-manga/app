@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
@@ -40,33 +42,70 @@ void main() {
       verify(() => storage.read()).called(1);
     });
 
-    test('init keeps defaults when the read fails', () async {
-      when(() => storage.read()).thenThrow(Exception('disk'));
+    test(
+      'update applies the change to the current value and persists it',
+      () async {
+        when(() => storage.write(any())).thenAnswer((_) async {});
 
-      await service.init();
+        await service.update((p) => p.copyWith(theme: ReaderTheme.sepia));
 
-      expect(service.current, ReaderPreferences.defaults);
+        expect(service.current, stored);
+        verify(() => storage.write(stored)).called(1);
+      },
+    );
+
+    test('update emits before the write completes', () async {
+      final writeStarted = Completer<void>();
+      final finishWrite = Completer<void>();
+      when(() => storage.write(any())).thenAnswer((_) {
+        writeStarted.complete();
+        return finishWrite.future;
+      });
+
+      final pending = service.update(
+        (p) => p.copyWith(theme: ReaderTheme.sepia),
+      );
+      await writeStarted.future;
+
+      expect(service.current, stored);
+      finishWrite.complete();
+      await pending;
     });
 
-    test('update writes, emits and returns true', () async {
+    test('two updates without awaiting both apply', () async {
       when(() => storage.write(any())).thenAnswer((_) async {});
 
-      final emitted = expectLater(service.stream, emitsThrough(stored));
-      final ok = await service.update(stored);
+      final first = service.update(
+        (p) => p.copyWith(text: p.text.stepFontSize(1)),
+      );
+      final second = service.update(
+        (p) => p.copyWith(text: p.text.stepFontSize(1)),
+      );
+      await Future.wait([first, second]);
 
-      expect(ok, isTrue);
-      expect(service.current, stored);
-      verify(() => storage.write(stored)).called(1);
-      await emitted;
+      expect(service.current.text.fontSize, 21);
     });
 
-    test('a failed write keeps the previous value and returns false', () async {
+    test('a failed write reverts to the previous value', () async {
       when(() => storage.write(any())).thenThrow(Exception('disk full'));
 
-      final ok = await service.update(stored);
+      await service.update((p) => p.copyWith(theme: ReaderTheme.sepia));
 
-      expect(ok, isFalse);
       expect(service.current, ReaderPreferences.defaults);
+    });
+
+    test('init retries after a failed read', () async {
+      var calls = 0;
+      when(() => storage.read()).thenAnswer((_) async {
+        calls++;
+        if (calls == 1) throw Exception('disk');
+        return stored;
+      });
+
+      await service.init();
+      expect(service.current, ReaderPreferences.defaults);
+      await service.init();
+      expect(service.current, stored);
     });
   });
 }

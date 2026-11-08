@@ -16,6 +16,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     required this.accent,
     required this.highlight,
     required this.border,
+    required this.onAccent,
   });
 
   /// `leitura/fundo`
@@ -39,6 +40,13 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
   /// `leitura/borda`
   final Color border;
 
+  /// Text on [accent]. Not a Figma token: `color/on-primary` for the app
+  /// palette, otherwise black or white by the accent's brightness.
+  final Color onAccent;
+
+  static const Color _light = Color(0xFFFDFDFD);
+  static const Color _dark = Color(0xFF000000);
+
   /// Figma mode `Sépia`.
   static const ReaderPalette sepia = ReaderPalette(
     background: Color(0xFFF4ECD8),
@@ -48,6 +56,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     accent: Color(0xFF9A4A00),
     highlight: Color(0x1F9A4A00),
     border: Color(0x2E4A3A2C),
+    onAccent: _light,
   );
 
   /// Figma mode `Creme`.
@@ -59,6 +68,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     accent: Color(0xFF1B5FAD),
     highlight: Color(0x1F1B5FAD),
     border: Color(0x291F2430),
+    onAccent: _light,
   );
 
   /// Figma mode `Alto contraste`.
@@ -70,6 +80,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     accent: Color(0xFFFFD600),
     highlight: Color(0x38FFD600),
     border: Color(0x99FFFFFF),
+    onAccent: _dark,
   );
 
   // Alpha of `leitura/destaque` in the Figma `Padrão` mode (#f185221f).
@@ -85,11 +96,13 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     accent: app.primary,
     highlight: app.primary.withAlpha(_highlightAlpha),
     border: app.border,
+    onAccent: app.onPrimary,
   );
 
-  /// [base] with the Material surface roles replaced by this palette, so the
-  /// reader chrome and sheets built from `colorScheme` follow the reader
-  /// theme without knowing about it.
+  /// [base] re-derived from this palette: the Material surface roles and
+  /// every colour `ThemeData` bakes in at construction (text themes, icons,
+  /// canvas, divider, hint), so the reader chrome and sheets built from the
+  /// theme follow the reader theme without knowing about it.
   ThemeData themeData(ThemeData base) {
     final brightness = ThemeData.estimateBrightnessForColor(background);
     return base.copyWith(
@@ -99,12 +112,28 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
         surface: background,
         onSurface: text,
         primary: accent,
+        onPrimary: onAccent,
         outline: border,
         surfaceContainerLow: surface,
         surfaceContainerHighest: surface,
         onSurfaceVariant: textSoft,
       ),
       scaffoldBackgroundColor: background,
+      canvasColor: surface,
+      dividerColor: border,
+      hintColor: textSoft,
+      disabledColor: text.withValues(alpha: 0.38),
+      textTheme: base.textTheme.apply(
+        bodyColor: text,
+        displayColor: text,
+        decorationColor: text,
+      ),
+      primaryTextTheme: base.primaryTextTheme.apply(
+        bodyColor: text,
+        displayColor: text,
+        decorationColor: text,
+      ),
+      iconTheme: base.iconTheme.copyWith(color: text),
       extensions: [...base.extensions.values, this],
     );
   }
@@ -118,6 +147,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     Color? accent,
     Color? highlight,
     Color? border,
+    Color? onAccent,
   }) {
     return ReaderPalette(
       background: background ?? this.background,
@@ -127,6 +157,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
       accent: accent ?? this.accent,
       highlight: highlight ?? this.highlight,
       border: border ?? this.border,
+      onAccent: onAccent ?? this.onAccent,
     );
   }
 
@@ -141,6 +172,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
       accent: Color.lerp(accent, other.accent, t)!,
       highlight: Color.lerp(highlight, other.highlight, t)!,
       border: Color.lerp(border, other.border, t)!,
+      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
     );
   }
 
@@ -153,7 +185,8 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
       other.textSoft == textSoft &&
       other.accent == accent &&
       other.highlight == highlight &&
-      other.border == border;
+      other.border == border &&
+      other.onAccent == onAccent;
 
   @override
   int get hashCode => Object.hash(
@@ -164,5 +197,6 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     accent,
     highlight,
     border,
+    onAccent,
   );
 }

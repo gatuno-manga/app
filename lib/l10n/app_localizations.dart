@@ -1140,7 +1140,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Line spacing ({value})'**
-  String readingLineHeight(String value);
+  String readingLineHeight(double value);
 
   /// No description provided for @readingLineHeightDesc.
   ///
@@ -1177,18 +1177,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Justified'**
   String get readingAlignJustify;
-
-  /// No description provided for @readingDecrease.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease'**
-  String get readingDecrease;
-
-  /// No description provided for @readingIncrease.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase'**
-  String get readingIncrease;
 
   /// No description provided for @booksDocumentFormat.
   ///
@@ -1615,6 +1603,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save your backup codes before leaving this screen.'**
   String get mfaSaveCodesFirst;
+
+  /// No description provided for @readingDecreaseFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease font size'**
+  String get readingDecreaseFontSize;
+
+  /// No description provided for @readingIncreaseFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase font size'**
+  String get readingIncreaseFontSize;
+
+  /// No description provided for @readingDecreaseLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease line spacing'**
+  String get readingDecreaseLineHeight;
+
+  /// No description provided for @readingIncreaseLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase line spacing'**
+  String get readingIncreaseLineHeight;
 }
 
 class _AppLocalizationsDelegate

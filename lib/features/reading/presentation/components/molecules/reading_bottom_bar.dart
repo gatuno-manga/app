@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../../l10n/app_localizations.dart';
-import '../../../../../shared/components/atoms/app_icon_button.dart';
+import '../atoms/reader_settings_button.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../view_models/reading_view_model.dart';
 
@@ -75,12 +75,7 @@ class ReadingBottomBar extends StatelessWidget {
                     tooltip: l10n.readingPreviousChapter,
                   ),
                   if (onSettingsPressed != null)
-                    AppIconButton(
-                      icon: Icons.settings_outlined,
-                      color: theme.colorScheme.onSurface,
-                      tooltip: l10n.readingSettingsAction,
-                      onPressed: onSettingsPressed,
-                    ),
+                    ReaderSettingsButton(onPressed: onSettingsPressed),
                   IconButton(
                     icon: Icon(
                       Icons.skip_next,

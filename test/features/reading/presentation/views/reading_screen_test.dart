@@ -8,6 +8,7 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
 
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
@@ -154,6 +155,7 @@ void main() {
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
+        theme: AppTheme.darkTheme,
       );
 
       expect(find.byType(TextReader), findsOneWidget);

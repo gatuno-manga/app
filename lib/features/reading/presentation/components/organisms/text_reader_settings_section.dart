@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../l10n/app_localizations.dart';
-import '../../../../../shared/components/molecules/app_stepper.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../molecules/reader_choice_row.dart';
-import '../molecules/reader_setting_row.dart';
+import '../molecules/reader_stepper_row.dart';
+
+/// Applies a change to the current [ReaderPreferences]; sections never see
+/// a stale value, so rapid changes compose instead of overwriting.
+typedef ReaderPreferencesChange =
+    ReaderPreferences Function(ReaderPreferences current);
 
 /// The text reader's rows of the settings sheet (Figma tab `Texto`): font
 /// family, font size, line spacing and alignment.
 class TextReaderSettingsSection extends StatelessWidget {
   final ReaderPreferences preferences;
-  final ValueChanged<ReaderPreferences> onChanged;
+  final ValueChanged<ReaderPreferencesChange> onChanged;
 
   const TextReaderSettingsSection({
     super.key,
@@ -18,19 +22,14 @@ class TextReaderSettingsSection extends StatelessWidget {
     required this.onChanged,
   });
 
-  TextReaderPreferences get _text => preferences.text;
-
-  void _emit(TextReaderPreferences text) =>
-      onChanged(preferences.copyWith(text: text));
-
-  /// Keeps one decimal so `1.8 + 0.1` stores as `1.9`, not `1.9000000001`.
-  static double _step(double value, double step) =>
-      ((value + step) * 10).roundToDouble() / 10;
+  void _changeText(
+    TextReaderPreferences Function(TextReaderPreferences text) change,
+  ) => onChanged((current) => current.copyWith(text: change(current.text)));
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final text = _text;
+    final text = preferences.text;
     return Column(
       children: [
         ReaderChoiceRow<ReaderFontFamily>(
@@ -48,65 +47,34 @@ class TextReaderSettingsSection extends StatelessWidget {
               l10n.readingFontOpenDyslexic,
             ),
           ],
-          onChanged: (family) => _emit(text.copyWith(fontFamily: family)),
+          onChanged: (family) =>
+              _changeText((t) => t.copyWith(fontFamily: family)),
         ),
-        ReaderSettingRow(
+        ReaderStepperRow(
           icon: Icons.format_size,
           title: l10n.readingFontSize(text.fontSize.round()),
           subtitle: l10n.readingFontSizeDesc,
-          trailing: AppStepper(
-            onDecrement: text.fontSize > TextReaderPreferences.minFontSize
-                ? () => _emit(
-                    text.copyWith(
-                      fontSize: _step(
-                        text.fontSize,
-                        -TextReaderPreferences.fontSizeStep,
-                      ),
-                    ),
-                  )
-                : null,
-            onIncrement: text.fontSize < TextReaderPreferences.maxFontSize
-                ? () => _emit(
-                    text.copyWith(
-                      fontSize: _step(
-                        text.fontSize,
-                        TextReaderPreferences.fontSizeStep,
-                      ),
-                    ),
-                  )
-                : null,
-            decrementTooltip: l10n.readingDecrease,
-            incrementTooltip: l10n.readingIncrease,
-          ),
+          onDecrement: text.canDecreaseFontSize
+              ? () => _changeText((t) => t.stepFontSize(-1))
+              : null,
+          onIncrement: text.canIncreaseFontSize
+              ? () => _changeText((t) => t.stepFontSize(1))
+              : null,
+          decrementTooltip: l10n.readingDecreaseFontSize,
+          incrementTooltip: l10n.readingIncreaseFontSize,
         ),
-        ReaderSettingRow(
+        ReaderStepperRow(
           icon: Icons.format_line_spacing,
-          title: l10n.readingLineHeight(text.lineHeight.toStringAsFixed(1)),
+          title: l10n.readingLineHeight(text.lineHeight),
           subtitle: l10n.readingLineHeightDesc,
-          trailing: AppStepper(
-            onDecrement: text.lineHeight > TextReaderPreferences.minLineHeight
-                ? () => _emit(
-                    text.copyWith(
-                      lineHeight: _step(
-                        text.lineHeight,
-                        -TextReaderPreferences.lineHeightStep,
-                      ),
-                    ),
-                  )
-                : null,
-            onIncrement: text.lineHeight < TextReaderPreferences.maxLineHeight
-                ? () => _emit(
-                    text.copyWith(
-                      lineHeight: _step(
-                        text.lineHeight,
-                        TextReaderPreferences.lineHeightStep,
-                      ),
-                    ),
-                  )
-                : null,
-            decrementTooltip: l10n.readingDecrease,
-            incrementTooltip: l10n.readingIncrease,
-          ),
+          onDecrement: text.canDecreaseLineHeight
+              ? () => _changeText((t) => t.stepLineHeight(-1))
+              : null,
+          onIncrement: text.canIncreaseLineHeight
+              ? () => _changeText((t) => t.stepLineHeight(1))
+              : null,
+          decrementTooltip: l10n.readingDecreaseLineHeight,
+          incrementTooltip: l10n.readingIncreaseLineHeight,
         ),
         ReaderChoiceRow<ReaderTextAlignment>(
           icon: Icons.format_align_left,
@@ -118,7 +86,8 @@ class TextReaderSettingsSection extends StatelessWidget {
             ReaderChoice(ReaderTextAlignment.center, l10n.readingAlignCenter),
             ReaderChoice(ReaderTextAlignment.justify, l10n.readingAlignJustify),
           ],
-          onChanged: (alignment) => _emit(text.copyWith(alignment: alignment)),
+          onChanged: (alignment) =>
+              _changeText((t) => t.copyWith(alignment: alignment)),
         ),
       ],
     );

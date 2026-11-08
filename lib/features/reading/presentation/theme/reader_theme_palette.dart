@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
-
 import '../../../../core/theme/app_palette.dart';
 import '../../../../core/theme/reader_palette.dart';
-import '../../../../core/theme/theme.dart';
 import '../../domain/entities/reader_preferences.dart';
 
 extension ReaderThemePalette on ReaderTheme {
@@ -15,9 +12,3 @@ extension ReaderThemePalette on ReaderTheme {
     ReaderTheme.highContrast => ReaderPalette.highContrast,
   };
 }
-
-/// The active app palette, or the Light/Dark one when [theme] was not built
-/// by [AppTheme] (tests, previews).
-AppPalette appPaletteOf(ThemeData theme) =>
-    theme.extension<GatunoColors>()?.palette ??
-    (theme.brightness == Brightness.dark ? darkPalette : lightPalette);

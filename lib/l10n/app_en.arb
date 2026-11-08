@@ -222,7 +222,11 @@
   "@readingLineHeight": {
     "placeholders": {
       "value": {
-        "type": "String"
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
       }
     }
   },
@@ -232,8 +236,6 @@
   "readingAlignLeft": "Left",
   "readingAlignCenter": "Center",
   "readingAlignJustify": "Justified",
-  "readingDecrease": "Decrease",
-  "readingIncrease": "Increase",
   "booksDocumentFormat": "Format: {format}",
   "@booksDocumentFormat": {
     "placeholders": {
@@ -332,5 +334,9 @@
   "mfaErrorUnknown": "Something went wrong. Please try again.",
   "settingsMfaDesc": "Protect your account with an authenticator app",
   "mfaNoAuthenticatorApp": "Could not open an authenticator app. Copy the secret and add it manually.",
-  "mfaSaveCodesFirst": "Save your backup codes before leaving this screen."
+  "mfaSaveCodesFirst": "Save your backup codes before leaving this screen.",
+  "readingDecreaseFontSize": "Decrease font size",
+  "readingIncreaseFontSize": "Increase font size",
+  "readingDecreaseLineHeight": "Decrease line spacing",
+  "readingIncreaseLineHeight": "Increase line spacing"
 }

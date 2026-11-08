@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/text_reader_settings_section.dart';
 
@@ -10,17 +11,27 @@ void main() {
 
   setUp(() => changes = []);
 
-  Future<void> pump(WidgetTester tester, ReaderPreferences prefs) =>
-      tester.pumpApp(
-        Scaffold(
-          body: SingleChildScrollView(
-            child: TextReaderSettingsSection(
-              preferences: prefs,
-              onChanged: changes.add,
-            ),
+  Future<void> pump(
+    WidgetTester tester,
+    ReaderPreferences prefs, {
+    TextScaler textScaler = TextScaler.noScaling,
+    Locale? locale,
+  }) => tester.pumpApp(
+    MediaQuery(
+      data: MediaQueryData(textScaler: textScaler),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: TextReaderSettingsSection(
+            preferences: prefs,
+            // Each change is applied to the value the section was built with.
+            onChanged: (change) => changes.add(change(prefs)),
           ),
         ),
-      );
+      ),
+    ),
+    theme: AppTheme.lightTheme,
+    locale: locale,
+  );
 
   group('TextReaderSettingsSection', () {
     testWidgets('renders the four text rows', (tester) async {
@@ -37,8 +48,8 @@ void main() {
     ) async {
       await pump(tester, ReaderPreferences.defaults);
 
-      await tester.tap(find.byTooltip('Increase').first);
-      await tester.tap(find.byTooltip('Decrease').first);
+      await tester.tap(find.byTooltip('Increase font size'));
+      await tester.tap(find.byTooltip('Decrease font size'));
 
       expect(changes.map((p) => p.text.fontSize), [20, 18]);
 
@@ -59,8 +70,8 @@ void main() {
     ) async {
       await pump(tester, ReaderPreferences.defaults);
 
-      await tester.tap(find.byTooltip('Increase').last);
-      await tester.tap(find.byTooltip('Decrease').last);
+      await tester.tap(find.byTooltip('Increase line spacing'));
+      await tester.tap(find.byTooltip('Decrease line spacing'));
 
       expect(changes.map((p) => p.text.lineHeight), [1.9, 1.7]);
 
@@ -99,6 +110,30 @@ void main() {
         ReaderTextAlignment.left,
         ReaderTextAlignment.justify,
       ]);
+    });
+
+    testWidgets('fits a 390dp phone at 2x text scale in Portuguese', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await pump(
+        tester,
+        ReaderPreferences.defaults.copyWith(
+          text: TextReaderPreferences.defaults.copyWith(
+            fontFamily: ReaderFontFamily.atkinson,
+            alignment: ReaderTextAlignment.justify,
+          ),
+        ),
+        textScaler: const TextScaler.linear(2.0),
+        locale: const Locale('pt'),
+      );
+
+      // An overflow would have been reported as a test exception.
+      expect(find.text('Atkinson Hyperlegible'), findsOneWidget);
+      expect(find.text('Espaçamento de linhas (1,8)'), findsOneWidget);
     });
   });
 }

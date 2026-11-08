@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/theme/theme.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../../theme/reader_theme_palette.dart';
@@ -27,21 +28,27 @@ class ReaderThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final app = appPaletteOf(Theme.of(context));
-    return Row(
-      children: [
-        for (final theme in ReaderTheme.values) ...[
-          if (theme != ReaderTheme.values.first) const SizedBox(width: 8),
-          Expanded(
-            child: ReaderThemeSwatch(
-              palette: theme.palette(app),
-              label: _labelOf(l10n, theme),
-              isSelected: theme == selected,
-              onTap: () => onSelected(theme),
+    final app = Theme.of(context).extension<GatunoColors>()!.palette;
+    return Semantics(
+      container: true,
+      label: l10n.readingThemeTitle,
+      child: Row(
+        // Labels may wrap to two lines; the samples stay on one baseline.
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final theme in ReaderTheme.values) ...[
+            if (theme != ReaderTheme.values.first) const SizedBox(width: 8),
+            Expanded(
+              child: ReaderThemeSwatch(
+                palette: theme.palette(app),
+                label: _labelOf(l10n, theme),
+                isSelected: theme == selected,
+                onTap: () => onSelected(theme),
+              ),
             ),
-          ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

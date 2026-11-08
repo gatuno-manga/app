@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/presentation/components/atoms/reader_theme_swatch.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reader_theme_picker.dart';
@@ -18,6 +19,7 @@ void main() {
           onSelected: (theme) => picked = theme,
         ),
       ),
+      theme: AppTheme.darkTheme,
     );
 
     expect(find.byType(ReaderThemeSwatch), findsNWidgets(4));
@@ -32,5 +34,23 @@ void main() {
 
     await tester.tap(find.text('Cream'));
     expect(picked, ReaderTheme.cream);
+  });
+
+  testWidgets('ReaderThemePicker labels the group for screen readers', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpApp(
+      Scaffold(
+        body: ReaderThemePicker(
+          selected: ReaderTheme.standard,
+          onSelected: (_) {},
+        ),
+      ),
+      theme: AppTheme.darkTheme,
+    );
+
+    expect(find.bySemanticsLabel('Reading theme'), findsOneWidget);
+    handle.dispose();
   });
 }

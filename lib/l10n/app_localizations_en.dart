@@ -554,8 +554,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingFontSizeDesc => 'A- / A+';
 
   @override
-  String readingLineHeight(String value) {
-    return 'Line spacing ($value)';
+  String readingLineHeight(double value) {
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.decimalPatternDigits(
+          locale: localeName,
+          decimalDigits: 1,
+        );
+    final String valueString = valueNumberFormat.format(value);
+
+    return 'Line spacing ($valueString)';
   }
 
   @override
@@ -575,12 +582,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readingAlignJustify => 'Justified';
-
-  @override
-  String get readingDecrease => 'Decrease';
-
-  @override
-  String get readingIncrease => 'Increase';
 
   @override
   String booksDocumentFormat(String format) {
@@ -824,4 +825,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mfaSaveCodesFirst =>
       'Save your backup codes before leaving this screen.';
+
+  @override
+  String get readingDecreaseFontSize => 'Decrease font size';
+
+  @override
+  String get readingIncreaseFontSize => 'Increase font size';
+
+  @override
+  String get readingDecreaseLineHeight => 'Decrease line spacing';
+
+  @override
+  String get readingIncreaseLineHeight => 'Increase line spacing';
 }

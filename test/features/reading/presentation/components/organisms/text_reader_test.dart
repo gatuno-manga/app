@@ -9,6 +9,7 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
 
 import 'package:gatuno/core/theme/reader_palette.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
@@ -91,6 +92,7 @@ void main() {
           ],
           child: Scaffold(body: TextReader(chapter: chapter)),
         ),
+        theme: AppTheme.darkTheme,
       );
 
   group('TextReader', () {
@@ -133,7 +135,7 @@ void main() {
     testWidgets('applies the preferences to plain text and the surface', (
       tester,
     ) async {
-      await preferences.update(_customPrefs);
+      await preferences.update((_) => _customPrefs);
       final chapter = _MockChapter(
         content: const ChapterContent('Hello world'),
         contentFormat: ContentFormat.plain,
@@ -155,7 +157,7 @@ void main() {
 
     testWidgets('applies the preferences to markdown and HTML', (tester) async {
       await preferences.update(
-        _customPrefs.copyWith(
+        (_) => _customPrefs.copyWith(
           text: _customPrefs.text.copyWith(
             alignment: ReaderTextAlignment.justify,
           ),
@@ -198,7 +200,7 @@ void main() {
       await pumpReader(tester, chapter);
       expect(tester.widget<Text>(find.text('Hello world')).style?.fontSize, 19);
 
-      await preferences.update(_customPrefs);
+      await preferences.update((_) => _customPrefs);
       await tester.pump();
 
       expect(tester.widget<Text>(find.text('Hello world')).style?.fontSize, 22);

@@ -15,6 +15,7 @@ void main() {
       expect(p.accent, draculaPalette.primary);
       expect(p.highlight, draculaPalette.primary.withAlpha(0x1F));
       expect(p.border, draculaPalette.border);
+      expect(p.onAccent, draculaPalette.onPrimary);
     });
 
     test('fixed themes ignore the app palette', () {

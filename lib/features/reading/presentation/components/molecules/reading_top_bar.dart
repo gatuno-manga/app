@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../l10n/app_localizations.dart';
-import '../../../../../shared/components/atoms/app_icon_button.dart';
+import '../atoms/reader_settings_button.dart';
 import '../../../domain/entities/reading_chapter.dart';
 
 class ReadingTopBar extends StatelessWidget {
@@ -61,12 +60,7 @@ class ReadingTopBar extends StatelessWidget {
             ),
           ),
           if (onSettingsPressed != null)
-            AppIconButton(
-              icon: Icons.settings_outlined,
-              color: theme.colorScheme.onSurface,
-              tooltip: AppLocalizations.of(context)!.readingSettingsAction,
-              onPressed: onSettingsPressed,
-            ),
+            ReaderSettingsButton(onPressed: onSettingsPressed),
         ],
       ),
     );

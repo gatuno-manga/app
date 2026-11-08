@@ -70,6 +70,16 @@ class TextReaderContent extends StatelessWidget {
       h5: tinted(base.h5),
       h6: tinted(base.h6),
       listBullet: body,
+      tableBody: body,
+      checkbox: body,
+      code: base.code?.copyWith(
+        color: palette.text,
+        backgroundColor: palette.surface,
+      ),
+      codeblockDecoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
       blockquote: body.copyWith(color: palette.textSoft),
       blockquoteDecoration: BoxDecoration(
         color: palette.highlight,
