@@ -54,6 +54,17 @@ void main() {
     expect(find.text('App lock'), findsNothing);
   });
 
+  testWidgets('stays reachable while the lock is on but unsupported', (
+    tester,
+  ) async {
+    await pumpTile(
+      tester,
+      const AppLockState(enabled: true, isInitialized: true),
+    );
+
+    expect(find.byType(ListTile), findsOneWidget);
+  });
+
   testWidgets('appears once support is reported later', (tester) async {
     await pumpTile(tester, const AppLockState());
     expect(find.byType(ListTile), findsNothing);

@@ -249,6 +249,17 @@ void main() {
   });
 
   group('sub-settings', () {
+    test('setGrace rethrows a persistence failure and keeps state', () async {
+      await service.init();
+      when(() => storage.setGrace(any())).thenThrow(Exception('disk'));
+
+      await expectLater(
+        service.setGrace(AppLockGrace.immediately),
+        throwsException,
+      );
+      expect(service.state.grace, AppLockGrace.oneMinute);
+    });
+
     test('setGrace persists and emits without a prompt', () async {
       await service.init();
       await service.setGrace(AppLockGrace.fifteenMinutes);

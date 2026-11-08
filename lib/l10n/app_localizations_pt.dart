@@ -767,6 +767,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Este aparelho não tem bloqueio de tela, então o Gatuno não pode ser bloqueado.';
 
   @override
+  String get appLockUnsupportedEnabledDesc =>
+      'Este aparelho não tem bloqueio de tela. Defina um nos ajustes do sistema para desbloquear o Gatuno ou desativar o bloqueio.';
+
+  @override
   String get appLockGraceTitle => 'Bloquear depois de sair do app';
 
   @override
@@ -794,11 +798,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get appLockFallbackOffDesc =>
-      'Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo';
+      'Se a biometria for bloqueada, o Gatuno fica bloqueado até o aparelho liberá-la de novo.';
 
   @override
   String get appLockConfirmReason =>
       'Confirme que é você para alterar o bloqueio do app';
+
+  @override
+  String get appLockFallbackNeedsBiometric =>
+      'Cadastre uma digital ou rosto nos ajustes do sistema antes de desativar o PIN do aparelho.';
 
   @override
   String get appLockPromptHint => 'Use sua digital ou rosto';

@@ -5,7 +5,8 @@ import '../../../../../core/di/injection.dart';
 import '../../../domain/use_cases/app_lock_service.dart';
 
 /// Settings entry for the app lock. Renders nothing on devices without a
-/// screen lock, so the settings page does not need to know about support.
+/// screen lock, unless the lock is still on (the screen lock was removed
+/// while it was enabled) so the page stays reachable to turn it off.
 class AppLockSettingsTile extends StatefulWidget {
   final VoidCallback onTap;
 
@@ -23,15 +24,17 @@ class _AppLockSettingsTileState extends State<AppLockSettingsTile> {
   void initState() {
     super.initState();
     _service = sl<AppLockService>();
-    _supported = _service.stateStream.map((s) => s.isSupported).distinct();
+    _supported = _service.stateStream.map(_reachable).distinct();
   }
+
+  static bool _reachable(AppLockState s) => s.isSupported || s.enabled;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return StreamBuilder<bool>(
       stream: _supported,
-      initialData: _service.state.isSupported,
+      initialData: _reachable(_service.state),
       builder: (context, snapshot) {
         if (snapshot.data != true) return const SizedBox.shrink();
         return ListTile(

@@ -148,23 +148,22 @@ class AppLockService {
   }) async {
     if (state.enabled == enabled) return DeviceAuthOutcome.success;
 
-    final outcome = await _prompt(messages);
+    final outcome = await _prompt(
+      messages,
+      allowDeviceCredential: state.deviceCredentialAllowed,
+    );
     if (outcome != DeviceAuthOutcome.success) return outcome;
 
-    try {
-      await _storage.setEnabled(enabled);
-    } catch (e, stackTrace) {
-      AppLogger.e('Error persisting app lock', e, stackTrace, _logTag);
-      rethrow;
-    }
+    await _persist('enabled', () => _storage.setEnabled(enabled));
     _emit(state.copyWith(enabled: enabled, locked: false));
     await _privacyScreen.setEnabled(enabled);
     AppLogger.i('App lock ${enabled ? 'enabled' : 'disabled'}', _logTag);
     return DeviceAuthOutcome.success;
   }
 
+  /// Throws when the preference cannot be persisted.
   Future<void> setGrace(AppLockGrace grace) async {
-    await _storage.setGrace(grace);
+    await _persist('grace', () => _storage.setGrace(grace));
     _emit(state.copyWith(grace: grace));
   }
 
@@ -178,9 +177,23 @@ class AppLockService {
       final outcome = await _prompt(messages, allowDeviceCredential: false);
       if (outcome != DeviceAuthOutcome.success) return outcome;
     }
-    await _storage.setDeviceCredentialAllowed(allowed);
+    await _persist(
+      'device credential',
+      () => _storage.setDeviceCredentialAllowed(allowed),
+    );
     _emit(state.copyWith(deviceCredentialAllowed: allowed));
     return DeviceAuthOutcome.success;
+  }
+
+  /// The single definition of "the preference could not be saved": log it
+  /// and let the caller surface it; state is never changed on failure.
+  Future<void> _persist(String what, Future<void> Function() write) async {
+    try {
+      await write();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error persisting app lock $what', e, stackTrace, _logTag);
+      rethrow;
+    }
   }
 
   /// Call when the app leaves the foreground.
@@ -214,7 +227,10 @@ class AppLockService {
   }
 
   Future<DeviceAuthOutcome> _runUnlock(DeviceAuthMessages messages) async {
-    final outcome = await _prompt(messages);
+    final outcome = await _prompt(
+      messages,
+      allowDeviceCredential: state.deviceCredentialAllowed,
+    );
     final success = outcome == DeviceAuthOutcome.success;
     _emit(
       state.copyWith(
@@ -227,7 +243,7 @@ class AppLockService {
 
   Future<DeviceAuthOutcome> _prompt(
     DeviceAuthMessages messages, {
-    bool? allowDeviceCredential,
+    required bool allowDeviceCredential,
   }) async {
     // Clearing the old outcome lets the cover re-announce an identical one.
     _emit(state.copyWith(isAuthenticating: true, lastOutcome: () => null));
@@ -235,8 +251,7 @@ class AppLockService {
     try {
       outcome = await _authenticator.authenticate(
         messages: messages,
-        allowDeviceCredential:
-            allowDeviceCredential ?? state.deviceCredentialAllowed,
+        allowDeviceCredential: allowDeviceCredential,
       );
       return outcome;
     } finally {

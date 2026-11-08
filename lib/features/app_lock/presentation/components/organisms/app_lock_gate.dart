@@ -5,6 +5,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../domain/device_authenticator.dart';
 import '../../../domain/use_cases/app_lock_service.dart';
+import '../../app_lock_texts.dart';
 import '../../views/app_lock_screen.dart';
 
 /// Covers [child] with [AppLockScreen] while the app is locked, feeds app
@@ -56,9 +57,10 @@ class _AppLockGateState extends State<AppLockGate> with WidgetsBindingObserver {
         messages: DeviceAuthMessages(
           reason: l10n.appLockPromptReason,
           title: l10n.appLockLockedTitle,
-          hint: widget.service.state.deviceCredentialAllowed
-              ? l10n.appLockPromptHintWithCredential
-              : l10n.appLockPromptHint,
+          hint: appLockPromptHint(
+            l10n,
+            allowDeviceCredential: widget.service.state.deviceCredentialAllowed,
+          ),
           cancel: l10n.commonCancel,
         ),
       ),

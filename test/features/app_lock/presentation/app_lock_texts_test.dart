@@ -20,6 +20,20 @@ void main() {
     expect(failures.toSet().length, failures.length);
   });
 
+  test(
+    'the OS sheet hint mentions the PIN only when the fallback is allowed',
+    () {
+      expect(
+        appLockPromptHint(l10n, allowDeviceCredential: true),
+        l10n.appLockPromptHintWithCredential,
+      );
+      expect(
+        appLockPromptHint(l10n, allowDeviceCredential: false),
+        l10n.appLockPromptHint,
+      );
+    },
+  );
+
   test('maps the lockout to its dedicated message', () {
     expect(
       appLockOutcomeText(l10n, DeviceAuthOutcome.lockedOut),

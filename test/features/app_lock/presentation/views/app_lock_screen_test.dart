@@ -99,6 +99,21 @@ void main() {
     );
   });
 
+  testWidgets('the title is a heading for screen-reader navigation', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      AppLockScreen(
+        isAuthenticating: false,
+        lastOutcome: null,
+        onUnlock: () {},
+      ),
+    );
+
+    final node = tester.getSemantics(find.text('Gatuno is locked'));
+    expect(node.flagsCollection.isHeader, isTrue);
+  });
+
   testWidgets('disables the button while the prompt is open', (tester) async {
     var taps = 0;
     await tester.pumpApp(

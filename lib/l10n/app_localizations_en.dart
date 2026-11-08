@@ -765,6 +765,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This device has no screen lock, so Gatuno cannot be locked.';
 
   @override
+  String get appLockUnsupportedEnabledDesc =>
+      'This device has no screen lock. Set one in the system settings to unlock Gatuno or turn the lock off.';
+
+  @override
   String get appLockGraceTitle => 'Lock after leaving the app';
 
   @override
@@ -791,10 +795,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockFallbackOffDesc =>
-      'If biometrics get locked out, Gatuno stays locked until the device allows them again';
+      'If biometrics get locked out, Gatuno stays locked until the device allows them again.';
 
   @override
   String get appLockConfirmReason => 'Confirm it\'s you to change the app lock';
+
+  @override
+  String get appLockFallbackNeedsBiometric =>
+      'Enroll a fingerprint or face in the system settings before turning off the device PIN.';
 
   @override
   String get appLockPromptHint => 'Use your fingerprint or face';

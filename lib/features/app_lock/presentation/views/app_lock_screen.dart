@@ -46,6 +46,7 @@ class AppLockScreen extends StatelessWidget {
                   ExcludeSemantics(child: AppIcons.logo(height: 96)),
                   const SizedBox(height: 24),
                   Semantics(
+                    header: true,
                     liveRegion: true,
                     child: Text(
                       l10n.appLockLockedTitle,

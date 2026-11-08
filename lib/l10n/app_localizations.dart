@@ -1496,6 +1496,12 @@ abstract class AppLocalizations {
   /// **'This device has no screen lock, so Gatuno cannot be locked.'**
   String get appLockUnsupportedDesc;
 
+  /// No description provided for @appLockUnsupportedEnabledDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no screen lock. Set one in the system settings to unlock Gatuno or turn the lock off.'**
+  String get appLockUnsupportedEnabledDesc;
+
   /// No description provided for @appLockGraceTitle.
   ///
   /// In en, this message translates to:
@@ -1547,7 +1553,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLockFallbackOffDesc.
   ///
   /// In en, this message translates to:
-  /// **'If biometrics get locked out, Gatuno stays locked until the device allows them again'**
+  /// **'If biometrics get locked out, Gatuno stays locked until the device allows them again.'**
   String get appLockFallbackOffDesc;
 
   /// No description provided for @appLockConfirmReason.
@@ -1555,6 +1561,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm it\'s you to change the app lock'**
   String get appLockConfirmReason;
+
+  /// No description provided for @appLockFallbackNeedsBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Enroll a fingerprint or face in the system settings before turning off the device PIN.'**
+  String get appLockFallbackNeedsBiometric;
 
   /// No description provided for @appLockPromptHint.
   ///

@@ -165,7 +165,7 @@ void main() {
 
     expect(
       find.text(
-        'If biometrics get locked out, Gatuno stays locked until the device allows them again',
+        'If biometrics get locked out, Gatuno stays locked until the device allows them again.',
       ),
       findsOneWidget,
     );
@@ -213,7 +213,7 @@ void main() {
 
     expect(
       find.text(
-        'No fingerprint or face is enrolled on this device. Enroll one in the system settings to unlock Gatuno.',
+        'Enroll a fingerprint or face in the system settings before turning off the device PIN.',
       ),
       findsOneWidget,
     );
@@ -229,13 +229,23 @@ void main() {
 
       expect(
         find.text(
-          'This device has no screen lock, so Gatuno cannot be locked.',
+          'This device has no screen lock. Set one in the system settings to unlock Gatuno or turn the lock off.',
         ),
         findsOneWidget,
       );
       expect(switchWithTitle('Lock Gatuno'), findsOneWidget);
     },
   );
+
+  testWidgets('a grace save failure shows the save error', (tester) async {
+    await pumpPage(tester, supportedOn);
+    when(() => fake.mock.setGrace(any())).thenThrow(Exception('disk'));
+
+    await tester.tap(find.text('After 5 minutes'));
+    await tester.pump();
+
+    expect(find.text('Could not save the setting. Try again.'), findsOneWidget);
+  });
 
   testWidgets('the OS sheet hint omits the PIN when the fallback is off', (
     tester,

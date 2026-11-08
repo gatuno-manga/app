@@ -3,6 +3,8 @@ import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
+// Shared on purpose with the settings feature: this page is a settings
+// sub-page and must look like its siblings (MFA, certificates).
 import '../../../settings/presentation/components/molecules/settings_section_header.dart';
 import '../../domain/device_authenticator.dart';
 import '../../domain/use_cases/app_lock_service.dart';
@@ -34,13 +36,11 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
   }) => DeviceAuthMessages(
     reason: l10n.appLockConfirmReason,
     title: l10n.appLockTitle,
-    hint: allowDeviceCredential
-        ? l10n.appLockPromptHintWithCredential
-        : l10n.appLockPromptHint,
+    hint: appLockPromptHint(l10n, allowDeviceCredential: allowDeviceCredential),
     cancel: l10n.commonCancel,
   );
 
-  Future<void> _toggleLock(bool enabled) => _confirm(
+  Future<void> _toggleLock(bool enabled) => _apply(
     (l10n) => _service.setEnabled(
       enabled,
       messages: _confirmMessages(
@@ -51,26 +51,36 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
   );
 
   // Turning the fallback off proves a biometric works first, so the hint
-  // must not mention the PIN.
-  Future<void> _toggleFallback(bool allowed) => _confirm(
+  // must not mention the PIN, and a refusal is explained in those terms.
+  Future<void> _toggleFallback(bool allowed) => _apply(
     (l10n) => _service.setDeviceCredentialAllowed(
       allowed,
       messages: _confirmMessages(l10n, allowDeviceCredential: allowed),
     ),
+    explain: (l10n, outcome) => outcome == DeviceAuthOutcome.noBiometrics
+        ? l10n.appLockFallbackNeedsBiometric
+        : appLockOutcomeText(l10n, outcome),
   );
 
-  /// Runs a change guarded by the OS prompt and explains any refusal.
-  Future<void> _confirm(
-    Future<DeviceAuthOutcome> Function(AppLocalizations l10n) change,
-  ) async {
+  Future<void> _chooseGrace(AppLockGrace grace) => _apply((_) async {
+    await _service.setGrace(grace);
+    return null;
+  });
+
+  /// Runs a preference change (prompt-guarded or not) and explains a
+  /// refused prompt or a failed save in a SnackBar.
+  Future<void> _apply(
+    Future<DeviceAuthOutcome?> Function(AppLocalizations l10n) change, {
+    String? Function(AppLocalizations l10n, DeviceAuthOutcome outcome)? explain,
+  }) async {
     if (_service.state.isAuthenticating) return;
     final l10n = AppLocalizations.of(context)!;
     String? message;
     try {
       final outcome = await change(l10n);
       // A dismissed prompt simply leaves the switch where it was.
-      if (outcome == DeviceAuthOutcome.cancelled) return;
-      message = appLockOutcomeText(l10n, outcome);
+      if (outcome == null || outcome == DeviceAuthOutcome.cancelled) return;
+      message = (explain ?? appLockOutcomeText)(l10n, outcome);
     } catch (_) {
       message = l10n.appLockErrorSave;
     }
@@ -96,7 +106,14 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
               children: [
                 // A lock enabled before the screen lock was removed must
                 // still be switchable off.
-                if (!state.isSupported) Text(l10n.appLockUnsupportedDesc),
+                if (!state.isSupported) ...[
+                  Text(
+                    state.enabled
+                        ? l10n.appLockUnsupportedEnabledDesc
+                        : l10n.appLockUnsupportedDesc,
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 if (state.isSupported || state.enabled)
                   ..._controls(l10n, state),
               ],
@@ -121,7 +138,7 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
         RadioGroup<AppLockGrace>(
           groupValue: state.grace,
           onChanged: (grace) {
-            if (grace != null) _service.setGrace(grace);
+            if (grace != null) _chooseGrace(grace);
           },
           child: Column(
             children: [
