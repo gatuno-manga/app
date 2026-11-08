@@ -122,6 +122,20 @@ class AuthService with WidgetsBindingObserver {
     }
   }
 
+  /// Completes a sign-in that was interrupted by an MFA challenge.
+  Future<bool> verifyMfaLogin(String mfaToken, String code) async {
+    try {
+      final token = await _authRepository.verifyMfaLogin(mfaToken, code);
+      await _tokenManager.saveToken(token);
+      _authStateSubject.add(AuthState.authenticated);
+      AppLogger.i('MFA login completed and token saved', _logTag);
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('MFA login failed in AuthService', e, stackTrace, _logTag);
+      rethrow;
+    }
+  }
+
   Future<bool> signUp(EmailAddress email, Password password) async {
     final redactedEmail = AppLogger.redactEmail(email.value);
     AppLogger.i('Performing signUp for: $redactedEmail', _logTag);

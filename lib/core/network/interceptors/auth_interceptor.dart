@@ -13,6 +13,7 @@ class AuthInterceptor extends QueuedInterceptor {
     ApiConstants.signIn,
     ApiConstants.signUp,
     ApiConstants.authRefresh,
+    ApiConstants.mfaVerifyLogin,
     ApiConstants.s3Prefix,
   ];
 

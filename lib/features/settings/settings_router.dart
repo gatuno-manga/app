@@ -8,6 +8,9 @@ import '../settings/domain/use_cases/settings_service.dart';
 import '../users/presentation/views/me_screen.dart';
 import '../users/presentation/view_models/me_view_model.dart';
 import '../certificates/certificates_router.dart';
+import '../authentication/domain/repositories/mfa_repository.dart';
+import 'presentation/view_models/mfa_settings_view_model.dart';
+import 'presentation/views/mfa_settings_screen.dart';
 import '../../../core/di/injection.dart';
 
 final GlobalKey<NavigatorState> settingsNavigatorKey =
@@ -27,6 +30,14 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
       ),
       routes: [
         ...certificatesRoutes,
+        GoRoute(
+          path: 'mfa',
+          redirect: (context, state) =>
+              sl<AuthService>().authenticated ? null : '/auth/signin',
+          builder: (context, state) => MfaSettingsPage(
+            viewModel: MfaSettingsViewModel(sl<MfaRepository>()),
+          ),
+        ),
         GoRoute(
           path:
               'profile', // Full path will be /settings/profile or use /users/me

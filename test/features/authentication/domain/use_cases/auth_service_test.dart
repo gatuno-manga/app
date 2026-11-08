@@ -38,6 +38,16 @@ void main() {
   final tToken = AuthToken('access');
 
   group('AuthService', () {
+    test('verifyMfaLogin saves the token and authenticates', () async {
+      when(
+        () => mockAuthRepository.verifyMfaLogin('chal', '123456'),
+      ).thenAnswer((_) async => tToken);
+      when(() => mockTokenManager.saveToken(any())).thenAnswer((_) async {});
+      expect(await authService.verifyMfaLogin('chal', '123456'), true);
+      verify(() => mockTokenManager.saveToken(tToken)).called(1);
+      expect(authService.authState, AuthState.authenticated);
+    });
+
     test(
       'signIn calls repository, saves token and notifies listeners',
       () async {
@@ -51,13 +61,19 @@ void main() {
           () => mockTokenManager.saveToken(any()),
         ).thenAnswer((_) async => {});
 
-        final result = await authService.signIn(EmailAddress('test@example.com'), Password('password'));
+        final result = await authService.signIn(
+          EmailAddress('test@example.com'),
+          Password('password'),
+        );
 
         expect(result, true);
         expect(authService.authenticated, true);
         expect(notificationCount, greaterThan(0));
         verify(
-          () => mockAuthRepository.signIn(EmailAddress('test@example.com'), Password('password')),
+          () => mockAuthRepository.signIn(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
         ).called(1);
         verify(() => mockTokenManager.saveToken(tToken)).called(1);
       },

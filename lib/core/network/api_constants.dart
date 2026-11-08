@@ -5,6 +5,13 @@ class ApiConstants {
   static const String authRefresh = '/auth/refresh';
   static const String logout = '/auth/logout';
 
+  // MFA Routes
+  static const String mfaVerifyLogin = '/auth/mfa/verify-login';
+  static const String mfaStatus = '/auth/mfa/status';
+  static const String mfaTotpSetup = '/auth/mfa/totp/setup';
+  static const String mfaTotpVerifySetup = '/auth/mfa/totp/verify-setup';
+  static const String mfaTotpDisable = '/auth/mfa/totp/disable';
+
   // Books Routes
   static const String books = '/books';
 

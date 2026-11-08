@@ -560,4 +560,132 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get userImageErrorUnknown =>
       'Algo deu errado com esta imagem. Tente novamente.';
+
+  @override
+  String get mfaTitle => 'Autenticação em dois fatores';
+
+  @override
+  String get mfaStatusEnabled => 'A autenticação em dois fatores está ativada';
+
+  @override
+  String get mfaStatusDisabled =>
+      'A autenticação em dois fatores está desativada';
+
+  @override
+  String mfaBackupCodesRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count códigos de backup restantes',
+      one: '1 código de backup restante',
+      zero: 'Nenhum código de backup restante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mfaEnableButton => 'Ativar';
+
+  @override
+  String get mfaDisableButton => 'Desativar';
+
+  @override
+  String get mfaReconfigureButton => 'Reconfigurar';
+
+  @override
+  String get mfaReconfigureTitle =>
+      'Reconfigurar a autenticação em dois fatores?';
+
+  @override
+  String get mfaReconfigureWarning =>
+      'Seu autenticador atual e todos os códigos de backup deixarão de funcionar imediatamente.';
+
+  @override
+  String get mfaReconfigureConfirm => 'Reconfigurar';
+
+  @override
+  String get mfaDisableTitle => 'Desativar autenticação em dois fatores';
+
+  @override
+  String get mfaDisableDescription =>
+      'Informe um código do seu aplicativo autenticador ou um código de backup.';
+
+  @override
+  String get mfaDisableConfirm => 'Desativar';
+
+  @override
+  String get mfaSetupInstructions =>
+      'Adicione este segredo ao seu aplicativo autenticador (ou gerenciador de senhas) e informe o código de 6 dígitos exibido.';
+
+  @override
+  String get mfaCopySecret => 'Copiar segredo';
+
+  @override
+  String get mfaOpenAuthenticator => 'Abrir no aplicativo autenticador';
+
+  @override
+  String get mfaCopied => 'Copiado';
+
+  @override
+  String get mfaConfirmButton => 'Confirmar';
+
+  @override
+  String get mfaBackupCodesTitle => 'Guarde seus códigos de backup';
+
+  @override
+  String get mfaBackupCodesWarning =>
+      'Cada código funciona uma vez caso você perca o acesso ao autenticador. Eles não serão exibidos novamente.';
+
+  @override
+  String get mfaShareCodes => 'Salvar ou compartilhar';
+
+  @override
+  String get mfaCopyCodes => 'Copiar todos';
+
+  @override
+  String get mfaSavedConfirm => 'Eu guardei estes códigos';
+
+  @override
+  String get mfaDoneButton => 'Concluir';
+
+  @override
+  String get mfaRetryButton => 'Tentar novamente';
+
+  @override
+  String get mfaCodeLabel => 'Código de autenticação';
+
+  @override
+  String get mfaCodeRequired => 'Informe seu código de autenticação';
+
+  @override
+  String get mfaChallengeTitle => 'Confirme que é você';
+
+  @override
+  String get mfaChallengeDescription =>
+      'Informe o código de 6 dígitos do seu aplicativo autenticador ou um código de backup.';
+
+  @override
+  String get mfaVerifyButton => 'Verificar';
+
+  @override
+  String get mfaErrorInvalidCode => 'Código inválido. Tente novamente.';
+
+  @override
+  String get mfaErrorTooManyAttempts =>
+      'Muitas tentativas. Aguarde um minuto e tente novamente.';
+
+  @override
+  String get mfaErrorChallengeExpired =>
+      'A verificação expirou. Entre novamente.';
+
+  @override
+  String get mfaErrorNetwork =>
+      'Não foi possível acessar o servidor. Verifique sua conexão.';
+
+  @override
+  String get mfaErrorUnknown => 'Algo deu errado. Tente novamente.';
+
+  @override
+  String get settingsMfaDesc =>
+      'Proteja sua conta com um aplicativo autenticador';
 }

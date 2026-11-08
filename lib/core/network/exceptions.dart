@@ -27,6 +27,11 @@ class ValidationException extends AppExceptions {
     : super(message ?? 'Validation failed', statusCode: 400);
 }
 
+class TooManyRequestsException extends AppExceptions {
+  TooManyRequestsException({String? message})
+    : super(message ?? 'Too many requests', statusCode: 429);
+}
+
 class ServerException extends AppExceptions {
   ServerException({String? message, int? statusCode})
     : super(message ?? 'Internal server error', statusCode: statusCode ?? 500);
@@ -57,6 +62,8 @@ class ApiExceptionHandler {
         return AuthException('Access denied: ${message ?? ''}');
       case 404:
         return AuthException('Resource not found');
+      case 429:
+        return TooManyRequestsException(message: message);
       case 500:
         return ServerException(message: message, statusCode: 500);
       default:
