@@ -59,11 +59,11 @@ Use this checklist to collect objective evidence for Phase 1 requirements: **TRI
 
 ## TRIG-04 — Quality gate blocks continuation on analysis/test failure
 
-1. Push a valid tag for a commit that intentionally fails `flutter analyze` or `flutter test`.
+1. Push a valid tag for a commit that intentionally fails `dart analyze` or `flutter test`.
 2. Open the run logs for `validate_and_gate`.
 
 **Expected evidence**
-- `flutter analyze` and/or `flutter test` fails in `validate_and_gate`.
+- `dart analyze` and/or `flutter test` fails in `validate_and_gate`.
 - No downstream release/build path runs after the gate failure.
 
 ## Tag protection

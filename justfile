@@ -17,9 +17,11 @@ gen:
 l10n:
     flutter gen-l10n
 
-# Static analysis
+# Static analysis, including the gatuno_lints plugin rules.
+# `dart analyze` is used instead of `flutter analyze` because the latter exits
+# before analyzer plugins report, so plugin diagnostics would be dropped.
 analyze:
-    flutter analyze
+    dart analyze
 
 # Run unit and widget tests
 test:
@@ -33,12 +35,16 @@ coverage:
 fmt *files='.':
     dart format {{ files }}
 
+# Unit tests of the gatuno_lints analyzer plugin (tool/gatuno_lints)
+test-lints:
+    cd tool/gatuno_lints && dart pub get && dart test
+
 # Check design token consistency (DESIGN.md, .impeccable/design.json, theme)
 design-tokens:
     python3 tool/check_design_tokens.py
 
-# Full local gate: analysis, tests and design tokens
-check: analyze test design-tokens
+# Full local gate: analysis, tests, lint-rule tests and design tokens
+check: analyze test test-lints design-tokens
 
 # Apply automated Dart fixes (defaults to the whole project)
 # `dart fix` accepts a single path, so run it once per argument.

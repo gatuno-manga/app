@@ -1,0 +1,4 @@
+# Standalone: the plugin package is analysed on its own, not with the app rules.
+linter:
+  rules:
+    - prefer_single_quotes
