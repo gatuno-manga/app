@@ -99,10 +99,16 @@ class UserService {
     }
   }
 
-  /// Fetches `/me`, caches it and returns it; null when offline or failing.
+  /// Fetches `/me`, caches it and returns it; null when offline or failing,
+  /// or when the account signed out while the request was in flight.
   Future<UserModel?> refreshProfile() async {
     try {
-      return await _storeProfile(await _remote.fetchMe());
+      final profile = await _remote.fetchMe();
+      if (!_authService.authenticated) {
+        AppLogger.i('Dropping /me fetched after sign-out', _logTag);
+        return null;
+      }
+      return await _storeProfile(profile);
     } catch (e) {
       AppLogger.w('Could not refresh profile: $e', _logTag);
       return null;

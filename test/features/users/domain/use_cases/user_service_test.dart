@@ -19,6 +19,15 @@ class MockUserStorage extends Mock implements UserStorage {}
 
 class MockRemote extends Mock implements UserRemoteDataSource {}
 
+/// A `/me` payload for account [id] with an avatar and no banner.
+Map<String, dynamic> profile(String id) => {
+  'id': id,
+  'email': 'a@b.c',
+  'roles': ['user'],
+  'profileImageUrl': 'http://x/$id.webp',
+  'profileBannerUrl': '',
+};
+
 void main() {
   setUpAll(() {
     registerFallbackValue(ProfileImageKind.avatar);
@@ -37,6 +46,7 @@ void main() {
     when(
       () => mockAuthService.authStateStream,
     ).thenAnswer((_) => const Stream.empty());
+    when(() => mockAuthService.authenticated).thenReturn(true);
     userService = UserService(
       mockAuthService,
       remote: MockRemote(),
@@ -126,14 +136,6 @@ void main() {
       'roles': ['user'],
       'exp': (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600,
     });
-
-    Map<String, dynamic> profile(String id) => {
-      'id': id,
-      'email': 'a@b.c',
-      'roles': ['user'],
-      'profileImageUrl': 'http://x/$id.webp',
-      'profileBannerUrl': '',
-    };
 
     setUp(() {
       storage = MockUserStorage();
@@ -238,13 +240,6 @@ void main() {
     late MockRemote remote;
     late UserService service;
 
-    Map<String, dynamic> profile(String id) => {
-      'id': id,
-      'email': 'a@b.c',
-      'roles': ['user'],
-      'profileImageUrl': 'http://x/$id.webp',
-    };
-
     setUp(() {
       storage = MockUserStorage();
       remote = MockRemote();
@@ -319,13 +314,6 @@ void main() {
     late MockRemote remote;
     late StreamController<AuthState> auth;
     late UserService service;
-
-    Map<String, dynamic> profile(String id) => {
-      'id': id,
-      'email': 'a@b.c',
-      'roles': ['user'],
-      'profileImageUrl': 'http://x/$id.webp',
-    };
 
     String validToken(String sub) => createMockToken({
       'sub': sub,
@@ -405,6 +393,27 @@ void main() {
         verifyNever(() => remote.fetchMe());
       },
     );
+
+    test('drops a /me that resolves after sign-out', () async {
+      final fetched = Completer<Map<String, dynamic>>();
+      when(() => remote.fetchMe()).thenAnswer((_) => fetched.future);
+      when(() => mockAuthService.authenticated).thenReturn(true);
+      final events = <UserModel>[];
+      final sub = service.profileStream.skip(1).listen(events.add);
+      service.init();
+
+      auth.add(AuthState.authenticated);
+      await Future<void>.delayed(Duration.zero);
+      when(() => mockAuthService.authenticated).thenReturn(false);
+      auth.add(AuthState.unauthenticated);
+      await Future<void>.delayed(Duration.zero);
+      fetched.complete(profile('1'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.last, same(UserModel.guest));
+      verifyNever(() => storage.writeProfile(any()));
+      await sub.cancel();
+    });
 
     test('ignores the uninitialized state', () async {
       service.init();

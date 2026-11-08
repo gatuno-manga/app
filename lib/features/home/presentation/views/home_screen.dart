@@ -29,6 +29,7 @@ class HomePage extends StatelessWidget {
             title: l10n.homeTitle,
             isAuthenticated: state.isAuthenticated,
             isLoading: !state.isInitialized,
+            // Guest while the profile loads keeps the avatar skeleton.
             displayName: state.user.isGuest ? null : state.user.displayName,
             imageUrl: state.user.profilePictureUrl,
             onProfilePressed: () => context.push('/settings/profile'),

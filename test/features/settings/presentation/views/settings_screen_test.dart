@@ -191,4 +191,31 @@ void main() {
       'http://x/a.webp',
     );
   });
+
+  testWidgets('SettingsPage shows the guest card while the profile loads', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    when(() => mockAuthService.authenticated).thenReturn(true);
+    viewModel = SettingsViewModel(
+      settingsService: mockSettingsService,
+      authService: mockAuthService,
+      userService: mockUserService,
+    );
+
+    await tester.pumpApp(
+      Provider<SettingsViewModel>.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+    await tester.pump();
+
+    // Signed in, profile not delivered yet: localized placeholder, never the
+    // raw guest model.
+    expect(find.text('Guest'), findsOneWidget);
+    expect(find.text('guest'), findsNothing);
+  });
 }
