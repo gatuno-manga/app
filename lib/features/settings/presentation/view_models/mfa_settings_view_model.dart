@@ -86,6 +86,7 @@ class MfaSettingsViewModel extends BaseStreamViewModel<MfaSettingsState> {
   }
 
   Future<void> confirmSetup(String code) async {
+    if (state.isBusy) return;
     emit(state.copyWith(isBusy: true, error: () => null));
     try {
       final result = await _repository.verifyTotpSetup(code.trim());
@@ -118,6 +119,7 @@ class MfaSettingsViewModel extends BaseStreamViewModel<MfaSettingsState> {
   }
 
   Future<bool> disable(String code) async {
+    if (state.isBusy) return false;
     emit(state.copyWith(isBusy: true, error: () => null));
     try {
       await _repository.disableTotp(code.trim());

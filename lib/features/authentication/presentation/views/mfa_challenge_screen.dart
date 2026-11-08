@@ -67,6 +67,11 @@ class _MfaChallengePageState extends State<MfaChallengePage> {
     if (!mounted) return;
     if (ok) {
       context.go(widget.redirectUrl ?? '/home');
+    } else if (_viewModel.state.error == MfaError.invalidCode) {
+      _controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _controller.text.length,
+      );
     } else if (_viewModel.state.error == MfaError.challengeExpired) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(mfaErrorText(l10n, MfaError.challengeExpired))),

@@ -25,6 +25,7 @@ class MfaChallengeViewModel extends BaseStreamViewModel<MfaChallengeState> {
 
   /// Returns true when the session was established.
   Future<bool> verify(String code) async {
+    if (state.isLoading) return false;
     emit(const MfaChallengeState(isLoading: true));
     try {
       final ok = await _authService.verifyMfaLogin(_mfaToken, code.trim());

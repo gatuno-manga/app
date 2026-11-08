@@ -326,7 +326,13 @@ class _DisableDialogState extends State<_DisableDialog> {
     super.dispose();
   }
 
-  void _confirm() => Navigator.pop(context, _controller.text);
+  bool _submitted = false;
+
+  void _confirm() {
+    if (_submitted) return;
+    _submitted = true;
+    Navigator.pop(context, _controller.text);
+  }
 
   @override
   Widget build(BuildContext context) {

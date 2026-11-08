@@ -8,6 +8,7 @@ enum MfaError {
   unknown,
 }
 
+/// 401/400 from the MFA endpoints are treated as a wrong code by design.
 MfaError mfaErrorFrom(Object error) {
   if (error is MfaChallengeExpiredException) return MfaError.challengeExpired;
   if (error is TooManyRequestsException) return MfaError.tooManyAttempts;

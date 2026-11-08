@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
@@ -22,6 +24,20 @@ void main() {
       final vm = MfaChallengeViewModel(auth, 'chal');
       expect(await vm.verify(' 123456 '), true);
       expect(vm.state.isLoading, false);
+      vm.dispose();
+    });
+
+    test('ignores a second verify while one is in flight', () async {
+      final completer = Completer<bool>();
+      when(
+        () => auth.verifyMfaLogin(any(), any()),
+      ).thenAnswer((_) => completer.future);
+      final vm = MfaChallengeViewModel(auth, 'chal');
+      final first = vm.verify('123456');
+      expect(await vm.verify('123456'), false);
+      completer.complete(true);
+      expect(await first, true);
+      verify(() => auth.verifyMfaLogin(any(), any())).called(1);
       vm.dispose();
     });
 

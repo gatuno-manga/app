@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/features/authentication/domain/repositories/mfa_repository.dart';
@@ -62,6 +64,23 @@ void main() {
       expect(vm.state.status!.totpEnabled, true);
     },
   );
+
+  test('confirmSetup ignores re-entry while busy', () async {
+    when(() => repo.status()).thenAnswer((_) async => off);
+    when(
+      () => repo.setupTotp(),
+    ).thenAnswer((_) async => const TotpSetup(secret: 'S', otpauthUri: 'u'));
+    final completer = Completer<BackupCodes>();
+    when(() => repo.verifyTotpSetup(any())).thenAnswer((_) => completer.future);
+    await vm.load();
+    await vm.startSetup();
+    final first = vm.confirmSetup('123456');
+    await vm.confirmSetup('123456');
+    completer.complete(const BackupCodes(['A-1']));
+    await first;
+    verify(() => repo.verifyTotpSetup(any())).called(1);
+    expect(vm.state.phase, MfaPhase.backupCodes);
+  });
 
   test('wrong confirm code stays in setup with invalidCode', () async {
     when(() => repo.status()).thenAnswer((_) async => off);
