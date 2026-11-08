@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title.dart';
 import '../atoms/book_type_badge.dart';
 
+/// Grid card: cover with the title below it (Figma `Livro/Card`).
 class BookCard extends StatelessWidget {
   final Book book;
 
@@ -12,44 +14,36 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/books/${book.id}'),
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BookCover(
-              imageUrl: book.cover?.value,
-              blurHash: book.metadata?.blurHash,
-              borderRadius: 0,
-              iconSize: 60,
-              usePlaceholderIfNull: true,
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  BookCover(
+                    imageUrl: book.cover?.value,
+                    blurHash: book.metadata?.blurHash,
+                    borderRadius: 0,
+                    iconSize: 60,
+                    usePlaceholderIfNull: true,
+                  ),
+                  PositionedBookTypeBadge(type: book.type, inset: 8),
+                ],
+              ),
             ),
-            PositionedBookTypeBadge(type: book.type, inset: 8),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                      Colors.black.withValues(alpha: 0.9),
-                    ],
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
-                child: BookTitle(
-                  title: book.title.value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: BookTitle(
+                title: book.title.value,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
