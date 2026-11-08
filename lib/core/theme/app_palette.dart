@@ -1,5 +1,16 @@
 import 'dart:ui' show Color;
 
+// Opacity bytes of the `-N` suffixes in design.json (`_a40` = `-40`, ...).
+// Figma stores the ramps as 8-bit alpha, so they are not exactly N percent.
+const int _a10 = 0x1a; // 26/255
+const int _a15 = 0x26; // 38/255
+const int _a40 = 0x66; // 102/255
+const int _a45 = 0x73; // 115/255
+const int _a60 = 0x99; // 153/255
+const int _a75 = 0xbf; // 191/255
+const int _a2 = 0x05; // 5/255
+const int _a3 = 0x08; // 8/255
+
 /// Color tokens of one Figma theme (`.impeccable/design.json`, collection
 /// "Gatuno"). Values are copied from the Figma variables; the alpha ramps
 /// (`color/primary-10`, `color/text-40`, ...) derive from their base token.
@@ -75,73 +86,72 @@ class AppPalette {
   /// `color/cyan`
   final Color cyan;
 
-  // Alpha ramps: `color/<base>-<percent>` is the base token at that opacity.
-  // Figma stores them as 8-bit alpha, so the byte values are fixed here.
+  // Alpha ramps: `color/<base>-<N>` is the base token at the `_aN` opacity.
   /// `color/primary-10`
-  Color get primary10 => primary.withAlpha(0x1a);
+  Color get primary10 => primary.withAlpha(_a10);
 
   /// `color/primary-15`
-  Color get primary15 => primary.withAlpha(0x26);
+  Color get primary15 => primary.withAlpha(_a15);
 
   /// `color/primary-40`
-  Color get primary40 => primary.withAlpha(0x66);
+  Color get primary40 => primary.withAlpha(_a40);
 
   /// `color/lilac-15`
-  Color get lilac15 => lilac.withAlpha(0x26);
+  Color get lilac15 => lilac.withAlpha(_a15);
 
   /// `color/lilac-40`
-  Color get lilac40 => lilac.withAlpha(0x66);
+  Color get lilac40 => lilac.withAlpha(_a40);
 
   /// `color/success-15`
-  Color get success15 => success.withAlpha(0x26);
+  Color get success15 => success.withAlpha(_a15);
 
   /// `color/success-40`
-  Color get success40 => success.withAlpha(0x66);
+  Color get success40 => success.withAlpha(_a40);
 
   /// `color/danger-10`
-  Color get danger10 => danger.withAlpha(0x1a);
+  Color get danger10 => danger.withAlpha(_a10);
 
   /// `color/danger-15`
-  Color get danger15 => danger.withAlpha(0x26);
+  Color get danger15 => danger.withAlpha(_a15);
 
   /// `color/danger-40`
-  Color get danger40 => danger.withAlpha(0x66);
+  Color get danger40 => danger.withAlpha(_a40);
 
   /// `color/warning-15`
-  Color get warning15 => warning.withAlpha(0x26);
+  Color get warning15 => warning.withAlpha(_a15);
 
   /// `color/warning-40`
-  Color get warning40 => warning.withAlpha(0x66);
+  Color get warning40 => warning.withAlpha(_a40);
 
   /// `color/cyan-15`
-  Color get cyan15 => cyan.withAlpha(0x26);
+  Color get cyan15 => cyan.withAlpha(_a15);
 
   /// `color/cyan-40`
-  Color get cyan40 => cyan.withAlpha(0x66);
+  Color get cyan40 => cyan.withAlpha(_a40);
 
   /// `color/secondary-45`
-  Color get secondary45 => secondary.withAlpha(0x73);
+  Color get secondary45 => secondary.withAlpha(_a45);
 
   /// `color/secondary-60`
-  Color get secondary60 => secondary.withAlpha(0x99);
+  Color get secondary60 => secondary.withAlpha(_a60);
 
   /// `color/text-10`
-  Color get text10 => text.withAlpha(0x1a);
+  Color get text10 => text.withAlpha(_a10);
 
   /// `color/text-40`
-  Color get text40 => text.withAlpha(0x66);
+  Color get text40 => text.withAlpha(_a40);
 
   /// `color/app-background-2`
-  Color get appBackground2 => appBackground.withAlpha(0x05);
+  Color get appBackground2 => appBackground.withAlpha(_a2);
 
   /// `color/app-background-3`
-  Color get appBackground3 => appBackground.withAlpha(0x08);
+  Color get appBackground3 => appBackground.withAlpha(_a3);
 
   /// `color/app-background-40`
-  Color get appBackground40 => appBackground.withAlpha(0x66);
+  Color get appBackground40 => appBackground.withAlpha(_a40);
 
   /// `color/app-background-75`
-  Color get appBackground75 => appBackground.withAlpha(0xbf);
+  Color get appBackground75 => appBackground.withAlpha(_a75);
 
   static AppPalette lerp(AppPalette a, AppPalette b, double t) {
     return AppPalette(

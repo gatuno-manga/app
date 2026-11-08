@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/app_typography.dart';
 import 'package:gatuno/core/theme/theme.dart';
 
@@ -150,6 +152,29 @@ void main() {
     });
   }
 
+  test('AppPalette.lerp returns its endpoints and blends between them', () {
+    expect(
+      AppPalette.lerp(lightPalette, darkPalette, 0).appBackground,
+      lightPalette.appBackground,
+    );
+    expect(
+      AppPalette.lerp(lightPalette, darkPalette, 1).primary,
+      darkPalette.primary,
+    );
+    expect(
+      AppPalette.lerp(lightPalette, darkPalette, 0.5).text,
+      Color.lerp(lightPalette.text, darkPalette.text, 0.5),
+    );
+  });
+
+  for (final entry in themes.entries) {
+    test('${entry.key} snackbar text is readable on its background', () {
+      final sb = entry.value().snackBarTheme;
+      final ratio = _contrast(sb.backgroundColor!, sb.contentTextStyle!.color!);
+      expect(ratio, greaterThanOrEqualTo(4.5));
+    });
+  }
+
   test('styles without a Material role are exposed by AppTypography', () {
     final byName = <String, TextStyle>{
       'Interface/Sobrelinha': AppTypography.overline,
@@ -167,14 +192,21 @@ void main() {
         .map((t) => (t as Map)['family'] as String)
         .toSet();
     for (final f in families) {
-      expect(pubspec, contains('- family: $f'));
+      expect(pubspec, contains('- family: $f\n'));
+    }
+    final assets = RegExp(
+      r'asset: (assets/fonts/\S+\.ttf)',
+    ).allMatches(pubspec).map((m) => m.group(1)!);
+    expect(assets, isNotEmpty);
+    for (final a in assets) {
+      expect(File(a).existsSync(), isTrue, reason: a);
     }
     for (final t in typography.values.cast<Map<String, dynamic>>()) {
       final family = t['family'] as String;
       final weight = t['weight'] as int;
       final block = pubspec
           .split('- family: ')
-          .firstWhere((b) => b.startsWith(family));
+          .firstWhere((b) => b.startsWith('$family\n'));
       expect(block, contains('weight: $weight'), reason: '$family $weight');
     }
   });
@@ -186,7 +218,7 @@ void _expectStyle(TextStyle style, Map<String, dynamic> tok, String name) {
   expect(style.fontSize, size, reason: name);
   expect(
     style.fontWeight,
-    FontWeight.values[(tok['weight'] as int) ~/ 100 - 1],
+    FontWeight.values[(tok['weight'] as int) ~/ 100 - 1], // w100 is index 0,
     reason: name,
   );
   expect(
@@ -199,4 +231,15 @@ void _expectStyle(TextStyle style, Map<String, dynamic> tok, String name) {
     closeTo(((tok['letterSpacingPercent'] ?? 0) as num) / 100 * size, 1e-9),
     reason: name,
   );
+}
+
+double _luminance(Color c) {
+  double ch(double v) =>
+      v <= 0.03928 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
+  return 0.2126 * ch(c.r) + 0.7152 * ch(c.g) + 0.0722 * ch(c.b);
+}
+
+double _contrast(Color a, Color b) {
+  final la = _luminance(a), lb = _luminance(b);
+  return (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05);
 }

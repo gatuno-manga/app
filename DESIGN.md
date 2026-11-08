@@ -61,7 +61,7 @@ Alpha ramps (same hue as their base token, fixed opacity; values per theme in `d
 
 ## Typography
 
-**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset). **Code:** all five families are bundled (`assets/fonts/`, declared in `pubspec.yaml`, OFL licences alongside). Inknut Antiqua stays the `ThemeData.fontFamily` fallback for roles Figma does not define; `AppTypography.textTheme` maps the Figma styles.
+**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset). **Code:** all five families are bundled (`assets/fonts/`, declared in `pubspec.yaml`, OFL licences alongside; Manrope also at 500/600/700 and Literata/Lexend at 700 so Material bold does not synthesize). Inknut Antiqua stays the `ThemeData.fontFamily` fallback for roles Figma does not define; `AppTypography.textTheme` maps the Figma styles.
 
 ### Hierarchy
 Styles without a Material role (target column below) are exposed as `AppTypography.overline`, `readingSerif` and `readingDyslexia`; `overline` also needs upper-casing by the caller.
@@ -139,6 +139,8 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 
 ## Figma vs code gaps
 
+- **figma-contrast**: Figma tokens fail WCAG AA 4.5:1 in places and AppTheme follows them as the source of truth: color/on-primary (#fdfdfd) on color/primary is 2.5:1 in Dark, True-dark and Slate, 2.4:1 in Dracula, 4.0:1 in Light; on color/danger 3.1-3.9:1 in Light, Dracula, Slate; color/text-secondary and color/text-muted are 2.5-4.4:1 on color/app-background in most themes. Needs a Figma decision; PRODUCT.md has no WCAG target yet.
+- **fallback-text-roles**: Material text roles Figma does not define (displayMedium, displaySmall, headlineLarge, titleMedium, titleSmall) keep Material default sizes but render in Inknut Antiqua through ThemeData.fontFamily; bodySmall and other roles use onSurface, not color/text-secondary or color/text-muted.
 - **themes-missing**: AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51).
 - **tokens-without-code**: radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and AppColors.gray*/badge* constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.

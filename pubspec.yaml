@@ -92,6 +92,12 @@ flutter:
       fonts:
         - asset: assets/fonts/Manrope/Manrope-Regular.ttf
           weight: 400
+        - asset: assets/fonts/Manrope/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope/Manrope-Bold.ttf
+          weight: 700
     - family: Plus Jakarta Sans
       fonts:
         - asset: assets/fonts/PlusJakartaSans/PlusJakartaSans-Medium.ttf
@@ -104,7 +110,11 @@ flutter:
       fonts:
         - asset: assets/fonts/Literata/Literata-Regular.ttf
           weight: 400
+        - asset: assets/fonts/Literata/Literata-Bold.ttf
+          weight: 700
     - family: Lexend
       fonts:
         - asset: assets/fonts/Lexend/Lexend-Regular.ttf
           weight: 400
+        - asset: assets/fonts/Lexend/Lexend-Bold.ttf
+          weight: 700

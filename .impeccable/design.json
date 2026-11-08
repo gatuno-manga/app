@@ -1346,6 +1346,14 @@
   },
   "gaps": [
     {
+      "id": "figma-contrast",
+      "summary": "Figma tokens fail WCAG AA 4.5:1 in places and AppTheme follows them as the source of truth: color/on-primary (#fdfdfd) on color/primary is 2.5:1 in Dark, True-dark and Slate, 2.4:1 in Dracula, 4.0:1 in Light; on color/danger 3.1-3.9:1 in Light, Dracula, Slate; color/text-secondary and color/text-muted are 2.5-4.4:1 on color/app-background in most themes. Needs a Figma decision; PRODUCT.md has no WCAG target yet."
+    },
+    {
+      "id": "fallback-text-roles",
+      "summary": "Material text roles Figma does not define (displayMedium, displaySmall, headlineLarge, titleMedium, titleSmall) keep Material default sizes but render in Inknut Antiqua through ThemeData.fontFamily; bodySmall and other roles use onSurface, not color/text-secondary or color/text-muted."
+    },
+    {
       "id": "themes-missing",
       "summary": "AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51)."
     },
