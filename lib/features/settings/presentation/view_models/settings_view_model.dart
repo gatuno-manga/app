@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../../../../core/base/base_stream_view_model.dart';
+import '../../../../core/theme/app_theme_choice.dart';
 import '../../../../core/logging/logger.dart';
 import '../../domain/use_cases/settings_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
@@ -9,6 +10,7 @@ import 'package:equatable/equatable.dart';
 class SettingsState extends Equatable {
   final String? apiUrl;
   final bool sensitiveContentEnabled;
+  final AppThemeChoice themeChoice;
   final bool isAuthenticated;
   final UserModel user;
   final bool isLoading;
@@ -16,6 +18,7 @@ class SettingsState extends Equatable {
   const SettingsState({
     this.apiUrl,
     required this.sensitiveContentEnabled,
+    required this.themeChoice,
     required this.isAuthenticated,
     required this.user,
     required this.isLoading,
@@ -25,6 +28,7 @@ class SettingsState extends Equatable {
     return SettingsState(
       apiUrl: null,
       sensitiveContentEnabled: false,
+      themeChoice: AppThemeChoice.system,
       isAuthenticated: false,
       user: UserModel.guest,
       isLoading: false,
@@ -34,13 +38,16 @@ class SettingsState extends Equatable {
   SettingsState copyWith({
     String? Function()? apiUrl,
     bool? sensitiveContentEnabled,
+    AppThemeChoice? themeChoice,
     bool? isAuthenticated,
     UserModel? user,
     bool? isLoading,
   }) {
     return SettingsState(
       apiUrl: apiUrl != null ? apiUrl() : this.apiUrl,
-      sensitiveContentEnabled: sensitiveContentEnabled ?? this.sensitiveContentEnabled,
+      sensitiveContentEnabled:
+          sensitiveContentEnabled ?? this.sensitiveContentEnabled,
+      themeChoice: themeChoice ?? this.themeChoice,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       user: user ?? this.user,
       isLoading: isLoading ?? this.isLoading,
@@ -49,12 +56,13 @@ class SettingsState extends Equatable {
 
   @override
   List<Object?> get props => [
-        apiUrl,
-        sensitiveContentEnabled,
-        isAuthenticated,
-        user,
-        isLoading,
-      ];
+    apiUrl,
+    sensitiveContentEnabled,
+    themeChoice,
+    isAuthenticated,
+    user,
+    isLoading,
+  ];
 }
 
 class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
@@ -69,18 +77,25 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
   }) : _settingsService = settingsService,
        _authService = authService,
        super(SettingsState.initial()) {
-    _settingsSubscription = _settingsService.settingsStream.listen((_) => _syncState());
-    _authSubscription = _authService.authStateStream.listen((_) => _syncState());
+    _settingsSubscription = _settingsService.settingsStream.listen(
+      (_) => _syncState(),
+    );
+    _authSubscription = _authService.authStateStream.listen(
+      (_) => _syncState(),
+    );
     _syncState();
   }
 
   void _syncState() {
-    emit(state.copyWith(
-      apiUrl: () => _settingsService.apiUrl,
-      sensitiveContentEnabled: _settingsService.sensitiveContentEnabled,
-      isAuthenticated: _authService.authenticated,
-      user: _authService.currentUser,
-    ));
+    emit(
+      state.copyWith(
+        apiUrl: () => _settingsService.apiUrl,
+        sensitiveContentEnabled: _settingsService.sensitiveContentEnabled,
+        themeChoice: _settingsService.themeChoice,
+        isAuthenticated: _authService.authenticated,
+        user: _authService.currentUser,
+      ),
+    );
   }
 
   @override
@@ -92,6 +107,10 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
 
   Future<void> setSensitiveContentEnabled(bool enabled) async {
     await _settingsService.setSensitiveContentEnabled(enabled);
+  }
+
+  Future<void> setThemeChoice(AppThemeChoice choice) async {
+    await _settingsService.setThemeChoice(choice);
   }
 
   Future<bool> updateApiUrl(String url) async {

@@ -596,6 +596,48 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settingsTitle;
 
+  /// No description provided for @settingsThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsThemeTitle;
+
+  /// No description provided for @settingsThemeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsThemeSystem;
+
+  /// No description provided for @settingsThemeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// No description provided for @settingsThemeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// No description provided for @settingsThemeTrueDark.
+  ///
+  /// In en, this message translates to:
+  /// **'True dark'**
+  String get settingsThemeTrueDark;
+
+  /// No description provided for @settingsThemeDracula.
+  ///
+  /// In en, this message translates to:
+  /// **'Dracula'**
+  String get settingsThemeDracula;
+
+  /// No description provided for @settingsThemeSlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Slate'**
+  String get settingsThemeSlate;
+
   /// No description provided for @settingsGeneralSection.
   ///
   /// In en, this message translates to:

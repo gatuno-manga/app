@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
@@ -23,12 +24,19 @@ void main() {
     mockAuthService = MockAuthService();
 
     // When listening, we need to stub streams
-    when(() => mockSettingsService.settingsStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockSettingsService.settingsStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAuthService.authStateStream,
+    ).thenAnswer((_) => const Stream.empty());
 
     // Setup mock returns BEFORE init
     when(() => mockSettingsService.apiUrl).thenReturn('http://test.com');
     when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
+    when(
+      () => mockSettingsService.themeChoice,
+    ).thenReturn(AppThemeChoice.system);
     when(() => mockAuthService.authenticated).thenReturn(true);
     when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
 

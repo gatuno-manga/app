@@ -266,6 +266,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsTitle => 'Configurações';
 
   @override
+  String get settingsThemeTitle => 'Tema';
+
+  @override
+  String get settingsThemeSystem => 'Sistema';
+
+  @override
+  String get settingsThemeLight => 'Claro';
+
+  @override
+  String get settingsThemeDark => 'Escuro';
+
+  @override
+  String get settingsThemeTrueDark => 'Preto absoluto';
+
+  @override
+  String get settingsThemeDracula => 'Dracula';
+
+  @override
+  String get settingsThemeSlate => 'Ardósia';
+
+  @override
   String get settingsGeneralSection => 'Geral';
 
   @override

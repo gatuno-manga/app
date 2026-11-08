@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'l10n/app_localizations.dart';
-import 'core/theme/theme.dart';
 import 'core/di/injection.dart';
 import 'features/authentication/domain/use_cases/auth_service.dart';
 import 'features/settings/domain/use_cases/settings_service.dart';
@@ -24,33 +23,41 @@ void main() async {
         Provider.value(value: sl<AuthService>()),
         Provider.value(value: settingsService),
       ],
-      child: App(router: router),
+      child: App(router: router, settingsService: settingsService),
     ),
   );
 }
 
 class App extends StatelessWidget {
   final GoRouter router;
-  const App({super.key, required this.router});
+  final SettingsService settingsService;
+  const App({super.key, required this.router, required this.settingsService});
 
   @override
   Widget build(BuildContext context) {
     return AppActivityObserver(
       onIdle: () => context.read<AuthService>().pauseRefresh(),
       onInteraction: () => context.read<AuthService>().evaluateTokenState(),
-      child: MaterialApp.router(
-        title: 'Gatuno',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: router,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: const [Locale('en'), Locale('pt')],
+      child: StreamBuilder<SettingsState>(
+        stream: settingsService.settingsStream,
+        initialData: settingsService.state,
+        builder: (context, snapshot) {
+          final choice = snapshot.data!.themeChoice;
+          return MaterialApp.router(
+            title: 'Gatuno',
+            theme: choice.theme,
+            darkTheme: choice.darkTheme,
+            themeMode: choice.themeMode,
+            routerConfig: router,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en'), Locale('pt')],
+          );
+        },
       ),
     );
   }
