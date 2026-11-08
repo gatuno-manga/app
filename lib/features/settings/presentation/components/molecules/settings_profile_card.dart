@@ -4,12 +4,14 @@ import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 class SettingsProfileCard extends StatelessWidget {
   final String name;
   final String? email;
+  final String? imageUrl;
   final VoidCallback onTap;
 
   const SettingsProfileCard({
     super.key,
     required this.name,
     this.email,
+    this.imageUrl,
     required this.onTap,
   });
 
@@ -17,7 +19,11 @@ class SettingsProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      leading: AppAvatar(name: email != null ? name : null, radius: 24),
+      leading: AppAvatar(
+        name: email != null ? name : null,
+        imageUrl: imageUrl,
+        radius: 24,
+      ),
       title: Text(
         name,
         style: Theme.of(

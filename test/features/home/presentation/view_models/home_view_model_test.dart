@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
@@ -16,9 +18,13 @@ import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordi
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 class MockAuthService extends Mock implements AuthService {}
+
 class MockUserService extends Mock implements UserService {}
+
 class MockBooksRepository extends Mock implements BooksRepository {}
-class MockReadingProgressCoordinator extends Mock implements ReadingProgressCoordinator {}
+
+class MockReadingProgressCoordinator extends Mock
+    implements ReadingProgressCoordinator {}
 
 void main() {
   late HomeViewModel viewModel;
@@ -37,17 +43,39 @@ void main() {
     mockBooksRepository = MockBooksRepository();
     mockReadingCoordinator = MockReadingProgressCoordinator();
 
-    when(() => mockAuthService.authStateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAuthService.authStateStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.isInitialized).thenReturn(true);
     when(
       () => mockUserService.getCurrentUser(),
     ).thenAnswer((_) async => UserModel.guest);
-    
-    when(() => mockBooksRepository.getBooks(any())).thenAnswer((_) async => const BookList(data: [], total: PositiveInt(0), page: PositiveInt(1), limit: PositiveInt(12), totalPages: PositiveInt(1)));
-    when(() => mockReadingCoordinator.getContinueReadingBooks(limit: any(named: 'limit'))).thenAnswer((_) async => []);
+    when(
+      () => mockUserService.profileStream,
+    ).thenAnswer((_) => const Stream.empty());
 
-    viewModel = HomeViewModel(mockAuthService, mockUserService, mockBooksRepository, mockReadingCoordinator);
+    when(() => mockBooksRepository.getBooks(any())).thenAnswer(
+      (_) async => const BookList(
+        data: [],
+        total: PositiveInt(0),
+        page: PositiveInt(1),
+        limit: PositiveInt(12),
+        totalPages: PositiveInt(1),
+      ),
+    );
+    when(
+      () => mockReadingCoordinator.getContinueReadingBooks(
+        limit: any(named: 'limit'),
+      ),
+    ).thenAnswer((_) async => []);
+
+    viewModel = HomeViewModel(
+      mockAuthService,
+      mockUserService,
+      mockBooksRepository,
+      mockReadingCoordinator,
+    );
   });
 
   group('HomeViewModel', () {
@@ -71,7 +99,12 @@ void main() {
       ).thenAnswer((_) async => user);
 
       // Re-initialize to trigger _loadUser
-      viewModel = HomeViewModel(mockAuthService, mockUserService, mockBooksRepository, mockReadingCoordinator);
+      viewModel = HomeViewModel(
+        mockAuthService,
+        mockUserService,
+        mockBooksRepository,
+        mockReadingCoordinator,
+      );
 
       // Wait for async load
       await Future<void>.delayed(Duration.zero);
@@ -82,6 +115,66 @@ void main() {
 
     test('displayName should be null when not authenticated', () {
       expect(viewModel.state.displayName, isNull);
+    });
+
+    test('exposes the cached profile image url', () async {
+      final user = UserModel(
+        id: const UserId('1'),
+        email: const UserEmail('test@example.com'),
+        roles: const UserRoles(['user']),
+        maxWeightSensitiveContent: const SensitiveContentWeight(5),
+        name: const UserDisplayName('Test'),
+        profilePictureUrl: 'http://x/1.webp',
+      );
+      when(() => mockAuthService.authenticated).thenReturn(true);
+      when(
+        () => mockUserService.getCurrentUser(),
+      ).thenAnswer((_) async => user);
+
+      viewModel = HomeViewModel(
+        mockAuthService,
+        mockUserService,
+        mockBooksRepository,
+        mockReadingCoordinator,
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(viewModel.state.profileImageUrl, 'http://x/1.webp');
+    });
+
+    test('follows the profile stream', () async {
+      final profiles = StreamController<UserModel?>();
+      addTearDown(profiles.close);
+      when(
+        () => mockUserService.profileStream,
+      ).thenAnswer((_) => profiles.stream);
+      viewModel = HomeViewModel(
+        mockAuthService,
+        mockUserService,
+        mockBooksRepository,
+        mockReadingCoordinator,
+      );
+
+      profiles.add(
+        UserModel(
+          id: const UserId('1'),
+          email: const UserEmail('test@example.com'),
+          roles: const UserRoles(['user']),
+          maxWeightSensitiveContent: const SensitiveContentWeight(5),
+          name: const UserDisplayName('Fresh'),
+          profilePictureUrl: 'http://x/new.webp',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(viewModel.state.displayName, 'Fresh');
+      expect(viewModel.state.profileImageUrl, 'http://x/new.webp');
+
+      profiles.add(null);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(viewModel.state.displayName, isNull);
+      expect(viewModel.state.profileImageUrl, isNull);
     });
   });
 }

@@ -63,6 +63,9 @@ class SettingsPage extends StatelessWidget {
                 ? state.user.displayName
                 : l10n.commonGuest,
             email: state.isAuthenticated ? state.user.email.value : null,
+            imageUrl: state.isAuthenticated
+                ? state.user.profilePictureUrl
+                : null,
             onTap: () {
               if (state.isAuthenticated) {
                 context.push('/settings/profile');

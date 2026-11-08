@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:typed_data';
+
+import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/utils/jwt_decoder.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
@@ -15,12 +18,34 @@ class UserService {
   final UserStorage _storage;
   static const String _logTag = 'UserService';
 
+  final BehaviorSubject<UserModel?> _profileSubject = BehaviorSubject();
+  late final StreamSubscription<AuthState> _authSubscription;
+
+  /// The cached `/me` profile whenever it changes: after a refresh or an
+  /// upload, and null once the account signs out. Replays the last value.
+  Stream<UserModel?> get profileStream => _profileSubject.stream;
+
   UserService(
     this._authService, {
     required UserRemoteDataSource remote,
     required UserStorage storage,
   }) : _remote = remote,
-       _storage = storage;
+       _storage = storage {
+    _authSubscription = _authService.authStateStream.listen(_onAuthChanged);
+  }
+
+  /// One `/me` fetch per sign-in keeps every avatar current without any
+  /// screen having to ask; a failed fetch keeps the cache.
+  void _onAuthChanged(AuthState authState) {
+    switch (authState) {
+      case AuthState.authenticated:
+        refreshProfile();
+      case AuthState.unauthenticated:
+        _profileSubject.add(null);
+      case AuthState.uninitialized:
+        break;
+    }
+  }
 
   /// The signed-in user from the JWT, enriched with the cached `/me` profile
   /// (image URLs) when it belongs to the same account.
@@ -101,11 +126,18 @@ class UserService {
   Future<UserModel> _storeProfile(Map<String, dynamic> profile) async {
     final user = UserModel.fromJson(profile);
     await _storage.writeProfile(profile);
+    _profileSubject.add(user);
     return user;
   }
 
   Future<void> logout() async {
     await _storage.clear();
+    _profileSubject.add(null);
     await _authService.logout();
+  }
+
+  void dispose() {
+    _authSubscription.cancel();
+    _profileSubject.close();
   }
 }

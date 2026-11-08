@@ -15,12 +15,15 @@ void initUsersInjection(GetIt sl) {
   );
 
   // Use Cases
-  sl.registerLazySingleton<UserService>(
-    () => UserService(
+  // Eager: UserService refreshes the profile on sign-in, so it must be
+  // listening to auth state before any screen resolves it.
+  sl.registerSingleton<UserService>(
+    UserService(
       sl<AuthService>(),
       remote: sl<UserRemoteDataSource>(),
       storage: sl<UserStorage>(),
     ),
+    dispose: (service) => service.dispose(),
   );
 
   // View Models

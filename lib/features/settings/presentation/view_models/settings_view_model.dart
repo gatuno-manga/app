@@ -5,6 +5,7 @@ import '../../../../core/logging/logger.dart';
 import '../../domain/use_cases/settings_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
 import '../../../users/data/models/user_model.dart';
+import '../../../users/domain/use_cases/user_service.dart';
 import 'package:equatable/equatable.dart';
 
 class SettingsState extends Equatable {
@@ -68,20 +69,27 @@ class SettingsState extends Equatable {
 class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
   final SettingsService _settingsService;
   final AuthService _authService;
+  final UserService _userService;
   late final StreamSubscription<void> _settingsSubscription;
   late final StreamSubscription<AuthState> _authSubscription;
+  late final StreamSubscription<UserModel?> _profileSubscription;
 
   SettingsViewModel({
     required SettingsService settingsService,
     required AuthService authService,
+    required UserService userService,
   }) : _settingsService = settingsService,
        _authService = authService,
+       _userService = userService,
        super(SettingsState.initial()) {
     _settingsSubscription = _settingsService.settingsStream.listen(
       (_) => _syncState(),
     );
     _authSubscription = _authService.authStateStream.listen(
       (_) => _syncState(),
+    );
+    _profileSubscription = _userService.profileStream.listen(
+      (user) => emit(state.copyWith(user: user ?? UserModel.guest)),
     );
     _syncState();
   }
@@ -93,15 +101,21 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
         sensitiveContentEnabled: _settingsService.sensitiveContentEnabled,
         themeChoice: _settingsService.themeChoice,
         isAuthenticated: _authService.authenticated,
-        user: _authService.currentUser,
       ),
     );
+    _loadUser();
+  }
+
+  /// The cached profile carries the image URLs the JWT does not.
+  Future<void> _loadUser() async {
+    emit(state.copyWith(user: await _userService.getCurrentUser()));
   }
 
   @override
   void dispose() {
     _settingsSubscription.cancel();
     _authSubscription.cancel();
+    _profileSubscription.cancel();
     super.dispose();
   }
 

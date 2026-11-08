@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../components/templates/home_template.dart';
+import '../components/organisms/home_app_bar.dart';
 import '../components/organisms/featured_carousel.dart';
 import '../components/molecules/home_section_header.dart';
 import '../components/organisms/horizontal_book_list.dart';
@@ -24,7 +25,17 @@ class HomePage extends StatelessWidget {
         final state = snapshot.data!;
 
         return HomeTemplate(
-          appBar: AppBar(title: Text(l10n.homeTitle)),
+          appBar: HomeAppBar(
+            title: l10n.homeTitle,
+            isAuthenticated: state.isAuthenticated,
+            isLoading: !state.isInitialized,
+            displayName: state.displayName,
+            imageUrl: state.profileImageUrl,
+            onProfilePressed: () => context.push('/settings/profile'),
+            onSignInPressed: () => context.push('/auth/signin'),
+            profileTooltip: l10n.homeProfile,
+            signInTooltip: l10n.homeSignIn,
+          ),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -32,7 +43,8 @@ class HomePage extends StatelessWidget {
                 if (state.isLoadingFeatured || state.featuredBooks.isNotEmpty)
                   FeaturedCarousel(books: state.featuredBooks),
 
-                if (state.isLoadingContinueReading || state.continueReadingBooks.isNotEmpty) ...[
+                if (state.isLoadingContinueReading ||
+                    state.continueReadingBooks.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   HomeSectionHeader(title: l10n.homeContinueReadingTitle),
                   HorizontalBookList(
@@ -73,8 +85,12 @@ class HomePage extends StatelessWidget {
                   child: AppCtaCard(
                     title: l10n.homeCtaTitle,
                     description: l10n.homeCtaDescription,
-                    buttonText: state.isAuthenticated ? l10n.bookRequestsTitle : l10n.homeCtaSignInButton,
-                    buttonIcon: state.isAuthenticated ? Icons.library_add : Icons.login,
+                    buttonText: state.isAuthenticated
+                        ? l10n.bookRequestsTitle
+                        : l10n.homeCtaSignInButton,
+                    buttonIcon: state.isAuthenticated
+                        ? Icons.library_add
+                        : Icons.login,
                     onPressed: () {
                       if (state.isAuthenticated) {
                         context.push('/requests');

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/di/injection.dart';
+import '../../../core/image/image_loading_strategy.dart';
+import '../../../core/image/strategy_image_provider.dart';
+
 class AppAvatar extends StatelessWidget {
   final String? name;
   final double radius;
@@ -9,6 +13,10 @@ class AppAvatar extends StatelessWidget {
   /// Image to show over the initials; the initials remain if it is null,
   /// empty or fails to load.
   final String? imageUrl;
+
+  /// Loads [imageUrl]; defaults to the registered [ImageLoadingStrategy] so
+  /// avatars honour trusted certificates and headers like every other image.
+  final ImageLoadingStrategy? strategy;
 
   /// When set, the avatar becomes tappable and shows an edit badge.
   final VoidCallback? onEdit;
@@ -24,6 +32,7 @@ class AppAvatar extends StatelessWidget {
     this.backgroundColor,
     this.foregroundColor,
     this.imageUrl,
+    this.strategy,
     this.onEdit,
     this.editLabel,
     this.isBusy = false,
@@ -50,7 +59,12 @@ class AppAvatar extends StatelessWidget {
     final avatar = CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-      foregroundImage: hasImage ? NetworkImage(url) : null,
+      foregroundImage: hasImage
+          ? StrategyImageProvider(
+              url: url,
+              strategy: strategy ?? sl<ImageLoadingStrategy>(),
+            )
+          : null,
       onForegroundImageError: hasImage ? (_, _) {} : null,
       child: Text(
         initials,

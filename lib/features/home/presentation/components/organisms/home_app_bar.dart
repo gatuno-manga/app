@@ -7,6 +7,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isAuthenticated;
   final bool isLoading;
   final String? displayName;
+  final String? imageUrl;
   final VoidCallback onProfilePressed;
   final VoidCallback onSignInPressed;
   final String profileTooltip;
@@ -18,6 +19,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.isAuthenticated,
     required this.isLoading,
     required this.displayName,
+    this.imageUrl,
     required this.onProfilePressed,
     required this.onSignInPressed,
     required this.profileTooltip,
@@ -33,6 +35,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           isAuthenticated
               ? UserProfileIcon(
                   displayName: displayName,
+                  imageUrl: imageUrl,
                   tooltip: profileTooltip,
                   onPressed: onProfilePressed,
                 )
