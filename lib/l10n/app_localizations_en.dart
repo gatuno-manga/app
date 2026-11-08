@@ -282,6 +282,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeProfile => 'Profile';
 
   @override
+  String get homeSignIn => 'Sign in';
+
+  @override
   String get userMeTitle => 'My Profile';
 
   @override

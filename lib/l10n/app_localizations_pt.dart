@@ -280,6 +280,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeProfile => 'Perfil';
 
   @override
+  String get homeSignIn => 'Entrar';
+
+  @override
   String get userMeTitle => 'Meu Perfil';
 
   @override

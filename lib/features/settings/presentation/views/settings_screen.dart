@@ -55,14 +55,16 @@ class SettingsPage extends StatelessWidget {
       initialData: viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
+        // Guest until the profile stream delivers the signed-in user, so the
+        // card never shows the raw guest model.
+        final user = state.user.isGuest ? null : state.user;
 
         return SettingsTemplate(
           appBarTitle: Text(l10n.settingsTitle),
           profileCard: SettingsProfileCard(
-            name: state.isAuthenticated
-                ? state.user.displayName
-                : l10n.commonGuest,
-            email: state.isAuthenticated ? state.user.email.value : null,
+            name: user?.displayName ?? l10n.commonGuest,
+            email: user?.email.value,
+            imageUrl: user?.profilePictureUrl,
             onTap: () {
               if (state.isAuthenticated) {
                 context.push('/settings/profile');

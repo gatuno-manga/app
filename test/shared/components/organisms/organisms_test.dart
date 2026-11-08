@@ -5,9 +5,16 @@ import 'package:gatuno/features/settings/presentation/components/organisms/me_se
 import 'package:gatuno/features/home/presentation/components/organisms/home_app_bar.dart';
 import 'package:gatuno/features/home/presentation/components/molecules/user_profile_icon.dart';
 import 'package:gatuno/features/home/presentation/components/molecules/login_icon.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+
+import '../../../helpers/test_injection.dart';
 
 void main() {
   group('Organisms', () {
+    setUp(registerFailingImageStrategy);
+    tearDown(sl.reset);
+
     testWidgets('MeSettingsList renders logout button', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -32,6 +39,7 @@ void main() {
               isAuthenticated: true,
               isLoading: false,
               displayName: 'User',
+              imageUrl: null,
               onProfilePressed: () {},
               onSignInPressed: () {},
               profileTooltip: 'Profile',
@@ -52,6 +60,7 @@ void main() {
               isAuthenticated: false,
               isLoading: false,
               displayName: '',
+              imageUrl: null,
               onProfilePressed: () {},
               onSignInPressed: () {},
               profileTooltip: 'Profile',
@@ -62,6 +71,33 @@ void main() {
       );
       expect(find.byType(LoginIcon), findsOneWidget);
       expect(find.byType(UserProfileIcon), findsNothing);
+    });
+
+    testWidgets('HomeAppBar passes the profile image to the avatar', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: HomeAppBar(
+              title: 'Title',
+              isAuthenticated: true,
+              isLoading: false,
+              displayName: 'User',
+              imageUrl: 'http://x/a.webp',
+              onProfilePressed: () {},
+              onSignInPressed: () {},
+              profileTooltip: 'Profile',
+              signInTooltip: 'Sign In',
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl,
+        'http://x/a.webp',
+      );
     });
   });
 }

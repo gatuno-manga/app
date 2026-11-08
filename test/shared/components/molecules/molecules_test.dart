@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/users/presentation/components/molecules/user_profile_header.dart';
 import 'package:gatuno/features/home/presentation/components/molecules/user_profile_icon.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+
+import '../../../helpers/test_injection.dart';
 
 void main() {
   group('Molecules', () {
+    setUp(registerFailingImageStrategy);
+    tearDown(sl.reset);
+
     testWidgets('UserProfileHeader renders name and email', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -28,6 +35,7 @@ void main() {
           home: Scaffold(
             body: UserProfileIcon(
               displayName: 'John Doe',
+              imageUrl: null,
               tooltip: 'Profile',
               onPressed: () {},
             ),
@@ -42,6 +50,7 @@ void main() {
           home: Scaffold(
             body: UserProfileIcon(
               displayName: null,
+              imageUrl: null,
               tooltip: 'Profile',
               onPressed: () {},
             ),
@@ -50,6 +59,49 @@ void main() {
       );
       // Should find the skeleton Container
       expect(find.byType(Container), findsOneWidget);
+    });
+
+    testWidgets('UserProfileIcon shows the profile image over the initials', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: UserProfileIcon(
+              displayName: 'John Doe',
+              imageUrl: 'http://x/a.webp',
+              tooltip: 'Profile',
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl,
+        'http://x/a.webp',
+      );
+      expect(find.text('J'), findsOneWidget);
+    });
+
+    testWidgets('UserProfileIcon announces only its tooltip', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: UserProfileIcon(
+              displayName: 'Maria',
+              imageUrl: null,
+              tooltip: 'Profile',
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('Profile'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('M')), findsNothing);
+      semantics.dispose();
     });
   });
 }

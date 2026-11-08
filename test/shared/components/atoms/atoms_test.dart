@@ -5,12 +5,18 @@ import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/shared/components/atoms/app_clickable_action.dart';
 import 'package:gatuno/shared/components/atoms/app_switch.dart';
 
+import '../../../helpers/test_injection.dart';
+
+const _strategy = FailingImageLoadingStrategy();
+
 void main() {
   group('Atoms', () {
     testWidgets('AppAvatar renders initials correctly', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: AppAvatar(name: 'John Doe')),
+          home: Scaffold(
+            body: AppAvatar(name: 'John Doe', strategy: _strategy),
+          ),
         ),
       );
 
@@ -20,7 +26,9 @@ void main() {
     testWidgets('AppAvatar renders ? for empty name', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: AppAvatar(name: '')),
+          home: Scaffold(
+            body: AppAvatar(name: '', strategy: _strategy),
+          ),
         ),
       );
 
@@ -29,7 +37,9 @@ void main() {
 
     testWidgets('AppAvatar renders skeleton for null name', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: AppAvatar(name: null))),
+        const MaterialApp(
+          home: Scaffold(body: AppAvatar(name: null, strategy: _strategy)),
+        ),
       );
 
       expect(find.byType(Container), findsOneWidget);

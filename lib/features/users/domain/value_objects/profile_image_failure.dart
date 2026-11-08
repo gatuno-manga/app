@@ -6,6 +6,10 @@ enum ProfileImageFailureReason {
   forbidden,
   network,
   unknown,
+
+  /// The account signed out while the upload was in flight; the image was
+  /// accepted by the API but is not shown or cached for this session.
+  signedOut,
 }
 
 /// Why a profile image upload was rejected, before or after reaching the API.

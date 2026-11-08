@@ -7,12 +7,21 @@ import 'package:gatuno/features/settings/presentation/views/settings_screen.dart
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/presentation/components/molecules/settings_profile_card.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
+import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
+
+class MockUserService extends Mock implements UserService {}
 
 void main() {
   late MockSettingsService mockSettingsService;
   late MockAuthService mockAuthService;
+  late MockUserService mockUserService;
   late SettingsViewModel viewModel;
 
   setUpAll(() => registerFallbackValue(AppThemeChoice.system));
@@ -20,6 +29,7 @@ void main() {
   setUp(() async {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
+    mockUserService = MockUserService();
 
     when(
       () => mockSettingsService.settingsStream,
@@ -34,11 +44,14 @@ void main() {
       () => mockSettingsService.themeChoice,
     ).thenReturn(AppThemeChoice.system);
     when(() => mockAuthService.authenticated).thenReturn(false);
-    when(() => mockAuthService.currentUser).thenReturn(UserModel.guest);
+    when(
+      () => mockUserService.profileStream,
+    ).thenAnswer((_) => Stream.value(UserModel.guest));
 
     viewModel = SettingsViewModel(
       settingsService: mockSettingsService,
       authService: mockAuthService,
+      userService: mockUserService,
     );
 
     await initTestDI(
@@ -138,5 +151,71 @@ void main() {
     verify(
       () => mockSettingsService.setThemeChoice(AppThemeChoice.dracula),
     ).called(1);
+  });
+
+  testWidgets('SettingsPage shows the profile image on the card', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    when(() => mockAuthService.authenticated).thenReturn(true);
+    when(() => mockUserService.profileStream).thenAnswer(
+      (_) => Stream.value(
+        UserModel(
+          id: const UserId('1'),
+          email: const UserEmail('maria@example.com'),
+          roles: const UserRoles(['user']),
+          maxWeightSensitiveContent: const SensitiveContentWeight(0),
+          profilePictureUrl: 'http://x/a.webp',
+        ),
+      ),
+    );
+    viewModel = SettingsViewModel(
+      settingsService: mockSettingsService,
+      authService: mockAuthService,
+      userService: mockUserService,
+    );
+
+    await tester.pumpApp(
+      Provider<SettingsViewModel>.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('maria@example.com'), findsOneWidget);
+    expect(
+      tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl,
+      'http://x/a.webp',
+    );
+  });
+
+  testWidgets('SettingsPage shows the guest card while the profile loads', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    when(() => mockAuthService.authenticated).thenReturn(true);
+    viewModel = SettingsViewModel(
+      settingsService: mockSettingsService,
+      authService: mockAuthService,
+      userService: mockUserService,
+    );
+
+    await tester.pumpApp(
+      Provider<SettingsViewModel>.value(
+        value: viewModel,
+        child: const SettingsPage(),
+      ),
+    );
+    await tester.pump();
+
+    // Signed in, profile not delivered yet: localized placeholder, never the
+    // raw guest model.
+    expect(find.text('Guest'), findsOneWidget);
+    expect(find.text('guest'), findsNothing);
   });
 }

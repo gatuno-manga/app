@@ -626,6 +626,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get homeProfile;
 
+  /// No description provided for @homeSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get homeSignIn;
+
   /// No description provided for @userMeTitle.
   ///
   /// In en, this message translates to:

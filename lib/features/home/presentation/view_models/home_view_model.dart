@@ -2,6 +2,7 @@ import 'dart:async';
 import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
+import '../../../users/data/models/user_model.dart';
 import '../../../users/domain/use_cases/user_service.dart';
 import '../../../books/domain/repositories/books_repository.dart';
 import '../../../books/domain/entities/book_page_options.dart';
@@ -13,8 +14,8 @@ import 'package:equatable/equatable.dart';
 class HomeState extends Equatable {
   final bool isAuthenticated;
   final bool isInitialized;
-  final String? displayName;
-  
+  final UserModel user;
+
   final List<Book> featuredBooks;
   final List<Book> continueReadingBooks;
   final List<Book> latestUpdatedBooks;
@@ -28,7 +29,7 @@ class HomeState extends Equatable {
   const HomeState({
     required this.isAuthenticated,
     required this.isInitialized,
-    required this.displayName,
+    required this.user,
     required this.featuredBooks,
     required this.continueReadingBooks,
     required this.latestUpdatedBooks,
@@ -40,10 +41,10 @@ class HomeState extends Equatable {
   });
 
   factory HomeState.initial() {
-    return const HomeState(
+    return HomeState(
       isAuthenticated: false,
       isInitialized: false,
-      displayName: null,
+      user: UserModel.guest,
       featuredBooks: [],
       continueReadingBooks: [],
       latestUpdatedBooks: [],
@@ -58,7 +59,7 @@ class HomeState extends Equatable {
   HomeState copyWith({
     bool? isAuthenticated,
     bool? isInitialized,
-    String? Function()? displayName,
+    UserModel? user,
     List<Book>? featuredBooks,
     List<Book>? continueReadingBooks,
     List<Book>? latestUpdatedBooks,
@@ -71,15 +72,17 @@ class HomeState extends Equatable {
     return HomeState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isInitialized: isInitialized ?? this.isInitialized,
-      displayName: displayName != null ? displayName() : this.displayName,
+      user: user ?? this.user,
       featuredBooks: featuredBooks ?? this.featuredBooks,
       continueReadingBooks: continueReadingBooks ?? this.continueReadingBooks,
       latestUpdatedBooks: latestUpdatedBooks ?? this.latestUpdatedBooks,
       recentlyAddedBooks: recentlyAddedBooks ?? this.recentlyAddedBooks,
       isLoadingFeatured: isLoadingFeatured ?? this.isLoadingFeatured,
       isLoadingGrid: isLoadingGrid ?? this.isLoadingGrid,
-      isLoadingRecentlyAdded: isLoadingRecentlyAdded ?? this.isLoadingRecentlyAdded,
-      isLoadingContinueReading: isLoadingContinueReading ?? this.isLoadingContinueReading,
+      isLoadingRecentlyAdded:
+          isLoadingRecentlyAdded ?? this.isLoadingRecentlyAdded,
+      isLoadingContinueReading:
+          isLoadingContinueReading ?? this.isLoadingContinueReading,
     );
   }
 
@@ -87,7 +90,7 @@ class HomeState extends Equatable {
   List<Object?> get props => [
     isAuthenticated,
     isInitialized,
-    displayName,
+    user,
     featuredBooks,
     continueReadingBooks,
     latestUpdatedBooks,
@@ -105,35 +108,35 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   final BooksRepository _booksRepository;
   final ReadingProgressCoordinator _readingCoordinator;
   late final StreamSubscription<AuthState> _authSubscription;
-  
+  late final StreamSubscription<UserModel> _profileSubscription;
+
   static const String _logTag = 'HomeViewModel';
 
   HomeViewModel(
-    this._authService, 
+    this._authService,
     this._userService,
     this._booksRepository,
     this._readingCoordinator,
   ) : super(HomeState.initial()) {
-    _authSubscription = _authService.authStateStream.listen((_) => _onAuthChanged());
+    _authSubscription = _authService.authStateStream.listen(
+      (_) => _onAuthChanged(),
+    );
+    _profileSubscription = _userService.profileStream.listen(
+      (user) => emit(state.copyWith(user: user)),
+    );
     _onAuthChanged(); // Initialize state from auth service
     _loadBooksData();
     _loadRecentlyAdded();
   }
 
   void _onAuthChanged() {
-    emit(state.copyWith(
-      isAuthenticated: _authService.authenticated,
-      isInitialized: _authService.isInitialized,
-    ));
-    _loadUser();
+    emit(
+      state.copyWith(
+        isAuthenticated: _authService.authenticated,
+        isInitialized: _authService.isInitialized,
+      ),
+    );
     _loadContinueReading();
-  }
-
-  Future<void> _loadUser() async {
-    final user = await _userService.getCurrentUser();
-    emit(state.copyWith(
-      displayName: () => user.isGuest ? null : user.displayName,
-    ));
   }
 
   Future<void> _loadBooksData() async {
@@ -147,12 +150,14 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
           order: SortOrder.desc,
         ),
       );
-      
+
       if (res.data.isNotEmpty) {
-        emit(state.copyWith(
-          featuredBooks: res.data.take(5).toList(),
-          latestUpdatedBooks: res.data,
-        ));
+        emit(
+          state.copyWith(
+            featuredBooks: res.data.take(5).toList(),
+            latestUpdatedBooks: res.data,
+          ),
+        );
       }
     } catch (e) {
       AppLogger.e('Error loading latest books data', e, null, _logTag);
@@ -189,7 +194,9 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     emit(state.copyWith(isLoadingContinueReading: true));
 
     try {
-      final bookIds = await _readingCoordinator.getContinueReadingBooks(limit: 10);
+      final bookIds = await _readingCoordinator.getContinueReadingBooks(
+        limit: 10,
+      );
       if (bookIds.isEmpty) {
         emit(state.copyWith(continueReadingBooks: []));
         return;
@@ -197,7 +204,7 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
 
       final futures = bookIds.map((id) => _booksRepository.getBook(id));
       final books = await Future.wait(futures);
-      
+
       emit(state.copyWith(continueReadingBooks: books.toList()));
     } catch (e) {
       AppLogger.e('Error loading continue reading books', e, null, _logTag);
@@ -209,6 +216,7 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   @override
   void dispose() {
     _authSubscription.cancel();
+    _profileSubscription.cancel();
     super.dispose();
   }
 }

@@ -21,6 +21,7 @@ void initUsersInjection(GetIt sl) {
       remote: sl<UserRemoteDataSource>(),
       storage: sl<UserStorage>(),
     ),
+    dispose: (service) => service.dispose(),
   );
 
   // View Models

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/image/image_loading_strategy.dart';
+import '../../../core/image/strategy_image_provider.dart';
+
 class AppAvatar extends StatelessWidget {
   final String? name;
   final double radius;
@@ -9,6 +12,10 @@ class AppAvatar extends StatelessWidget {
   /// Image to show over the initials; the initials remain if it is null,
   /// empty or fails to load.
   final String? imageUrl;
+
+  /// Loads [imageUrl] through the app's image pipeline, so avatars honour
+  /// trusted certificates and headers like every other image.
+  final ImageLoadingStrategy strategy;
 
   /// When set, the avatar becomes tappable and shows an edit badge.
   final VoidCallback? onEdit;
@@ -24,6 +31,7 @@ class AppAvatar extends StatelessWidget {
     this.backgroundColor,
     this.foregroundColor,
     this.imageUrl,
+    required this.strategy,
     this.onEdit,
     this.editLabel,
     this.isBusy = false,
@@ -42,7 +50,9 @@ class AppAvatar extends StatelessWidget {
       );
     }
 
-    final initials = name!.isNotEmpty ? name![0].toUpperCase() : '?';
+    final initials = name!.isNotEmpty
+        ? name!.characters.first.toUpperCase()
+        : '?';
     final theme = Theme.of(context);
     final url = imageUrl;
     final hasImage = url != null && url.isNotEmpty;
@@ -50,14 +60,20 @@ class AppAvatar extends StatelessWidget {
     final avatar = CircleAvatar(
       radius: radius,
       backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-      foregroundImage: hasImage ? NetworkImage(url) : null,
+      foregroundImage: hasImage
+          ? StrategyImageProvider(url: url, strategy: strategy)
+          : null,
       onForegroundImageError: hasImage ? (_, _) {} : null,
-      child: Text(
-        initials,
-        style: TextStyle(
-          fontSize: radius * 0.8,
-          fontWeight: FontWeight.bold,
-          color: foregroundColor ?? theme.colorScheme.onPrimary,
+      // The initial is a visual fallback only; the parent (tooltip, tile)
+      // carries the spoken meaning.
+      child: ExcludeSemantics(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: radius * 0.8,
+            fontWeight: FontWeight.bold,
+            color: foregroundColor ?? theme.colorScheme.onPrimary,
+          ),
         ),
       ),
     );

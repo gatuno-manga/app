@@ -5,6 +5,7 @@ import 'presentation/views/settings_screen.dart';
 import 'presentation/view_models/settings_view_model.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
 import '../settings/domain/use_cases/settings_service.dart';
+import '../users/domain/use_cases/user_service.dart';
 import '../users/presentation/views/me_screen.dart';
 import '../users/presentation/view_models/me_view_model.dart';
 import '../certificates/certificates_router.dart';
@@ -23,6 +24,7 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
         create: (_) => SettingsViewModel(
           settingsService: sl<SettingsService>(),
           authService: sl<AuthService>(),
+          userService: sl<UserService>(),
         ),
         child: const SettingsPage(),
       ),

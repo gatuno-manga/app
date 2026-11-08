@@ -8,6 +8,7 @@ import '../network/interceptors/cookie_interceptor.dart';
 import '../network/interceptors/logging_interceptor.dart';
 import '../network/interceptors/bad_certificate_interceptor.dart';
 import '../../features/authentication/authentication_injection.dart';
+import '../../features/users/domain/use_cases/user_service.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
@@ -64,4 +65,8 @@ Future<void> initDI() async {
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
+
+  // Last: refreshes the profile on sign-in, so it needs the interceptors
+  // above and must be listening before any screen appears.
+  sl<UserService>().init();
 }

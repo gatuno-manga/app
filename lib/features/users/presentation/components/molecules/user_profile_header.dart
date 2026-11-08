@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/shared/components/atoms/app_text_skeleton.dart';
 import 'user_banner.dart';
@@ -73,6 +75,7 @@ class UserProfileHeader extends StatelessWidget {
                     name: displayName,
                     radius: _avatarRadius,
                     imageUrl: avatarUrl,
+                    strategy: sl<ImageLoadingStrategy>(),
                     onEdit: onEditAvatar,
                     editLabel: editAvatarLabel,
                     isBusy: isAvatarBusy,

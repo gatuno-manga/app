@@ -83,6 +83,8 @@ class MeViewModel extends BaseStreamViewModel<MeState> {
       return null;
     } on ProfileImageFailure catch (failure) {
       emit(state.copyWith(uploading: _without(kind)));
+      // Nothing to tell a user who just signed out.
+      if (failure.reason == ProfileImageFailureReason.signedOut) return null;
       return failure;
     } catch (e, stackTrace) {
       AppLogger.e('Unexpected upload error', e, stackTrace, _logTag);

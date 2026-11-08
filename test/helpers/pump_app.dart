@@ -28,6 +28,11 @@ extension PumpApp on WidgetTester {
               const Scaffold(body: Text('Settings Page')),
         ),
         GoRoute(
+          path: '/settings/profile',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Profile Page')),
+        ),
+        GoRoute(
           path: '/auth/signin',
           builder: (context, state) =>
               const Scaffold(body: Text('Signin Page')),

@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
 import 'package:gatuno/core/image/image_loading_strategy.dart';
@@ -18,6 +21,26 @@ import 'package:gatuno/features/certificates/data/data_sources/certificates_loca
 import 'package:mocktail/mocktail.dart';
 
 class MockAuthService extends Mock implements AuthService {}
+
+/// Never returns bytes, so every image load ends in the error path.
+class FailingImageLoadingStrategy implements ImageLoadingStrategy {
+  const FailingImageLoadingStrategy();
+
+  @override
+  Future<Uint8List?> loadImage(
+    String url, {
+    void Function(Size)? onImageLoaded,
+  }) async => null;
+}
+
+/// Registers only the image strategy, for widget tests that render an
+/// avatar-bearing widget but need nothing else from DI.
+Future<void> registerFailingImageStrategy() async {
+  await sl.reset();
+  sl.registerSingleton<ImageLoadingStrategy>(
+    const FailingImageLoadingStrategy(),
+  );
+}
 
 class MockTokenManager extends Mock implements TokenManager {}
 
