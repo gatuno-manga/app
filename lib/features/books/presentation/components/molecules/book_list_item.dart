@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
+import '../atoms/book_type_badge.dart';
 import 'book_info.dart';
 
 class BookListItem extends StatelessWidget {
@@ -22,11 +24,29 @@ class BookListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BookCover(
-                imageUrl: book.cover?.value,
-                blurHash: book.metadata?.blurHash,
+              SizedBox(
                 width: 70,
                 height: 100,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    BookCover(
+                      imageUrl: book.cover?.value,
+                      blurHash: book.metadata?.blurHash,
+                      width: 70,
+                      height: 100,
+                    ),
+                    Positioned(
+                      top: 4,
+                      left: 4,
+                      right: 4,
+                      child: Align(
+                        alignment: AlignmentDirectional.topStart,
+                        child: BookTypeBadge(type: book.type),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

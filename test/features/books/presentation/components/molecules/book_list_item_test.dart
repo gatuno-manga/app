@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_cover.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart'
+    as vo;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_list_item.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_info.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_cover.dart';
+import 'package:gatuno/features/books/presentation/components/atoms/book_type_badge.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
 import 'package:gatuno/core/image/image_loading_strategy.dart';
@@ -26,11 +28,11 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(BookId('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
 
@@ -69,7 +71,8 @@ setUp(() {
     }
   });
 
-  final testBook = Book(id: const BookId('1'),
+  final testBook = Book(
+    id: const BookId('1'),
     title: const BookTitle('Test Book Title'),
     type: TypeBook.manga,
     createdAt: DateTime.now(),
@@ -88,5 +91,12 @@ setUp(() {
     // Verify Title and Description text
     expect(find.text('Test Book Title'), findsOneWidget);
     expect(find.text('Test Book Description'), findsOneWidget);
+  });
+
+  testWidgets('BookListItem shows the book type badge', (tester) async {
+    await tester.pumpApp(Scaffold(body: BookListItem(book: testBook)));
+
+    expect(find.byType(BookTypeBadge), findsOneWidget);
+    expect(find.text('Manga'), findsOneWidget);
   });
 }

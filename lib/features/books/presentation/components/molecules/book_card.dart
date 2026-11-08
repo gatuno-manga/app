@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title.dart';
+import '../atoms/book_type_badge.dart';
 
 class BookCard extends StatelessWidget {
   final Book book;
@@ -24,6 +26,15 @@ class BookCard extends StatelessWidget {
               borderRadius: 0,
               iconSize: 60,
               usePlaceholderIfNull: true,
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              right: 8,
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                child: BookTypeBadge(type: book.type),
+              ),
             ),
             Positioned(
               bottom: 0,

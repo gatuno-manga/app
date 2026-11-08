@@ -434,6 +434,12 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get bookTypeOther;
 
+  /// No description provided for @bookTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get bookTypeUnknown;
+
   /// No description provided for @booksUnknownAuthor.
   ///
   /// In en, this message translates to:

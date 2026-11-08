@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_title.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart'
+    as vo;
 import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_cover.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart'
+    as vo;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +12,7 @@ import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_card.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_cover.dart';
+import 'package:gatuno/features/books/presentation/components/atoms/book_type_badge.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_title.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
@@ -26,11 +29,11 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(BookId('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
 
@@ -95,5 +98,12 @@ setUp(() {
     // Verify Card has Clip.antiAlias
     final cardWidget = tester.widget<Card>(find.byType(Card));
     expect(cardWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('BookCard shows the book type badge', (tester) async {
+    await tester.pumpApp(BookCard(book: testBook));
+
+    expect(find.byType(BookTypeBadge), findsOneWidget);
+    expect(find.text('Manga'), findsOneWidget);
   });
 }

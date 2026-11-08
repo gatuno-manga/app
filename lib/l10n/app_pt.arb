@@ -56,6 +56,7 @@
   "bookTypeManhua": "Manhua",
   "bookTypeBook": "Livro",
   "bookTypeOther": "Outro",
+  "bookTypeUnknown": "Desconhecido",
   "booksUnknownAuthor": "Autor Desconhecido",
   "booksNoBooksFound": "Nenhum livro encontrado",
   "booksNoChaptersFound": "Nenhum capítulo encontrado",
