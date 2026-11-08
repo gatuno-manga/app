@@ -35,12 +35,13 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
   void _onPointerMove(PointerMoveEvent event) {
     final previous = _pointers[event.pointer];
     if (previous == null) return;
-    final before = _pointers.values.toList();
-    _pointers[event.pointer] = event.localPosition;
     if (!_pinching) {
+      _pointers[event.pointer] = event.localPosition;
       widget.zoom.panBy(event.localPosition.dx - previous.dx);
       return;
     }
+    final before = _pointers.values.toList();
+    _pointers[event.pointer] = event.localPosition;
     final after = _pointers.values.toList();
     final oldSpan = (before[0] - before[1]).distance;
     if (oldSpan == 0) return;
@@ -71,6 +72,8 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
         final width = constraints.maxWidth;
         widget.zoom.resize(constraints.biggest);
         return Listener(
+          // Opaque so pinches starting in the side margins (scale < 1) count.
+          behavior: HitTestBehavior.opaque,
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,
           onPointerUp: _onPointerEnd,

@@ -34,16 +34,17 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final onDoubleTap = widget.onDoubleTap;
     return Stack(
       children: [
         GestureDetector(
           onTap: _toggleOverlay,
-          onDoubleTapDown: widget.onDoubleTap == null
+          onDoubleTapDown: onDoubleTap == null
               ? null
               : (details) => _doubleTapPosition = details.localPosition,
-          onDoubleTap: widget.onDoubleTap == null
+          onDoubleTap: onDoubleTap == null
               ? null
-              : () => widget.onDoubleTap!(_doubleTapPosition),
+              : () => onDoubleTap(_doubleTapPosition),
           behavior: HitTestBehavior.opaque,
           child: widget.child,
         ),

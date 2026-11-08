@@ -104,4 +104,19 @@ void main() {
     await tester.pump();
     expect(scroll.offset, closeTo((300 + 100) * 3 - 100, 0.01));
   });
+
+  testWidgets('pinch starting in the side margins works below 1x', (
+    tester,
+  ) async {
+    await pump(tester);
+    zoom.zoomTo(0.5, focal: Offset.zero); // content spans x 100..300
+    await tester.pump();
+    final a = await tester.startGesture(const Offset(20, 300));
+    final b = await tester.startGesture(const Offset(60, 300));
+    await b.moveTo(const Offset(140, 300)); // span 40 -> 120
+    await tester.pump();
+    expect(zoom.scale, closeTo(1.5, 0.01));
+    await a.up();
+    await b.up();
+  });
 }
