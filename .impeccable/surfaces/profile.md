@@ -7,12 +7,11 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Code: `/settings/profile` (`lib/features/users`, `me_screen.dart`)
 
 ## Figma frames
-- `953:2544` /users/:userId — mobile · Meu Perfil (avatar, name, email, sensitive-content switch, logout)
+- `953:2544` /users/:userId — mobile · Meu Perfil (avatar, name, email, logout)
 
 ## Figma components used
 - `Shell/Header` (Plataforma=Mobile)
 - `Avatar/Perfil` (new local component, `951:870`) → `shared/components/atoms/app_avatar.dart`
-- `Leitor/Item de ajuste` (Controle=Switch) → sensitive-content switch
 - `Botão` (Contorno) → logout
 
 ## Code
@@ -40,5 +39,5 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Gaps (Figma vs code)
 - Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.
-- The switch row reuses `Leitor/Item de ajuste`, which belongs to the reader; no dedicated settings-row component exists besides the new `Lista/Item`.
+- The sensitive-content switch is not on the profile screen: code puts it on settings (`settings_screen.dart`), so the profile frame omits it.
 - Avatar has no image, loading or error state.

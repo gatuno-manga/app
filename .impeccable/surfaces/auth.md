@@ -44,10 +44,13 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Copy follows `lib/l10n/app_pt.arb` (`authSignInTitle`, `authEmailLabel`, `authPasswordError`, and so on).
 
 ## Accessibility
+- Code supports password-manager autofill (autofillHints) and a 'go back' action to `/home`; preserve both when implementing.
+- Password rules: 8+ characters, uppercase, digit, symbol.
 - Not audited. Error text relies on `color/danger` plus message copy; check contrast of `color/danger` on `color/app-background` manually.
 
 ## Gaps (Figma vs code)
 - Figma routes /auth/login and /auth/register differ from code `/auth/signin` and `/auth/signup`.
 - `/welcome` (API URL setup) has no frame; tracked in a follow-up issue.
 - Sign-up validation errors (password rules) and server errors are not drawn; no web frame exists (web section `859:27` is empty).
-- Password field has no show/hide control in Figma; check code before adding.
+- Neither Figma nor code has a show/hide control on the password field (`obscureText: true`).
+- Autofill hints and the go-back action are not visible in Figma.

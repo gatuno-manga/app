@@ -12,7 +12,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `Shell/Header` (Plataforma=Mobile)
 - `Avatar/Perfil` (new local component, `951:870`) → profile card
-- `Leitor/Item de ajuste` (Controle=Switch) → sensitive-content switch
+- `Leitor/Item de ajuste` (Controle=Switch) → sensitive-content switch (`app_switch`; reuses the reader component because Figma has no settings switch)
 - `Campo/Texto` (new local component, `951:869`) → API base URL
 - `Lista/Item` (new local component, `951:872`) → certificates, export logs, open logs
 
@@ -43,7 +43,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
-- Not audited. Section labels use `Interface/Rótulo` in `color/text-secondary`; check contrast and row tap targets (56 dp rows) manually.
+- Not audited. Section labels use `Interface/Rótulo` in `color/text-secondary`; check contrast manually. Measured in Figma: `Lista/Item` rows are 73 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
 
 ## Gaps (Figma vs code)
 - Figma route /user differs from code `/settings`.

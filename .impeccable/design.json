@@ -1460,7 +1460,7 @@
     },
     {
       "id": "routes-differ",
-      "summary": "Figma routes /library, /users/:userId and /latest-reads have no matching code routes; code has /settings/profile, /settings/certificates, /auth/signin, /auth/signup, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome which have no Figma frames."
+      "summary": "Figma routes /library, /users/:userId and /latest-reads have no matching code routes; Figma /auth/login, /auth/register, /user and /users/:userId map to code /auth/signin, /auth/signup, /settings and /settings/profile under different names. Code-only routes without Figma frames: /settings/certificates, /chapters/:id, /chapters/:id/page/:index, /requests, /requests/create and /welcome."
     },
     {
       "id": "cheap-weekly-exploration",
