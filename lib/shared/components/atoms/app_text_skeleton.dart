@@ -24,7 +24,9 @@ class AppTextSkeleton extends StatelessWidget {
         height: height,
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.grey.withValues(alpha: 0.3),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(4),
         ),
       );

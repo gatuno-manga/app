@@ -39,7 +39,11 @@ class _WelcomePageState extends State<WelcomePage> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.pets, size: 80, color: Colors.orange),
+                  Icon(
+                    Icons.pets,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     l10n.welcomeTitle,
@@ -68,9 +72,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       onPressed: state.isLoading
                           ? null
                           : () async {
-                              final success = await viewModel.validateAndSaveUrl(
-                                _urlController.text,
-                              );
+                              final success = await viewModel
+                                  .validateAndSaveUrl(_urlController.text);
                               if (success && context.mounted) {
                                 context.go('/home');
                               }

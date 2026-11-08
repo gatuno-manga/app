@@ -110,7 +110,7 @@ class _PageButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? theme.colorScheme.primary
-                  : Colors.grey.shade400,
+                  : theme.colorScheme.outlineVariant,
             ),
             borderRadius: BorderRadius.circular(4),
           ),
@@ -126,7 +126,7 @@ class _PageButton extends StatelessWidget {
                 )
               : Text(
                   '$page',
-                  style: TextStyle(
+                  style: theme.textTheme.labelLarge?.copyWith(
                     color: isSelected ? theme.colorScheme.onPrimary : null,
                     fontWeight: isSelected ? FontWeight.bold : null,
                   ),

@@ -44,7 +44,9 @@ class AppAvatar extends StatelessWidget {
         width: radius * 2,
         height: radius * 2,
         decoration: BoxDecoration(
-          color: Colors.grey.withValues(alpha: 0.3),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
       );
@@ -69,7 +71,7 @@ class AppAvatar extends StatelessWidget {
       child: ExcludeSemantics(
         child: Text(
           initials,
-          style: TextStyle(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontSize: radius * 0.8,
             fontWeight: FontWeight.bold,
             color: foregroundColor ?? theme.colorScheme.onPrimary,

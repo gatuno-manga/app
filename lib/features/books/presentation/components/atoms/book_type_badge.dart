@@ -6,6 +6,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../domain/entities/book_type.dart';
 import '../../book_type_label.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 
 /// Small chip showing the book type, meant to sit over a cover.
 ///
@@ -26,7 +27,8 @@ class BookTypeBadge extends StatelessWidget {
     // The translucent GatunoColors.badgeType tint is meant for flat surfaces
     // and has no contrast over images.
     final overlay =
-        theme.extension<GatunoColors>()?.overlayBackground ?? Colors.black;
+        theme.extension<GatunoColors>()?.overlayBackground ??
+        OnImageColors.scrim;
     final scrim = overlay.withValues(alpha: math.max(overlay.a, 0.7));
 
     return DecoratedBox(
@@ -45,7 +47,9 @@ class BookTypeBadge extends StatelessWidget {
             textScaler: MediaQuery.textScalerOf(
               context,
             ).clamp(maxScaleFactor: 1.2),
-            style: theme.textTheme.labelSmall?.copyWith(color: Colors.white),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: OnImageColors.content,
+            ),
           ),
         ),
       ),

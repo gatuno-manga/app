@@ -52,9 +52,8 @@ class ReadingBottomBar extends StatelessWidget {
                       state.currentPageIndex + 1,
                       chapter.pages.length,
                     ),
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface,
-                      fontSize: 14,
                     ),
                   ),
                 ),
