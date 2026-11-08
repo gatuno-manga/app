@@ -91,10 +91,8 @@ class _BooksOptionFilterState extends State<BooksOptionFilter> {
             Expanded(
               child: Text(widget.title, style: theme.textTheme.titleMedium),
             ),
-            Semantics(
-              label: '${l10n.booksFilterAdd} ${widget.title}',
-              excludeSemantics: true,
-              button: true,
+            Tooltip(
+              message: '${l10n.booksFilterAdd} ${widget.title}',
               child: TextButton.icon(
                 onPressed: _openPicker,
                 icon: const Icon(Icons.add),

@@ -63,6 +63,14 @@ class BookPageOptions {
   static List<String>? _typeToJson(List<TypeBook>? type) =>
       type?.map((e) => e.name.toLowerCase()).toList();
 
+  /// Keeps paging/sort/search and drops every filter field.
+  BookPageOptions withoutFilters() => BookPageOptions(
+    limit: limit,
+    orderBy: orderBy,
+    order: order,
+    search: search,
+  );
+
   BookPageOptions copyWith({
     PositiveInt? page,
     PositiveInt? limit,

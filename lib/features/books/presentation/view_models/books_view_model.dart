@@ -233,17 +233,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
 
   void clearFilters() {
     AppLogger.i('Clearing filters', _logTag);
-    final current = state.options;
-    emit(
-      state.copyWith(
-        options: BookPageOptions(
-          limit: current.limit,
-          orderBy: current.orderBy,
-          order: current.order,
-          search: current.search,
-        ),
-      ),
-    );
+    emit(state.copyWith(options: state.options.withoutFilters()));
     fetchBooks(refresh: true);
   }
 

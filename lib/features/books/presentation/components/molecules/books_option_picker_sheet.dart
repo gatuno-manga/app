@@ -144,7 +144,7 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
             const SizedBox(height: 8),
             AppButton(
               text: l10n.booksFilterDone,
-              onPressed: () => Navigator.pop(context, _selected),
+              onPressed: () => Navigator.pop(context, {..._selected}),
             ),
           ],
         ),
