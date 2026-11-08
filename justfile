@@ -33,6 +33,13 @@ coverage:
 fmt *files='.':
     dart format {{ files }}
 
+# Check design token consistency (DESIGN.md, .impeccable/design.json, theme)
+design-tokens:
+    python3 tool/check_design_tokens.py
+
+# Full local gate: analysis, tests and design tokens
+check: analyze test design-tokens
+
 # Apply automated Dart fixes (defaults to the whole project)
 fix *files='.':
     dart fix --apply {{ files }}
