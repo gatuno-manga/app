@@ -1,21 +1,40 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gatuno/features/users/data/data_sources/user_local_data_source.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late Directory dir;
+  late UserStorage storage;
 
-  late UserStorage userStorage;
-
-  setUp(() {
-    FlutterSecureStorage.setMockInitialValues({});
-    userStorage = UserStorage();
+  setUp(() async {
+    dir = await Directory.systemTemp.createTemp('user_storage_test');
+    storage = UserStorage(directoryProvider: () async => dir);
   });
 
-  group('UserStorage', () {
-    // Add tests for other UserStorage methods here when they are implemented
-    test('UserStorage exists', () {
-      expect(userStorage, isNotNull);
+  tearDown(() => dir.delete(recursive: true));
+
+  test('readProfile is null when nothing is cached', () async {
+    expect(await storage.readProfile(), isNull);
+  });
+
+  test('writeProfile then readProfile round-trips', () async {
+    await storage.writeProfile({'id': '1', 'profileImageUrl': 'http://x/a'});
+    expect(await storage.readProfile(), {
+      'id': '1',
+      'profileImageUrl': 'http://x/a',
     });
+  });
+
+  test('clear removes the cache and tolerates an empty one', () async {
+    await storage.writeProfile({'id': '1'});
+    await storage.clear();
+    expect(await storage.readProfile(), isNull);
+    await storage.clear();
+  });
+
+  test('a corrupt cache file reads as null', () async {
+    await File('${dir.path}/user_profile.json').writeAsString('{not json');
+    expect(await storage.readProfile(), isNull);
   });
 }

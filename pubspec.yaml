@@ -42,6 +42,7 @@ dependencies:
   url_launcher: ^6.3.2
   mqtt_client: ^10.11.11
   rxdart: ^0.28.0
+  image_picker: ^1.2.4
 
 dev_dependencies:
   flutter_test:

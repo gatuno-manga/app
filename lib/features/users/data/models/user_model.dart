@@ -18,6 +18,10 @@ class UserModel {
   final UserDisplayName? name;
   final UserImage? profilePicture;
   final UserImage? profileBanner;
+
+  /// Absolute, publicly fetchable image URLs from `/me`; null when unset.
+  final String? profilePictureUrl;
+  final String? profileBannerUrl;
   final UserBanStatus? banStatus;
   final UserDateTime? createdAt;
   final UserDateTime? updatedAt;
@@ -31,6 +35,8 @@ class UserModel {
     this.name,
     this.profilePicture,
     this.profileBanner,
+    this.profilePictureUrl,
+    this.profileBannerUrl,
     this.banStatus,
     this.createdAt,
     this.updatedAt,
@@ -51,6 +57,9 @@ class UserModel {
   );
 
   bool get isGuest => id.isGuest;
+
+  static String? _nonEmpty(Object? value) =>
+      value is String && value.isNotEmpty ? value : null;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     // Mapping flattened image fields from /me response
@@ -97,6 +106,8 @@ class UserModel {
           : null,
       profilePicture: profilePicture,
       profileBanner: profileBanner,
+      profilePictureUrl: _nonEmpty(json['profileImageUrl']),
+      profileBannerUrl: _nonEmpty(json['profileBannerUrl']),
       banStatus: banStatus,
       createdAt: json['createdAt'] != null
           ? UserDateTime.fromJson(json['createdAt'] as String?)
