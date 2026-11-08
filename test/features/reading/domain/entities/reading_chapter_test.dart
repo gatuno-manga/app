@@ -69,6 +69,16 @@ void main() {
       expect(c.hasNext, isFalse);
     });
 
+    test('previous and next are evaluated independently', () {
+      final onlyPrevious = build(previous: const ChapterId('p'));
+      expect(onlyPrevious.hasPrevious, isTrue);
+      expect(onlyPrevious.hasNext, isFalse);
+
+      final onlyNext = build(next: const ChapterId('n'));
+      expect(onlyNext.hasPrevious, isFalse);
+      expect(onlyNext.hasNext, isTrue);
+    });
+
     test('valid ids mean previous/next exist', () {
       final c = build(
         previous: const ChapterId('p'),

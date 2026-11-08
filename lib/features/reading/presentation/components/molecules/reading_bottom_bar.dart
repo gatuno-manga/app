@@ -60,6 +60,7 @@ class ReadingBottomBar extends StatelessWidget {
                       Icons.skip_previous,
                       color: theme.colorScheme.onSurface,
                     ),
+                    // `!` is safe: hasPrevious/hasNext imply a non-null id.
                     onPressed: chapter.hasPrevious
                         ? () => context.pushReplacement(
                             '/chapters/${chapter.previous!.value}',

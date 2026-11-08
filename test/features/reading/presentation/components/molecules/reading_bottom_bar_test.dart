@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
+import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
+import 'package:gatuno/features/reading/domain/value_objects/original_url.dart';
+import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reading_bottom_bar.dart';
@@ -12,21 +18,25 @@ import '../../../../../helpers/pump_app.dart';
 
 class MockReadingViewModel extends Mock implements ReadingViewModel {}
 
-class _MockChapter extends Fake implements ReadingChapter {
-  @override
-  final List<ReadingPage> pages;
-  @override
-  final ChapterId? previous;
-  @override
-  final ChapterId? next;
-
-  _MockChapter({required this.pages, this.previous, this.next});
-
-  @override
-  bool get hasPrevious => previous != null && previous!.value.trim().isNotEmpty;
-  @override
-  bool get hasNext => next != null && next!.value.trim().isNotEmpty;
-}
+ReadingChapter _chapter({
+  List<ReadingPage> pages = const [],
+  ChapterId? previous,
+  ChapterId? next,
+}) => ReadingChapter(
+  id: const ChapterId('1'),
+  originalUrl: const OriginalUrl('https://example.com/original.pdf'),
+  index: const ChapterIndex(1.0),
+  contentType: ContentType.image,
+  retries: const PositiveInt(0),
+  isFinal: true,
+  previous: previous,
+  next: next,
+  bookId: const BookId('b1'),
+  bookTitle: const BookTitle('Book'),
+  totalChapters: const PositiveInt(10),
+  pages: pages,
+  comments: const <ChapterComment>[],
+);
 
 class FakeReadingPage extends Fake implements ReadingPage {}
 
@@ -50,7 +60,7 @@ void main() {
     testWidgets('renders page indicator and navigation buttons', (
       tester,
     ) async {
-      final chapter = _MockChapter(
+      final chapter = _chapter(
         pages: [FakeReadingPage(), FakeReadingPage()],
         previous: const ChapterId('prev-id'),
         next: const ChapterId('next-id'),
@@ -73,7 +83,7 @@ void main() {
     testWidgets('disables previous button when no previous chapter', (
       tester,
     ) async {
-      final chapter = _MockChapter(pages: [], previous: null);
+      final chapter = _chapter(pages: [], previous: null);
 
       await tester.pumpApp(
         Provider<ReadingViewModel>.value(
@@ -91,7 +101,7 @@ void main() {
     });
 
     testWidgets('disables next button when no next chapter', (tester) async {
-      final chapter = _MockChapter(pages: [], next: null);
+      final chapter = _chapter(pages: [], next: null);
 
       await tester.pumpApp(
         Provider<ReadingViewModel>.value(
@@ -112,7 +122,7 @@ void main() {
       testWidgets('disables both buttons for blank id "$blank"', (
         tester,
       ) async {
-        final chapter = _MockChapter(
+        final chapter = _chapter(
           pages: [],
           previous: ChapterId(blank),
           next: ChapterId(blank),
@@ -147,7 +157,7 @@ void main() {
     }
 
     testWidgets('enables both buttons for valid ids', (tester) async {
-      final chapter = _MockChapter(
+      final chapter = _chapter(
         pages: [],
         previous: const ChapterId('prev-id'),
         next: const ChapterId('next-id'),
