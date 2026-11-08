@@ -108,27 +108,41 @@ class AppLockService {
 
   Future<void> init() async {
     if (state.isInitialized) return;
-    var next = state;
-    try {
-      // Three platform reads on the cold-start path; run them together.
-      final (enabled, grace, deviceCredentialAllowed) = await (
-        _storage.isEnabled(),
-        _storage.getGrace(),
-        _storage.isDeviceCredentialAllowed(),
-      ).wait;
-      next = next.copyWith(
-        enabled: enabled,
-        grace: grace,
-        deviceCredentialAllowed: deviceCredentialAllowed,
-      );
-    } catch (e, stackTrace) {
-      AppLogger.e('Error reading app lock settings', e, stackTrace, _logTag);
-    }
+    // Three platform reads on the cold-start path, run together. Each fails
+    // on its own so one unreadable value never discards the others (above all
+    // a correctly read "enabled").
+    final (enabled, grace, deviceCredentialAllowed) = await (
+      _read('enabled', _storage.isEnabled, fallback: false),
+      _read('grace', _storage.getGrace, fallback: AppLockGrace.defaultValue),
+      _read(
+        'device credential',
+        _storage.isDeviceCredentialAllowed,
+        fallback: true,
+      ),
+    ).wait;
+    var next = state.copyWith(
+      enabled: enabled,
+      grace: grace,
+      deviceCredentialAllowed: deviceCredentialAllowed,
+    );
     // The capability probe is separate on purpose: a failure there must not
     // switch off a lock the user enabled.
     next = next.copyWith(isSupported: await _probeSupport());
     _emit(next.copyWith(locked: next.enabled, isInitialized: true));
     await _privacyScreen.setEnabled(next.enabled);
+  }
+
+  Future<T> _read<T>(
+    String what,
+    Future<T> Function() read, {
+    required T fallback,
+  }) async {
+    try {
+      return await read();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error reading app lock $what', e, stackTrace, _logTag);
+      return fallback;
+    }
   }
 
   Future<bool> _probeSupport() async {

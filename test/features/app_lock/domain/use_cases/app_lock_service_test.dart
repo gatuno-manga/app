@@ -139,6 +139,32 @@ void main() {
       expect(service.state.locked, isTrue);
     });
 
+    test('an unreadable grace does not switch off an enabled lock', () async {
+      when(() => storage.isEnabled()).thenAnswer((_) async => true);
+      when(() => storage.getGrace()).thenThrow(Exception('storage'));
+
+      await service.init();
+
+      expect(service.state.enabled, isTrue);
+      expect(service.state.locked, isTrue);
+      expect(service.state.grace, AppLockGrace.defaultValue);
+    });
+
+    test(
+      'an unreadable fallback flag keeps the default and the lock',
+      () async {
+        when(() => storage.isEnabled()).thenAnswer((_) async => true);
+        when(
+          () => storage.isDeviceCredentialAllowed(),
+        ).thenThrow(Exception('storage'));
+
+        await service.init();
+
+        expect(service.state.locked, isTrue);
+        expect(service.state.deviceCredentialAllowed, isTrue);
+      },
+    );
+
     test('survives a storage failure and stays unlocked', () async {
       when(() => storage.isEnabled()).thenThrow(Exception('storage'));
       await service.init();

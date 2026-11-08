@@ -98,9 +98,9 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
       message = l10n.appLockErrorSave;
     }
     if (message == null || !mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
