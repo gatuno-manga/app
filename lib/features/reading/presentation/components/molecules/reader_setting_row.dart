@@ -21,10 +21,9 @@ class ReaderSettingRow extends StatelessWidget {
     this.liveTitle = false,
   });
 
-  // Figma `Leitor/Item de ajuste`: texts take 172 of the 286 dp left after
-  // the icon tile, the control 114 (3:2).
-  static const int _textFlex = 3;
-  static const int _controlFlex = 2;
+  // Controls take at most this share of the row, so the texts keep room
+  // while a dropdown still shows its current value whole.
+  static const double _maxControlFraction = 0.55;
 
   @override
   Widget build(BuildContext context) {
@@ -32,50 +31,48 @@ class ReaderSettingRow extends StatelessWidget {
     final scheme = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              // `color/hover`: text at 8%, visible on every reader surface.
-              color: scheme.onSurface.withValues(alpha: 0.08),
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
+      child: LayoutBuilder(
+        builder: (context, constraints) => Row(
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                // `color/hover`: text at 8%, visible on every reader surface.
+                color: scheme.onSurface.withValues(alpha: 0.08),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              ),
+              child: SizedBox.square(
+                dimension: 40,
+                child: Icon(icon, color: scheme.onSurface),
+              ),
             ),
-            child: SizedBox.square(
-              dimension: 40,
-              child: Icon(icon, color: scheme.onSurface),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: _textFlex,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Semantics(
-                  liveRegion: liveTitle,
-                  child: Text(title, style: theme.textTheme.labelLarge),
-                ),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Semantics(
+                    liveRegion: liveTitle,
+                    child: Text(title, style: theme.textTheme.labelLarge),
                   ),
-                ),
-              ],
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          // Bounded, so a wide control (a dropdown with long labels at a
-          // large text scale) shrinks instead of overflowing; right-aligned
-          // so narrow controls (the stepper) share the edge of wide ones.
-          Flexible(
-            flex: _controlFlex,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
+            const SizedBox(width: 12),
+            // Last child, so every control ends on the trailing edge.
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: constraints.maxWidth * _maxControlFraction,
+              ),
               child: trailing,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

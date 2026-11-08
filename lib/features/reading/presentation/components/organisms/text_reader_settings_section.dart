@@ -21,14 +21,13 @@ class TextReaderSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final text = preferences;
     return Column(
       children: [
         ReaderChoiceRow<ReaderFontFamily>(
           icon: Icons.text_fields,
           title: l10n.readingFontFamily,
           subtitle: l10n.readingFontFamilyDesc,
-          value: text.fontFamily,
+          value: preferences.fontFamily,
           options: [
             ReaderChoice(ReaderFontFamily.serif, l10n.readingFontSerif),
             ReaderChoice(ReaderFontFamily.sans, l10n.readingFontSans),
@@ -44,12 +43,12 @@ class TextReaderSettingsSection extends StatelessWidget {
         ),
         ReaderStepperRow(
           icon: Icons.format_size,
-          title: l10n.readingFontSize(text.fontSize.round()),
+          title: l10n.readingFontSize(preferences.fontSize.round()),
           subtitle: l10n.readingFontSizeDesc,
-          onDecrement: text.canDecreaseFontSize
+          onDecrement: preferences.canDecreaseFontSize
               ? () => onChanged((t) => t.stepFontSize(-1))
               : null,
-          onIncrement: text.canIncreaseFontSize
+          onIncrement: preferences.canIncreaseFontSize
               ? () => onChanged((t) => t.stepFontSize(1))
               : null,
           decrementTooltip: l10n.readingDecreaseFontSize,
@@ -57,12 +56,12 @@ class TextReaderSettingsSection extends StatelessWidget {
         ),
         ReaderStepperRow(
           icon: Icons.format_line_spacing,
-          title: l10n.readingLineHeight(text.lineHeight),
+          title: l10n.readingLineHeight(preferences.lineHeight),
           subtitle: l10n.readingLineHeightDesc,
-          onDecrement: text.canDecreaseLineHeight
+          onDecrement: preferences.canDecreaseLineHeight
               ? () => onChanged((t) => t.stepLineHeight(-1))
               : null,
-          onIncrement: text.canIncreaseLineHeight
+          onIncrement: preferences.canIncreaseLineHeight
               ? () => onChanged((t) => t.stepLineHeight(1))
               : null,
           decrementTooltip: l10n.readingDecreaseLineHeight,
@@ -72,7 +71,7 @@ class TextReaderSettingsSection extends StatelessWidget {
           icon: Icons.format_align_left,
           title: l10n.readingAlignment,
           subtitle: l10n.readingAlignmentDesc,
-          value: text.alignment,
+          value: preferences.alignment,
           options: [
             ReaderChoice(ReaderTextAlignment.left, l10n.readingAlignLeft),
             ReaderChoice(ReaderTextAlignment.center, l10n.readingAlignCenter),

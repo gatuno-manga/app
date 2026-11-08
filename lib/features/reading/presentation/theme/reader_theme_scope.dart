@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/theme.dart';
 import '../../domain/entities/reader_preferences.dart';
 import 'reader_theme_palette.dart';
 
@@ -15,15 +14,17 @@ class ReaderThemeScope extends StatelessWidget {
 
   static const Duration _duration = Duration(milliseconds: 200);
 
+  /// Duration of reader theme transitions; zero when the platform disables
+  /// animations. Widgets that animate alongside the theme use it too.
+  static Duration durationOf(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) ? Duration.zero : _duration;
+
   @override
   Widget build(BuildContext context) {
     final base = Theme.of(context);
-    final app = base.extension<GatunoColors>()!.palette;
     return AnimatedTheme(
-      data: theme.palette(app).themeData(base),
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : _duration,
+      data: theme.paletteOf(context).themeData(base),
+      duration: durationOf(context),
       curve: Curves.easeOut,
       child: child,
     );

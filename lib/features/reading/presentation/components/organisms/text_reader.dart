@@ -10,6 +10,7 @@ import '../../theme/reader_preferences_builder.dart';
 import '../../theme/reader_text_style.dart';
 import '../molecules/text_reader_content.dart';
 import 'reader_overlay_wrapper.dart';
+import 'reader_settings_sheet.dart';
 import 'text_reader_settings_section.dart';
 
 class TextReader extends StatelessWidget {
@@ -17,20 +18,29 @@ class TextReader extends StatelessWidget {
 
   const TextReader({super.key, required this.chapter});
 
+  /// The sheet rows of this reader; independent of the value being read, so
+  /// built once per [build] rather than per preference change.
+  static ReaderSettingsSections _settingsSections(
+    ReaderPreferencesService service,
+  ) =>
+      (preferences) => [
+        TextReaderSettingsSection(
+          preferences: preferences.text,
+          onChanged: (change) => service.update(
+            (current) => current.copyWith(text: change(current.text)),
+          ),
+        ),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    final service = context.read<ReaderPreferencesService>();
+    final sections = _settingsSections(
+      context.read<ReaderPreferencesService>(),
+    );
     return ReaderPreferencesBuilder(
       builder: (context, preferences) => ReaderOverlayWrapper(
         chapter: chapter,
-        settingsSections: (preferences) => [
-          TextReaderSettingsSection(
-            preferences: preferences.text,
-            onChanged: (change) => service.update(
-              (current) => current.copyWith(text: change(current.text)),
-            ),
-          ),
-        ],
+        settingsSections: sections,
         child: _TextReaderBody(chapter: chapter, preferences: preferences.text),
       ),
     );
@@ -75,8 +85,10 @@ class _TextReaderBody extends StatelessWidget {
                       child: Text(
                         title.value,
                         textAlign: preferences.alignment.textAlign,
+                        // Same family as the body (Figma 882:910).
                         style: theme.textTheme.headlineMedium?.copyWith(
                           color: palette.text,
+                          fontFamily: preferences.fontFamily.family,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

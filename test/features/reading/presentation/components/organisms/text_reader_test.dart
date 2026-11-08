@@ -137,6 +137,7 @@ void main() {
     ) async {
       await preferences.update((_) => _customPrefs);
       final chapter = _MockChapter(
+        title: const ChapterTitle('Chapter Title'),
         content: const ChapterContent('Hello world'),
         contentFormat: ContentFormat.plain,
       );
@@ -145,6 +146,9 @@ void main() {
 
       final text = tester.widget<Text>(find.text('Hello world'));
       expect(text.style?.fontFamily, 'Atkinson Hyperlegible');
+      // The chapter title follows the chosen family too (Figma 882:910).
+      final title = tester.widget<Text>(find.text('Chapter Title'));
+      expect(title.style?.fontFamily, 'Atkinson Hyperlegible');
       expect(text.style?.fontSize, 22);
       expect(text.style?.height, 1.5);
       expect(text.style?.color, ReaderPalette.cream.text);
@@ -173,6 +177,7 @@ void main() {
       );
       final markdown = tester.widget<MarkdownBody>(find.byType(MarkdownBody));
       expect(markdown.styleSheet?.p?.fontFamily, 'Atkinson Hyperlegible');
+      expect(markdown.styleSheet?.h1?.fontFamily, 'Atkinson Hyperlegible');
       expect(markdown.styleSheet?.p?.fontSize, 22);
       expect(markdown.styleSheet?.p?.height, 1.5);
       expect(markdown.styleSheet?.textAlign, WrapAlignment.spaceBetween);

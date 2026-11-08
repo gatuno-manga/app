@@ -11,8 +11,9 @@ void main() {
       expect(p.background, draculaPalette.appBackground);
       expect(p.surface, draculaPalette.secondary);
       expect(p.text, draculaPalette.text);
-      // Figma Padrão `leitura/texto-suave` is the text at 62% (0x9E).
-      expect(p.textSoft, draculaPalette.text.withAlpha(0x9E));
+      // Text at 70%: the lowest alpha that passes 4.5:1 on every app theme's
+      // sheet surface (Figma's own Padrão value, 62%, fails on Light).
+      expect(p.textSoft, draculaPalette.text.withAlpha(0xB3));
       expect(p.accent, draculaPalette.primary);
       expect(p.highlight, draculaPalette.primary.withAlpha(0x1F));
       expect(p.border, draculaPalette.border);

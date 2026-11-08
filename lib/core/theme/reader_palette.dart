@@ -41,7 +41,7 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
   final Color border;
 
   /// Text on [accent]. Not a Figma token: `color/on-primary` for the app
-  /// palette, otherwise black or white by the accent's brightness.
+  /// palette, otherwise near-white or black picked per fixed palette.
   final Color onAccent;
 
   static const Color _light = Color(0xFFFDFDFD);
@@ -83,12 +83,14 @@ class ReaderPalette extends ThemeExtension<ReaderPalette> {
     onAccent: _dark,
   );
 
-  // Alphas of the Figma `Padrão` mode: `leitura/destaque` #f185221f and
-  // `leitura/texto-suave` #e9e1d19e. The soft text is derived from the text
-  // rather than `color/text-secondary`, which fails contrast on the darker
-  // sheet surface (`color/secondary`) in Dracula and True-dark.
+  // Alpha of `leitura/destaque` in the Figma `Padrão` mode (#f185221f).
   static const int _highlightAlpha = 0x1F;
-  static const int _softTextAlpha = 0x9E;
+
+  // Soft text is the text at 70%: the lowest alpha that keeps 4.5:1 on
+  // every app theme's sheet surface (`color/secondary`). Figma's `Padrão`
+  // value (#e9e1d19e, 62%) is a dark-mode value and fails on Light, and
+  // `color/text-secondary` fails on Dracula and True-dark.
+  static const int _softTextAlpha = 0xB3;
 
   /// Figma mode `Padrão`: the app theme's own tokens, so True-dark, Dracula
   /// or Light users keep their look inside the reader.

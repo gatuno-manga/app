@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/reader_palette.dart';
+import '../../theme/reader_theme_scope.dart';
 
 /// One reader theme option (Figma `Leitor/Tema de leitura`): an "Aa" sample
 /// painted in the palette, with its label below.
@@ -21,16 +22,11 @@ class ReaderThemeSwatch extends StatelessWidget {
   /// `radius/md`
   static const BorderRadius _radius = BorderRadius.all(Radius.circular(8));
 
-  /// Same as `ReaderThemeScope`, so the ring and the sheet change together.
-  static const Duration _duration = Duration(milliseconds: 200);
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final duration = MediaQuery.disableAnimationsOf(context)
-        ? Duration.zero
-        : _duration;
+    final duration = ReaderThemeScope.durationOf(context);
     return Semantics(
       button: true,
       selected: isSelected,
@@ -57,13 +53,16 @@ class ReaderThemeSwatch extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: SizedBox(
-                height: 56,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 56),
                 child: Center(
-                  child: Text(
-                    'Aa',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: palette.text,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Aa',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: palette.text,
+                      ),
                     ),
                   ),
                 ),

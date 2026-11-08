@@ -63,8 +63,11 @@ class TextReaderContent extends StatelessWidget {
   MarkdownStyleSheet _markdownStyle(ThemeData theme, TextStyle body) {
     final base = MarkdownStyleSheet.fromTheme(theme);
     final bodySize = body.fontSize!;
+    // Headings follow the chosen family (Figma 882:910 sets the title in
+    // Lexend for the dyslexia preset), scaled from the body.
     TextStyle? heading(TextStyle? style, int level) => style?.copyWith(
       color: palette.text,
+      fontFamily: body.fontFamily,
       fontSize: bodySize * _headingScale[level],
       height: body.height,
       fontWeight: level >= 4 ? FontWeight.w700 : null,

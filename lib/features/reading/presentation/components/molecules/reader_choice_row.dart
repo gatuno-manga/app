@@ -29,8 +29,6 @@ class ReaderChoiceRow<T> extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const double _maxWidth = 180;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,41 +38,46 @@ class ReaderChoiceRow<T> extends StatelessWidget {
       subtitle: subtitle,
       trailing: Semantics(
         label: title,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: _maxWidth),
-          child: DropdownButton<T>(
-            value: value,
-            isExpanded: true,
-            // `Interface/Botão`; the default titleMedium is an unmapped role.
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
-            iconEnabledColor: theme.colorScheme.onSurfaceVariant,
-            underline: const SizedBox.shrink(),
-            items: [
-              for (final option in options)
-                DropdownMenuItem(
-                  value: option.value,
-                  child: Text(option.label),
-                ),
-            ],
-            // The closed button shows only the current label, ellipsised,
-            // instead of reserving the width of the widest option.
-            selectedItemBuilder: (context) => [
-              for (final option in options)
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: Text(
-                    option.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-            onChanged: (picked) {
-              if (picked != null) onChanged(picked);
-            },
+        child: DropdownButton<T>(
+          value: value,
+          // Fills the control width the row allows (55% of the row, enough
+          // for the longest label at the default text scale); longer
+          // labels ellipsise instead of overflowing.
+          isExpanded: true,
+          // Items grow with their text instead of clipping inside 48 dp.
+          itemHeight: null,
+          // `Interface/Botão`; the default titleMedium is an unmapped role.
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
           ),
+          iconEnabledColor: theme.colorScheme.onSurfaceVariant,
+          underline: const SizedBox.shrink(),
+          items: [
+            for (final option in options)
+              DropdownMenuItem(
+                value: option.value,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(option.label, softWrap: true),
+                ),
+              ),
+          ],
+          // The closed button shows only the current label, ellipsised,
+          // instead of reserving the width of the widest option.
+          selectedItemBuilder: (context) => [
+            for (final option in options)
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  option.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+          onChanged: (picked) {
+            if (picked != null) onChanged(picked);
+          },
         ),
       ),
     );

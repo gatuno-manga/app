@@ -95,7 +95,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final subtitle = tester.widget<Text>(find.text('Text family'));
-    expect(subtitle.style?.color, draculaPalette.text.withAlpha(0x9E));
+    expect(subtitle.style?.color, draculaPalette.text.withAlpha(0xB3));
   });
 
   testWidgets('two stepper taps in one frame both apply', (tester) async {

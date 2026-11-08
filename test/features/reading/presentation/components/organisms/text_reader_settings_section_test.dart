@@ -128,11 +128,21 @@ void main() {
           .dx;
       expect(stepperRight, moreOrLessEquals(dropdownRight, epsilon: 1));
 
-      // The texts keep most of the row (Figma: 172 of 286 dp).
+      // The control takes its own width, but never the whole row (the test
+      // font is 1 em per glyph, so the dropdown is at its cap here).
       final textColumn = find
           .ancestor(of: find.text('Font'), matching: find.byType(Column))
           .first;
-      expect(tester.getSize(textColumn).width, greaterThan(150));
+      expect(tester.getSize(textColumn).width, greaterThan(40));
+      expect(
+        tester.getSize(find.byType(DropdownButton<ReaderFontFamily>)).width,
+        lessThanOrEqualTo(390 * 0.55),
+      );
+      final dropdown = tester.widget<DropdownButton<ReaderFontFamily>>(
+        find.byType(DropdownButton<ReaderFontFamily>),
+      );
+      // Items size to their content so wrapped labels are not clipped.
+      expect(dropdown.itemHeight, isNull);
     });
 
     testWidgets('fits a 390dp phone at 2x text scale in Portuguese', (

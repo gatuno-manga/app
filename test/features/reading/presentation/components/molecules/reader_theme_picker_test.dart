@@ -36,6 +36,40 @@ void main() {
     expect(picked, ReaderTheme.cream);
   });
 
+  testWidgets('ReaderThemePicker wraps to two rows when labels need it', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    // The test font is 1 em per glyph, far wider than Plus Jakarta Sans, so
+    // the widths below stand in for "fits" and "does not fit" rather than
+    // for a real phone.
+    Future<Set<double>> rowTops(double width, TextScaler scaler) async {
+      tester.view.physicalSize = Size(width, 844);
+      await tester.pumpApp(
+        MediaQuery(
+          data: MediaQueryData(textScaler: scaler),
+          child: Scaffold(
+            body: ReaderThemePicker(
+              selected: ReaderTheme.standard,
+              onSelected: (_) {},
+            ),
+          ),
+        ),
+        theme: AppTheme.darkTheme,
+        locale: const Locale('pt'),
+      );
+      return {
+        for (final element in find.byType(ReaderThemeSwatch).evaluate())
+          tester.getTopLeft(find.byWidget(element.widget)).dy,
+      };
+    }
+
+    expect(await rowTops(1000, TextScaler.noScaling), hasLength(1));
+    expect(await rowTops(1000, const TextScaler.linear(2.0)), hasLength(2));
+  });
+
   testWidgets('ReaderThemePicker labels the group for screen readers', (
     tester,
   ) async {
