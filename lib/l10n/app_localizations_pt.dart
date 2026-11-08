@@ -180,6 +180,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get bookTypeOther => 'Outro';
 
   @override
+  String get bookTypeUnknown => 'Desconhecido';
+
+  @override
   String get booksUnknownAuthor => 'Autor Desconhecido';
 
   @override

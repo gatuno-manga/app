@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title.dart';
+import '../atoms/book_type_badge.dart';
 
 class BookCard extends StatelessWidget {
   final Book book;
@@ -25,6 +26,7 @@ class BookCard extends StatelessWidget {
               iconSize: 60,
               usePlaceholderIfNull: true,
             ),
+            PositionedBookTypeBadge(type: book.type, inset: 8),
             Positioned(
               bottom: 0,
               left: 0,

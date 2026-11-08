@@ -10,6 +10,7 @@ import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_card.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_cover.dart';
+import 'package:gatuno/features/books/presentation/components/atoms/book_type_badge.dart';
 import 'package:gatuno/features/books/presentation/components/atoms/book_title.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/image/dio_image_loading_strategy.dart';
@@ -95,5 +96,12 @@ setUp(() {
     // Verify Card has Clip.antiAlias
     final cardWidget = tester.widget<Card>(find.byType(Card));
     expect(cardWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('BookCard shows the book type badge', (tester) async {
+    await tester.pumpApp(BookCard(book: testBook));
+
+    expect(find.byType(BookTypeBadge), findsOneWidget);
+    expect(find.text('Manga'), findsOneWidget);
   });
 }

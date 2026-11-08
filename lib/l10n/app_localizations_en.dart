@@ -182,6 +182,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookTypeOther => 'Other';
 
   @override
+  String get bookTypeUnknown => 'Unknown';
+
+  @override
   String get booksUnknownAuthor => 'Unknown Author';
 
   @override
