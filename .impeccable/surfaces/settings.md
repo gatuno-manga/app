@@ -48,6 +48,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Leitor/Item de ajuste` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 
 ## Gaps (Figma vs code)
+- The API field shows only a placeholder (`http://sua-api.com/api`) and no save action, although the server URL is always set at first launch; the stored-value and save states are not drawn.
 - Signed-out state is not drawn: code shows the profile card as `commonGuest` ("Visitante") with no email, and tapping it opens `/auth/signin` (`settings_screen.dart`).
 - The page header has no subtitle, unlike library and profile; code does not show one either.
 - Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.

@@ -49,7 +49,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Sign-up password rules: 8+ characters, uppercase, digit, symbol. Sign-in only checks that the password is not empty (`authPasswordError`).
 - Error text uses `color/danger` (about 4.9:1 on `color/app-background`) and also a red field border and message copy, so color is not the only cue.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the ENTRAR and CRIAR CONTA buttons.
-- Placeholder text (`color/text-muted`) is about 4.4:1, just below the AA 4.5:1 minimum for normal text.
+- Placeholder and helper text (`color/text-muted`, 12 dp) is about 4.4:1, just below the AA 4.5:1 minimum for normal text. In sign-up the helper line is the only place the password rule is stated.
+- Field outline (`color/border`, translucent) is about 1.3:1 against the background, below the 3:1 guideline for input boundaries; it is a shared token and `Campo/Texto` inherits it.
 
 ## Gaps (Figma vs code)
 - The Figma section title names the routes /auth/login and /auth/register; code uses `/auth/signin` and `/auth/signup`. The new frames are named after the code routes.
