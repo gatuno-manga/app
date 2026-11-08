@@ -41,4 +41,4 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Profile (`/settings/profile`) and settings (`/settings`) are separate screens in code; settings holds the profile card, sensitive-content switch and API, certificate and log entries.
 - Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.
 - The sensitive-content switch is not on the profile screen: code puts it on settings (`settings_screen.dart`), so the profile frame omits it.
-- Avatar has no image, loading or error state.
+- Avatar has no image, loading or error state; there is no logout-confirmation frame.

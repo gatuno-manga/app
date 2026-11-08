@@ -35,6 +35,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Título/3`
 - `Corpo/Padrão`
 - `Corpo/Pequeno`
+- `Interface/Botão`
 - `Interface/Rótulo`
 - `Interface/Legenda`
 
@@ -47,6 +48,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Leitor/Item de ajuste` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 
 ## Gaps (Figma vs code)
+- The page header has no subtitle, unlike library and profile; code does not show one either.
+- Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.
 - Figma route /user differs from code `/settings`.
 - `/settings/certificates` (list, add and remove allowed URLs) has no frame; tracked in a follow-up issue.
 - No web frame exists (web section `859:28` is empty).

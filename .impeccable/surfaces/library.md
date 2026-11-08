@@ -28,11 +28,13 @@ No code exists for `/library`. The closest code surface is `/books` (`lib/featur
 - `color/primary`
 - `Título/2`
 - `Corpo/Padrão`
+- `Corpo/Grande`
+- `Corpo/Pequeno`
 - `Interface/Botão`
 
 ## States in Figma
 - Loaded: tabs plus list of saved books.
-- Empty: icon, message and a primary action to explore books.
+- Empty: icon, message and a primary action to explore books. The tabs are hidden in this state (a choice, not a code fact).
 - No loading or error frame.
 
 ## Accessibility

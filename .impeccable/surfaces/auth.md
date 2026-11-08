@@ -40,6 +40,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `radius/md`
 
 ## States in Figma
+- Hints: sign-in password shows "Informe a senha da sua conta."; sign-up shows the full rule. The loading frame dims the action but leaves fields looking active.
 - Default, error and loading for sign-in; default for sign-up. The `Foco` field state exists in the component but no frame shows it.
 - Copy follows `lib/l10n/app_pt.arb` (`authSignInTitle`, `authEmailLabel`, `authPasswordError`, and so on).
 
