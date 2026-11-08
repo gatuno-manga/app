@@ -36,27 +36,12 @@ class _ImageReaderState extends State<ImageReader> {
     super.dispose();
   }
 
-  void _onDoubleTap(Offset position) {
-    final size = context.size;
-    if (size == null) return;
-    final ratio = _zoom.toggleAt(position.dx, width: size.width);
-    if (!_scrollController.hasClients) return;
-    final target =
-        (_scrollController.offset + position.dy) * ratio - position.dy;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-      _scrollController.jumpTo(
-        target.clamp(0.0, _scrollController.position.maxScrollExtent),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final chapter = widget.chapter;
     return ReaderOverlayWrapper(
       chapter: chapter,
-      onDoubleTap: _onDoubleTap,
+      onDoubleTap: _zoom.toggleAt,
       child: ZoomableViewport(
         zoom: _zoom,
         scrollController: _scrollController,

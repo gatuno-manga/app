@@ -76,10 +76,33 @@ void main() {
 
   testWidgets('one-finger drag pans horizontally when zoomed', (tester) async {
     await pump(tester);
-    zoom.zoomTo(2, focalX: 0, width: 400);
+    zoom.zoomTo(2, focal: Offset.zero);
     await tester.pump();
     await tester.dragFrom(const Offset(200, 300), const Offset(-100, 0));
     await tester.pump();
     expect(zoom.dx, closeTo(-100, 1));
+  });
+
+  testWidgets('zoom re-anchors the scroll offset on the focal point', (
+    tester,
+  ) async {
+    await pump(tester);
+    scroll.jumpTo(300);
+    await tester.pump();
+    zoom.toggleAt(const Offset(200, 100)); // 1x -> 2x
+    await tester.pump();
+    await tester.pump();
+    expect(scroll.offset, closeTo((300 + 100) * 2 - 100, 0.01));
+  });
+
+  testWidgets('several zoom steps in one frame compound', (tester) async {
+    await pump(tester);
+    scroll.jumpTo(300);
+    await tester.pump();
+    zoom.zoomTo(1.5, focal: const Offset(200, 100));
+    zoom.zoomTo(3, focal: const Offset(200, 100));
+    await tester.pump();
+    await tester.pump();
+    expect(scroll.offset, closeTo((300 + 100) * 3 - 100, 0.01));
   });
 }

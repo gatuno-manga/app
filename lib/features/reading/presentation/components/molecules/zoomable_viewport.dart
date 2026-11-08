@@ -26,20 +26,7 @@ class ZoomableViewport extends StatefulWidget {
 
 class _ZoomableViewportState extends State<ZoomableViewport> {
   final Map<int, Offset> _pointers = {};
-  double _width = 0;
-  double _height = 0;
-
   bool get _pinching => _pointers.length >= 2;
-
-  void _anchorScroll(double ratio, double focalY) {
-    final controller = widget.scrollController;
-    if (!controller.hasClients || ratio == 1.0) return;
-    final target = (controller.offset + focalY) * ratio - focalY;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!controller.hasClients) return;
-      controller.jumpTo(target.clamp(0.0, controller.position.maxScrollExtent));
-    });
-  }
 
   void _onPointerDown(PointerDownEvent event) {
     final wasPinching = _pinching;
@@ -50,35 +37,28 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
   void _onPointerMove(PointerMoveEvent event) {
     final previous = _pointers[event.pointer];
     if (previous == null) return;
-    if (_pinching) {
-      final before = _pointers.values.toList();
-      _pointers[event.pointer] = event.localPosition;
-      final after = _pointers.values.toList();
-      final oldSpan = (before[0] - before[1]).distance;
-      final newSpan = (after[0] - after[1]).distance;
-      if (oldSpan == 0) return;
-      final oldFocal = (before[0] + before[1]) / 2;
-      final focal = (after[0] + after[1]) / 2;
-      final ratio = widget.zoom.zoomTo(
-        widget.zoom.scale * newSpan / oldSpan,
-        focalX: focal.dx,
-        width: _width,
-      );
-      widget.zoom.panBy(focal.dx - oldFocal.dx, width: _width);
-      _anchorScroll(ratio, focal.dy);
-    } else {
-      _pointers[event.pointer] = event.localPosition;
-      widget.zoom.panBy(event.localPosition.dx - previous.dx, width: _width);
+    final before = _pointers.values.toList();
+    _pointers[event.pointer] = event.localPosition;
+    if (!_pinching) {
+      widget.zoom.panBy(event.localPosition.dx - previous.dx);
+      return;
     }
+    final after = _pointers.values.toList();
+    final oldSpan = (before[0] - before[1]).distance;
+    if (oldSpan == 0) return;
+    final newSpan = (after[0] - after[1]).distance;
+    final oldFocal = (before[0] + before[1]) / 2;
+    final focal = (after[0] + after[1]) / 2;
+    widget.zoom.zoomTo(widget.zoom.scale * newSpan / oldSpan, focal: focal);
+    widget.zoom.panBy(focal.dx - oldFocal.dx);
   }
 
   void _onPointerEnd(PointerEvent event) {
     final wasPinching = _pinching;
     _pointers.remove(event.pointer);
     if (wasPinching && !_pinching) {
-      final ratio = widget.zoom.scale;
-      widget.zoom.snap(width: _width);
-      _anchorScroll(widget.zoom.scale / ratio, _height / 2);
+      widget.zoom.snap();
+      // Re-enables list scrolling (physics depend on _pinching).
       setState(() {});
     }
   }
@@ -87,8 +67,8 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        _width = constraints.maxWidth;
-        _height = constraints.maxHeight;
+        final width = constraints.maxWidth;
+        widget.zoom.attach(widget.scrollController, constraints.biggest);
         return Listener(
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,
@@ -101,7 +81,7 @@ class _ZoomableViewportState extends State<ZoomableViewport> {
                 children: [
                   Positioned(
                     left: widget.zoom.dx,
-                    width: _width * widget.zoom.scale,
+                    width: width * widget.zoom.scale,
                     top: 0,
                     bottom: 0,
                     child: widget.builder(
