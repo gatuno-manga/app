@@ -152,6 +152,13 @@ void main() {
     });
   }
 
+  test('tertiary (lilac) pair is readable in every theme', () {
+    for (final t in themes.values) {
+      final cs = t().colorScheme;
+      expect(_contrast(cs.tertiary, cs.onTertiary), greaterThanOrEqualTo(4.5));
+    }
+  });
+
   test('onLilac equals the Dark app-background token', () {
     expect(AppPalette.onLilac, darkPalette.appBackground);
   });

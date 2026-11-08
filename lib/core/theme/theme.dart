@@ -64,7 +64,8 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
   /// Figma color tokens of the active theme, including the alpha ramps.
   final AppPalette palette;
 
-  // Aliases of Figma tokens, kept so call sites need not know the palette.
+  // Aliases of Figma tokens, kept so existing call sites keep working. New
+  // code should read `palette` directly.
   Color get scrapingStatusReady => palette.success;
   Color get scrapingStatusProcessing => palette.warning;
   Color get scrapingStatusError => palette.danger;
@@ -146,7 +147,7 @@ class AppTheme {
         secondary: palette.secondary,
         onSecondary: palette.text,
         tertiary: palette.lilac,
-        onTertiary: palette.onPrimary,
+        onTertiary: AppPalette.onLilac,
         error: palette.danger,
         onError: palette.onPrimary,
         surface: palette.appBackground,
@@ -205,6 +206,7 @@ class AppTheme {
   }
 }
 
+/// What differs between light and dark builds beyond the palette.
 class _Variant {
   const _Variant({
     required this.brightness,
@@ -219,7 +221,6 @@ class _Variant {
 
 /// Badge colors have no Figma variable (gap `badge-colors-not-in-figma`), so
 /// they stay per brightness rather than per theme.
-/// What differs between light and dark builds beyond the palette.
 class _BadgeSet {
   const _BadgeSet({
     required this.badgeDefault,
