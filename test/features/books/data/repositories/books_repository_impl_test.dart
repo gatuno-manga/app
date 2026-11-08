@@ -19,16 +19,64 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(BookId('dummy'));
     registerFallbackValue(const BookPageOptions());
   });
 
-setUp(() {
+  setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
     when(() => mockDioClient.dio).thenReturn(mockDio);
     repository = BooksRepositoryImpl(mockDioClient);
+  });
+
+  group('getTags / getAuthors', () {
+    test('getTags parses the list response', () async {
+      when(() => mockDio.get<List<dynamic>>(ApiConstants.tags)).thenAnswer(
+        (_) async => Response(
+          data: [
+            {'id': 't1', 'name': 'Action'},
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ApiConstants.tags),
+        ),
+      );
+
+      final result = await repository.getTags();
+
+      expect(result.single.id.value, 't1');
+      expect(result.single.name.value, 'Action');
+    });
+
+    test('getAuthors parses the list response', () async {
+      when(() => mockDio.get<List<dynamic>>(ApiConstants.authors)).thenAnswer(
+        (_) async => Response(
+          data: [
+            {'id': 'a1', 'name': 'Oda'},
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ApiConstants.authors),
+        ),
+      );
+
+      final result = await repository.getAuthors();
+
+      expect(result.single.id.value, 'a1');
+      expect(result.single.name.value, 'Oda');
+    });
+
+    test('getTags throws on an unexpected response', () async {
+      when(() => mockDio.get<List<dynamic>>(ApiConstants.tags)).thenAnswer(
+        (_) async => Response(
+          data: null,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ApiConstants.tags),
+        ),
+      );
+
+      expect(() => repository.getTags(), throwsA(isA<ServerException>()));
+    });
   });
 
   group('getBooks', () {
@@ -165,7 +213,9 @@ setUp(() {
         (_) async => Response(
           data: bookJson,
           statusCode: 200,
-          requestOptions: RequestOptions(path: '${ApiConstants.books}/${bookId.value}'),
+          requestOptions: RequestOptions(
+            path: '${ApiConstants.books}/${bookId.value}',
+          ),
         ),
       );
 

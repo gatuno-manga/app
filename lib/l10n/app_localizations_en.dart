@@ -125,6 +125,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksExcludedTags => 'Excluded Tags';
 
   @override
+  String get booksAuthors => 'Authors';
+
+  @override
+  String get booksFilterAdd => 'Add';
+
+  @override
+  String get booksFilterSearchHint => 'Search...';
+
+  @override
+  String get booksFilterNoOptions => 'No options found';
+
+  @override
+  String get booksFilterLoadError => 'Could not load options';
+
+  @override
+  String get booksFilterRetry => 'Try again';
+
+  @override
+  String get booksFilterDone => 'Done';
+
+  @override
+  String get booksFilterLogicAll => 'All';
+
+  @override
+  String get booksFilterLogicAny => 'Any';
+
+  @override
   String get booksOperatorBefore => 'Before';
 
   @override

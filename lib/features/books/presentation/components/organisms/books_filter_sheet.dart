@@ -7,6 +7,7 @@ import '../../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/book_page_options.dart';
 import '../../../domain/entities/book_type.dart';
 import '../../view_models/books_view_model.dart';
+import '../../models/filter_option.dart';
 import '../molecules/books_filter_content.dart';
 import '../molecules/books_filter_header.dart';
 
@@ -14,11 +15,15 @@ class BooksFilterSheet extends StatefulWidget {
   final BookPageOptions initialOptions;
   final void Function(BookPageOptions) onApply;
   final VoidCallback onClear;
+  final Future<List<FilterOption>> Function() loadTags;
+  final Future<List<FilterOption>> Function() loadAuthors;
   const BooksFilterSheet({
     super.key,
     required this.initialOptions,
     required this.onApply,
     required this.onClear,
+    required this.loadTags,
+    required this.loadAuthors,
   });
 
   static Future<void> show(BuildContext context, BooksViewModel viewModel) {
@@ -41,6 +46,8 @@ class BooksFilterSheet extends StatefulWidget {
           );
         },
         onClear: viewModel.clearFilters,
+        loadTags: viewModel.loadTagOptions,
+        loadAuthors: viewModel.loadAuthorOptions,
       ),
     );
   }
@@ -80,7 +87,9 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
     setState(() {
       final parsed = int.tryParse(value);
       _currentOptions = _currentOptions.copyWith(
-        publication: Optional.ofNullable(parsed != null ? PositiveInt(parsed) : null),
+        publication: Optional.ofNullable(
+          parsed != null ? PositiveInt(parsed) : null,
+        ),
       );
     });
   }
@@ -111,6 +120,10 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
         sensitiveContent: Optional.ofNullable(tags),
       );
     });
+  }
+
+  void _onUpdate(BookPageOptions Function(BookPageOptions) change) {
+    setState(() => _currentOptions = change(_currentOptions));
   }
 
   void _onClear() {
@@ -152,6 +165,9 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
                 onYearChanged: _onYearChanged,
                 onTypeSelected: _onTypeSelected,
                 onSensitiveContentSelected: _onSensitiveContentSelected,
+                loadTags: widget.loadTags,
+                loadAuthors: widget.loadAuthors,
+                onUpdate: _onUpdate,
               ),
             ),
             const SizedBox(height: 16),

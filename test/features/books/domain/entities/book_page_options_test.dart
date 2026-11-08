@@ -22,7 +22,8 @@ void main() {
     });
 
     test('toJson should contain correct fields and uppercase order', () {
-      const options = BookPageOptions(page: PositiveInt(2),
+      const options = BookPageOptions(
+        page: PositiveInt(2),
         limit: PositiveInt(10),
         orderBy: 'title',
         order: SortOrder.asc,
@@ -57,7 +58,7 @@ void main() {
     test('copyWith should update fields correctly', () {
       const options = BookPageOptions();
       final updated = options.copyWith(
-          page: const PositiveInt(5),
+        page: const PositiveInt(5),
         search: Optional.ofNullable('test'),
         order: SortOrder.asc,
       );
@@ -67,5 +68,32 @@ void main() {
       expect(updated.order, SortOrder.asc);
       expect(updated.limit, options.limit); // Unchanged
     });
+  });
+
+  test('withoutFilters keeps search/sort/limit and drops filters', () {
+    const options = BookPageOptions(
+      search: 'x',
+      orderBy: 'title',
+      order: SortOrder.asc,
+      limit: PositiveInt(30),
+      page: PositiveInt(4),
+      publication: PositiveInt(2020),
+      publicationOperator: 'gt',
+      tags: ['t'],
+      tagsLogic: 'or',
+      authors: ['a'],
+    );
+
+    final result = options.withoutFilters();
+
+    expect(result.search, 'x');
+    expect(result.orderBy, 'title');
+    expect(result.order, SortOrder.asc);
+    expect(result.limit.value, 30);
+    expect(result.page.value, 1);
+    expect(result.publication, isNull);
+    expect(result.tags, isNull);
+    expect(result.tagsLogic, isNull);
+    expect(result.authors, isNull);
   });
 }

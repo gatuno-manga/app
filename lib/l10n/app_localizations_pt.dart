@@ -123,6 +123,33 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksExcludedTags => 'Excluídas';
 
   @override
+  String get booksAuthors => 'Autores';
+
+  @override
+  String get booksFilterAdd => 'Adicionar';
+
+  @override
+  String get booksFilterSearchHint => 'Buscar...';
+
+  @override
+  String get booksFilterNoOptions => 'Nenhuma opção encontrada';
+
+  @override
+  String get booksFilterLoadError => 'Não foi possível carregar as opções';
+
+  @override
+  String get booksFilterRetry => 'Tentar novamente';
+
+  @override
+  String get booksFilterDone => 'Concluir';
+
+  @override
+  String get booksFilterLogicAll => 'Todos';
+
+  @override
+  String get booksFilterLogicAny => 'Qualquer';
+
+  @override
   String get booksOperatorBefore => 'Antes de';
 
   @override

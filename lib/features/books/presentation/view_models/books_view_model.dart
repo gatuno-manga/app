@@ -8,6 +8,7 @@ import '../../domain/entities/book_page_options.dart';
 import '../../domain/entities/book_type.dart';
 import '../../domain/repositories/books_repository.dart';
 import 'package:equatable/equatable.dart';
+import '../models/filter_option.dart';
 
 enum BooksLayoutMode { grid, list }
 
@@ -53,13 +54,7 @@ class BooksState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        bookList,
-        isLoading,
-        error,
-        layoutMode,
-        options,
-      ];
+  List<Object?> get props => [bookList, isLoading, error, layoutMode, options];
 }
 
 class BooksViewModel extends BaseStreamViewModel<BooksState> {
@@ -80,20 +75,30 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   BooksLayoutMode get layoutMode => state.layoutMode;
   BookPageOptions get options => state.options;
 
+  bool _refetchQueued = false;
+
+  /// Fetches the list. A call made while a fetch is in flight is not dropped:
+  /// one follow-up fetch runs afterwards with the latest options (page and
+  /// filters are read from state, so `refresh`/`resetPage` are not replayed).
   Future<void> fetchBooks({bool refresh = false, bool resetPage = true}) async {
-    if (state.isLoading) return;
+    if (state.isLoading) {
+      _refetchQueued = true;
+      return;
+    }
 
     AppLogger.i(
       'Fetching books: refresh=$refresh, resetPage=$resetPage, page=${state.options.page}',
       _logTag,
     );
-    
+
     var newOptions = state.options;
     if (refresh && resetPage) {
       newOptions = newOptions.copyWith(page: const PositiveInt(1));
     }
-    
-    emit(state.copyWith(isLoading: true, error: () => null, options: newOptions));
+
+    emit(
+      state.copyWith(isLoading: true, error: () => null, options: newOptions),
+    );
 
     try {
       final sensitiveEnabled = _settingsService.sensitiveContentEnabled;
@@ -113,20 +118,28 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         'Books fetched successfully: page=${result.page}, count=${result.data.length}, total=${result.total}',
         _logTag,
       );
-      
+
       emit(state.copyWith(isLoading: false, bookList: () => result));
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching books', e, stackTrace, _logTag);
       emit(state.copyWith(isLoading: false, error: () => e.toString()));
     }
+
+    if (_refetchQueued) {
+      _refetchQueued = false;
+      await fetchBooks();
+    }
   }
 
   void setPage(int page) {
-    if (page < 1 || (state.bookList != null && page > state.bookList!.totalPages.value)) {
+    if (page < 1 ||
+        (state.bookList != null && page > state.bookList!.totalPages.value)) {
       return;
     }
     AppLogger.i('Setting page to: $page', _logTag);
-    emit(state.copyWith(options: state.options.copyWith(page: PositiveInt(page))));
+    emit(
+      state.copyWith(options: state.options.copyWith(page: PositiveInt(page))),
+    );
     fetchBooks();
   }
 
@@ -145,19 +158,41 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       return;
     }
     AppLogger.i('Setting search to: $search', _logTag);
-    emit(state.copyWith(options: state.options.copyWith(search: Optional.ofNullable(search), page: const PositiveInt(1))));
+    emit(
+      state.copyWith(
+        options: state.options.copyWith(
+          search: Optional.ofNullable(search),
+          page: const PositiveInt(1),
+        ),
+      ),
+    );
     fetchBooks(refresh: true);
   }
 
   void clearSearch() {
     AppLogger.i('Clearing search', _logTag);
-    emit(state.copyWith(options: state.options.copyWith(search: const Optional.empty(), page: const PositiveInt(1))));
+    emit(
+      state.copyWith(
+        options: state.options.copyWith(
+          search: const Optional.empty(),
+          page: const PositiveInt(1),
+        ),
+      ),
+    );
     fetchBooks(refresh: true);
   }
 
   void setSort(String orderBy, SortOrder order) {
     AppLogger.i('Setting sort: $orderBy $order', _logTag);
-    emit(state.copyWith(options: state.options.copyWith(orderBy: orderBy, order: order, page: const PositiveInt(1))));
+    emit(
+      state.copyWith(
+        options: state.options.copyWith(
+          orderBy: orderBy,
+          order: order,
+          page: const PositiveInt(1),
+        ),
+      ),
+    );
     fetchBooks(refresh: true);
   }
 
@@ -174,26 +209,65 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     List<String>? sensitiveContent,
   }) {
     AppLogger.i('Updating filters', _logTag);
-    emit(state.copyWith(options: state.options.copyWith(
-      publication: Optional.ofNullable(publication != null ? PositiveInt(publication) : null),
-      publicationOperator: Optional.ofNullable(publicationOperator),
-      type: Optional.ofNullable(type),
-      tags: Optional.ofNullable(tags),
-      tagsLogic: Optional.ofNullable(tagsLogic),
-      excludeTags: Optional.ofNullable(excludeTags),
-      excludeTagsLogic: Optional.ofNullable(excludeTagsLogic),
-      authors: Optional.ofNullable(authors),
-      authorsLogic: Optional.ofNullable(authorsLogic),
-      sensitiveContent: Optional.ofNullable(sensitiveContent),
-      page: const PositiveInt(1),
-    )));
+    emit(
+      state.copyWith(
+        options: state.options.copyWith(
+          publication: Optional.ofNullable(
+            publication != null ? PositiveInt(publication) : null,
+          ),
+          publicationOperator: Optional.ofNullable(publicationOperator),
+          type: Optional.ofNullable(type),
+          tags: Optional.ofNullable(tags),
+          tagsLogic: Optional.ofNullable(tagsLogic),
+          excludeTags: Optional.ofNullable(excludeTags),
+          excludeTagsLogic: Optional.ofNullable(excludeTagsLogic),
+          authors: Optional.ofNullable(authors),
+          authorsLogic: Optional.ofNullable(authorsLogic),
+          sensitiveContent: Optional.ofNullable(sensitiveContent),
+          page: const PositiveInt(1),
+        ),
+      ),
+    );
     fetchBooks(refresh: true);
   }
 
   void clearFilters() {
     AppLogger.i('Clearing filters', _logTag);
-    emit(state.copyWith(options: const BookPageOptions()));
+    emit(state.copyWith(options: state.options.withoutFilters()));
     fetchBooks(refresh: true);
+  }
+
+  Future<List<FilterOption>>? _tagOptions;
+  Future<List<FilterOption>>? _authorOptions;
+
+  /// Tags for the filter picker; cached, and re-requested after a failure.
+  Future<List<FilterOption>> loadTagOptions() => _tagOptions ??= _cached(
+    () async => [
+      for (final t in await _repository.getTags())
+        FilterOption(id: t.id.value, label: t.name.value),
+    ],
+    () => _tagOptions = null,
+  );
+
+  /// Authors for the filter picker; cached, and re-requested after a failure.
+  Future<List<FilterOption>> loadAuthorOptions() => _authorOptions ??= _cached(
+    () async => [
+      for (final a in await _repository.getAuthors())
+        FilterOption(id: a.id.value, label: a.name.value),
+    ],
+    () => _authorOptions = null,
+  );
+
+  Future<List<FilterOption>> _cached(
+    Future<List<FilterOption>> Function() load,
+    void Function() reset,
+  ) async {
+    try {
+      return await load();
+    } catch (_) {
+      reset();
+      rethrow;
+    }
   }
 
   void clearError() {

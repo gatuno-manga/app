@@ -320,6 +320,60 @@ abstract class AppLocalizations {
   /// **'Excluded Tags'**
   String get booksExcludedTags;
 
+  /// No description provided for @booksAuthors.
+  ///
+  /// In en, this message translates to:
+  /// **'Authors'**
+  String get booksAuthors;
+
+  /// No description provided for @booksFilterAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get booksFilterAdd;
+
+  /// No description provided for @booksFilterSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get booksFilterSearchHint;
+
+  /// No description provided for @booksFilterNoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'No options found'**
+  String get booksFilterNoOptions;
+
+  /// No description provided for @booksFilterLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load options'**
+  String get booksFilterLoadError;
+
+  /// No description provided for @booksFilterRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get booksFilterRetry;
+
+  /// No description provided for @booksFilterDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get booksFilterDone;
+
+  /// No description provided for @booksFilterLogicAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get booksFilterLogicAll;
+
+  /// No description provided for @booksFilterLogicAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get booksFilterLogicAny;
+
   /// No description provided for @booksOperatorBefore.
   ///
   /// In en, this message translates to:
