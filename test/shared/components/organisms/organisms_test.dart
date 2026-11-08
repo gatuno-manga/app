@@ -12,6 +12,9 @@ import '../../../helpers/test_injection.dart';
 
 void main() {
   group('Organisms', () {
+    setUp(registerFailingImageStrategy);
+    tearDown(sl.reset);
+
     testWidgets('MeSettingsList renders logout button', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -36,6 +39,7 @@ void main() {
               isAuthenticated: true,
               isLoading: false,
               displayName: 'User',
+              imageUrl: null,
               onProfilePressed: () {},
               onSignInPressed: () {},
               profileTooltip: 'Profile',
@@ -56,6 +60,7 @@ void main() {
               isAuthenticated: false,
               isLoading: false,
               displayName: '',
+              imageUrl: null,
               onProfilePressed: () {},
               onSignInPressed: () {},
               profileTooltip: 'Profile',
@@ -71,9 +76,6 @@ void main() {
     testWidgets('HomeAppBar passes the profile image to the avatar', (
       tester,
     ) async {
-      await registerFailingImageStrategy();
-      addTearDown(sl.reset);
-
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

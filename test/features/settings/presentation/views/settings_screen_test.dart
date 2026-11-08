@@ -45,11 +45,8 @@ void main() {
     ).thenReturn(AppThemeChoice.system);
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(
-      () => mockUserService.getCurrentUser(),
-    ).thenAnswer((_) async => UserModel.guest);
-    when(
       () => mockUserService.profileStream,
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => Stream.value(UserModel.guest));
 
     viewModel = SettingsViewModel(
       settingsService: mockSettingsService,
@@ -163,13 +160,15 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     when(() => mockAuthService.authenticated).thenReturn(true);
-    when(() => mockUserService.getCurrentUser()).thenAnswer(
-      (_) async => UserModel(
-        id: const UserId('1'),
-        email: const UserEmail('maria@example.com'),
-        roles: const UserRoles(['user']),
-        maxWeightSensitiveContent: const SensitiveContentWeight(0),
-        profilePictureUrl: 'http://x/a.webp',
+    when(() => mockUserService.profileStream).thenAnswer(
+      (_) => Stream.value(
+        UserModel(
+          id: const UserId('1'),
+          email: const UserEmail('maria@example.com'),
+          roles: const UserRoles(['user']),
+          maxWeightSensitiveContent: const SensitiveContentWeight(0),
+          profilePictureUrl: 'http://x/a.webp',
+        ),
       ),
     );
     viewModel = SettingsViewModel(

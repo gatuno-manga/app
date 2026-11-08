@@ -24,6 +24,8 @@ class MockAuthService extends Mock implements AuthService {}
 
 /// Never returns bytes, so every image load ends in the error path.
 class FailingImageLoadingStrategy implements ImageLoadingStrategy {
+  const FailingImageLoadingStrategy();
+
   @override
   Future<Uint8List?> loadImage(
     String url, {
@@ -32,10 +34,12 @@ class FailingImageLoadingStrategy implements ImageLoadingStrategy {
 }
 
 /// Registers only the image strategy, for widget tests that render an
-/// [AppAvatar] with an image but need nothing else from DI.
+/// avatar-bearing widget but need nothing else from DI.
 Future<void> registerFailingImageStrategy() async {
   await sl.reset();
-  sl.registerSingleton<ImageLoadingStrategy>(FailingImageLoadingStrategy());
+  sl.registerSingleton<ImageLoadingStrategy>(
+    const FailingImageLoadingStrategy(),
+  );
 }
 
 class MockTokenManager extends Mock implements TokenManager {}

@@ -37,6 +37,22 @@ void main() {
     registerFallbackValue(const BookPageOptions());
   });
 
+  UserModel user({String? name, String? imageUrl}) => UserModel(
+    id: const UserId('1'),
+    email: const UserEmail('test@example.com'),
+    roles: const UserRoles(['user']),
+    maxWeightSensitiveContent: const SensitiveContentWeight(5),
+    name: name == null ? null : UserDisplayName(name),
+    profilePictureUrl: imageUrl,
+  );
+
+  HomeViewModel buildViewModel() => HomeViewModel(
+    mockAuthService,
+    mockUserService,
+    mockBooksRepository,
+    mockReadingCoordinator,
+  );
+
   setUp(() {
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
@@ -49,11 +65,8 @@ void main() {
     when(() => mockAuthService.authenticated).thenReturn(false);
     when(() => mockAuthService.isInitialized).thenReturn(true);
     when(
-      () => mockUserService.getCurrentUser(),
-    ).thenAnswer((_) async => UserModel.guest);
-    when(
       () => mockUserService.profileStream,
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => Stream.value(UserModel.guest));
 
     when(() => mockBooksRepository.getBooks(any())).thenAnswer(
       (_) async => const BookList(
@@ -70,12 +83,7 @@ void main() {
       ),
     ).thenAnswer((_) async => []);
 
-    viewModel = HomeViewModel(
-      mockAuthService,
-      mockUserService,
-      mockBooksRepository,
-      mockReadingCoordinator,
-    );
+    viewModel = buildViewModel();
   });
 
   group('HomeViewModel', () {
@@ -84,97 +92,39 @@ void main() {
       expect(viewModel.state.isInitialized, isTrue);
     });
 
-    test('should load user when authenticated', () async {
-      final user = UserModel(
-        id: const UserId('1'),
-        email: const UserEmail('test@example.com'),
-        roles: const UserRoles(['user']),
-        maxWeightSensitiveContent: const SensitiveContentWeight(5),
-        name: const UserDisplayName('Test'),
-      );
+    test('starts with the guest user', () {
+      expect(viewModel.state.user, same(UserModel.guest));
+    });
 
+    test('takes the user from the profile stream', () async {
       when(() => mockAuthService.authenticated).thenReturn(true);
-      when(
-        () => mockUserService.getCurrentUser(),
-      ).thenAnswer((_) async => user);
-
-      // Re-initialize to trigger _loadUser
-      viewModel = HomeViewModel(
-        mockAuthService,
-        mockUserService,
-        mockBooksRepository,
-        mockReadingCoordinator,
+      when(() => mockUserService.profileStream).thenAnswer(
+        (_) => Stream.value(user(name: 'Test', imageUrl: 'http://x/1.webp')),
       );
 
-      // Wait for async load
+      viewModel = buildViewModel();
       await Future<void>.delayed(Duration.zero);
 
       expect(viewModel.state.isAuthenticated, isTrue);
-      expect(viewModel.state.displayName, equals('Test'));
+      expect(viewModel.state.user.displayName, 'Test');
+      expect(viewModel.state.user.profilePictureUrl, 'http://x/1.webp');
     });
 
-    test('displayName should be null when not authenticated', () {
-      expect(viewModel.state.displayName, isNull);
-    });
-
-    test('exposes the cached profile image url', () async {
-      final user = UserModel(
-        id: const UserId('1'),
-        email: const UserEmail('test@example.com'),
-        roles: const UserRoles(['user']),
-        maxWeightSensitiveContent: const SensitiveContentWeight(5),
-        name: const UserDisplayName('Test'),
-        profilePictureUrl: 'http://x/1.webp',
-      );
-      when(() => mockAuthService.authenticated).thenReturn(true);
-      when(
-        () => mockUserService.getCurrentUser(),
-      ).thenAnswer((_) async => user);
-
-      viewModel = HomeViewModel(
-        mockAuthService,
-        mockUserService,
-        mockBooksRepository,
-        mockReadingCoordinator,
-      );
-      await Future<void>.delayed(Duration.zero);
-
-      expect(viewModel.state.profileImageUrl, 'http://x/1.webp');
-    });
-
-    test('follows the profile stream', () async {
-      final profiles = StreamController<UserModel?>();
+    test('follows later profile changes', () async {
+      final profiles = StreamController<UserModel>();
       addTearDown(profiles.close);
       when(
         () => mockUserService.profileStream,
       ).thenAnswer((_) => profiles.stream);
-      viewModel = HomeViewModel(
-        mockAuthService,
-        mockUserService,
-        mockBooksRepository,
-        mockReadingCoordinator,
-      );
+      viewModel = buildViewModel();
 
-      profiles.add(
-        UserModel(
-          id: const UserId('1'),
-          email: const UserEmail('test@example.com'),
-          roles: const UserRoles(['user']),
-          maxWeightSensitiveContent: const SensitiveContentWeight(5),
-          name: const UserDisplayName('Fresh'),
-          profilePictureUrl: 'http://x/new.webp',
-        ),
-      );
+      profiles.add(user(name: 'Fresh', imageUrl: 'http://x/new.webp'));
       await Future<void>.delayed(Duration.zero);
+      expect(viewModel.state.user.profilePictureUrl, 'http://x/new.webp');
 
-      expect(viewModel.state.displayName, 'Fresh');
-      expect(viewModel.state.profileImageUrl, 'http://x/new.webp');
-
-      profiles.add(null);
+      profiles.add(UserModel.guest);
       await Future<void>.delayed(Duration.zero);
-
-      expect(viewModel.state.displayName, isNull);
-      expect(viewModel.state.profileImageUrl, isNull);
+      expect(viewModel.state.user, same(UserModel.guest));
     });
   });
 }

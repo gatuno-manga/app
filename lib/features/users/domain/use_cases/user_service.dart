@@ -18,30 +18,41 @@ class UserService {
   final UserStorage _storage;
   static const String _logTag = 'UserService';
 
-  final BehaviorSubject<UserModel?> _profileSubject = BehaviorSubject();
-  late final StreamSubscription<AuthState> _authSubscription;
+  final BehaviorSubject<UserModel> _profileSubject = BehaviorSubject.seeded(
+    UserModel.guest,
+  );
+  StreamSubscription<AuthState>? _authSubscription;
 
-  /// The cached `/me` profile whenever it changes: after a refresh or an
-  /// upload, and null once the account signs out. Replays the last value.
-  Stream<UserModel?> get profileStream => _profileSubject.stream;
+  /// The current profile, replayed to new listeners: guest until sign-in,
+  /// then the cached `/me` user, then every refresh or upload.
+  Stream<UserModel> get profileStream => _profileSubject.stream;
 
   UserService(
     this._authService, {
     required UserRemoteDataSource remote,
     required UserStorage storage,
   }) : _remote = remote,
-       _storage = storage {
-    _authSubscription = _authService.authStateStream.listen(_onAuthChanged);
+       _storage = storage;
+
+  /// Starts following auth state. Called from `initDI` once the Dio
+  /// interceptors are installed, so the sign-in `/me` fetch carries the
+  /// token; registration alone must not resolve AuthService.
+  void init() {
+    _authSubscription ??= _authService.authStateStream.distinct().listen(
+      _onAuthChanged,
+    );
   }
 
   /// One `/me` fetch per sign-in keeps every avatar current without any
-  /// screen having to ask; a failed fetch keeps the cache.
-  void _onAuthChanged(AuthState authState) {
+  /// screen having to ask; the cached user shows first and a failed fetch
+  /// keeps it.
+  Future<void> _onAuthChanged(AuthState authState) async {
     switch (authState) {
       case AuthState.authenticated:
-        refreshProfile();
+        _profileSubject.add(await getCurrentUser());
+        await refreshProfile();
       case AuthState.unauthenticated:
-        _profileSubject.add(null);
+        _profileSubject.add(UserModel.guest);
       case AuthState.uninitialized:
         break;
     }
@@ -132,12 +143,14 @@ class UserService {
 
   Future<void> logout() async {
     await _storage.clear();
-    _profileSubject.add(null);
+    // Drop the avatar now; AuthService only reports the sign-out after the
+    // backend round-trip.
+    _profileSubject.add(UserModel.guest);
     await _authService.logout();
   }
 
   void dispose() {
-    _authSubscription.cancel();
+    _authSubscription?.cancel();
     _profileSubject.close();
   }
 }

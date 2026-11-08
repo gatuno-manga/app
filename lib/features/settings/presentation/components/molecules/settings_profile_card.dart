@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 
 class SettingsProfileCard extends StatelessWidget {
@@ -22,6 +24,7 @@ class SettingsProfileCard extends StatelessWidget {
       leading: AppAvatar(
         name: email != null ? name : null,
         imageUrl: imageUrl,
+        strategy: sl<ImageLoadingStrategy>(),
         radius: 24,
       ),
       title: Text(

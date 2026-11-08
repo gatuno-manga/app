@@ -4,6 +4,12 @@ import 'package:gatuno/features/home/presentation/components/molecules/login_ico
 import 'package:gatuno/features/home/presentation/components/molecules/user_profile_icon.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/home/presentation/views/home_screen.dart';
+import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 
 import '../../../../helpers/pump_app.dart';
@@ -11,6 +17,15 @@ import '../../../../helpers/test_injection.dart';
 
 void main() {
   late MockHomeViewModel viewModel;
+
+  final maria = UserModel(
+    id: const UserId('1'),
+    email: const UserEmail('maria@example.com'),
+    roles: const UserRoles(['user']),
+    maxWeightSensitiveContent: const SensitiveContentWeight(0),
+    name: const UserDisplayName('Maria'),
+    profilePictureUrl: 'http://x/a.webp',
+  );
 
   Future<void> pumpHome(WidgetTester tester, HomeState state) async {
     when(() => viewModel.stateStream).thenAnswer((_) => const Stream.empty());
@@ -31,8 +46,7 @@ void main() {
       HomeState.initial().copyWith(
         isInitialized: true,
         isAuthenticated: true,
-        displayName: () => 'Maria',
-        profileImageUrl: () => 'http://x/a.webp',
+        user: maria,
       ),
     );
 
@@ -66,7 +80,7 @@ void main() {
       HomeState.initial().copyWith(
         isInitialized: true,
         isAuthenticated: true,
-        displayName: () => 'Maria',
+        user: maria,
       ),
     );
 

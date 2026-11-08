@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/shared/components/atoms/app_clickable_action.dart';
 
 class UserProfileIcon extends StatelessWidget {
   final String? displayName;
+
+  /// Profile picture over the initials; null keeps the initials.
   final String? imageUrl;
   final String tooltip;
   final VoidCallback onPressed;
@@ -11,7 +15,7 @@ class UserProfileIcon extends StatelessWidget {
   const UserProfileIcon({
     super.key,
     required this.displayName,
-    this.imageUrl,
+    required this.imageUrl,
     required this.tooltip,
     required this.onPressed,
   });
@@ -21,7 +25,12 @@ class UserProfileIcon extends StatelessWidget {
     return AppClickableAction(
       tooltip: tooltip,
       onPressed: onPressed,
-      child: AppAvatar(name: displayName, imageUrl: imageUrl, radius: 16),
+      child: AppAvatar(
+        name: displayName,
+        imageUrl: imageUrl,
+        strategy: sl<ImageLoadingStrategy>(),
+        radius: 16,
+      ),
     );
   }
 }

@@ -8,6 +8,9 @@ import '../../../../../helpers/test_injection.dart';
 
 void main() {
   group('SettingsProfileCard', () {
+    setUp(registerFailingImageStrategy);
+    tearDown(sl.reset);
+
     testWidgets('renders name and email when provided', (tester) async {
       await tester.pumpApp(
         Scaffold(
@@ -38,9 +41,6 @@ void main() {
     });
 
     testWidgets('shows the profile image over the initials', (tester) async {
-      await registerFailingImageStrategy();
-      addTearDown(sl.reset);
-
       await tester.pumpApp(
         Scaffold(
           body: SettingsProfileCard(

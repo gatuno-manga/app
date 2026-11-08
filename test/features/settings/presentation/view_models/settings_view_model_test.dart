@@ -54,11 +54,8 @@ void main() {
     ).thenReturn(AppThemeChoice.system);
     when(() => mockAuthService.authenticated).thenReturn(true);
     when(
-      () => mockUserService.getCurrentUser(),
-    ).thenAnswer((_) async => UserModel.guest);
-    when(
       () => mockUserService.profileStream,
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => Stream.value(UserModel.guest));
 
     viewModel = buildViewModel();
   });
@@ -74,8 +71,8 @@ void main() {
 
       // User was mocked to guest in setup, let's override and re-init for this test
       when(
-        () => mockUserService.getCurrentUser(),
-      ).thenAnswer((_) async => user);
+        () => mockUserService.profileStream,
+      ).thenAnswer((_) => Stream.value(user));
       viewModel = buildViewModel();
       await Future<void>.delayed(Duration.zero);
 
@@ -127,7 +124,7 @@ void main() {
     });
 
     test('follows the profile stream', () async {
-      final profiles = StreamController<UserModel?>();
+      final profiles = StreamController<UserModel>();
       addTearDown(profiles.close);
       when(
         () => mockUserService.profileStream,
@@ -145,7 +142,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(viewModel.state.user, same(fresh));
 
-      profiles.add(null);
+      profiles.add(UserModel.guest);
       await Future<void>.delayed(Duration.zero);
       expect(viewModel.state.user, same(UserModel.guest));
     });

@@ -9,6 +9,9 @@ import '../../../helpers/test_injection.dart';
 
 void main() {
   group('Molecules', () {
+    setUp(registerFailingImageStrategy);
+    tearDown(sl.reset);
+
     testWidgets('UserProfileHeader renders name and email', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
@@ -32,6 +35,7 @@ void main() {
           home: Scaffold(
             body: UserProfileIcon(
               displayName: 'John Doe',
+              imageUrl: null,
               tooltip: 'Profile',
               onPressed: () {},
             ),
@@ -46,6 +50,7 @@ void main() {
           home: Scaffold(
             body: UserProfileIcon(
               displayName: null,
+              imageUrl: null,
               tooltip: 'Profile',
               onPressed: () {},
             ),
@@ -59,9 +64,6 @@ void main() {
     testWidgets('UserProfileIcon shows the profile image over the initials', (
       tester,
     ) async {
-      await registerFailingImageStrategy();
-      addTearDown(sl.reset);
-
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -80,6 +82,26 @@ void main() {
         'http://x/a.webp',
       );
       expect(find.text('J'), findsOneWidget);
+    });
+
+    testWidgets('UserProfileIcon announces only its tooltip', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: UserProfileIcon(
+              displayName: 'Maria',
+              imageUrl: null,
+              tooltip: 'Profile',
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel('Profile'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('M')), findsNothing);
+      semantics.dispose();
     });
   });
 }

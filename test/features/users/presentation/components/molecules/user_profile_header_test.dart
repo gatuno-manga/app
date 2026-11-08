@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/users/presentation/components/molecules/user_profile_header.dart';
 
+import '../../../../../helpers/test_injection.dart';
+
 void main() {
+  setUp(registerFailingImageStrategy);
+  tearDown(sl.reset);
+
   testWidgets('tapping the avatar edit badge below the banner triggers edit', (
     tester,
   ) async {

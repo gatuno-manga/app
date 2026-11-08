@@ -72,7 +72,7 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
   final UserService _userService;
   late final StreamSubscription<void> _settingsSubscription;
   late final StreamSubscription<AuthState> _authSubscription;
-  late final StreamSubscription<UserModel?> _profileSubscription;
+  late final StreamSubscription<UserModel> _profileSubscription;
 
   SettingsViewModel({
     required SettingsService settingsService,
@@ -89,7 +89,7 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
       (_) => _syncState(),
     );
     _profileSubscription = _userService.profileStream.listen(
-      (user) => emit(state.copyWith(user: user ?? UserModel.guest)),
+      (user) => emit(state.copyWith(user: user)),
     );
     _syncState();
   }
@@ -103,12 +103,6 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
         isAuthenticated: _authService.authenticated,
       ),
     );
-    _loadUser();
-  }
-
-  /// The cached profile carries the image URLs the JWT does not.
-  Future<void> _loadUser() async {
-    emit(state.copyWith(user: await _userService.getCurrentUser()));
   }
 
   @override

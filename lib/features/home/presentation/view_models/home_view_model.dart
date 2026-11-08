@@ -14,8 +14,7 @@ import 'package:equatable/equatable.dart';
 class HomeState extends Equatable {
   final bool isAuthenticated;
   final bool isInitialized;
-  final String? displayName;
-  final String? profileImageUrl;
+  final UserModel user;
 
   final List<Book> featuredBooks;
   final List<Book> continueReadingBooks;
@@ -30,8 +29,7 @@ class HomeState extends Equatable {
   const HomeState({
     required this.isAuthenticated,
     required this.isInitialized,
-    required this.displayName,
-    required this.profileImageUrl,
+    required this.user,
     required this.featuredBooks,
     required this.continueReadingBooks,
     required this.latestUpdatedBooks,
@@ -43,11 +41,10 @@ class HomeState extends Equatable {
   });
 
   factory HomeState.initial() {
-    return const HomeState(
+    return HomeState(
       isAuthenticated: false,
       isInitialized: false,
-      displayName: null,
-      profileImageUrl: null,
+      user: UserModel.guest,
       featuredBooks: [],
       continueReadingBooks: [],
       latestUpdatedBooks: [],
@@ -62,8 +59,7 @@ class HomeState extends Equatable {
   HomeState copyWith({
     bool? isAuthenticated,
     bool? isInitialized,
-    String? Function()? displayName,
-    String? Function()? profileImageUrl,
+    UserModel? user,
     List<Book>? featuredBooks,
     List<Book>? continueReadingBooks,
     List<Book>? latestUpdatedBooks,
@@ -76,10 +72,7 @@ class HomeState extends Equatable {
     return HomeState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isInitialized: isInitialized ?? this.isInitialized,
-      displayName: displayName != null ? displayName() : this.displayName,
-      profileImageUrl: profileImageUrl != null
-          ? profileImageUrl()
-          : this.profileImageUrl,
+      user: user ?? this.user,
       featuredBooks: featuredBooks ?? this.featuredBooks,
       continueReadingBooks: continueReadingBooks ?? this.continueReadingBooks,
       latestUpdatedBooks: latestUpdatedBooks ?? this.latestUpdatedBooks,
@@ -97,8 +90,7 @@ class HomeState extends Equatable {
   List<Object?> get props => [
     isAuthenticated,
     isInitialized,
-    displayName,
-    profileImageUrl,
+    user,
     featuredBooks,
     continueReadingBooks,
     latestUpdatedBooks,
@@ -116,7 +108,7 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   final BooksRepository _booksRepository;
   final ReadingProgressCoordinator _readingCoordinator;
   late final StreamSubscription<AuthState> _authSubscription;
-  late final StreamSubscription<UserModel?> _profileSubscription;
+  late final StreamSubscription<UserModel> _profileSubscription;
 
   static const String _logTag = 'HomeViewModel';
 
@@ -129,7 +121,9 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     _authSubscription = _authService.authStateStream.listen(
       (_) => _onAuthChanged(),
     );
-    _profileSubscription = _userService.profileStream.listen(_applyUser);
+    _profileSubscription = _userService.profileStream.listen(
+      (user) => emit(state.copyWith(user: user)),
+    );
     _onAuthChanged(); // Initialize state from auth service
     _loadBooksData();
     _loadRecentlyAdded();
@@ -142,23 +136,7 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
         isInitialized: _authService.isInitialized,
       ),
     );
-    _loadUser();
     _loadContinueReading();
-  }
-
-  Future<void> _loadUser() async {
-    _applyUser(await _userService.getCurrentUser());
-  }
-
-  /// A null profile (signed out) clears the header the same way a guest does.
-  void _applyUser(UserModel? user) {
-    final signedIn = user != null && !user.isGuest;
-    emit(
-      state.copyWith(
-        displayName: () => signedIn ? user.displayName : null,
-        profileImageUrl: () => signedIn ? user.profilePictureUrl : null,
-      ),
-    );
   }
 
   Future<void> _loadBooksData() async {

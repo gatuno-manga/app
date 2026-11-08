@@ -23,12 +23,20 @@ void main() {
 
   tearDown(() => sl.reset());
 
-  test('UserService starts listening to auth state at registration', () {
+  test('registers UserService without touching auth state', () {
     initUsersInjection(sl);
 
-    // Eager creation: the sign-in refresh must run even before any screen
-    // resolves the service.
-    verify(() => authService.authStateStream).called(1);
+    // Listening starts in initDI (UserService.init) only after the Dio
+    // interceptors are installed, so the first /me carries the token.
+    verifyNever(() => authService.authStateStream);
     expect(sl.isRegistered<UserService>(), isTrue);
+  });
+
+  test('init attaches the auth listener once', () {
+    initUsersInjection(sl);
+
+    sl<UserService>().init();
+
+    verify(() => authService.authStateStream).called(1);
   });
 }

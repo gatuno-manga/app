@@ -19,7 +19,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.isAuthenticated,
     required this.isLoading,
     required this.displayName,
-    this.imageUrl,
+    required this.imageUrl,
     required this.onProfilePressed,
     required this.onSignInPressed,
     required this.profileTooltip,

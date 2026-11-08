@@ -255,13 +255,17 @@ void main() {
 
     tearDown(() => service.dispose());
 
+    test('starts as guest', () async {
+      expect(await service.profileStream.first, same(UserModel.guest));
+    });
+
     test('emits the profile stored by refreshProfile', () async {
       when(() => remote.fetchMe()).thenAnswer((_) async => profile('1'));
-      final next = service.profileStream.first;
+      final next = service.profileStream.skip(1).first;
 
       await service.refreshProfile();
 
-      expect((await next)?.profilePictureUrl, 'http://x/1.webp');
+      expect((await next).profilePictureUrl, 'http://x/1.webp');
     });
 
     test('emits the profile stored by uploadProfileImage', () async {
@@ -272,7 +276,7 @@ void main() {
           fileName: any(named: 'fileName'),
         ),
       ).thenAnswer((_) async => profile('1'));
-      final next = service.profileStream.first;
+      final next = service.profileStream.skip(1).first;
 
       await service.uploadProfileImage(
         kind: ProfileImageKind.avatar,
@@ -280,22 +284,27 @@ void main() {
         bytes: Uint8List(1),
       );
 
-      expect((await next)?.id, const UserId('1'));
+      expect((await next).id, const UserId('1'));
     });
 
-    test('emits null after logout', () async {
-      when(() => mockAuthService.logout()).thenAnswer((_) async {});
-      final next = service.profileStream.first;
+    test('emits guest before the backend logout round-trip', () async {
+      final backendLogout = Completer<void>();
+      when(
+        () => mockAuthService.logout(),
+      ).thenAnswer((_) => backendLogout.future);
+      final next = service.profileStream.skip(1).first;
 
-      await service.logout();
+      final logout = service.logout();
 
-      expect(await next, isNull);
+      expect(await next, same(UserModel.guest));
+      backendLogout.complete();
+      await logout;
     });
 
     test('does not emit when the refresh fails', () async {
       when(() => remote.fetchMe()).thenThrow(Exception('offline'));
-      final events = <UserModel?>[];
-      final sub = service.profileStream.listen(events.add);
+      final events = <UserModel>[];
+      final sub = service.profileStream.skip(1).listen(events.add);
 
       await service.refreshProfile();
       await Future<void>.delayed(Duration.zero);
@@ -318,6 +327,13 @@ void main() {
       'profileImageUrl': 'http://x/$id.webp',
     };
 
+    String validToken(String sub) => createMockToken({
+      'sub': sub,
+      'email': 'a@b.c',
+      'roles': ['user'],
+      'exp': (DateTime.now().millisecondsSinceEpoch ~/ 1000) + 3600,
+    });
+
     setUp(() {
       storage = MockUserStorage();
       remote = MockRemote();
@@ -325,6 +341,10 @@ void main() {
       when(
         () => mockAuthService.authStateStream,
       ).thenAnswer((_) => auth.stream);
+      when(
+        () => mockAuthService.getToken(),
+      ).thenAnswer((_) async => validToken('1'));
+      when(() => storage.readProfile()).thenAnswer((_) async => null);
       when(() => storage.writeProfile(any())).thenAnswer((_) async {});
       when(() => remote.fetchMe()).thenAnswer((_) async => profile('1'));
       service = UserService(mockAuthService, remote: remote, storage: storage);
@@ -335,28 +355,60 @@ void main() {
       await auth.close();
     });
 
-    test('fetches /me once when auth becomes authenticated', () async {
-      final next = service.profileStream.first;
+    test('does not listen to auth state until init', () {
+      verifyNever(() => mockAuthService.authStateStream);
+
+      service.init();
+
+      verify(() => mockAuthService.authStateStream).called(1);
+    });
+
+    test('emits the cached user, then the refreshed one, on sign-in', () async {
+      final fetched = Completer<Map<String, dynamic>>();
+      when(() => remote.fetchMe()).thenAnswer((_) => fetched.future);
+      final events = <UserModel>[];
+      final sub = service.profileStream.skip(1).listen(events.add);
+      service.init();
 
       auth.add(AuthState.authenticated);
+      await Future<void>.delayed(Duration.zero);
 
-      expect((await next)?.profilePictureUrl, 'http://x/1.webp');
+      expect(events.map((u) => u.profilePictureUrl), [null]);
+      expect(events.single.id, const UserId('1'));
+
+      fetched.complete(profile('1'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.last.profilePictureUrl, 'http://x/1.webp');
+      await sub.cancel();
+    });
+
+    test('fetches /me once even when authenticated is re-emitted', () async {
+      service.init();
+
+      auth.add(AuthState.authenticated);
+      auth.add(AuthState.authenticated);
+      await Future<void>.delayed(Duration.zero);
+
       verify(() => remote.fetchMe()).called(1);
     });
 
     test(
-      'emits null without fetching when auth becomes unauthenticated',
+      'emits guest without fetching when auth becomes unauthenticated',
       () async {
-        final next = service.profileStream.first;
+        final next = service.profileStream.skip(1).first;
+        service.init();
 
         auth.add(AuthState.unauthenticated);
 
-        expect(await next, isNull);
+        expect(await next, same(UserModel.guest));
         verifyNever(() => remote.fetchMe());
       },
     );
 
     test('ignores the uninitialized state', () async {
+      service.init();
+
       auth.add(AuthState.uninitialized);
       await Future<void>.delayed(Duration.zero);
 
@@ -364,6 +416,7 @@ void main() {
     });
 
     test('stops listening after dispose', () async {
+      service.init();
       service.dispose();
 
       auth.add(AuthState.authenticated);
