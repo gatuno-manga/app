@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import '../../../../core/network/exceptions.dart';
 import '../repositories/auth_repository.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../core/utils/jwt_decoder.dart';
@@ -111,6 +112,9 @@ class AuthService with WidgetsBindingObserver {
       );
       _authStateSubject.add(AuthState.authenticated);
       return true;
+    } on MfaRequiredException {
+      AppLogger.i('SignIn requires MFA for: $redactedEmail', _logTag);
+      rethrow;
     } catch (e, stackTrace) {
       AppLogger.e(
         'SignIn failed in AuthService for: $redactedEmail',
@@ -118,6 +122,20 @@ class AuthService with WidgetsBindingObserver {
         stackTrace,
         _logTag,
       );
+      rethrow;
+    }
+  }
+
+  /// Completes a sign-in that was interrupted by an MFA challenge.
+  Future<bool> verifyMfaLogin(String mfaToken, String code) async {
+    try {
+      final token = await _authRepository.verifyMfaLogin(mfaToken, code);
+      await _tokenManager.saveToken(token);
+      _authStateSubject.add(AuthState.authenticated);
+      AppLogger.i('MFA login completed and token saved', _logTag);
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.e('MFA login failed in AuthService', e, stackTrace, _logTag);
       rethrow;
     }
   }

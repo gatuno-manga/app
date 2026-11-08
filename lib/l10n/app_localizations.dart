@@ -1135,6 +1135,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong with this image. Please try again.'**
   String get userImageErrorUnknown;
+
+  /// No description provided for @mfaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication'**
+  String get mfaTitle;
+
+  /// No description provided for @mfaStatusEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication is on'**
+  String get mfaStatusEnabled;
+
+  /// No description provided for @mfaStatusDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication is off'**
+  String get mfaStatusDisabled;
+
+  /// No description provided for @mfaBackupCodesRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No backup codes left} =1{1 backup code left} other{{count} backup codes left}}'**
+  String mfaBackupCodesRemaining(int count);
+
+  /// No description provided for @mfaEnableButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get mfaEnableButton;
+
+  /// No description provided for @mfaDisableButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get mfaDisableButton;
+
+  /// No description provided for @mfaReconfigureButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconfigure'**
+  String get mfaReconfigureButton;
+
+  /// No description provided for @mfaReconfigureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconfigure two-factor authentication?'**
+  String get mfaReconfigureTitle;
+
+  /// No description provided for @mfaReconfigureWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current authenticator and all backup codes will stop working immediately.'**
+  String get mfaReconfigureWarning;
+
+  /// No description provided for @mfaReconfigureConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconfigure'**
+  String get mfaReconfigureConfirm;
+
+  /// No description provided for @mfaDisableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable two-factor authentication'**
+  String get mfaDisableTitle;
+
+  /// No description provided for @mfaDisableDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a code from your authenticator app or a backup code.'**
+  String get mfaDisableDescription;
+
+  /// No description provided for @mfaDisableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get mfaDisableConfirm;
+
+  /// No description provided for @mfaSetupInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this secret to your authenticator app (or password manager), then enter the 6-digit code it shows.'**
+  String get mfaSetupInstructions;
+
+  /// No description provided for @mfaCopySecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy secret'**
+  String get mfaCopySecret;
+
+  /// No description provided for @mfaOpenAuthenticator.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in authenticator app'**
+  String get mfaOpenAuthenticator;
+
+  /// No description provided for @mfaCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get mfaCopied;
+
+  /// No description provided for @mfaConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get mfaConfirmButton;
+
+  /// No description provided for @mfaBackupCodesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your backup codes'**
+  String get mfaBackupCodesTitle;
+
+  /// No description provided for @mfaBackupCodesWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Each code works once if you lose access to your authenticator. They will not be shown again.'**
+  String get mfaBackupCodesWarning;
+
+  /// No description provided for @mfaShareCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Save or share'**
+  String get mfaShareCodes;
+
+  /// No description provided for @mfaCopyCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get mfaCopyCodes;
+
+  /// No description provided for @mfaSavedConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I saved these codes'**
+  String get mfaSavedConfirm;
+
+  /// No description provided for @mfaDoneButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get mfaDoneButton;
+
+  /// No description provided for @mfaRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get mfaRetryButton;
+
+  /// No description provided for @mfaCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication code'**
+  String get mfaCodeLabel;
+
+  /// No description provided for @mfaCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your authentication code'**
+  String get mfaCodeRequired;
+
+  /// No description provided for @mfaChallengeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify it\'s you'**
+  String get mfaChallengeTitle;
+
+  /// No description provided for @mfaChallengeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code from your authenticator app, or a backup code.'**
+  String get mfaChallengeDescription;
+
+  /// No description provided for @mfaVerifyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get mfaVerifyButton;
+
+  /// No description provided for @mfaErrorInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code is not valid. Try again.'**
+  String get mfaErrorInvalidCode;
+
+  /// No description provided for @mfaErrorTooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Wait a minute and try again.'**
+  String get mfaErrorTooManyAttempts;
+
+  /// No description provided for @mfaErrorChallengeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification expired. Please sign in again.'**
+  String get mfaErrorChallengeExpired;
+
+  /// No description provided for @mfaErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check your connection.'**
+  String get mfaErrorNetwork;
+
+  /// No description provided for @mfaErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get mfaErrorUnknown;
+
+  /// No description provided for @settingsMfaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your account with an authenticator app'**
+  String get settingsMfaDesc;
+
+  /// No description provided for @mfaNoAuthenticatorApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open an authenticator app. Copy the secret and add it manually.'**
+  String get mfaNoAuthenticatorApp;
+
+  /// No description provided for @mfaSaveCodesFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your backup codes before leaving this screen.'**
+  String get mfaSaveCodesFirst;
 }
 
 class _AppLocalizationsDelegate

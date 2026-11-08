@@ -27,6 +27,17 @@ class AuthRepositoryImpl implements AuthRepository {
       final data = response.data;
       if ((response.statusCode == 200 || response.statusCode == 201) &&
           data is Map<String, dynamic>) {
+        if (data['mfaRequired'] == true) {
+          final mfaToken = data['mfaToken'];
+          if (mfaToken is! String || mfaToken.isEmpty) {
+            throw ServerException(
+              message: 'SignIn failed: missing MFA challenge token',
+              statusCode: response.statusCode,
+            );
+          }
+          AppLogger.i('MFA required for: $redactedEmail', _logTag);
+          throw MfaRequiredException(mfaToken);
+        }
         AppLogger.i('SignIn success for: $redactedEmail', _logTag);
         return AuthResponse.fromJson(data).token;
       } else {
@@ -59,6 +70,44 @@ class AuthRepositoryImpl implements AuthRepository {
         _logTag,
       );
       throw AuthException('An unexpected error occurred during signIn');
+    }
+  }
+
+  @override
+  Future<AuthToken> verifyMfaLogin(String mfaToken, String code) async {
+    AppLogger.i('MFA login verification attempt', _logTag);
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        ApiConstants.mfaVerifyLogin,
+        data: {'mfaToken': mfaToken, 'code': code},
+      );
+      final data = response.data;
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          data is Map<String, dynamic>) {
+        AppLogger.i('MFA login verification success', _logTag);
+        return AuthResponse.fromJson(data).token;
+      }
+      throw ServerException(
+        message: 'MFA verification failed: Invalid response format',
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      AppLogger.w('MFA login verification failed: ${e.message}', _logTag);
+      final mapped = ApiExceptionHandler.handle(e);
+      // The backend does not distinguish expired from malformed challenge
+      // tokens; both mean the user must sign in again.
+      if (mapped is UnauthorizedException &&
+          mapped.message.contains('challenge token')) {
+        throw MfaChallengeExpiredException();
+      }
+      throw mapped;
+    } on AppExceptions {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.e('MFA verification unexpected error', e, stackTrace, _logTag);
+      throw AuthException(
+        'An unexpected error occurred during MFA verification',
+      );
     }
   }
 

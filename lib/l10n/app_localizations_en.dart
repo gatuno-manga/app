@@ -560,4 +560,138 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get userImageErrorUnknown =>
       'Something went wrong with this image. Please try again.';
+
+  @override
+  String get mfaTitle => 'Two-factor authentication';
+
+  @override
+  String get mfaStatusEnabled => 'Two-factor authentication is on';
+
+  @override
+  String get mfaStatusDisabled => 'Two-factor authentication is off';
+
+  @override
+  String mfaBackupCodesRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count backup codes left',
+      one: '1 backup code left',
+      zero: 'No backup codes left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mfaEnableButton => 'Enable';
+
+  @override
+  String get mfaDisableButton => 'Disable';
+
+  @override
+  String get mfaReconfigureButton => 'Reconfigure';
+
+  @override
+  String get mfaReconfigureTitle => 'Reconfigure two-factor authentication?';
+
+  @override
+  String get mfaReconfigureWarning =>
+      'Your current authenticator and all backup codes will stop working immediately.';
+
+  @override
+  String get mfaReconfigureConfirm => 'Reconfigure';
+
+  @override
+  String get mfaDisableTitle => 'Disable two-factor authentication';
+
+  @override
+  String get mfaDisableDescription =>
+      'Enter a code from your authenticator app or a backup code.';
+
+  @override
+  String get mfaDisableConfirm => 'Disable';
+
+  @override
+  String get mfaSetupInstructions =>
+      'Add this secret to your authenticator app (or password manager), then enter the 6-digit code it shows.';
+
+  @override
+  String get mfaCopySecret => 'Copy secret';
+
+  @override
+  String get mfaOpenAuthenticator => 'Open in authenticator app';
+
+  @override
+  String get mfaCopied => 'Copied';
+
+  @override
+  String get mfaConfirmButton => 'Confirm';
+
+  @override
+  String get mfaBackupCodesTitle => 'Save your backup codes';
+
+  @override
+  String get mfaBackupCodesWarning =>
+      'Each code works once if you lose access to your authenticator. They will not be shown again.';
+
+  @override
+  String get mfaShareCodes => 'Save or share';
+
+  @override
+  String get mfaCopyCodes => 'Copy all';
+
+  @override
+  String get mfaSavedConfirm => 'I saved these codes';
+
+  @override
+  String get mfaDoneButton => 'Done';
+
+  @override
+  String get mfaRetryButton => 'Try again';
+
+  @override
+  String get mfaCodeLabel => 'Authentication code';
+
+  @override
+  String get mfaCodeRequired => 'Enter your authentication code';
+
+  @override
+  String get mfaChallengeTitle => 'Verify it\'s you';
+
+  @override
+  String get mfaChallengeDescription =>
+      'Enter the 6-digit code from your authenticator app, or a backup code.';
+
+  @override
+  String get mfaVerifyButton => 'Verify';
+
+  @override
+  String get mfaErrorInvalidCode => 'That code is not valid. Try again.';
+
+  @override
+  String get mfaErrorTooManyAttempts =>
+      'Too many attempts. Wait a minute and try again.';
+
+  @override
+  String get mfaErrorChallengeExpired =>
+      'Verification expired. Please sign in again.';
+
+  @override
+  String get mfaErrorNetwork =>
+      'Could not reach the server. Check your connection.';
+
+  @override
+  String get mfaErrorUnknown => 'Something went wrong. Please try again.';
+
+  @override
+  String get settingsMfaDesc =>
+      'Protect your account with an authenticator app';
+
+  @override
+  String get mfaNoAuthenticatorApp =>
+      'Could not open an authenticator app. Copy the secret and add it manually.';
+
+  @override
+  String get mfaSaveCodesFirst =>
+      'Save your backup codes before leaving this screen.';
 }

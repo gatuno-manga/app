@@ -5,6 +5,7 @@ import '../value_objects/password.dart';
 abstract class AuthRepository {
   Future<AuthToken> signIn(EmailAddress email, Password password);
   Future<void> signUp(EmailAddress email, Password password);
+  Future<AuthToken> verifyMfaLogin(String mfaToken, String code);
   Future<AuthToken> refreshToken();
   Future<void> logout();
 }

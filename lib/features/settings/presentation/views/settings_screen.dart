@@ -54,7 +54,7 @@ class SettingsPage extends StatelessWidget {
       initialData: viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return SettingsTemplate(
           appBarTitle: Text(l10n.settingsTitle),
           profileCard: SettingsProfileCard(
@@ -79,7 +79,18 @@ class SettingsPage extends StatelessWidget {
             value: state.sensitiveContentEnabled,
             onChanged: (value) => viewModel.setSensitiveContentEnabled(value),
           ),
-          apiSectionHeader: SettingsSectionHeader(title: l10n.settingsApiSection),
+          securityTile: state.isAuthenticated
+              ? ListTile(
+                  title: Text(l10n.mfaTitle),
+                  subtitle: Text(l10n.settingsMfaDesc),
+                  leading: const Icon(Icons.shield_outlined),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/settings/mfa'),
+                )
+              : null,
+          apiSectionHeader: SettingsSectionHeader(
+            title: l10n.settingsApiSection,
+          ),
           apiForm: SettingsApiForm(
             initialUrl: state.apiUrl ?? '',
             isLoading: state.isLoading,

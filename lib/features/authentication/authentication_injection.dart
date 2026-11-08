@@ -3,7 +3,9 @@ import '../../core/network/dio_client.dart';
 import '../../core/network/token_provider.dart';
 import 'data/data_sources/auth_local_data_source.dart';
 import 'data/repositories/auth_repository_impl.dart';
+import 'data/repositories/mfa_repository_impl.dart';
 import 'domain/repositories/auth_repository.dart';
+import 'domain/repositories/mfa_repository.dart';
 import 'domain/use_cases/auth_service.dart';
 import 'domain/use_cases/token_manager.dart';
 
@@ -14,6 +16,10 @@ void initAuthenticationInjection(GetIt sl) {
   // Repositories
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl<DioClient>().dio),
+  );
+
+  sl.registerLazySingleton<MfaRepository>(
+    () => MfaRepositoryImpl(sl<DioClient>().dio),
   );
 
   // Token Management

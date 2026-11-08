@@ -8,6 +8,7 @@ import '../components/organisms/signin_form.dart';
 import '../components/templates/auth_template.dart';
 import '../../domain/use_cases/auth_service.dart';
 import '../view_models/signin_view_model.dart';
+import 'mfa_challenge_screen.dart';
 import '../../../../core/di/injection.dart';
 
 class SignInPage extends StatefulWidget {
@@ -38,6 +39,18 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   void _onStateChanged(SignInState state) {
+    final mfaToken = state.mfaToken;
+    if (mfaToken != null && mounted) {
+      _viewModel.clearMfaChallenge();
+      context.push(
+        '/auth/mfa',
+        extra: MfaChallengeArgs(
+          mfaToken: mfaToken,
+          redirectUrl: widget.redirectUrl,
+        ),
+      );
+      return;
+    }
     if (state.errorMessage != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -71,7 +84,7 @@ class _SignInPageState extends State<SignInPage> {
       initialData: _viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return AuthTemplate(
           onBack: () {
             if (context.canPop()) {
