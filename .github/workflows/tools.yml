@@ -29,3 +29,8 @@ jobs:
           version: v0.2.0
           check-issues: 'true'
           check-repo: 'true'
+          # The default GITHUB_TOKEN (contents: read) cannot read merge settings
+          # (squash/rebase/delete-branch), so repo-sync would report a false
+          # "in sync". Check only labels and milestones here; verify the merge
+          # settings locally with `just repo-check`.
+          repo-sync-args: '--labels --milestones'

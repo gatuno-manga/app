@@ -36,3 +36,7 @@ fmt *files='.':
 # Apply automated Dart fixes (defaults to the whole project)
 fix *files='.':
     dart fix --apply {{ files }}
+
+# Verify repo settings, labels and milestones against tools.toml (needs a token that can read merge settings)
+repo-check:
+    repo-sync --check
