@@ -229,6 +229,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksSortOldestPublished => 'Oldest Published';
 
   @override
+  String get booksViewOptions => 'View options';
+
+  @override
+  String get booksViewGrid => 'Grid';
+
+  @override
+  String get booksViewList => 'List';
+
+  @override
+  String get booksViewCover => 'Covers';
+
+  @override
+  String get booksViewColumns => 'Columns';
+
+  @override
+  String get booksViewNavigation => 'Navigation';
+
+  @override
+  String get booksViewNavigationPages => 'Pages';
+
+  @override
+  String get booksViewNavigationInfinite => 'Infinite scroll';
+
+  @override
   String get scrapingStatusReady => 'Ready';
 
   @override

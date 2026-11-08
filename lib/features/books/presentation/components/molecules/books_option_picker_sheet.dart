@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../../shared/components/atoms/app_loading_indicator.dart';
+import '../../../../../shared/components/atoms/app_sheet_title.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../models/filter_option.dart';
 
@@ -63,7 +64,6 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     // Cap against the space left above the keyboard, not the full screen,
     // so the list keeps room while the search field is focused.
@@ -85,9 +85,7 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
           children: [
             Row(
               children: [
-                Expanded(
-                  child: Text(widget.title, style: theme.textTheme.titleLarge),
-                ),
+                Expanded(child: AppSheetTitle(text: widget.title)),
                 TextButton(
                   onPressed: () => Navigator.pop(context, {..._selected}),
                   child: Text(l10n.booksFilterDone),

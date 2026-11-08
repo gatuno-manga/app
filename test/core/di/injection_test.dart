@@ -6,6 +6,7 @@ import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/core/network/dio_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,7 @@ void main() {
 
     test('initDI registers all dependencies', () async {
       FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
 
       await initDI();
 

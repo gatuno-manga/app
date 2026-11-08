@@ -15,10 +15,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Shell/Header`
 - `Botão` → search/filter actions
 - `Seletor cíclico/Fonte` → source selector
-- `Seletor cíclico/Visualização` → view mode selector
+- `Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)
 - `Livros/Filtros avançados` → `features/books/presentation/components/`
 - `Filtro/Ativo` → active filter chip
-- `Livro/Card` → grid/list card
+- `Livro/Card` → `molecules/book_card.dart` (grid, title below the cover), `molecules/book_cover_card.dart` (cover mode, title over the art), `molecules/book_list_item.dart` (list)
 - `Paginação/Página` → `shared/components/molecules/pagination.dart`
 
 ## Code
@@ -37,11 +37,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## States in Figma
 - Grid, list and advanced-filters-open variants; paginated (6 page controls).
-- Web only: cover mode, no results, filter combinations (`919:3451` section).
+- Web only: no results, filter combinations (`919:3451` section). Cover mode is drawn on web only (`920:5249`) but the mobile selector carries the segment, so code implements it on mobile too.
 
 ## Accessibility
-- Not audited.
+- Selected view-selector glyph is `color/on-primary` on `color/primary` (2.5:1 in Dark, True-dark, Slate; 2.4:1 Dracula; 4.0:1 Light), the documented `figma-contrast` gap; selection also reads from the tile fill. Needs a Figma decision.
+- Selector tiles are 36 dp (Figma size), like the pagination buttons.
 
 ## Gaps (Figma vs code)
 - Mobile has no empty/no-results or loading frame (web has `920:5605`).
-- Cover view mode exists on web only.
+- Cover view mode is drawn on web only; the mobile implementation (issue #6) reuses the web card.
+- Code-only, no Figma frame (issue #6): the view-options bottom sheet (`organisms/books_view_options_sheet.dart`: columns 1–4, navigation Pages/Infinite), the `Icons.tune` button that opens it, infinite scroll with its load-more footer, and the stored view preferences.
+- Figma places sort, random-book actions and the source selector in the body and pagination above the grid; code keeps sort/filter/search in the app bar and pagination below the list.

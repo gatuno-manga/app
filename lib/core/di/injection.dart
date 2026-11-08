@@ -48,13 +48,13 @@ Future<void> initDI() async {
 
   // Features
   initAuthenticationInjection(sl);
-  sl.registerLazySingleton<AppMqttService>(
-    () => AppMqttService(sl(), sl()),
-  );
+  sl.registerLazySingleton<AppMqttService>(() => AppMqttService(sl(), sl()));
   initUsersInjection(sl);
   initHomeInjection(sl);
-  initBooksInjection(sl);
-  initSyncDI(sl); // Must be before reading since reading depends on sync coordinator
+  await initBooksInjection(sl);
+  initSyncDI(
+    sl,
+  ); // Must be before reading since reading depends on sync coordinator
   initReadingDI(sl);
   initBookRequestsInjection(sl);
 
@@ -65,4 +65,3 @@ Future<void> initDI() async {
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
 }
-

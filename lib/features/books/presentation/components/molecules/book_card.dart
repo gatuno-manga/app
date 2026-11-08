@@ -1,56 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title.dart';
 import '../atoms/book_type_badge.dart';
 
+/// Grid card: cover with the title below it (Figma `Livro/Card`).
 class BookCard extends StatelessWidget {
+  /// Figma Livro/Card, grid variant: 171x295.
+  static const double aspectRatio = 0.58;
+
   final Book book;
 
   const BookCard({super.key, required this.book});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final titleStyle = theme.textTheme.labelMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+    // Always reserve two title lines so covers in one grid row stay level.
+    // Flutter scales the font size and then applies the line height.
+    final titleHeight =
+        MediaQuery.textScalerOf(context).scale(titleStyle?.fontSize ?? 12) *
+        (titleStyle?.height ?? 1.3) *
+        2;
+
     return Card(
+      margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.push('/books/${book.id}'),
-        child: Stack(
-          fit: StackFit.expand,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BookCover(
-              imageUrl: book.cover?.value,
-              blurHash: book.metadata?.blurHash,
-              borderRadius: 0,
-              iconSize: 60,
-              usePlaceholderIfNull: true,
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  BookCover(
+                    imageUrl: book.cover?.value,
+                    blurHash: book.metadata?.blurHash,
+                    borderRadius: 0,
+                    iconSize: 60,
+                    usePlaceholderIfNull: true,
+                  ),
+                  PositionedBookTypeBadge(type: book.type, inset: 8),
+                ],
+              ),
             ),
-            PositionedBookTypeBadge(type: book.type, inset: 8),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                      Colors.black.withValues(alpha: 0.9),
-                    ],
-                  ),
-                ),
-                padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
-                child: BookTitle(
-                  title: book.title.value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SizedBox(
+                height: titleHeight,
+                child: BookTitle(title: book.title.value, style: titleStyle),
               ),
             ),
           ],

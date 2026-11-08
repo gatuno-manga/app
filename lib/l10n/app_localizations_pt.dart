@@ -227,6 +227,30 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksSortOldestPublished => 'Publicados antigos';
 
   @override
+  String get booksViewOptions => 'Opções de visualização';
+
+  @override
+  String get booksViewGrid => 'Grade';
+
+  @override
+  String get booksViewList => 'Lista';
+
+  @override
+  String get booksViewCover => 'Capas';
+
+  @override
+  String get booksViewColumns => 'Colunas';
+
+  @override
+  String get booksViewNavigation => 'Navegação';
+
+  @override
+  String get booksViewNavigationPages => 'Páginas';
+
+  @override
+  String get booksViewNavigationInfinite => 'Rolagem infinita';
+
+  @override
   String get scrapingStatusReady => 'Pronto';
 
   @override

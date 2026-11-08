@@ -27,7 +27,7 @@ class _BooksPageState extends State<BooksPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_viewModel.bookList == null) {
-        _viewModel.fetchBooks(refresh: true);
+        _viewModel.fetchBooks();
       }
     });
   }
@@ -58,18 +58,12 @@ class _BooksPageState extends State<BooksPage> {
     return StreamBuilder<BooksState>(
       stream: _viewModel.stateStream,
       initialData: _viewModel.state,
+      // Rebuilds the body on every state change; BooksContent reads the
+      // view model directly.
       builder: (context, snapshot) {
-        final state = snapshot.data!;
-        
         return BooksTemplate(
           appBar: BooksAppBar(
             searchController: _searchController,
-            layoutMode: state.layoutMode,
-            onToggleLayout: () => _viewModel.setLayoutMode(
-              state.layoutMode == BooksLayoutMode.grid
-                  ? BooksLayoutMode.list
-                  : BooksLayoutMode.grid,
-            ),
             onFilterPressed: () => BooksFilterSheet.show(context, _viewModel),
             onSearchChanged: (value) => _viewModel.setSearch(value),
             onSortChanged: (orderBy, order) =>
