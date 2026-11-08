@@ -23,6 +23,14 @@ class LoadMoreListener extends StatefulWidget {
 class _LoadMoreListenerState extends State<LoadMoreListener> {
   bool _armed = true;
 
+  @override
+  void didUpdateWidget(LoadMoreListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A load that ended (or was discarded) while the user stayed near the
+    // end must be able to trigger the next one on the next scroll event.
+    if (widget.enabled && !oldWidget.enabled) _armed = true;
+  }
+
   bool _onNotification(ScrollNotification notification) {
     if (notification.depth != 0) return false;
     final nearEnd = notification.metrics.extentAfter <= widget.threshold;

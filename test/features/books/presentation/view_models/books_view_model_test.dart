@@ -478,7 +478,7 @@ void main() {
     );
   });
 
-  group('BooksViewModel round 2', () {
+  group('BooksViewModel fetch queueing and preferences', () {
     setUp(() {
       when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
     });
@@ -562,7 +562,7 @@ void main() {
     );
 
     test(
-      'a failed append after a sort change does not roll the page to 0',
+      'a failed append after a sort change runs the queued fetch quietly',
       () async {
         final second = Completer<BookList>();
         final seen = <int>[];
@@ -573,6 +573,8 @@ void main() {
           return Future.value(page(number: 1, totalPages: 3, ids: ['a']));
         });
         await viewModel.fetchBooks();
+        final states = <BooksState>[];
+        final sub = viewModel.stateStream.listen(states.add);
 
         final append = viewModel.loadMore();
         viewModel.setSort('title', SortOrder.asc);
@@ -580,7 +582,16 @@ void main() {
         await append;
         await flush();
 
+        expect(seen, [1, 2, 1]);
         expect(viewModel.options.page.value, 1);
+        expect(viewModel.error, isNull);
+        expect(states.every((s) => s.error == null), isTrue);
+        expect(viewModel.isLoading, isFalse);
+
+        // The queued flag must not leak into the next plain fetch.
+        await viewModel.fetchBooks();
+        await sub.cancel();
+        expect(seen, [1, 2, 1, 1]);
       },
     );
 

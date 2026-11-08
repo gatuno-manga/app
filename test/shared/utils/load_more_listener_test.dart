@@ -88,4 +88,29 @@ void main() {
 
     expect(calls, 0);
   });
+
+  testWidgets('re-arms when it becomes enabled again at the end of the list', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    var calls = 0;
+    Widget app({required bool enabled}) => build(
+      onLoadMore: () => calls++,
+      enabled: enabled,
+      controller: controller,
+    );
+    await tester.pumpWidget(app(enabled: true));
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pump();
+    expect(calls, 1);
+
+    // A load starts (disabled) and fails; the user is still at the end.
+    await tester.pumpWidget(app(enabled: false));
+    await tester.pumpWidget(app(enabled: true));
+    controller.jumpTo(controller.position.maxScrollExtent - 1);
+    await tester.pump();
+
+    expect(calls, 2);
+  });
 }
