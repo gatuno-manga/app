@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
@@ -108,6 +110,81 @@ void main() {
       viewModel.setSearch(null);
 
       expect(viewModel.options.search, null);
+    });
+
+    test(
+      'fetchBooks called while loading queues one follow-up fetch',
+      () async {
+        final bookList = BookList(
+          data: [],
+          total: const PositiveInt(0),
+          page: const PositiveInt(1),
+          limit: const PositiveInt(20),
+          totalPages: const PositiveInt(1),
+        );
+        final first = Completer<BookList>();
+        final seen = <BookPageOptions>[];
+        var calls = 0;
+
+        when(
+          () => mockSettingsService.sensitiveContentEnabled,
+        ).thenReturn(true);
+        when(() => mockRepository.getBooks(any())).thenAnswer((inv) {
+          seen.add(inv.positionalArguments.first as BookPageOptions);
+          calls++;
+          return calls == 1 ? first.future : Future.value(bookList);
+        });
+
+        final inFlight = viewModel.fetchBooks(refresh: true);
+        viewModel.updateFilters(publication: 2020);
+        viewModel.updateFilters(publication: 2021);
+        first.complete(bookList);
+        await inFlight;
+        await Future<void>.delayed(Duration.zero);
+
+        expect(calls, 2);
+        expect(seen.last.publication?.value, 2021);
+        expect(viewModel.isLoading, false);
+      },
+    );
+
+    test('clearFilters keeps search, sort and limit', () async {
+      final bookList = BookList(
+        data: [],
+        total: const PositiveInt(0),
+        page: const PositiveInt(1),
+        limit: const PositiveInt(20),
+        totalPages: const PositiveInt(1),
+      );
+      when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
+      when(
+        () => mockRepository.getBooks(any()),
+      ).thenAnswer((_) async => bookList);
+
+      viewModel.setSearch('naruto');
+      await Future<void>.delayed(Duration.zero);
+      viewModel.setSort('title', SortOrder.asc);
+      await Future<void>.delayed(Duration.zero);
+      viewModel.updateFilters(
+        publication: 2020,
+        publicationOperator: 'gt',
+        tags: ['t1'],
+        authors: ['a1'],
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      viewModel.clearFilters();
+      await Future<void>.delayed(Duration.zero);
+
+      final o = viewModel.options;
+      expect(o.search, 'naruto');
+      expect(o.orderBy, 'title');
+      expect(o.order, SortOrder.asc);
+      expect(o.publication, isNull);
+      expect(o.publicationOperator, isNull);
+      expect(o.tags, isNull);
+      expect(o.authors, isNull);
+      expect(o.page.value, 1);
     });
   });
 }

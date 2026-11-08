@@ -7,7 +7,11 @@ import '../../domain/entities/book_page_options.dart';
 import '../../domain/entities/chapter_page_options.dart';
 import '../../domain/repositories/books_repository.dart';
 import '../../domain/value_objects/book_id.dart';
+import '../../domain/entities/author.dart';
+import '../../domain/entities/tag.dart';
+import '../models/author_model.dart';
 import '../models/book_model.dart';
+import '../models/tag_model.dart';
 import '../models/chapter_model.dart';
 
 class BooksRepositoryImpl implements BooksRepository {
@@ -47,6 +51,46 @@ class BooksRepositoryImpl implements BooksRepository {
     } catch (e, stackTrace) {
       AppLogger.e('Unexpected error fetching books', e, stackTrace, _logTag);
       throw Exception('An unexpected error occurred while fetching books');
+    }
+  }
+
+  @override
+  Future<List<Tag>> getTags() => _getList(ApiConstants.tags, TagModel.fromJson);
+
+  @override
+  Future<List<Author>> getAuthors() =>
+      _getList(ApiConstants.authors, AuthorModel.fromJson);
+
+  Future<List<T>> _getList<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    try {
+      final response = await _dioClient.dio.get<List<dynamic>>(path);
+      final data = response.data;
+      if (response.statusCode == 200 && data is List) {
+        return data
+            .cast<Map<String, dynamic>>()
+            .map(fromJson)
+            .toList(growable: false);
+      }
+      throw ServerException(
+        message: 'Failed to fetch $path: Invalid response format',
+        statusCode: response.statusCode,
+      );
+    } on ServerException {
+      rethrow;
+    } on DioException catch (e) {
+      AppLogger.e(
+        'DioException fetching $path: ${e.message}',
+        e,
+        e.stackTrace,
+        _logTag,
+      );
+      throw ApiExceptionHandler.handle(e);
+    } catch (e, stackTrace) {
+      AppLogger.e('Unexpected error fetching $path', e, stackTrace, _logTag);
+      throw Exception('An unexpected error occurred while fetching $path');
     }
   }
 

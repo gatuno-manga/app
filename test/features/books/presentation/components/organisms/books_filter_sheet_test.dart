@@ -6,8 +6,18 @@ import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/presentation/components/organisms/books_filter_sheet.dart';
 import 'package:gatuno/shared/components/atoms/app_button.dart';
+import 'package:gatuno/features/books/presentation/models/filter_option.dart';
 import '../../../../../helpers/pump_app.dart';
 import '../../../../../helpers/test_injection.dart';
+
+Future<List<FilterOption>> _tags() async => const [
+  FilterOption(id: 'tag-1', label: 'Action'),
+  FilterOption(id: 'tag-2', label: 'Drama'),
+];
+
+Future<List<FilterOption>> _authors() async => const [
+  FilterOption(id: 'au-1', label: 'Oda'),
+];
 
 void main() {
   setUp(() async {
@@ -30,6 +40,8 @@ void main() {
                 initialOptions: initialOptions,
                 onApply: (_) {},
                 onClear: () {},
+                loadTags: _tags,
+                loadAuthors: _authors,
               ),
             ),
           ),
@@ -62,6 +74,8 @@ void main() {
                 initialOptions: const BookPageOptions(),
                 onApply: (_) {},
                 onClear: () => cleared = true,
+                loadTags: _tags,
+                loadAuthors: _authors,
               ),
             ),
           ),
@@ -84,6 +98,8 @@ void main() {
                 initialOptions: const BookPageOptions(),
                 onApply: (options) => appliedOptions = options,
                 onClear: () {},
+                loadTags: _tags,
+                loadAuthors: _authors,
               ),
             ),
           ),
@@ -115,6 +131,98 @@ void main() {
       expect(appliedOptions?.publicationOperator, 'lt');
       expect(appliedOptions?.type, contains(TypeBook.manhwa));
       expect(appliedOptions?.sensitiveContent, contains('Ecchi'));
+    });
+
+    testWidgets('picks tags, exclude tags and authors and applies them', (
+      tester,
+    ) async {
+      BookPageOptions? applied;
+      await tester.pumpApp(
+        Scaffold(
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute(
+              builder: (context) => BooksFilterSheet(
+                initialOptions: const BookPageOptions(),
+                onApply: (o) => applied = o,
+                onClear: () {},
+                loadTags: _tags,
+                loadAuthors: _authors,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Tag selection to be implemented...'), findsNothing);
+
+      Future<void> pick(int addIndex, List<String> labels) async {
+        final add = find.text('Add');
+        await tester.ensureVisible(add.at(addIndex));
+        await tester.tap(add.at(addIndex));
+        await tester.pumpAndSettle();
+        for (final l in labels) {
+          await tester.tap(
+            find.descendant(
+              of: find.byType(CheckboxListTile),
+              matching: find.text(l),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.text('Done'));
+        await tester.pumpAndSettle();
+      }
+
+      await pick(0, ['Action', 'Drama']);
+      await pick(1, ['Drama']);
+      await pick(2, ['Oda']);
+
+      // Two included tags show the and/or toggle; switch to "Any".
+      await tester.tap(find.text('Any'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpAndSettle();
+
+      expect(applied?.tags, ['tag-1', 'tag-2']);
+      expect(applied?.tagsLogic, 'or');
+      expect(applied?.excludeTags, ['tag-2']);
+      expect(applied?.authors, ['au-1']);
+    });
+
+    testWidgets('removing the last tag chip sends null, not an empty list', (
+      tester,
+    ) async {
+      BookPageOptions? applied;
+      await tester.pumpApp(
+        Scaffold(
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute(
+              builder: (context) => BooksFilterSheet(
+                initialOptions: const BookPageOptions(tags: ['tag-1']),
+                onApply: (o) => applied = o,
+                onClear: () {},
+                loadTags: _tags,
+                loadAuthors: _authors,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Action'), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(InputChip),
+          matching: find.byType(Icon),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpAndSettle();
+
+      expect(applied?.tags, isNull);
     });
   });
 }
