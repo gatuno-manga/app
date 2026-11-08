@@ -102,7 +102,9 @@ class _MePageState extends State<MePage> {
       ProfileImageFailureReason.forbidden => l10n.userImageErrorForbidden,
       ProfileImageFailureReason.network => l10n.userImageErrorNetwork,
       ProfileImageFailureReason.unknown => l10n.userImageErrorUnknown,
+      ProfileImageFailureReason.signedOut => null,
     };
+    if (message == null) return;
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));

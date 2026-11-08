@@ -151,5 +151,29 @@ void main() {
       expect(viewModel.state.uploading, isEmpty);
       expect(viewModel.state.user, UserModel.guest);
     });
+
+    test('uploadImage stays silent when the session ended meanwhile', () async {
+      when(
+        () => mockUserService.uploadProfileImage(
+          kind: any(named: 'kind'),
+          fileName: any(named: 'fileName'),
+          bytes: any(named: 'bytes'),
+        ),
+      ).thenThrow(
+        const ProfileImageFailure(
+          ProfileImageFailureReason.signedOut,
+          ProfileImageKind.avatar,
+        ),
+      );
+
+      final failure = await viewModel.uploadImage(
+        kind: ProfileImageKind.avatar,
+        fileName: 'a.png',
+        bytes: Uint8List(1),
+      );
+
+      expect(failure, isNull);
+      expect(viewModel.state.uploading, isEmpty);
+    });
   });
 }

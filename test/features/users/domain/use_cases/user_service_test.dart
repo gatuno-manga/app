@@ -474,7 +474,16 @@ void main() {
         final logout = service.logout();
         await Future<void>.delayed(Duration.zero);
         uploaded.complete(profile('1'));
-        await expectLater(upload, throwsA(isA<ProfileImageFailure>()));
+        await expectLater(
+          upload,
+          throwsA(
+            isA<ProfileImageFailure>().having(
+              (f) => f.reason,
+              'reason',
+              ProfileImageFailureReason.signedOut,
+            ),
+          ),
+        );
 
         expect(events.last, same(UserModel.guest));
         verifyNever(() => storage.writeProfile(any()));
@@ -512,6 +521,33 @@ void main() {
         await sub.cancel();
       },
     );
+
+    test('drops a /me whose cache write overlaps a logout', () async {
+      final written = Completer<void>();
+      final backendLogout = Completer<void>();
+      when(() => storage.writeProfile(any())).thenAnswer((_) => written.future);
+      when(
+        () => mockAuthService.logout(),
+      ).thenAnswer((_) => backendLogout.future);
+      when(() => storage.clear()).thenAnswer((_) async {});
+      final events = <UserModel>[];
+      final sub = service.profileStream.skip(1).listen(events.add);
+      service.init();
+
+      auth.add(AuthState.authenticated); // /me resolves, file write pending
+      await Future<void>.delayed(Duration.zero);
+      final logout = service.logout();
+      await Future<void>.delayed(Duration.zero);
+      written.complete();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events.last, same(UserModel.guest));
+      // The write landed after logout's clear: the file is wiped again.
+      verify(() => storage.clear()).called(2);
+      backendLogout.complete();
+      await logout;
+      await sub.cancel();
+    });
 
     test('ignores the uninitialized state', () async {
       service.init();

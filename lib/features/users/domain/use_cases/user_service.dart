@@ -69,13 +69,37 @@ class UserService {
   }
 
   /// Runs [request]; null when a sign-out happened while it was in flight,
-  /// so a result for the previous session is never cached or published.
-  Future<T?> _unlessSignedOut<T>(Future<T> Function() request) async {
+  /// so a result for the previous session is never published.
+  Future<T?> _unlessSignedOut<T extends Object>(
+    Future<T> Function() request,
+  ) async {
     final epoch = _sessionEpoch;
     final result = await request();
     if (epoch == _sessionEpoch) return result;
     AppLogger.i('Dropping a result that resolved after sign-out', _logTag);
     return null;
+  }
+
+  /// Fetches a profile with [request], caches it and publishes it; null when
+  /// a sign-out happened while the request or the cache write was in flight.
+  /// The publish is synchronous after the last check, so nothing for the
+  /// previous session reaches the stream.
+  Future<UserModel?> _commitProfile(
+    Future<Map<String, dynamic>> Function() request,
+  ) async {
+    final profile = await _unlessSignedOut(request);
+    if (profile == null) return null;
+    final user = await _unlessSignedOut(() async {
+      await _storage.writeProfile(profile);
+      return UserModel.fromJson(profile);
+    });
+    if (user == null) {
+      // The write landed after logout cleared the cache: wipe it again.
+      await _storage.clear();
+      return null;
+    }
+    _profileSubject.add(user);
+    return user;
   }
 
   /// The signed-in user from the JWT, enriched with the cached `/me` profile
@@ -123,9 +147,7 @@ class UserService {
   /// or when the account signed out while the request was in flight.
   Future<UserModel?> refreshProfile() async {
     try {
-      final profile = await _unlessSignedOut(_remote.fetchMe);
-      if (profile == null) return null;
-      return await _storeProfile(profile);
+      return await _commitProfile(_remote.fetchMe);
     } catch (e) {
       AppLogger.w('Could not refresh profile: $e', _logTag);
       return null;
@@ -145,25 +167,19 @@ class UserService {
       sizeBytes: bytes.length,
     );
     if (invalid != null) throw invalid;
-    final profile = await _unlessSignedOut(
-      () => _remote.uploadImage(kind: kind, bytes: bytes, fileName: fileName),
-    );
-    // Uploaded, but the account signed out meanwhile: neither cache nor
-    // publish it; the profile screen is gone by then anyway.
-    if (profile == null) {
-      throw ProfileImageFailure(ProfileImageFailureReason.unknown, kind);
-    }
+    final UserModel? user;
     try {
-      return await _storeProfile(profile);
+      user = await _commitProfile(
+        () => _remote.uploadImage(kind: kind, bytes: bytes, fileName: fileName),
+      );
+    } on ProfileImageFailure {
+      rethrow;
     } catch (e) {
       throw ProfileImageFailure(ProfileImageFailureReason.unknown, kind);
     }
-  }
-
-  Future<UserModel> _storeProfile(Map<String, dynamic> profile) async {
-    final user = UserModel.fromJson(profile);
-    await _storage.writeProfile(profile);
-    _profileSubject.add(user);
+    if (user == null) {
+      throw ProfileImageFailure(ProfileImageFailureReason.signedOut, kind);
+    }
     return user;
   }
 
