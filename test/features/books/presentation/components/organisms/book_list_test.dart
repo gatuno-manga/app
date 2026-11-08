@@ -20,11 +20,11 @@ class MockDioClient extends Mock implements DioClient {}
 void main() {
   late MockDioClient mockDioClient;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(BookId('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockDioClient = MockDioClient();
     if (sl.isRegistered<DioClient>()) {
       sl.unregister<DioClient>();
@@ -49,7 +49,8 @@ setUp(() {
 
   final testBooks = List.generate(
     5,
-    (i) => Book(id: BookId('$i'),
+    (i) => Book(
+      id: BookId('$i'),
       title: BookTitle('Book $i'),
       description: BookDescription('Description $i'),
       cover: BookCover('cover_$i.jpg'),
@@ -68,5 +69,24 @@ setUp(() {
     for (int i = 0; i < testBooks.length; i++) {
       expect(find.text('Book $i'), findsOneWidget);
     }
+  });
+
+  testWidgets('BookListView renders the footer after the items', (
+    tester,
+  ) async {
+    await tester.pumpApp(
+      Scaffold(
+        body: BookListView(
+          books: testBooks.take(2).toList(),
+          footer: const Text('footer'),
+        ),
+      ),
+    );
+
+    expect(find.text('footer'), findsOneWidget);
+    expect(
+      tester.getRect(find.text('footer')).top,
+      greaterThan(tester.getRect(find.text('Book 1')).bottom),
+    );
   });
 }

@@ -524,6 +524,54 @@ abstract class AppLocalizations {
   /// **'Oldest Published'**
   String get booksSortOldestPublished;
 
+  /// No description provided for @booksViewOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'View options'**
+  String get booksViewOptions;
+
+  /// No description provided for @booksViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get booksViewGrid;
+
+  /// No description provided for @booksViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get booksViewList;
+
+  /// No description provided for @booksViewCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Covers'**
+  String get booksViewCover;
+
+  /// No description provided for @booksViewColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Columns'**
+  String get booksViewColumns;
+
+  /// No description provided for @booksViewNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get booksViewNavigation;
+
+  /// No description provided for @booksViewNavigationPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get booksViewNavigationPages;
+
+  /// No description provided for @booksViewNavigationInfinite.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite scroll'**
+  String get booksViewNavigationInfinite;
+
   /// No description provided for @scrapingStatusReady.
   ///
   /// In en, this message translates to:
