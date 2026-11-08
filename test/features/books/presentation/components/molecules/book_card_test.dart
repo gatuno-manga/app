@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_title.dart'
-    as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart' as vo;
 import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_cover.dart'
-    as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_cover.dart' as vo;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,11 +27,11 @@ void main() {
   late MockDioClient mockDioClient;
   late MockDio mockDio;
 
-  setUpAll(() {
+    setUpAll(() {
     registerFallbackValue(BookId('dummy'));
   });
 
-  setUp(() {
+setUp(() {
     mockDioClient = MockDioClient();
     mockDio = MockDio();
 

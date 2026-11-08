@@ -22,6 +22,7 @@ class BookTypeBadge extends StatelessWidget {
     final theme = Theme.of(context);
     // Covers are arbitrary art, so the scrim keeps a floor of 0.7 alpha for
     // the white label: the light palette's overlay token alone is only 0.3.
+    // The label is white on purpose, for the same reason.
     // The translucent GatunoColors.badgeType tint is meant for flat surfaces
     // and has no contrast over images.
     final overlay =

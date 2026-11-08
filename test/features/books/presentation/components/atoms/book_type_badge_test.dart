@@ -70,4 +70,17 @@ void main() {
     final boxRight = tester.getTopRight(find.byKey(stackKey)).dx;
     expect(boxRight - right, 8);
   });
+
+  testWidgets('keeps the scrim at 0.7 alpha or above', (tester) async {
+    await tester.pumpApp(const BookTypeBadge(type: TypeBook.manga));
+
+    final box = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(BookTypeBadge),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    final color = (box.decoration as BoxDecoration).color!;
+    expect(color.a, greaterThanOrEqualTo(0.7));
+  });
 }
