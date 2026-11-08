@@ -80,6 +80,7 @@
               androidSdk
               pkgs.just
               pkgs.lefthook
+              pkgs.python3
               jaoppb-tools.packages.${system}.issues-check
               jaoppb-tools.packages.${system}.repo-sync
             ];

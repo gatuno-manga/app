@@ -9,7 +9,7 @@ supply your own server URL; nothing is tied to a hosted service. See
 ## Getting started
 
 The project ships a [Nix](https://nixos.org) flake that provides Flutter, JDK 17,
-the Android SDK, `just`, `lefthook` and the `jaoppb/tools` binaries.
+the Android SDK, `just`, `lefthook`, Python 3 and the `jaoppb/tools` binaries.
 
 ```sh
 nix develop            # enter the dev shell
@@ -46,13 +46,14 @@ so commit from inside the dev shell.
 
 - `pre-commit`: formats and fixes staged `lib/` and `test/` Dart files, then
   runs `just analyze`.
-- `pre-push`: runs `issues-check`, which validates the issue rules configured
+- `pre-push`: runs `issues-check`, which validates the label and cycle rules configured
   in `tools.toml`.
 
 ### CI
 
-The CI workflow runs the shared Flutter pipeline. The Tools workflow only
-checks labels and milestones: the default CI token cannot read repository
+The CI workflow runs the shared Flutter pipeline (`just check` is a local gate,
+not a CI mirror: the design token check does not run in CI). The Tools workflow's
+repo-sync step only checks labels and milestones: the default CI token cannot read repository
 merge settings. Verify those locally with `just repo-check` (needs a token that
 can read them).
 

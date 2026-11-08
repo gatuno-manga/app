@@ -20,7 +20,9 @@ sets a `type:*` label; add one `area:*` label too. The labels are defined in
 - Areas: `area:app`, `area:reader`, `area:library`, `area:auth`, `area:sync`,
   `area:ci`, `area:docs`
 
-The pre-push hook runs `issues-check`, which validates these rules.
+The `epic` form applies `type:feat`, since there is no epic label.
+
+The pre-push hook runs `issues-check`, which validates the label and cycle rules.
 
 ## Branches and commits
 
