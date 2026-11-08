@@ -76,7 +76,7 @@ lib/features/<feature>/
 ```
 
 Not every feature has every file or folder: `home` and `welcome` have no
-domain, `users`, `sync` and `app_lock` have no router, `settings` is
+domain, `welcome` has no injection file, `users`, `sync` and `app_lock` have no router, `settings` is
 registered inline in `initDI()`, and `authentication` pairs
 `authentication_injection.dart` with `auth_router.dart`.
 
@@ -122,7 +122,10 @@ registered inline in `initDI()`, and `authentication` pairs
   (auth with token refresh, cache, cookies, logging, bad certificate) live in
   `lib/core/network/interceptors/`. The server URL is set at runtime by the
   user (welcome screen, then `SettingsService`), never at compile time;
-  `AppConfig` only holds `--dart-define` values such as `REFERER`.
+  `AppConfig` only holds `--dart-define` values such as `REFERER`. Network
+  images use the `AppImage` atom with `sl<ImageLoadingStrategy>()` so they
+  also go through `DioClient`; `user_banner.dart` still uses `Image.network`,
+  do not copy it.
 - **Models.** New models that read or write JSON use `json_serializable`
   (`@JsonSerializable`, generated `*.g.dart` via `just gen`); `UserModel` and
   the MFA models are older hand-written exceptions. Value objects expose
