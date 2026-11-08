@@ -17,6 +17,13 @@ class AuthInterceptor extends QueuedInterceptor {
     ApiConstants.s3Prefix,
   ];
 
+  /// Endpoints where a 401 means "wrong code", not "expired session": replaying
+  /// them after a token refresh would double the attempts on a guessable code.
+  final List<String> _noRetryPaths = [
+    ApiConstants.mfaTotpVerifySetup,
+    ApiConstants.mfaTotpDisable,
+  ];
+
   AuthInterceptor({required this.dioClient, required this.tokenProvider});
 
   bool _shouldIntercept(RequestOptions options) {
@@ -67,7 +74,8 @@ class AuthInterceptor extends QueuedInterceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401 &&
-        _shouldIntercept(err.requestOptions)) {
+        _shouldIntercept(err.requestOptions) &&
+        !_noRetryPaths.any(err.requestOptions.uri.path.endsWith)) {
       AppLogger.i('Intercepted 401 for: ${err.requestOptions.path}', _logTag);
 
       // Check if the token was already refreshed by another concurrent request

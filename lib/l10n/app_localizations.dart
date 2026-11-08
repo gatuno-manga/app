@@ -1351,6 +1351,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Protect your account with an authenticator app'**
   String get settingsMfaDesc;
+
+  /// No description provided for @mfaNoAuthenticatorApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open an authenticator app. Copy the secret and add it manually.'**
+  String get mfaNoAuthenticatorApp;
+
+  /// No description provided for @mfaSaveCodesFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your backup codes before leaving this screen.'**
+  String get mfaSaveCodesFirst;
 }
 
 class _AppLocalizationsDelegate

@@ -102,6 +102,37 @@ void main() {
 
   group('onError', () {
     test(
+      'does not refresh or replay a 401 from the MFA code endpoints',
+      () async {
+        for (final path in [
+          '/auth/mfa/totp/verify-setup',
+          '/auth/mfa/totp/disable',
+        ]) {
+          final options = RequestOptions(
+            path: path,
+            baseUrl: testBaseUrl,
+            headers: {'Authorization': 'Bearer token'},
+          );
+          final error = DioException(
+            requestOptions: options,
+            response: Response<dynamic>(
+              requestOptions: options,
+              statusCode: 401,
+            ),
+          );
+          when(() => errorHandler.next(any())).thenAnswer((_) {});
+
+          getInterceptor().onError(error, errorHandler);
+
+          await Future<void>.delayed(Duration.zero);
+          verify(() => errorHandler.next(error)).called(1);
+        }
+        verifyNever(() => dio.fetch<dynamic>(any()));
+        verifyNever(() => tokenProvider.getValidToken(forceRefresh: true));
+      },
+    );
+
+    test(
       'should retry request if token was refreshed by another request',
       () async {
         final options = RequestOptions(

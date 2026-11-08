@@ -688,4 +688,12 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settingsMfaDesc =>
       'Proteja sua conta com um aplicativo autenticador';
+
+  @override
+  String get mfaNoAuthenticatorApp =>
+      'Não foi possível abrir um aplicativo autenticador. Copie o segredo e adicione manualmente.';
+
+  @override
+  String get mfaSaveCodesFirst =>
+      'Guarde seus códigos de backup antes de sair desta tela.';
 }

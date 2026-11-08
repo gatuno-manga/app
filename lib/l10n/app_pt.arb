@@ -268,5 +268,7 @@
   "mfaErrorChallengeExpired": "A verificação expirou. Entre novamente.",
   "mfaErrorNetwork": "Não foi possível acessar o servidor. Verifique sua conexão.",
   "mfaErrorUnknown": "Algo deu errado. Tente novamente.",
-  "settingsMfaDesc": "Proteja sua conta com um aplicativo autenticador"
+  "settingsMfaDesc": "Proteja sua conta com um aplicativo autenticador",
+  "mfaNoAuthenticatorApp": "Não foi possível abrir um aplicativo autenticador. Copie o segredo e adicione manualmente.",
+  "mfaSaveCodesFirst": "Guarde seus códigos de backup antes de sair desta tela."
 }

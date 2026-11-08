@@ -160,6 +160,13 @@ void main() {
       expect(r.toString(), isNot(contains('A-1')));
     });
 
+    test('status with a malformed body is a ServerException', () async {
+      when(
+        () => dio.get<Map<String, dynamic>>('/auth/mfa/status'),
+      ).thenAnswer((_) async => _ok({}));
+      await expectLater(repo.status(), throwsA(isA<ServerException>()));
+    });
+
     test('disableTotp sends the code', () async {
       when(
         () => dio.post<Map<String, dynamic>>(

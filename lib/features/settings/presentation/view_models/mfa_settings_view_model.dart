@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../core/network/exceptions.dart';
 import '../../../authentication/domain/repositories/mfa_repository.dart';
 import '../../../authentication/domain/value_objects/mfa_models.dart';
 import '../../../authentication/presentation/view_models/mfa_error.dart';
@@ -57,9 +58,11 @@ class MfaSettingsViewModel extends BaseStreamViewModel<MfaSettingsState> {
       emit(MfaSettingsState(phase: MfaPhase.status, status: status));
     } catch (e) {
       AppLogger.w('MFA status load failed: ${e.runtimeType}', _logTag);
-      emit(
-        MfaSettingsState(phase: MfaPhase.loadFailed, error: mfaErrorFrom(e)),
-      );
+      // A 401 here means the session is gone, not that a code was wrong.
+      final error = e is UnauthorizedException
+          ? MfaError.unknown
+          : mfaErrorFrom(e);
+      emit(MfaSettingsState(phase: MfaPhase.loadFailed, error: error));
     }
   }
 

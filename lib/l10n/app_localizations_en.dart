@@ -686,4 +686,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsMfaDesc =>
       'Protect your account with an authenticator app';
+
+  @override
+  String get mfaNoAuthenticatorApp =>
+      'Could not open an authenticator app. Copy the secret and add it manually.';
+
+  @override
+  String get mfaSaveCodesFirst =>
+      'Save your backup codes before leaving this screen.';
 }

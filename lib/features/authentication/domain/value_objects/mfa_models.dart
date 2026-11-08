@@ -7,10 +7,17 @@ class MfaStatus {
     required this.backupCodesRemaining,
   });
 
-  factory MfaStatus.fromJson(Map<String, dynamic> json) => MfaStatus(
-    totpEnabled: json['totpEnabled'] == true,
-    backupCodesRemaining: (json['backupCodesRemaining'] as num?)?.toInt() ?? 0,
-  );
+  factory MfaStatus.fromJson(Map<String, dynamic> json) {
+    final enabled = json['totpEnabled'];
+    final remaining = json['backupCodesRemaining'];
+    if (enabled is! bool || remaining is! num) {
+      throw const FormatException('Invalid MFA status response');
+    }
+    return MfaStatus(
+      totpEnabled: enabled,
+      backupCodesRemaining: remaining.toInt(),
+    );
+  }
 }
 
 class TotpSetup {
@@ -38,10 +45,10 @@ class BackupCodes {
 
   factory BackupCodes.fromJson(Map<String, dynamic> json) {
     final raw = json['backupCodes'];
-    if (raw is! List) {
+    if (raw is! List || !raw.every((e) => e is String)) {
       throw const FormatException('Invalid backup codes response');
     }
-    return BackupCodes(raw.map((e) => e.toString()).toList(growable: false));
+    return BackupCodes(List<String>.unmodifiable(raw));
   }
 
   @override

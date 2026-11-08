@@ -62,11 +62,15 @@ class _MfaChallengePageState extends State<MfaChallengePage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
     final ok = await _viewModel.verify(_controller.text);
     if (!mounted) return;
     if (ok) {
       context.go(widget.redirectUrl ?? '/home');
     } else if (_viewModel.state.error == MfaError.challengeExpired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(mfaErrorText(l10n, MfaError.challengeExpired))),
+      );
       context.go('/auth/signin');
     }
   }
@@ -97,7 +101,10 @@ class _MfaChallengePageState extends State<MfaChallengePage> {
                     label: l10n.mfaCodeLabel,
                     prefixIcon: const Icon(Icons.shield_outlined),
                     autofillHints: const [AutofillHints.oneTimeCode],
-                    validator: (v) => (v == null || v.trim().length < 6)
+                    autofocus: true,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (_) => _submit(),
+                    validator: (v) => (v == null || v.trim().isEmpty)
                         ? l10n.mfaCodeRequired
                         : null,
                   ),
@@ -108,7 +115,7 @@ class _MfaChallengePageState extends State<MfaChallengePage> {
                     liveRegion: true,
                     child: Text(
                       mfaErrorText(l10n, state.error!),
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.error,
                       ),
                     ),
