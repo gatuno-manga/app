@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppIconButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onPressed;
+
+  /// Null disables the button.
+  final VoidCallback? onPressed;
   final Color? color;
   final String? tooltip;
   final bool filled;

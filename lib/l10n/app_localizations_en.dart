@@ -504,6 +504,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingFinished => 'You\'ve reached the end of this chapter.';
 
   @override
+  String get readingSettingsTitle => 'Reading settings';
+
+  @override
+  String get readingSettingsAction => 'Settings';
+
+  @override
+  String get readingThemeTitle => 'Reading theme';
+
+  @override
+  String get readingThemeStandard => 'Default';
+
+  @override
+  String get readingThemeSepia => 'Sepia';
+
+  @override
+  String get readingThemeCream => 'Cream';
+
+  @override
+  String get readingThemeHighContrast => 'High contrast';
+
+  @override
+  String get readingFontFamily => 'Font';
+
+  @override
+  String get readingFontFamilyDesc => 'Text family';
+
+  @override
+  String get readingFontSerif => 'Serif';
+
+  @override
+  String get readingFontSans => 'Sans';
+
+  @override
+  String get readingFontLexend => 'Lexend';
+
+  @override
+  String get readingFontAtkinson => 'Atkinson Hyperlegible';
+
+  @override
+  String get readingFontOpenDyslexic => 'OpenDyslexic';
+
+  @override
+  String readingFontSize(int size) {
+    return 'Font size (${size}px)';
+  }
+
+  @override
+  String get readingFontSizeDesc => 'A- / A+';
+
+  @override
+  String readingLineHeight(String value) {
+    return 'Line spacing ($value)';
+  }
+
+  @override
+  String get readingLineHeightDesc => 'Distance between lines';
+
+  @override
+  String get readingAlignment => 'Alignment';
+
+  @override
+  String get readingAlignmentDesc => 'Left, center or justified';
+
+  @override
+  String get readingAlignLeft => 'Left';
+
+  @override
+  String get readingAlignCenter => 'Center';
+
+  @override
+  String get readingAlignJustify => 'Justified';
+
+  @override
+  String get readingDecrease => 'Decrease';
+
+  @override
+  String get readingIncrease => 'Increase';
+
+  @override
   String booksDocumentFormat(String format) {
     return 'Format: $format';
   }

@@ -1040,6 +1040,156 @@ abstract class AppLocalizations {
   /// **'You\'ve reached the end of this chapter.'**
   String get readingFinished;
 
+  /// No description provided for @readingSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading settings'**
+  String get readingSettingsTitle;
+
+  /// No description provided for @readingSettingsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get readingSettingsAction;
+
+  /// No description provided for @readingThemeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading theme'**
+  String get readingThemeTitle;
+
+  /// No description provided for @readingThemeStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get readingThemeStandard;
+
+  /// No description provided for @readingThemeSepia.
+  ///
+  /// In en, this message translates to:
+  /// **'Sepia'**
+  String get readingThemeSepia;
+
+  /// No description provided for @readingThemeCream.
+  ///
+  /// In en, this message translates to:
+  /// **'Cream'**
+  String get readingThemeCream;
+
+  /// No description provided for @readingThemeHighContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'High contrast'**
+  String get readingThemeHighContrast;
+
+  /// No description provided for @readingFontFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get readingFontFamily;
+
+  /// No description provided for @readingFontFamilyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Text family'**
+  String get readingFontFamilyDesc;
+
+  /// No description provided for @readingFontSerif.
+  ///
+  /// In en, this message translates to:
+  /// **'Serif'**
+  String get readingFontSerif;
+
+  /// No description provided for @readingFontSans.
+  ///
+  /// In en, this message translates to:
+  /// **'Sans'**
+  String get readingFontSans;
+
+  /// No description provided for @readingFontLexend.
+  ///
+  /// In en, this message translates to:
+  /// **'Lexend'**
+  String get readingFontLexend;
+
+  /// No description provided for @readingFontAtkinson.
+  ///
+  /// In en, this message translates to:
+  /// **'Atkinson Hyperlegible'**
+  String get readingFontAtkinson;
+
+  /// No description provided for @readingFontOpenDyslexic.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenDyslexic'**
+  String get readingFontOpenDyslexic;
+
+  /// No description provided for @readingFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Font size ({size}px)'**
+  String readingFontSize(int size);
+
+  /// No description provided for @readingFontSizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A- / A+'**
+  String get readingFontSizeDesc;
+
+  /// No description provided for @readingLineHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing ({value})'**
+  String readingLineHeight(String value);
+
+  /// No description provided for @readingLineHeightDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance between lines'**
+  String get readingLineHeightDesc;
+
+  /// No description provided for @readingAlignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Alignment'**
+  String get readingAlignment;
+
+  /// No description provided for @readingAlignmentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Left, center or justified'**
+  String get readingAlignmentDesc;
+
+  /// No description provided for @readingAlignLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get readingAlignLeft;
+
+  /// No description provided for @readingAlignCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Center'**
+  String get readingAlignCenter;
+
+  /// No description provided for @readingAlignJustify.
+  ///
+  /// In en, this message translates to:
+  /// **'Justified'**
+  String get readingAlignJustify;
+
+  /// No description provided for @readingDecrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease'**
+  String get readingDecrease;
+
+  /// No description provided for @readingIncrease.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase'**
+  String get readingIncrease;
+
   /// No description provided for @booksDocumentFormat.
   ///
   /// In en, this message translates to:

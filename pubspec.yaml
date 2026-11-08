@@ -122,3 +122,15 @@ flutter:
           weight: 400
         - asset: assets/fonts/Lexend/Lexend-Bold.ttf
           weight: 700
+    - family: Atkinson Hyperlegible
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegible/AtkinsonHyperlegible-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/AtkinsonHyperlegible/AtkinsonHyperlegible-Bold.ttf
+          weight: 700
+    - family: OpenDyslexic
+      fonts:
+        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-Regular.otf
+          weight: 400
+        - asset: assets/fonts/OpenDyslexic/OpenDyslexic-Bold.otf
+          weight: 700

@@ -195,6 +195,45 @@
   "readingNextChapter": "Next Chapter",
   "readingPreviousChapter": "Previous Chapter",
   "readingFinished": "You've reached the end of this chapter.",
+  "readingSettingsTitle": "Reading settings",
+  "readingSettingsAction": "Settings",
+  "readingThemeTitle": "Reading theme",
+  "readingThemeStandard": "Default",
+  "readingThemeSepia": "Sepia",
+  "readingThemeCream": "Cream",
+  "readingThemeHighContrast": "High contrast",
+  "readingFontFamily": "Font",
+  "readingFontFamilyDesc": "Text family",
+  "readingFontSerif": "Serif",
+  "readingFontSans": "Sans",
+  "readingFontLexend": "Lexend",
+  "readingFontAtkinson": "Atkinson Hyperlegible",
+  "readingFontOpenDyslexic": "OpenDyslexic",
+  "readingFontSize": "Font size ({size}px)",
+  "@readingFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "readingFontSizeDesc": "A- / A+",
+  "readingLineHeight": "Line spacing ({value})",
+  "@readingLineHeight": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "readingLineHeightDesc": "Distance between lines",
+  "readingAlignment": "Alignment",
+  "readingAlignmentDesc": "Left, center or justified",
+  "readingAlignLeft": "Left",
+  "readingAlignCenter": "Center",
+  "readingAlignJustify": "Justified",
+  "readingDecrease": "Decrease",
+  "readingIncrease": "Increase",
   "booksDocumentFormat": "Format: {format}",
   "@booksDocumentFormat": {
     "placeholders": {
@@ -253,7 +292,13 @@
   "mfaStatusEnabled": "Two-factor authentication is on",
   "mfaStatusDisabled": "Two-factor authentication is off",
   "mfaBackupCodesRemaining": "{count, plural, =0{No backup codes left} =1{1 backup code left} other{{count} backup codes left}}",
-  "@mfaBackupCodesRemaining": {"placeholders": {"count": {"type": "int"}}},
+  "@mfaBackupCodesRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mfaEnableButton": "Enable",
   "mfaDisableButton": "Disable",
   "mfaReconfigureButton": "Reconfigure",

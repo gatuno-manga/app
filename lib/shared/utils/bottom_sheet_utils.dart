@@ -5,11 +5,13 @@ Future<T?> showAppModalBottomSheet<T>({
   required WidgetBuilder builder,
   bool isScrollControlled = true,
   bool useSafeArea = true,
+  bool showDragHandle = false,
 }) {
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: isScrollControlled,
     useSafeArea: useSafeArea,
+    showDragHandle: showDragHandle,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),

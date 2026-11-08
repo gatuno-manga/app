@@ -11,6 +11,10 @@ abstract final class AppTypography {
   static const String literata = 'Literata';
   static const String lexend = 'Lexend';
 
+  // Reader-only families offered by the settings sheet; no Figma text style.
+  static const String atkinson = 'Atkinson Hyperlegible';
+  static const String openDyslexic = 'OpenDyslexic';
+
   /// `Display/Hero`
   static const TextStyle displayHero = TextStyle(
     fontFamily: inknut,

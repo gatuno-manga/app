@@ -195,6 +195,45 @@
   "readingNextChapter": "Próximo Capítulo",
   "readingPreviousChapter": "Capítulo Anterior",
   "readingFinished": "Você chegou ao fim deste capítulo.",
+  "readingSettingsTitle": "Ajustes de leitura",
+  "readingSettingsAction": "Ajustes",
+  "readingThemeTitle": "Tema de leitura",
+  "readingThemeStandard": "Padrão",
+  "readingThemeSepia": "Sépia",
+  "readingThemeCream": "Creme",
+  "readingThemeHighContrast": "Alto contraste",
+  "readingFontFamily": "Fonte",
+  "readingFontFamilyDesc": "Família do texto",
+  "readingFontSerif": "Serifa",
+  "readingFontSans": "Sem serifa",
+  "readingFontLexend": "Lexend",
+  "readingFontAtkinson": "Atkinson Hyperlegible",
+  "readingFontOpenDyslexic": "OpenDyslexic",
+  "readingFontSize": "Tamanho da fonte ({size}px)",
+  "@readingFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "readingFontSizeDesc": "A- / A+",
+  "readingLineHeight": "Espaçamento de linhas ({value})",
+  "@readingLineHeight": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "readingLineHeightDesc": "Distância entre linhas",
+  "readingAlignment": "Alinhamento",
+  "readingAlignmentDesc": "Esquerda, centro ou justificado",
+  "readingAlignLeft": "Esquerda",
+  "readingAlignCenter": "Centro",
+  "readingAlignJustify": "Justificado",
+  "readingDecrease": "Diminuir",
+  "readingIncrease": "Aumentar",
   "booksDocumentFormat": "Formato: {format}",
   "@booksDocumentFormat": {
     "placeholders": {
@@ -253,7 +292,13 @@
   "mfaStatusEnabled": "A autenticação em dois fatores está ativada",
   "mfaStatusDisabled": "A autenticação em dois fatores está desativada",
   "mfaBackupCodesRemaining": "{count, plural, =0{Nenhum código de backup restante} =1{1 código de backup restante} other{{count} códigos de backup restantes}}",
-  "@mfaBackupCodesRemaining": {"placeholders": {"count": {"type": "int"}}},
+  "@mfaBackupCodesRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mfaEnableButton": "Ativar",
   "mfaDisableButton": "Desativar",
   "mfaReconfigureButton": "Reconfigurar",
