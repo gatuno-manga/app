@@ -5,14 +5,14 @@ theme:
   source: lib/core/theme/theme.dart
   figma: https://www.figma.com/design/QlUrvomONqwfefHCwTg0Hh/Gatuno
   tokens: .impeccable/design.json
-  seed: "AppColors.lilac (Light), AppColors.orange (Dark)"
+  seed: "palette.primary of each theme"
   fontFamily: "Inknut Antiqua"
   extensions: [GatunoColors]
 ---
 
 # Design System: Gatuno
 
-**Source of truth: the Figma file, not the code.** Values below come from the Figma variable collections `Gatuno / Tokens (código)` and `Gatuno / Leitura (temas)` and the Figma text and effect styles. `AppTheme` (`lib/core/theme/theme.dart`) is the implementation and currently drifts from Figma; each drift is marked `(Figma; code differs: <value>)` and collected in [Figma vs code gaps](#figma-vs-code-gaps). This intentionally overrides the `document` reference's "theme code is normative" rule for this repository (issue #40). Machine-readable tokens, with Figma names, live in `.impeccable/design.json`; the two files must agree (`python3 tool/check_design_tokens.py`).
+**Source of truth: the Figma file, not the code.** Values below come from the Figma variable collections `Gatuno / Tokens (código)` and `Gatuno / Leitura (temas)` and the Figma text and effect styles. `AppTheme` (`lib/core/theme/theme.dart`, palettes in `app_palette.dart`, text styles in `app_typography.dart`) implements it; remaining drifts are collected in [Figma vs code gaps](#figma-vs-code-gaps). This intentionally overrides the `document` reference's "theme code is normative" rule for this repository (issue #40). Machine-readable tokens, with Figma names, live in `.impeccable/design.json`; the two files must agree (`python3 tool/check_design_tokens.py`).
 
 ## Overview
 
@@ -28,27 +28,27 @@ The Figma system is dark-first: warm cream text (`#e9e1d1`) on near-black blue (
 
 ## Colors
 
-Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`). Implemented in code today: Dark (partly matches), Light (diverges). True-dark, Dracula and Slate: not implemented, and no theme-selection mechanism exists in code.
+Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`). All five are implemented as `AppTheme` builders (`lightTheme`, `darkTheme`, `trueDarkTheme`, `draculaTheme`, `slateTheme`); only Light and Dark are wired in `main.dart`, and no theme-selection mechanism exists yet (issue #51).
 
 | Token (Figma) | CSS var | Dark | Light | True-dark | Dracula | Slate | Flutter target | Code vs Figma |
 |---|---|---|---|---|---|---|---|---|
-| `color/app-background` | `--app-background-color` | `#000212` | `#eeeeee` | `#000000` | `#282a36` | `#15161a` | `colorScheme.surface + scaffoldBackgroundColor` | differs: code Light `#fdfdfd` |
-| `color/text` | `--app-text-color` | `#e9e1d1` | `#2b2d31` | `#e9e1d1` | `#f8f8f2` | `#f8fafc` | `colorScheme.onSurface` | differs: code Light `#20142a` |
-| `color/text-secondary` | `--app-text-color-secondary` | `#e9e1d18c` | `#2b2d31a6` | `#e9e1d173` | `#6272a4` | `#94a3b8` | none | no code token |
-| `color/text-muted` | `--app-text-color-muted` | `#fdfdfd73` | `#2b2d3173` | `#fdfdfd59` | `#f8f8f273` | `#f8fafc73` | none | no code token |
-| `color/primary` | `--primary-color` | `#f18522` | `#cc5e00` | `#f18522` | `#bd93f9` | `#f18522` | `colorScheme.primary` | differs: code Light `#a972ff` |
-| `color/secondary` | `--secondary-color` | `#181a1f` | `#e0e0e0` | `#181a1f` | `#44475a` | `#212329` | `colorScheme.surfaceContainerHighest (proposed)` | differs: code Dark `#20142a`, Light `#f8f9fa` |
-| `color/border` | `--border-color` | `#e9e1d126` | `#2b2d311f` | `#e9e1d11a` | `#f8f8f226` | `#f8fafc26` | `colorScheme.outline` | differs: code Dark `#666666`, Light `#cccccc` |
-| `color/hover` | `--hover-color` | `#e9e1d114` | `#2b2d310f` | `#e9e1d10f` | `#f8f8f214` | `#f8fafc14` | none | no code token |
-| `color/divider` | (none) | `#e9e1d11a` | `#2b2d311a` | `#e9e1d112` | `#f8f8f21a` | `#f8fafc1a` | `dividerTheme.color` | differs: code Dark `#555555`, Light `#e0e0e0` |
-| `color/context-menu-bg` | `--context-menu-bg` | `#000212cc` | `#ffffffe5` | `#000000e5` | `#282a36e5` | `#15161ae5` | `GatunoColors.contextMenuBackground` | differs: code Light `#fdfdfde6` |
-| `color/overlay` | `--overlay-bg` | `#000000b2` | `#0000004d` | `#000000d9` | `#000000bf` | `#000000b2` | `GatunoColors.overlayBackground` | differs: code Dark `#000000b3` |
-| `color/on-primary` | `--white` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `colorScheme.onPrimary` | differs: code Dark `#000212` |
-| `color/danger` | `--danger-color` | `#f12237` | `#ff0000` | `#f12237` | `#ff5555` | `#ef4444` | `colorScheme.error` | differs: code Dark `#f18522`, Light `#f18522` |
-| `color/warning` | `--warning-color` | `#ffc107` | `#ffc107` | `#ffc107` | `#ffb86c` | `#f59e0b` | none | no code token |
-| `color/success` | `--success-color` | `#157219` | `#28a745` | `#157219` | `#50fa7b` | `#10b981` | `GatunoColors.scrapingStatusReady` | differs: code Light `#00ff00` |
-| `color/lilac` | `--lilac` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | none | no code token |
-| `color/cyan` | `--cyan` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | none | no code token |
+| `color/app-background` | `--app-background-color` | `#000212` | `#eeeeee` | `#000000` | `#282a36` | `#15161a` | `colorScheme.surface + scaffoldBackgroundColor` | match |
+| `color/text` | `--app-text-color` | `#e9e1d1` | `#2b2d31` | `#e9e1d1` | `#f8f8f2` | `#f8fafc` | `colorScheme.onSurface` | match |
+| `color/text-secondary` | `--app-text-color-secondary` | `#e9e1d18c` | `#2b2d31a6` | `#e9e1d173` | `#6272a4` | `#94a3b8` | `GatunoColors.palette.textSecondary` | match |
+| `color/text-muted` | `--app-text-color-muted` | `#fdfdfd73` | `#2b2d3173` | `#fdfdfd59` | `#f8f8f273` | `#f8fafc73` | `GatunoColors.palette.textMuted` | match |
+| `color/primary` | `--primary-color` | `#f18522` | `#cc5e00` | `#f18522` | `#bd93f9` | `#f18522` | `colorScheme.primary` | match |
+| `color/secondary` | `--secondary-color` | `#181a1f` | `#e0e0e0` | `#181a1f` | `#44475a` | `#212329` | `colorScheme.surfaceContainerHighest` | match |
+| `color/border` | `--border-color` | `#e9e1d126` | `#2b2d311f` | `#e9e1d11a` | `#f8f8f226` | `#f8fafc26` | `colorScheme.outline` | match |
+| `color/hover` | `--hover-color` | `#e9e1d114` | `#2b2d310f` | `#e9e1d10f` | `#f8f8f214` | `#f8fafc14` | `GatunoColors.palette.hover` | match |
+| `color/divider` | (none) | `#e9e1d11a` | `#2b2d311a` | `#e9e1d112` | `#f8f8f21a` | `#f8fafc1a` | `dividerTheme.color` | match |
+| `color/context-menu-bg` | `--context-menu-bg` | `#000212cc` | `#ffffffe5` | `#000000e5` | `#282a36e5` | `#15161ae5` | `GatunoColors.contextMenuBackground` | match |
+| `color/overlay` | `--overlay-bg` | `#000000b2` | `#0000004d` | `#000000d9` | `#000000bf` | `#000000b2` | `GatunoColors.overlayBackground` | match |
+| `color/on-primary` | `--white` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `#fdfdfd` | `colorScheme.onPrimary` | match |
+| `color/danger` | `--danger-color` | `#f12237` | `#ff0000` | `#f12237` | `#ff5555` | `#ef4444` | `colorScheme.error` | match |
+| `color/warning` | `--warning-color` | `#ffc107` | `#ffc107` | `#ffc107` | `#ffb86c` | `#f59e0b` | `GatunoColors.palette.warning` | match |
+| `color/success` | `--success-color` | `#157219` | `#28a745` | `#157219` | `#50fa7b` | `#10b981` | `GatunoColors.scrapingStatusReady` | match |
+| `color/lilac` | `--lilac` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | `#a972ff` | `GatunoColors.palette.lilac` | match |
+| `color/cyan` | `--cyan` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `#17a2b8` | `GatunoColors.palette.cyan` | match |
 
 Alpha ramps (same hue as their base token, fixed opacity; values per theme in `design.json`): `color/primary-10`, `color/primary-15`, `color/primary-40`, `color/lilac-15`, `color/lilac-40`, `color/success-15`, `color/success-40`, `color/danger-10`, `color/danger-15`, `color/danger-40`, `color/warning-15`, `color/warning-40`, `color/cyan-15`, `color/cyan-40`, `color/secondary-45`, `color/secondary-60`, `color/text-10`, `color/text-40`, `color/app-background-2`, `color/app-background-3`, `color/app-background-40`, `color/app-background-75`.
 
@@ -61,10 +61,10 @@ Alpha ramps (same hue as their base token, fixed opacity; values per theme in `d
 
 ## Typography
 
-**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset). **Code today:** Inknut Antiqua is applied to everything through `ThemeData.fontFamily`; the other four families are not bundled in `pubspec.yaml`.
+**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset). **Code:** all five families are bundled (`assets/fonts/`, declared in `pubspec.yaml`, OFL licences alongside). Inknut Antiqua stays the `ThemeData.fontFamily` fallback for roles Figma does not define; `AppTypography.textTheme` maps the Figma styles.
 
 ### Hierarchy
-Flutter targets are proposed mappings; none exist in `AppTheme` yet.
+Styles without a Material role (target column below) are exposed as `AppTypography.overline`, `readingSerif` and `readingDyslexia`; `overline` also needs upper-casing by the caller.
 
 | Style (Figma) | Family | Weight | Size dp | Line height | Letter spacing | Flutter target |
 |---|---|---|---|---|---|---|
@@ -78,9 +78,9 @@ Flutter targets are proposed mappings; none exist in `AppTheme` yet.
 | `Interface/Botão` | Plus Jakarta Sans SemiBold | 600 | 14 | 120% | 0% | `textTheme.labelLarge` |
 | `Interface/Rótulo` | Plus Jakarta Sans Medium | 500 | 13 | 130% | 0% | `textTheme.labelMedium` |
 | `Interface/Legenda` | Plus Jakarta Sans Medium | 500 | 12 | 130% | 0% | `textTheme.labelSmall` |
-| `Interface/Sobrelinha` | Plus Jakarta Sans Bold | 700 | 11 | 130% | 12% | none |
-| `Leitura/Serifa` | Literata Regular | 400 | 19 | 180% | 0% | none |
-| `Leitura/Dislexia` | Lexend Regular | 400 | 20 | 180% | 5% | none |
+| `Interface/Sobrelinha` | Plus Jakarta Sans Bold | 700 | 11 | 130% | 12% | `AppTypography.overline` |
+| `Leitura/Serifa` | Literata Regular | 400 | 19 | 180% | 0% | `AppTypography.readingSerif` |
+| `Leitura/Dislexia` | Lexend Regular | 400 | 20 | 180% | 5% | `AppTypography.readingDyslexia` |
 
 The Figma styles prefixed `Legado/Gatuno/*` (Inknut Antiqua only) are superseded and excluded.
 
@@ -139,15 +139,8 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 
 ## Figma vs code gaps
 
-- **fonts-not-bundled**: Manrope, Plus Jakarta Sans, Literata and Lexend are used by Figma text styles but are not declared in pubspec.yaml; only Inknut Antiqua is bundled.
-- **text-theme-uncustomized**: AppTheme sets fontFamily only; no TextTheme roles map to the Figma text styles.
-- **light-theme-diverges**: AppTheme.lightTheme uses lilac primary, white surface and darkPurple onSurface; Figma Light uses #cc5e00 primary, #eeeeee background and #2b2d31 text.
-- **themes-missing**: True-dark, Dracula and Slate exist in Figma but not in AppTheme; no theme-selection mechanism exists in code.
-- **on-primary-dark**: Dark onPrimary is #000212 in code; Figma color/on-primary is #fdfdfd in every theme.
-- **error-role**: colorScheme.error is orange (#f18522) in both code themes; Figma color/danger is #f12237 (Dark) / #ff0000 (Light). Code keeps danger only in GatunoColors.scrapingStatusError.
-- **outline-divider-values**: outline and divider use opaque grays in code; Figma border/divider are translucent text-color tints.
-- **secondary-role**: colorScheme.secondary is darkPurple (Dark) / beige (Light) in code; Figma color/secondary is #181a1f / #e0e0e0. Proposed mapping to surfaceContainerHighest is not implemented.
-- **tokens-without-code**: text-secondary, text-muted, hover, warning, lilac, cyan, alpha ramps, radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
+- **themes-missing**: AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51).
+- **tokens-without-code**: radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and AppColors.gray*/badge* constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.
 - **degrader-not-in-figma**: GatunoColors.degrader gradient has no Figma style.
 - **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings) have frames since issue #52 (Dark theme only, key states). Still without frames: web sections 3 (Auth) and 4 (Settings), web /library and /users/:userId, and the code-only welcome and certificates screens.

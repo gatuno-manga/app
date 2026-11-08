@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'app_palette.dart';
+import 'app_typography.dart';
+
 class AppColors {
   static const Color black = Color(0xFF000212);
   static const Color darkPurple = Color(0xFF20142A);
@@ -87,6 +90,7 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
     required this.badgeSensitive,
     required this.badgePublication,
     required this.badgeAuthor,
+    required this.palette,
   });
 
   final Color? scrapingStatusReady;
@@ -106,6 +110,9 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
   final BadgeColors badgePublication;
   final BadgeColors badgeAuthor;
 
+  /// Figma color tokens of the active theme, including the alpha ramps.
+  final AppPalette palette;
+
   @override
   GatunoColors copyWith({
     Color? scrapingStatusReady,
@@ -122,6 +129,7 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
     BadgeColors? badgeSensitive,
     BadgeColors? badgePublication,
     BadgeColors? badgeAuthor,
+    AppPalette? palette,
   }) {
     return GatunoColors(
       scrapingStatusReady: scrapingStatusReady ?? this.scrapingStatusReady,
@@ -140,6 +148,7 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
       badgeSensitive: badgeSensitive ?? this.badgeSensitive,
       badgePublication: badgePublication ?? this.badgePublication,
       badgeAuthor: badgeAuthor ?? this.badgeAuthor,
+      palette: palette ?? this.palette,
     );
   }
 
@@ -187,200 +196,200 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
         t,
       ),
       badgeAuthor: BadgeColors.lerp(badgeAuthor, other.badgeAuthor, t),
+      palette: AppPalette.lerp(palette, other.palette, t),
     );
   }
 }
 
 class AppTheme {
-  static ThemeData get lightTheme {
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      fontFamily: 'Inknut Antiqua',
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.lilac,
-        brightness: Brightness.light,
-        primary: AppColors.lilac,
-        onPrimary: AppColors.white,
-        secondary: AppColors.beige,
-        onSecondary: AppColors.darkPurple,
-        tertiary: AppColors.darkLilac,
-        onTertiary: AppColors.white,
-        error: AppColors.orange,
-        onError: AppColors.white,
-        surface: AppColors.white,
-        onSurface: AppColors.darkPurple,
-        surfaceContainerHighest: AppColors.gray100,
-        outline: AppColors.gray400,
-      ),
-      scaffoldBackgroundColor: AppColors.white,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.darkPurple,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.gray300,
-        thickness: 1,
-      ),
-      scrollbarTheme: ScrollbarThemeData(
-        thumbColor: WidgetStateProperty.all(AppColors.darkPurple),
-        trackColor: WidgetStateProperty.all(AppColors.beige),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.darkLilac,
-        contentTextStyle: const TextStyle(color: AppColors.white),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      extensions: [
-        GatunoColors(
-          scrapingStatusReady: AppColors.green,
-          scrapingStatusProcessing: AppColors.orange,
-          scrapingStatusError: AppColors.red,
-          contextMenuBackground: const Color(0xE6FDFDFD),
-          overlayBackground: const Color(0x4D000000),
-          shadowColor: const Color(0x26000000),
-          degrader: const LinearGradient(
-            begin: Alignment(1.0, -0.07),
-            end: Alignment(-1.0, 0.07),
-            colors: [AppColors.white, AppColors.white, AppColors.beige],
-            stops: [0.0, 0.5, 1.0],
-          ),
-          badgeDefault: const BadgeColors(
-            bg: Color(0x262B7FFF),
-            border: Color(0x662B7FFF),
-            text: Color(0xFF1A5ACF),
-          ),
-          badgeSearch: const BadgeColors(
-            bg: Color(0x262ECC71),
-            border: Color(0x592ECC71),
-            text: Color(0xFF1E8449),
-          ),
-          badgeType: const BadgeColors(
-            bg: Color(0x26F18522),
-            border: Color(0x59F18522),
-            text: Color(0xFFD68910),
-          ),
-          badgeExcluded: const BadgeColors(
-            bg: Color(0x26FF4343),
-            border: Color(0x59FF4343),
-            text: Color(0xFFC0392B),
-          ),
-          badgeSensitive: const BadgeColors(
-            bg: Color(0x269B59B6),
-            border: Color(0x599B59B6),
-            text: Color(0xFF7D3C98),
-          ),
-          badgePublication: const BadgeColors(
-            bg: Color(0x26F1C40F),
-            border: Color(0x59F1C40F),
-            text: Color(0xFF9A7D0A),
-          ),
-          badgeAuthor: const BadgeColors(
-            bg: Color(0x261ABC9C),
-            border: Color(0x591ABC9C),
-            text: Color(0xFF138D75),
-          ),
-        ),
-      ],
-    );
-  }
+  static ThemeData get lightTheme =>
+      _build(lightPalette, Brightness.light, _lightBadges);
 
-  static ThemeData get darkTheme {
+  static ThemeData get darkTheme =>
+      _build(darkPalette, Brightness.dark, _darkBadges);
+
+  static ThemeData get trueDarkTheme =>
+      _build(trueDarkPalette, Brightness.dark, _darkBadges);
+
+  static ThemeData get draculaTheme =>
+      _build(draculaPalette, Brightness.dark, _darkBadges);
+
+  static ThemeData get slateTheme =>
+      _build(slatePalette, Brightness.dark, _darkBadges);
+
+  static ThemeData _build(
+    AppPalette palette,
+    Brightness brightness,
+    _BadgeSet badges,
+  ) {
+    final isLight = brightness == Brightness.light;
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      fontFamily: 'Inknut Antiqua',
+      brightness: brightness,
+      fontFamily: AppTypography.inknut,
+      textTheme: AppTypography.textTheme,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.orange,
-        brightness: Brightness.dark,
-        primary: AppColors.orange,
-        onPrimary: AppColors.black,
-        secondary: AppColors.darkPurple,
-        onSecondary: AppColors.beige,
-        tertiary: AppColors.darkLilac,
-        onTertiary: AppColors.white,
-        error: AppColors.orange,
-        onError: AppColors.black,
-        surface: AppColors.black,
-        onSurface: AppColors.beige,
-        surfaceContainerHighest: AppColors.darkPurple,
-        outline: AppColors.gray700,
+        seedColor: palette.primary,
+        brightness: brightness,
+        primary: palette.primary,
+        onPrimary: palette.onPrimary,
+        secondary: palette.secondary,
+        onSecondary: palette.text,
+        tertiary: palette.lilac,
+        onTertiary: palette.onPrimary,
+        error: palette.danger,
+        onError: palette.onPrimary,
+        surface: palette.appBackground,
+        onSurface: palette.text,
+        surfaceContainerHighest: palette.secondary,
+        outline: palette.border,
       ),
-      scaffoldBackgroundColor: AppColors.black,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.black,
-        foregroundColor: AppColors.beige,
+      scaffoldBackgroundColor: palette.appBackground,
+      appBarTheme: AppBarTheme(
+        backgroundColor: palette.appBackground,
+        foregroundColor: palette.text,
         elevation: 0,
         centerTitle: true,
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.gray800,
-        thickness: 1,
-      ),
+      dividerTheme: DividerThemeData(color: palette.divider, thickness: 1),
       scrollbarTheme: ScrollbarThemeData(
-        thumbColor: WidgetStateProperty.all(AppColors.orange),
-        trackColor: WidgetStateProperty.all(AppColors.darkGray),
+        thumbColor: WidgetStateProperty.all(palette.primary),
+        trackColor: WidgetStateProperty.all(palette.secondary),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.lilac,
-        contentTextStyle: const TextStyle(color: AppColors.black),
+        backgroundColor: palette.lilac,
+        contentTextStyle: TextStyle(color: palette.onPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       extensions: [
         GatunoColors(
-          scrapingStatusReady: AppColors.darkGreen,
-          scrapingStatusProcessing: AppColors.orange,
-          scrapingStatusError: AppColors.darkRed,
-          contextMenuBackground: const Color(0xCC000212),
-          overlayBackground: const Color(0xB3000000),
-          shadowColor: const Color(0x33000000),
-          degrader: const LinearGradient(
-            begin: Alignment(1.0, -0.07),
-            end: Alignment(-1.0, 0.07),
-            colors: [AppColors.black, AppColors.darkPurple],
-            stops: [0.55, 1.94], // Values from CSS
+          scrapingStatusReady: palette.success,
+          scrapingStatusProcessing: palette.warning,
+          scrapingStatusError: palette.danger,
+          contextMenuBackground: palette.contextMenuBackground,
+          overlayBackground: palette.overlay,
+          shadowColor: Color(isLight ? 0x26000000 : 0x33000000),
+          degrader: LinearGradient(
+            begin: const Alignment(1.0, -0.07),
+            end: const Alignment(-1.0, 0.07),
+            colors: isLight
+                ? [
+                    palette.appBackground,
+                    palette.appBackground,
+                    palette.secondary,
+                  ]
+                : [palette.appBackground, palette.secondary],
+            stops: isLight ? const [0.0, 0.5, 1.0] : const [0.55, 1.94],
           ),
-          badgeDefault: const BadgeColors(
-            bg: Color(0x4D2B7FFF),
-            border: Color(0x802B7FFF),
-            text: AppColors.badgeBlueLight,
-          ),
-          badgeSearch: const BadgeColors(
-            bg: Color(0x332ECC71),
-            border: Color(0x662ECC71),
-            text: AppColors.badgeGreenLight,
-          ),
-          badgeType: const BadgeColors(
-            bg: Color(0x33F18522),
-            border: Color(0x66F18522),
-            text: AppColors.badgeOrangeLight,
-          ),
-          badgeExcluded: const BadgeColors(
-            bg: Color(0x33FF4343),
-            border: Color(0x66FF4343),
-            text: AppColors.badgeRedLight,
-          ),
-          badgeSensitive: const BadgeColors(
-            bg: Color(0x339B59B6),
-            border: Color(0x669B59B6),
-            text: AppColors.badgePurpleLight,
-          ),
-          badgePublication: const BadgeColors(
-            bg: Color(0x33F1C40F),
-            border: Color(0x66F1C40F),
-            text: AppColors.badgeYellowLight,
-          ),
-          badgeAuthor: const BadgeColors(
-            bg: Color(0x331ABC9C),
-            border: Color(0x661ABC9C),
-            text: AppColors.badgeTurquoiseLight,
-          ),
+          badgeDefault: badges.badgeDefault,
+          badgeSearch: badges.badgeSearch,
+          badgeType: badges.badgeType,
+          badgeExcluded: badges.badgeExcluded,
+          badgeSensitive: badges.badgeSensitive,
+          badgePublication: badges.badgePublication,
+          badgeAuthor: badges.badgeAuthor,
+          palette: palette,
         ),
       ],
     );
   }
 }
+
+/// Badge colors have no Figma variable (gap `badge-colors-not-in-figma`), so
+/// they stay per brightness rather than per theme.
+class _BadgeSet {
+  const _BadgeSet({
+    required this.badgeDefault,
+    required this.badgeSearch,
+    required this.badgeType,
+    required this.badgeExcluded,
+    required this.badgeSensitive,
+    required this.badgePublication,
+    required this.badgeAuthor,
+  });
+
+  final BadgeColors badgeDefault;
+  final BadgeColors badgeSearch;
+  final BadgeColors badgeType;
+  final BadgeColors badgeExcluded;
+  final BadgeColors badgeSensitive;
+  final BadgeColors badgePublication;
+  final BadgeColors badgeAuthor;
+}
+
+const _BadgeSet _lightBadges = _BadgeSet(
+  badgeDefault: BadgeColors(
+    bg: Color(0x262B7FFF),
+    border: Color(0x662B7FFF),
+    text: Color(0xFF1A5ACF),
+  ),
+  badgeSearch: BadgeColors(
+    bg: Color(0x262ECC71),
+    border: Color(0x592ECC71),
+    text: Color(0xFF1E8449),
+  ),
+  badgeType: BadgeColors(
+    bg: Color(0x26F18522),
+    border: Color(0x59F18522),
+    text: Color(0xFFD68910),
+  ),
+  badgeExcluded: BadgeColors(
+    bg: Color(0x26FF4343),
+    border: Color(0x59FF4343),
+    text: Color(0xFFC0392B),
+  ),
+  badgeSensitive: BadgeColors(
+    bg: Color(0x269B59B6),
+    border: Color(0x599B59B6),
+    text: Color(0xFF7D3C98),
+  ),
+  badgePublication: BadgeColors(
+    bg: Color(0x26F1C40F),
+    border: Color(0x59F1C40F),
+    text: Color(0xFF9A7D0A),
+  ),
+  badgeAuthor: BadgeColors(
+    bg: Color(0x261ABC9C),
+    border: Color(0x591ABC9C),
+    text: Color(0xFF138D75),
+  ),
+);
+
+const _BadgeSet _darkBadges = _BadgeSet(
+  badgeDefault: BadgeColors(
+    bg: Color(0x4D2B7FFF),
+    border: Color(0x802B7FFF),
+    text: AppColors.badgeBlueLight,
+  ),
+  badgeSearch: BadgeColors(
+    bg: Color(0x332ECC71),
+    border: Color(0x662ECC71),
+    text: AppColors.badgeGreenLight,
+  ),
+  badgeType: BadgeColors(
+    bg: Color(0x33F18522),
+    border: Color(0x66F18522),
+    text: AppColors.badgeOrangeLight,
+  ),
+  badgeExcluded: BadgeColors(
+    bg: Color(0x33FF4343),
+    border: Color(0x66FF4343),
+    text: AppColors.badgeRedLight,
+  ),
+  badgeSensitive: BadgeColors(
+    bg: Color(0x339B59B6),
+    border: Color(0x669B59B6),
+    text: AppColors.badgePurpleLight,
+  ),
+  badgePublication: BadgeColors(
+    bg: Color(0x33F1C40F),
+    border: Color(0x66F1C40F),
+    text: AppColors.badgeYellowLight,
+  ),
+  badgeAuthor: BadgeColors(
+    bg: Color(0x331ABC9C),
+    border: Color(0x661ABC9C),
+    text: AppColors.badgeTurquoiseLight,
+  ),
+);

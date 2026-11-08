@@ -28,11 +28,11 @@
     "Slate"
   ],
   "themeImplementation": {
-    "Dark": "AppTheme.darkTheme (partial)",
-    "Light": "AppTheme.lightTheme (diverges)",
-    "True-dark": "none",
-    "Dracula": "none",
-    "Slate": "none"
+    "Dark": "AppTheme.darkTheme",
+    "Light": "AppTheme.lightTheme",
+    "True-dark": "AppTheme.trueDarkTheme (no selection mechanism, #51)",
+    "Dracula": "AppTheme.draculaTheme (no selection mechanism, #51)",
+    "Slate": "AppTheme.slateTheme (no selection mechanism, #51)"
   },
   "colors": {
     "color/app-background": {
@@ -50,10 +50,7 @@
       },
       "flutter": {
         "target": "colorScheme.surface + scaffoldBackgroundColor",
-        "status": "differs",
-        "code": {
-          "Light": "#fdfdfd"
-        }
+        "status": "match"
       }
     },
     "color/text": {
@@ -71,10 +68,7 @@
       },
       "flutter": {
         "target": "colorScheme.onSurface",
-        "status": "differs",
-        "code": {
-          "Light": "#20142a"
-        }
+        "status": "match"
       }
     },
     "color/text-secondary": {
@@ -91,9 +85,8 @@
         "Slate": "#94a3b8"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.textSecondary",
+        "status": "match"
       }
     },
     "color/text-muted": {
@@ -110,9 +103,8 @@
         "Slate": "#f8fafc73"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.textMuted",
+        "status": "match"
       }
     },
     "color/primary": {
@@ -130,10 +122,7 @@
       },
       "flutter": {
         "target": "colorScheme.primary",
-        "status": "differs",
-        "code": {
-          "Light": "#a972ff"
-        }
+        "status": "match"
       }
     },
     "color/secondary": {
@@ -150,12 +139,8 @@
         "Slate": "#212329"
       },
       "flutter": {
-        "target": "colorScheme.surfaceContainerHighest (proposed)",
-        "status": "differs",
-        "code": {
-          "Dark": "#20142a",
-          "Light": "#f8f9fa"
-        }
+        "target": "colorScheme.surfaceContainerHighest",
+        "status": "match"
       }
     },
     "color/border": {
@@ -173,11 +158,7 @@
       },
       "flutter": {
         "target": "colorScheme.outline",
-        "status": "differs",
-        "code": {
-          "Dark": "#666666",
-          "Light": "#cccccc"
-        }
+        "status": "match"
       }
     },
     "color/hover": {
@@ -194,9 +175,8 @@
         "Slate": "#f8fafc14"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.hover",
+        "status": "match"
       }
     },
     "color/divider": {
@@ -214,11 +194,7 @@
       },
       "flutter": {
         "target": "dividerTheme.color",
-        "status": "differs",
-        "code": {
-          "Dark": "#555555",
-          "Light": "#e0e0e0"
-        }
+        "status": "match"
       }
     },
     "color/context-menu-bg": {
@@ -236,10 +212,7 @@
       },
       "flutter": {
         "target": "GatunoColors.contextMenuBackground",
-        "status": "differs",
-        "code": {
-          "Light": "#fdfdfde6"
-        }
+        "status": "match"
       }
     },
     "color/overlay": {
@@ -257,10 +230,7 @@
       },
       "flutter": {
         "target": "GatunoColors.overlayBackground",
-        "status": "differs",
-        "code": {
-          "Dark": "#000000b3"
-        }
+        "status": "match"
       }
     },
     "color/on-primary": {
@@ -278,10 +248,7 @@
       },
       "flutter": {
         "target": "colorScheme.onPrimary",
-        "status": "differs",
-        "code": {
-          "Dark": "#000212"
-        }
+        "status": "match"
       }
     },
     "color/danger": {
@@ -299,11 +266,7 @@
       },
       "flutter": {
         "target": "colorScheme.error",
-        "status": "differs",
-        "code": {
-          "Dark": "#f18522",
-          "Light": "#f18522"
-        }
+        "status": "match"
       }
     },
     "color/warning": {
@@ -320,9 +283,8 @@
         "Slate": "#f59e0b"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.warning",
+        "status": "match"
       }
     },
     "color/success": {
@@ -340,10 +302,7 @@
       },
       "flutter": {
         "target": "GatunoColors.scrapingStatusReady",
-        "status": "differs",
-        "code": {
-          "Light": "#00ff00"
-        }
+        "status": "match"
       }
     },
     "color/lilac": {
@@ -360,9 +319,8 @@
         "Slate": "#a972ff"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.lilac",
+        "status": "match"
       }
     },
     "color/cyan": {
@@ -379,9 +337,8 @@
         "Slate": "#17a2b8"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.cyan",
+        "status": "match"
       }
     },
     "color/primary-10": {
@@ -398,9 +355,8 @@
         "Slate": "#f185221a"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.primary10",
+        "status": "match"
       }
     },
     "color/primary-15": {
@@ -417,9 +373,8 @@
         "Slate": "#f1852226"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.primary15",
+        "status": "match"
       }
     },
     "color/primary-40": {
@@ -436,9 +391,8 @@
         "Slate": "#f1852266"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.primary40",
+        "status": "match"
       }
     },
     "color/lilac-15": {
@@ -455,9 +409,8 @@
         "Slate": "#a972ff26"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.lilac15",
+        "status": "match"
       }
     },
     "color/lilac-40": {
@@ -474,9 +427,8 @@
         "Slate": "#a972ff66"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.lilac40",
+        "status": "match"
       }
     },
     "color/success-15": {
@@ -493,9 +445,8 @@
         "Slate": "#10b98126"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.success15",
+        "status": "match"
       }
     },
     "color/success-40": {
@@ -512,9 +463,8 @@
         "Slate": "#10b98166"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.success40",
+        "status": "match"
       }
     },
     "color/danger-10": {
@@ -531,9 +481,8 @@
         "Slate": "#ef44441a"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.danger10",
+        "status": "match"
       }
     },
     "color/danger-15": {
@@ -550,9 +499,8 @@
         "Slate": "#ef444426"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.danger15",
+        "status": "match"
       }
     },
     "color/danger-40": {
@@ -569,9 +517,8 @@
         "Slate": "#ef444466"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.danger40",
+        "status": "match"
       }
     },
     "color/warning-15": {
@@ -588,9 +535,8 @@
         "Slate": "#f59e0b26"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.warning15",
+        "status": "match"
       }
     },
     "color/warning-40": {
@@ -607,9 +553,8 @@
         "Slate": "#f59e0b66"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.warning40",
+        "status": "match"
       }
     },
     "color/cyan-15": {
@@ -626,9 +571,8 @@
         "Slate": "#17a2b826"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.cyan15",
+        "status": "match"
       }
     },
     "color/cyan-40": {
@@ -645,9 +589,8 @@
         "Slate": "#17a2b866"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.cyan40",
+        "status": "match"
       }
     },
     "color/secondary-45": {
@@ -664,9 +607,8 @@
         "Slate": "#21232973"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.secondary45",
+        "status": "match"
       }
     },
     "color/secondary-60": {
@@ -683,9 +625,8 @@
         "Slate": "#21232999"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.secondary60",
+        "status": "match"
       }
     },
     "color/text-10": {
@@ -702,9 +643,8 @@
         "Slate": "#f8fafc1a"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.text10",
+        "status": "match"
       }
     },
     "color/text-40": {
@@ -721,9 +661,8 @@
         "Slate": "#f8fafc66"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.text40",
+        "status": "match"
       }
     },
     "color/app-background-2": {
@@ -740,9 +679,8 @@
         "Slate": "#15161a05"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.appBackground2",
+        "status": "match"
       }
     },
     "color/app-background-3": {
@@ -759,9 +697,8 @@
         "Slate": "#15161a08"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.appBackground3",
+        "status": "match"
       }
     },
     "color/app-background-40": {
@@ -778,9 +715,8 @@
         "Slate": "#15161a66"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.appBackground40",
+        "status": "match"
       }
     },
     "color/app-background-75": {
@@ -797,9 +733,8 @@
         "Slate": "#15161abf"
       },
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "code": {}
+        "target": "GatunoColors.palette.appBackground75",
+        "status": "match"
       }
     }
   },
@@ -817,8 +752,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.displayLarge",
-        "status": "differs",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Título/1": {
@@ -834,8 +769,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.headlineMedium",
-        "status": "differs",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Título/2": {
@@ -851,8 +786,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.headlineSmall",
-        "status": "differs",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Título/3": {
@@ -868,8 +803,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.titleLarge",
-        "status": "differs",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Corpo/Grande": {
@@ -885,8 +820,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.bodyLarge",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Corpo/Padrão": {
@@ -902,8 +837,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.bodyMedium",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Corpo/Pequeno": {
@@ -919,8 +854,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.bodySmall",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Interface/Botão": {
@@ -936,8 +871,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.labelLarge",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Interface/Rótulo": {
@@ -953,8 +888,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.labelMedium",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Interface/Legenda": {
@@ -970,8 +905,8 @@
       "letterSpacingPercent": 0,
       "flutter": {
         "target": "textTheme.labelSmall",
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Interface/Sobrelinha": {
@@ -987,9 +922,9 @@
       "letterSpacingPercent": 12,
       "textCase": "UPPER",
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "target": "AppTypography.overline",
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Leitura/Serifa": {
@@ -1004,9 +939,9 @@
       "lineHeightPercent": 180,
       "letterSpacingPercent": 0,
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "target": "AppTypography.readingSerif",
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     },
     "Leitura/Dislexia": {
@@ -1021,9 +956,9 @@
       "lineHeightPercent": 180,
       "letterSpacingPercent": 5,
       "flutter": {
-        "target": null,
-        "status": "missing",
-        "note": "code sets only fontFamily 'Inknut Antiqua' app-wide; TextTheme roles are not customized; font not bundled in pubspec.yaml"
+        "target": "AppTypography.readingDyslexia",
+        "status": "match",
+        "note": "AppTypography (lib/core/theme/app_typography.dart); fonts bundled in pubspec.yaml"
       }
     }
   },
@@ -1411,40 +1346,12 @@
   },
   "gaps": [
     {
-      "id": "fonts-not-bundled",
-      "summary": "Manrope, Plus Jakarta Sans, Literata and Lexend are used by Figma text styles but are not declared in pubspec.yaml; only Inknut Antiqua is bundled."
-    },
-    {
-      "id": "text-theme-uncustomized",
-      "summary": "AppTheme sets fontFamily only; no TextTheme roles map to the Figma text styles."
-    },
-    {
-      "id": "light-theme-diverges",
-      "summary": "AppTheme.lightTheme uses lilac primary, white surface and darkPurple onSurface; Figma Light uses #cc5e00 primary, #eeeeee background and #2b2d31 text."
-    },
-    {
       "id": "themes-missing",
-      "summary": "True-dark, Dracula and Slate exist in Figma but not in AppTheme; no theme-selection mechanism exists in code."
-    },
-    {
-      "id": "on-primary-dark",
-      "summary": "Dark onPrimary is #000212 in code; Figma color/on-primary is #fdfdfd in every theme."
-    },
-    {
-      "id": "error-role",
-      "summary": "colorScheme.error is orange (#f18522) in both code themes; Figma color/danger is #f12237 (Dark) / #ff0000 (Light). Code keeps danger only in GatunoColors.scrapingStatusError."
-    },
-    {
-      "id": "outline-divider-values",
-      "summary": "outline and divider use opaque grays in code; Figma border/divider are translucent text-color tints."
-    },
-    {
-      "id": "secondary-role",
-      "summary": "colorScheme.secondary is darkPurple (Dark) / beige (Light) in code; Figma color/secondary is #181a1f / #e0e0e0. Proposed mapping to surfaceContainerHighest is not implemented."
+      "summary": "AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51)."
     },
     {
       "id": "tokens-without-code",
-      "summary": "text-secondary, text-muted, hover, warning, lilac, cyan, alpha ramps, radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart."
+      "summary": "radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart."
     },
     {
       "id": "badge-colors-not-in-figma",
