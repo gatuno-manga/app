@@ -29,28 +29,34 @@ class ThemeSwatchGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.settingsThemeTitle,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final choice in AppThemeChoice.values)
-              _ThemeSwatchCard(
-                choice: choice,
-                label: labelOf(l10n, choice),
-                isSelected: choice == selected,
-                onTap: () => onSelected(choice),
-              ),
-          ],
-        ),
-      ],
+    return Semantics(
+      container: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              l10n.settingsThemeTitle,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final choice in AppThemeChoice.values)
+                _ThemeSwatchCard(
+                  choice: choice,
+                  label: labelOf(l10n, choice),
+                  isSelected: choice == selected,
+                  onTap: () => onSelected(choice),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -68,9 +74,10 @@ class _ThemeSwatchCard extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  static const double _width = 96;
+  static const double _width = 104;
   static const double _previewHeight = 64;
   static const BorderRadius _radius = BorderRadius.all(Radius.circular(12));
+  static const BorderRadius _innerRadius = BorderRadius.all(Radius.circular(8));
 
   @override
   Widget build(BuildContext context) {
@@ -80,66 +87,93 @@ class _ThemeSwatchCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
+      inMutuallyExclusiveGroup: true,
       label: label,
       excludeSemantics: true,
       onTap: onTap,
       child: SizedBox(
         width: _width,
-        child: InkWell(
-          key: ValueKey('theme-swatch-${choice.name}'),
-          onTap: onTap,
-          borderRadius: _radius,
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              borderRadius: _radius,
-              border: Border.all(
-                color: isSelected ? scheme.primary : scheme.outlineVariant,
-                width: isSelected ? 2 : 1,
+        child: Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                borderRadius: _radius,
+                // Constant width: selection must not shift the layout.
+                border: Border.all(
+                  color: isSelected ? scheme.primary : scheme.outlineVariant,
+                  width: 2,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: _innerRadius,
+                        child: SizedBox(
+                          height: _previewHeight,
+                          width: double.infinity,
+                          child: palette != null
+                              ? _PalettePreview(palette: palette)
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      child: _PalettePreview(
+                                        palette: AppThemeChoice.light.palette!,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: _PalettePreview(
+                                        palette: AppThemeChoice.dark.palette!,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                      if (isSelected)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: scheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              size: 14,
+                              color: scheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    label,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  child: SizedBox(
-                    height: _previewHeight,
-                    child: palette != null
-                        ? _PalettePreview(palette: palette)
-                        : const Row(
-                            children: [
-                              Expanded(
-                                child: _PalettePreview(palette: lightPalette),
-                              ),
-                              Expanded(
-                                child: _PalettePreview(palette: darkPalette),
-                              ),
-                            ],
-                          ),
-                  ),
+            // Above the preview so hover, focus and press feedback is visible.
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: ValueKey('theme-swatch-${choice.name}'),
+                  onTap: onTap,
+                  borderRadius: _radius,
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isSelected) ...[
-                      Icon(Icons.check, size: 14, color: scheme.primary),
-                      const SizedBox(width: 2),
-                    ],
-                    Flexible(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -30,10 +30,7 @@ enum AppThemeChoice {
     AppThemeChoice.slate => slatePalette,
   };
 
-  /// `MaterialApp.theme`.
-  ThemeData get theme => AppTheme.lightTheme;
-
-  /// `MaterialApp.darkTheme`.
+  /// `MaterialApp.darkTheme` (`MaterialApp.theme` is always Light).
   ThemeData get darkTheme => switch (this) {
     AppThemeChoice.trueDark => AppTheme.trueDarkTheme,
     AppThemeChoice.dracula => AppTheme.draculaTheme,

@@ -12,7 +12,6 @@ void main() {
 
   test('system follows the OS with light and dark themes', () {
     expect(AppThemeChoice.system.themeMode, ThemeMode.system);
-    expect(AppThemeChoice.system.theme, AppTheme.lightTheme);
     expect(AppThemeChoice.system.darkTheme, AppTheme.darkTheme);
     expect(AppThemeChoice.system.palette, isNull);
   });

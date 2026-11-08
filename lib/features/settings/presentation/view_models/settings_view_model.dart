@@ -109,9 +109,8 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
     await _settingsService.setSensitiveContentEnabled(enabled);
   }
 
-  Future<void> setThemeChoice(AppThemeChoice choice) async {
-    await _settingsService.setThemeChoice(choice);
-  }
+  Future<void> setThemeChoice(AppThemeChoice choice) =>
+      _settingsService.setThemeChoice(choice);
 
   Future<bool> updateApiUrl(String url) async {
     emit(state.copyWith(isLoading: true));

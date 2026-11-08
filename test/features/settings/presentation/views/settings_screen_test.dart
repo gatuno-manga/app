@@ -86,6 +86,9 @@ void main() {
   });
 
   testWidgets('SettingsPage can update API URL', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     when(
       () => mockSettingsService.validateApiUrl(any()),
     ).thenAnswer((_) async => true);

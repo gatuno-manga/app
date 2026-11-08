@@ -28,7 +28,7 @@ The Figma system is dark-first: warm cream text (`#e9e1d1`) on near-black blue (
 
 ## Colors
 
-Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`). All five are implemented as `AppTheme` builders (`lightTheme`, `darkTheme`, `trueDarkTheme`, `draculaTheme`, `slateTheme`); only Light and Dark are wired in `main.dart`, and no theme-selection mechanism exists yet (issue #51).
+Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`). All five are implemented as `AppTheme` builders (`lightTheme`, `darkTheme`, `trueDarkTheme`, `draculaTheme`, `slateTheme`); `main.dart` applies the choice persisted from the Settings swatch grid (System, Light, Dark, True-dark, Dracula, Slate; System follows the OS).
 
 | Token (Figma) | CSS var | Dark | Light | True-dark | Dracula | Slate | Flutter target | Code vs Figma |
 |---|---|---|---|---|---|---|---|---|
@@ -141,7 +141,6 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 
 - **figma-contrast**: Figma tokens fail WCAG AA 4.5:1 in places and AppTheme follows them as the source of truth. color/on-primary (#fdfdfd) on color/primary: 2.5:1 in Dark, True-dark and Slate, 2.4:1 in Dracula, 4.0:1 in Light. On color/danger: 3.1:1 Dracula, 3.7:1 Slate, 3.9:1 Light, 4.1:1 Dark and True-dark. color/text-secondary on color/app-background: 4.3:1 Light, 3.6:1 True-dark, 3.0:1 Dracula (Dark and Slate pass). color/text-muted: 2.5:1 Light, 3.0:1 True-dark, 4.0:1 Dracula, 4.4:1 Dark and Slate. Needs a Figma decision; PRODUCT.md has no WCAG target yet. Lilac pairings (snackbar, tertiary) are fixed in code with AppPalette.onLilac.
 - **fallback-text-roles**: Material text roles Figma does not define (displayMedium, displaySmall, headlineLarge, titleMedium, titleSmall) keep Material default sizes but render in Inknut Antiqua through ThemeData.fontFamily; bodySmall and other roles use onSurface, not color/text-secondary or color/text-muted. The mapped roles also change Material default sizes globally (bodyLarge 16->18, bodyMedium 14->16, bodySmall 12->14, labelMedium 12->13, labelSmall 11->12) with 150-160% line heights, so ListTile, TextField, dialog and chip text grow; check fixed-height rows at large text scales.
-- **themes-missing**: AppTheme has True-dark, Dracula and Slate builders, but no theme-selection mechanism exists in code (issue #51).
 - **tokens-without-code**: radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and the AppColors.badge*Light constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.
 - **degrader-not-in-figma**: GatunoColors.degrader gradient has no Figma style.

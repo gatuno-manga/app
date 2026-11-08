@@ -3,6 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'l10n/app_localizations.dart';
+import 'core/theme/app_theme_choice.dart';
+import 'core/theme/theme.dart';
 import 'core/di/injection.dart';
 import 'features/authentication/domain/use_cases/auth_service.dart';
 import 'features/settings/domain/use_cases/settings_service.dart';
@@ -23,29 +25,31 @@ void main() async {
         Provider.value(value: sl<AuthService>()),
         Provider.value(value: settingsService),
       ],
-      child: App(router: router, settingsService: settingsService),
+      child: App(router: router),
     ),
   );
 }
 
 class App extends StatelessWidget {
   final GoRouter router;
-  final SettingsService settingsService;
-  const App({super.key, required this.router, required this.settingsService});
+  const App({super.key, required this.router});
 
   @override
   Widget build(BuildContext context) {
+    final settingsService = context.read<SettingsService>();
     return AppActivityObserver(
       onIdle: () => context.read<AuthService>().pauseRefresh(),
       onInteraction: () => context.read<AuthService>().evaluateTokenState(),
-      child: StreamBuilder<SettingsState>(
-        stream: settingsService.settingsStream,
-        initialData: settingsService.state,
+      child: StreamBuilder<AppThemeChoice>(
+        stream: settingsService.settingsStream
+            .map((state) => state.themeChoice)
+            .distinct(),
+        initialData: settingsService.themeChoice,
         builder: (context, snapshot) {
-          final choice = snapshot.data!.themeChoice;
+          final choice = snapshot.data!;
           return MaterialApp.router(
             title: 'Gatuno',
-            theme: choice.theme,
+            theme: AppTheme.lightTheme,
             darkTheme: choice.darkTheme,
             themeMode: choice.themeMode,
             routerConfig: router,
