@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
-import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/app_theme_choice.dart';
+import '../molecules/theme_swatch_card.dart';
 
-/// Grid of theme cards; each previews its [AppPalette]. [AppThemeChoice.system]
-/// is a split Light/Dark card.
+/// Titled grid of [ThemeSwatchCard]s, one per [AppThemeChoice].
 class ThemeSwatchGrid extends StatelessWidget {
   const ThemeSwatchGrid({
     super.key,
@@ -16,7 +15,7 @@ class ThemeSwatchGrid extends StatelessWidget {
   final AppThemeChoice selected;
   final ValueChanged<AppThemeChoice> onSelected;
 
-  static String labelOf(AppLocalizations l10n, AppThemeChoice choice) =>
+  static String _labelOf(AppLocalizations l10n, AppThemeChoice choice) =>
       switch (choice) {
         AppThemeChoice.system => l10n.settingsThemeSystem,
         AppThemeChoice.light => l10n.settingsThemeLight,
@@ -47,9 +46,9 @@ class ThemeSwatchGrid extends StatelessWidget {
             runSpacing: 12,
             children: [
               for (final choice in AppThemeChoice.values)
-                _ThemeSwatchCard(
+                ThemeSwatchCard(
                   choice: choice,
-                  label: labelOf(l10n, choice),
+                  label: _labelOf(l10n, choice),
                   isSelected: choice == selected,
                   onTap: () => onSelected(choice),
                 ),
@@ -59,174 +58,4 @@ class ThemeSwatchGrid extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ThemeSwatchCard extends StatelessWidget {
-  const _ThemeSwatchCard({
-    required this.choice,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final AppThemeChoice choice;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  static const double _width = 104;
-  static const double _previewHeight = 64;
-  static const BorderRadius _radius = BorderRadius.all(Radius.circular(12));
-  static const BorderRadius _innerRadius = BorderRadius.all(Radius.circular(8));
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final palette = choice.palette;
-
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      inMutuallyExclusiveGroup: true,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: SizedBox(
-        width: _width,
-        child: Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                borderRadius: _radius,
-                // Constant width: selection must not shift the layout.
-                border: Border.all(
-                  color: isSelected ? scheme.primary : scheme.outlineVariant,
-                  width: 2,
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: _innerRadius,
-                        child: SizedBox(
-                          height: _previewHeight,
-                          width: double.infinity,
-                          child: palette != null
-                              ? _PalettePreview(palette: palette)
-                              : Row(
-                                  children: [
-                                    Expanded(
-                                      child: _PalettePreview(
-                                        palette: AppThemeChoice.light.palette!,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: _PalettePreview(
-                                        palette: AppThemeChoice.dark.palette!,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                      if (isSelected)
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: scheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              size: 14,
-                              color: scheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    label,
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                ],
-              ),
-            ),
-            // Above the preview so hover, focus and press feedback is visible.
-            Positioned.fill(
-              child: Material(
-                type: MaterialType.transparency,
-                child: InkWell(
-                  key: ValueKey('theme-swatch-${choice.name}'),
-                  onTap: onTap,
-                  borderRadius: _radius,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PalettePreview extends StatelessWidget {
-  const _PalettePreview({required this.palette});
-
-  final AppPalette palette;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: palette.appBackground,
-      child: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _bar(palette.text, 0.8),
-            const SizedBox(height: 4),
-            _bar(palette.textSecondary, 0.55),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 3,
-              children: [
-                _dot(palette.primary),
-                _dot(palette.lilac),
-                _dot(palette.cyan),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static Widget _bar(Color color, double widthFactor) => FractionallySizedBox(
-    widthFactor: widthFactor,
-    child: Container(
-      height: 4,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: const BorderRadius.all(Radius.circular(2)),
-      ),
-    ),
-  );
-
-  static Widget _dot(Color color) => Container(
-    width: 8,
-    height: 8,
-    decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-  );
 }
