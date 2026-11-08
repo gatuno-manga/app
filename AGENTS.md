@@ -22,7 +22,7 @@ Run `just` to list every task. The ones you need most:
 | `just fmt` / `just fix` | Formatting and automated fixes (the pre-commit hook runs both on staged files) |
 | `just analyze` | Static analysis |
 | `just test` | Unit and widget tests |
-| `just design-tokens` | You touched `DESIGN.md`, `.impeccable/design.json` or `lib/core/theme/` |
+| `just design-tokens` | You touched `DESIGN.md`, `PRODUCT.md`, anything under `.impeccable/`, or `lib/core/theme/` |
 | `just check` | Before pushing: analyze, tests and design tokens |
 
 Git hooks (`lefthook.yml`): pre-commit runs `just fmt` and `just fix` on staged
@@ -57,6 +57,7 @@ lib/
 test/                      Mirrors lib/ (test/core, test/features, test/shared);
                            helpers in test/helpers/
 specs/                     Feature specifications
+docs/                      Reports and checklists
 tool/                      Repository scripts (design token check)
 ```
 
@@ -100,8 +101,10 @@ registered inline in `initDI()`, and `authentication` pairs
   `Equatable` class with `copyWith` and an `initial()` factory; the view model
   calls `emit()` and the UI reads `stateStream` (usually with `StreamBuilder`)
   or `state`. A view model is not a `ChangeNotifier`, so nothing closes it
-  for you: whoever creates it calls `dispose()` (see Routing). Cancel stream
-  subscriptions in `State.dispose`. `SafeChangeNotifier` in the same folder is
+  for you: whoever creates it calls `dispose()` (see Routing). A view model
+  that subscribes to streams cancels them in its own `dispose()` override and
+  calls `super.dispose()`; widgets cancel their own subscriptions in their
+  `State.dispose`. `SafeChangeNotifier` in the same folder is
   no longer used by any view model; do not build new ones on it.
 - **Routing.** go_router. `lib/router.dart` builds the root router with a
   `StatefulShellRoute` for the bottom navigation; each feature exposes its
@@ -139,7 +142,7 @@ registered inline in `initDI()`, and `authentication` pairs
   generic `catch` does not swallow them.
 - View models catch everything, log it, and put a user-facing message in
   state. Screens show it (SnackBar or an error view).
-- Log with `AppLogger` (`lib/core/logging/logger.dart`). Every class that logs
+- Log with `AppLogger` (`lib/core/logging/logger.dart`). A class that logs
   declares `static const String _logTag = 'ClassName'` and passes it as the
   tag: `AppLogger.i('message', _logTag)`; for errors,
   `AppLogger.e('message', error, stackTrace, _logTag)`.
@@ -159,8 +162,9 @@ registered inline in `initDI()`, and `authentication` pairs
   `*_screen.dart` holding a `...Page` widget.
 - Single quotes. Private members start with `_`. Prefer named parameters and
   `required` for mandatory ones.
-- Inside `lib/`, use relative imports (the dominant style); tests import
-  `package:gatuno/...`.
+- Inside `lib/`, use relative imports (the dominant style; the
+  `AppLocalizations` import is often `package:gatuno/l10n/...`, so do not churn
+  existing imports); tests import `package:gatuno/...`.
 - Comments explain why, not what. Use `///` doc comments on public APIs and
   abstract classes.
 
@@ -177,7 +181,8 @@ registered inline in `initDI()`, and `authentication` pairs
 - **Strings.** Every user-facing string goes in `lib/l10n/app_en.arb` and
   `lib/l10n/app_pt.arb`. Keys are camelCase with a feature prefix
   (`authSignInTitle`, `booksSearchHint`, `settingsTitle`, `commonLoading`). Run
-  `just l10n` after editing.
+  `just l10n` after editing and commit the regenerated
+  `lib/l10n/app_localizations*.dart`.
 
 ### Atomic Design
 
