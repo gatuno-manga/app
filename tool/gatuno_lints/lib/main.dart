@@ -21,6 +21,8 @@ class GatunoLintsPlugin extends Plugin {
       ..registerWarningRule(HardcodedColor())
       ..registerWarningRule(InlineTextStyle())
       ..registerWarningRule(MissingSemantics())
+      // Enabled by default like the warnings; its severity (info, so existing
+      // violations do not fail `dart analyze`) comes from its LintCode.
       ..registerWarningRule(RawWidgetOutsideAtoms())
       ..registerWarningRule(SmallTapTarget());
   }

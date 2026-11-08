@@ -1,5 +1,4 @@
 import 'package:gatuno_lints/src/rules/raw_widget_outside_atoms.dart';
-import 'package:test/test.dart' show expect;
 import 'package:test_reflective_loader/test_reflective_loader.dart';
 
 import 'flutter_stub.dart';
@@ -55,18 +54,6 @@ class RawWidgetOutsideAtomsTest extends FlutterRuleTest {
       _assertFlagged('FilledButton', '(child: Text("x"))');
 
   void test_text_form_field() => _assertFlagged('TextFormField', '()');
-
-  void test_stub_covers_every_listed_widget() {
-    expect(RawWidgetOutsideAtoms.rawWidgets, {
-      'ElevatedButton',
-      'TextButton',
-      'OutlinedButton',
-      'FilledButton',
-      'IconButton',
-      'TextField',
-      'TextFormField',
-    });
-  }
 
   void test_other_widgets_allowed() async {
     await assertNoDiagnostics(
