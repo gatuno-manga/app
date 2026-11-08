@@ -4,14 +4,12 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_overlay_wrapper.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_top_overlay.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';
-
 
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -30,20 +28,26 @@ class _MockChapter extends Fake implements ReadingChapter {
   @override
   final ChapterId? next = null;
   @override
+  bool get hasPrevious => false;
+  @override
+  bool get hasNext => false;
+  @override
   final List<ReadingPage> pages = [];
 }
 
 void main() {
   late MockReadingViewModel mockViewModel;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(ChapterId('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockViewModel = MockReadingViewModel();
     when(() => mockViewModel.state).thenReturn(ReadingState.initial());
-    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(ReadingState.initial()));
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => Stream.value(ReadingState.initial()));
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
   });
 

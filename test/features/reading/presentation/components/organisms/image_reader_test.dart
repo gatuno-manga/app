@@ -8,7 +8,6 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/image_reader.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reading_bottom_overlay.dart';
@@ -16,7 +15,6 @@ import 'package:gatuno/features/reading/presentation/components/organisms/readin
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:mocktail/mocktail.dart';
-
 
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -33,6 +31,10 @@ class _MockChapter extends Fake implements ReadingChapter {
   final ChapterId? previous = null;
   @override
   final ChapterId? next = null;
+  @override
+  bool get hasPrevious => false;
+  @override
+  bool get hasNext => false;
   @override
   final ChapterTitle? title = const ChapterTitle('Chapter 1');
   @override
@@ -67,21 +69,31 @@ void main() {
   setUp(() async {
     mockViewModel = MockReadingViewModel();
     when(() => mockViewModel.state).thenReturn(ReadingState.initial());
-    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(ReadingState.initial()));
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => Stream.value(ReadingState.initial()));
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
     await initTestDI();
   });
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(ChapterId('dummy'));
   });
 
-group('ImageReader', () {
+  group('ImageReader', () {
     testWidgets('renders pages and toggles overlay on tap', (tester) async {
       final chapter = _MockChapter(
         pages: [
-          _MockPage(id: const ReadingPageId('1'), url: const ReadingPageUrl('p1.png'), index: const PositiveInt(0)),
-          _MockPage(id: const ReadingPageId('2'), url: const ReadingPageUrl('p2.png'), index: const PositiveInt(1)),
+          _MockPage(
+            id: const ReadingPageId('1'),
+            url: const ReadingPageUrl('p1.png'),
+            index: const PositiveInt(0),
+          ),
+          _MockPage(
+            id: const ReadingPageId('2'),
+            url: const ReadingPageUrl('p2.png'),
+            index: const PositiveInt(1),
+          ),
         ],
       );
 

@@ -9,7 +9,6 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/shared/domain/entities/image_metadata.dart';
@@ -34,6 +33,49 @@ void main() {
 
       expect(chapter.id.value, '1');
       expect(chapter.contentType, ContentType.image);
+    });
+  });
+
+  group('ReadingChapter navigation', () {
+    ReadingChapter build({ChapterId? previous, ChapterId? next}) =>
+        ReadingChapter(
+          id: const ChapterId('1'),
+          originalUrl: const OriginalUrl('https://example.com/original.pdf'),
+          index: const ChapterIndex(1.0),
+          contentType: ContentType.image,
+          retries: const PositiveInt(0),
+          isFinal: true,
+          previous: previous,
+          next: next,
+          bookId: const BookId('b1'),
+          bookTitle: const BookTitle('Book'),
+          totalChapters: const PositiveInt(10),
+          pages: const <ReadingPage>[],
+          comments: const <ChapterComment>[],
+        );
+
+    test('null ids mean no previous/next', () {
+      final c = build();
+      expect(c.hasPrevious, isFalse);
+      expect(c.hasNext, isFalse);
+    });
+
+    test('empty and whitespace ids mean no previous/next', () {
+      final c = build(
+        previous: const ChapterId(''),
+        next: const ChapterId('   '),
+      );
+      expect(c.hasPrevious, isFalse);
+      expect(c.hasNext, isFalse);
+    });
+
+    test('valid ids mean previous/next exist', () {
+      final c = build(
+        previous: const ChapterId('p'),
+        next: const ChapterId('n'),
+      );
+      expect(c.hasPrevious, isTrue);
+      expect(c.hasNext, isTrue);
     });
   });
 

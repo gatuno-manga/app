@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reading_bottom_bar.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:mocktail/mocktail.dart';
-
 
 import 'package:provider/provider.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -23,6 +21,11 @@ class _MockChapter extends Fake implements ReadingChapter {
   final ChapterId? next;
 
   _MockChapter({required this.pages, this.previous, this.next});
+
+  @override
+  bool get hasPrevious => previous != null && previous!.value.trim().isNotEmpty;
+  @override
+  bool get hasNext => next != null && next!.value.trim().isNotEmpty;
 }
 
 class FakeReadingPage extends Fake implements ReadingPage {}
@@ -30,14 +33,16 @@ class FakeReadingPage extends Fake implements ReadingPage {}
 void main() {
   late MockReadingViewModel mockViewModel;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(ChapterId('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockViewModel = MockReadingViewModel();
     when(() => mockViewModel.state).thenReturn(ReadingState.initial());
-    when(() => mockViewModel.stateStream).thenAnswer((_) => Stream.value(ReadingState.initial()));
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => Stream.value(ReadingState.initial()));
     when(() => mockViewModel.currentPageIndex).thenReturn(0);
   });
 
@@ -101,6 +106,78 @@ setUp(() {
         find.widgetWithIcon(IconButton, Icons.skip_next),
       );
       expect(nextButton.onPressed, isNull);
+    });
+
+    for (final blank in ['', '   ']) {
+      testWidgets('disables both buttons for blank id "$blank"', (
+        tester,
+      ) async {
+        final chapter = _MockChapter(
+          pages: [],
+          previous: ChapterId(blank),
+          next: ChapterId(blank),
+        );
+
+        await tester.pumpApp(
+          Provider<ReadingViewModel>.value(
+            value: mockViewModel,
+            child: Scaffold(
+              body: ReadingBottomBar(chapter: chapter, bottomPadding: 0.0),
+            ),
+          ),
+        );
+
+        expect(
+          tester
+              .widget<IconButton>(
+                find.widgetWithIcon(IconButton, Icons.skip_previous),
+              )
+              .onPressed,
+          isNull,
+        );
+        expect(
+          tester
+              .widget<IconButton>(
+                find.widgetWithIcon(IconButton, Icons.skip_next),
+              )
+              .onPressed,
+          isNull,
+        );
+      });
+    }
+
+    testWidgets('enables both buttons for valid ids', (tester) async {
+      final chapter = _MockChapter(
+        pages: [],
+        previous: const ChapterId('prev-id'),
+        next: const ChapterId('next-id'),
+      );
+
+      await tester.pumpApp(
+        Provider<ReadingViewModel>.value(
+          value: mockViewModel,
+          child: Scaffold(
+            body: ReadingBottomBar(chapter: chapter, bottomPadding: 0.0),
+          ),
+        ),
+      );
+
+      expect(
+        tester
+            .widget<IconButton>(
+              find.widgetWithIcon(IconButton, Icons.skip_previous),
+            )
+            .onPressed,
+        isNotNull,
+      );
+      expect(
+        tester
+            .widget<IconButton>(
+              find.widgetWithIcon(IconButton, Icons.skip_next),
+            )
+            .onPressed,
+        isNotNull,
+      );
     });
   });
 }
