@@ -37,6 +37,9 @@ class _BooksOptionFilterState extends State<BooksOptionFilter> {
   // fires (or leaks the error of) a request.
   Future<List<FilterOption>>? _options;
 
+  // Last resolved labels, shown while a re-resolve is in flight (no flicker).
+  List<FilterOption>? _resolved;
+
   Future<void> _openPicker() async {
     final result = await BooksOptionPickerSheet.show(
       context,
@@ -55,10 +58,12 @@ class _BooksOptionFilterState extends State<BooksOptionFilter> {
   Widget _chips(AppLocalizations l10n, List<String> ids) {
     return FutureBuilder<List<FilterOption>>(
       future: _options ??= widget.loadOptions(),
+      initialData: _resolved,
       builder: (context, snapshot) {
         if (snapshot.hasError) return Text(l10n.booksFilterLoadError);
         final data = snapshot.data;
         if (data == null) return const SizedBox.shrink();
+        _resolved = data;
         final names = {for (final o in data) o.id: o.label};
         return Wrap(
           spacing: 8,

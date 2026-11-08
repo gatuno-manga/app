@@ -260,5 +260,38 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Action'), findsOneWidget);
     });
+
+    testWidgets('picker does not overflow with the keyboard open on a short '
+        'screen', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(640, 360);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpApp(
+        Scaffold(
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute(
+              builder: (context) => BooksFilterSheet(
+                initialOptions: const BookPageOptions(),
+                onApply: (_) {},
+                onClear: () {},
+                loadTags: _tags,
+                loadAuthors: _authors,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Add').first);
+      await tester.tap(find.text('Add').first);
+      await tester.pumpAndSettle();
+
+      tester.view.viewInsets = const FakeViewPadding(bottom: 190);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Action'), findsOneWidget);
+    });
   });
 }

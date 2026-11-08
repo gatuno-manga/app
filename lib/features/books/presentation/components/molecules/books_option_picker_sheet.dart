@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import '../../../../../shared/components/atoms/app_button.dart';
 import '../../../../../shared/components/atoms/app_loading_indicator.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../models/filter_option.dart';
@@ -66,23 +65,36 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    // Cap against the space left above the keyboard, not the full screen,
+    // so the list keeps room while the search field is focused.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    final available = MediaQuery.sizeOf(context).height - keyboard;
+
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
-      ),
+      constraints: BoxConstraints(maxHeight: available + keyboard),
       child: Padding(
         padding: EdgeInsets.only(
           left: 16,
           right: 16,
           top: 16,
-          bottom: MediaQuery.viewInsetsOf(context).bottom + 16,
+          bottom: keyboard + 16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(widget.title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(widget.title, style: theme.textTheme.titleLarge),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, {..._selected}),
+                  child: Text(l10n.booksFilterDone),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             TextField(
               decoration: InputDecoration(
                 hintText: l10n.booksFilterSearchHint,
@@ -140,11 +152,6 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
                   );
                 },
               ),
-            ),
-            const SizedBox(height: 8),
-            AppButton(
-              text: l10n.booksFilterDone,
-              onPressed: () => Navigator.pop(context, {..._selected}),
             ),
           ],
         ),
