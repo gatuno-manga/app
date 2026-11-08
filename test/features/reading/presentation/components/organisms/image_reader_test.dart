@@ -118,8 +118,8 @@ void main() {
       expect(bottomOverlay.showOverlay, isFalse);
 
       // Tap to toggle overlay
-      await tester.tap(find.byType(GestureDetector).first);
-      await tester.pump();
+      await tester.tap(find.byType(ListView));
+      await tester.pump(const Duration(milliseconds: 400));
 
       // Overlays should now be shown
       final topOverlayShown = tester.widget<ReadingTopOverlay>(
