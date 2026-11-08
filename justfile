@@ -34,8 +34,13 @@ fmt *files='.':
     dart format {{ files }}
 
 # Apply automated Dart fixes (defaults to the whole project)
+# `dart fix` accepts a single path, so run it once per argument.
 fix *files='.':
-    dart fix --apply {{ files }}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for f in {{ files }}; do
+        dart fix --apply "$f"
+    done
 
 # Verify repo settings, labels and milestones against tools.toml (needs a token that can read merge settings)
 repo-check:

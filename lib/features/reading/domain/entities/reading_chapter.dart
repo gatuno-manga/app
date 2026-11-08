@@ -95,4 +95,13 @@ class ReadingChapter {
     required this.pages,
     required this.comments,
   });
+
+  /// Whether a navigable previous chapter exists (null/blank ids do not count).
+  bool get hasPrevious => _isNavigable(previous);
+
+  /// Whether a navigable next chapter exists (null/blank ids do not count).
+  bool get hasNext => _isNavigable(next);
+
+  static bool _isNavigable(ChapterId? id) =>
+      id != null && id.value.trim().isNotEmpty;
 }

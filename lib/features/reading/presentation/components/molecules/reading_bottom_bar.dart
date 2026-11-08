@@ -19,7 +19,7 @@ class ReadingBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final viewModel = context.read<ReadingViewModel>();
-    
+
     return StreamBuilder<ReadingState>(
       stream: viewModel.stateStream,
       initialData: viewModel.state,
@@ -60,17 +60,23 @@ class ReadingBottomBar extends StatelessWidget {
                       Icons.skip_previous,
                       color: theme.colorScheme.onSurface,
                     ),
-                    onPressed: chapter.previous != null
+                    // `!` is safe: hasPrevious/hasNext imply a non-null id.
+                    onPressed: chapter.hasPrevious
                         ? () => context.pushReplacement(
-                            '/chapters/${chapter.previous?.value}',
+                            '/chapters/${chapter.previous!.value}',
                           )
                         : null,
                     tooltip: l10n.readingPreviousChapter,
                   ),
                   IconButton(
-                    icon: Icon(Icons.skip_next, color: theme.colorScheme.onSurface),
-                    onPressed: chapter.next != null
-                        ? () => context.pushReplacement('/chapters/${chapter.next?.value}')
+                    icon: Icon(
+                      Icons.skip_next,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    onPressed: chapter.hasNext
+                        ? () => context.pushReplacement(
+                            '/chapters/${chapter.next!.value}',
+                          )
                         : null,
                     tooltip: l10n.readingNextChapter,
                   ),
