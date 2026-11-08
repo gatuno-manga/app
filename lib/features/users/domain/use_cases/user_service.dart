@@ -23,8 +23,7 @@ class UserService {
   );
   StreamSubscription<AuthState>? _authSubscription;
 
-  /// Bumped on every sign-out so a `/me` (or cache read) that was in flight
-  /// for the previous session is dropped instead of re-published.
+  /// Bumped on every sign-out; see [_unlessSignedOut].
   int _sessionEpoch = 0;
 
   /// The current profile, replayed to new listeners: guest until sign-in,
@@ -53,9 +52,8 @@ class UserService {
   Future<void> _onAuthChanged(AuthState authState) async {
     switch (authState) {
       case AuthState.authenticated:
-        final epoch = _sessionEpoch;
-        final user = await getCurrentUser();
-        if (epoch != _sessionEpoch) return;
+        final user = await _unlessSignedOut(getCurrentUser);
+        if (user == null) return;
         _profileSubject.add(user);
         await refreshProfile();
       case AuthState.unauthenticated:
@@ -68,6 +66,16 @@ class UserService {
   void _endSession() {
     _sessionEpoch++;
     _profileSubject.add(UserModel.guest);
+  }
+
+  /// Runs [request]; null when a sign-out happened while it was in flight,
+  /// so a result for the previous session is never cached or published.
+  Future<T?> _unlessSignedOut<T>(Future<T> Function() request) async {
+    final epoch = _sessionEpoch;
+    final result = await request();
+    if (epoch == _sessionEpoch) return result;
+    AppLogger.i('Dropping a result that resolved after sign-out', _logTag);
+    return null;
   }
 
   /// The signed-in user from the JWT, enriched with the cached `/me` profile
@@ -115,12 +123,8 @@ class UserService {
   /// or when the account signed out while the request was in flight.
   Future<UserModel?> refreshProfile() async {
     try {
-      final epoch = _sessionEpoch;
-      final profile = await _remote.fetchMe();
-      if (epoch != _sessionEpoch) {
-        AppLogger.i('Dropping /me fetched after sign-out', _logTag);
-        return null;
-      }
+      final profile = await _unlessSignedOut(_remote.fetchMe);
+      if (profile == null) return null;
       return await _storeProfile(profile);
     } catch (e) {
       AppLogger.w('Could not refresh profile: $e', _logTag);
@@ -141,11 +145,14 @@ class UserService {
       sizeBytes: bytes.length,
     );
     if (invalid != null) throw invalid;
-    final profile = await _remote.uploadImage(
-      kind: kind,
-      bytes: bytes,
-      fileName: fileName,
+    final profile = await _unlessSignedOut(
+      () => _remote.uploadImage(kind: kind, bytes: bytes, fileName: fileName),
     );
+    // Uploaded, but the account signed out meanwhile: neither cache nor
+    // publish it; the profile screen is gone by then anyway.
+    if (profile == null) {
+      throw ProfileImageFailure(ProfileImageFailureReason.unknown, kind);
+    }
     try {
       return await _storeProfile(profile);
     } catch (e) {

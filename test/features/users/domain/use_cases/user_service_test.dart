@@ -439,6 +439,80 @@ void main() {
       await sub.cancel();
     });
 
+    test(
+      'drops an upload that resolves during the logout round-trip',
+      () async {
+        final uploaded = Completer<Map<String, dynamic>>();
+        final backendLogout = Completer<void>();
+        // Keep the sign-in /me pending so only the upload writes could reach
+        // the cache.
+        when(
+          () => remote.fetchMe(),
+        ).thenAnswer((_) => Completer<Map<String, dynamic>>().future);
+        when(
+          () => remote.uploadImage(
+            kind: any(named: 'kind'),
+            bytes: any(named: 'bytes'),
+            fileName: any(named: 'fileName'),
+          ),
+        ).thenAnswer((_) => uploaded.future);
+        when(
+          () => mockAuthService.logout(),
+        ).thenAnswer((_) => backendLogout.future);
+        when(() => storage.clear()).thenAnswer((_) async {});
+        final events = <UserModel>[];
+        final sub = service.profileStream.skip(1).listen(events.add);
+        service.init();
+        auth.add(AuthState.authenticated);
+        await Future<void>.delayed(Duration.zero);
+
+        final upload = service.uploadProfileImage(
+          kind: ProfileImageKind.avatar,
+          fileName: 'a.png',
+          bytes: Uint8List(1),
+        );
+        final logout = service.logout();
+        await Future<void>.delayed(Duration.zero);
+        uploaded.complete(profile('1'));
+        await expectLater(upload, throwsA(isA<ProfileImageFailure>()));
+
+        expect(events.last, same(UserModel.guest));
+        verifyNever(() => storage.writeProfile(any()));
+        backendLogout.complete();
+        await logout;
+        await sub.cancel();
+      },
+    );
+
+    test(
+      'drops a stale /me from the previous account after re-sign-in',
+      () async {
+        final fetchedA = Completer<Map<String, dynamic>>();
+        var fetches = 0;
+        when(() => remote.fetchMe()).thenAnswer(
+          (_) => ++fetches == 1 ? fetchedA.future : Future.value(profile('2')),
+        );
+        final events = <UserModel>[];
+        final sub = service.profileStream.skip(1).listen(events.add);
+        service.init();
+
+        auth.add(AuthState.authenticated); // A, /me pending
+        await Future<void>.delayed(Duration.zero);
+        auth.add(AuthState.unauthenticated);
+        when(
+          () => mockAuthService.getToken(),
+        ).thenAnswer((_) async => validToken('2'));
+        auth.add(AuthState.authenticated); // B
+        await Future<void>.delayed(Duration.zero);
+        fetchedA.complete(profile('1'));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(events.last.id, const UserId('2'));
+        verifyNever(() => storage.writeProfile(profile('1')));
+        await sub.cancel();
+      },
+    );
+
     test('ignores the uninitialized state', () async {
       service.init();
 
