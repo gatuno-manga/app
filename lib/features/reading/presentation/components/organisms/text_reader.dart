@@ -1,75 +1,108 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import '../../../domain/entities/reading_chapter.dart';
-import '../../../domain/entities/reading_enums.dart';
-import 'reader_overlay_wrapper.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
-class TextReader extends StatefulWidget {
+import '../../../../../core/theme/reader_palette.dart';
+import '../../../domain/entities/reader_preferences.dart';
+import '../../../domain/entities/reading_chapter.dart';
+import '../../../domain/use_cases/reader_preferences_service.dart';
+import '../../theme/reader_preferences_builder.dart';
+import '../../theme/reader_text_style.dart';
+import '../molecules/text_reader_content.dart';
+import 'reader_overlay_wrapper.dart';
+import 'reader_settings_sheet.dart';
+import 'text_reader_settings_section.dart';
+
+class TextReader extends StatelessWidget {
   final ReadingChapter chapter;
 
   const TextReader({super.key, required this.chapter});
 
-  @override
-  State<TextReader> createState() => _TextReaderState();
-}
-
-class _TextReaderState extends State<TextReader> {
-  late Widget _textContent;
-
-  @override
-  void initState() {
-    super.initState();
-    _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
-  }
-
-  @override
-  void didUpdateWidget(TextReader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.chapter.content != widget.chapter.content ||
-        oldWidget.chapter.contentFormat != widget.chapter.contentFormat) {
-      _textContent = _buildTextContent(widget.chapter.content?.value ?? '');
-    }
-  }
-
-  Widget _buildTextContent(String content) {
-    switch (widget.chapter.contentFormat) {
-      case ContentFormat.html:
-        return Html(data: content);
-      case ContentFormat.markdown:
-        return MarkdownBody(data: content);
-      case ContentFormat.plain:
-      default:
-        return Builder(
-          builder: (context) => Text(
-            content,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
+  /// The sheet rows of this reader; independent of the value being read, so
+  /// built once per [build] rather than per preference change.
+  static ReaderSettingsSections _settingsSections(
+    ReaderPreferencesService service,
+  ) =>
+      (preferences) => [
+        TextReaderSettingsSection(
+          preferences: preferences.text,
+          onChanged: (change) => service.update(
+            (current) => current.copyWith(text: change(current.text)),
           ),
-        );
-    }
-  }
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
-    return ReaderOverlayWrapper(
-      chapter: widget.chapter,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (widget.chapter.title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: Text(
-                  widget.chapter.title!.value,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+    final sections = _settingsSections(
+      context.read<ReaderPreferencesService>(),
+    );
+    return ReaderPreferencesBuilder(
+      builder: (context, preferences) => ReaderOverlayWrapper(
+        chapter: chapter,
+        settingsSections: sections,
+        child: _TextReaderBody(chapter: chapter, preferences: preferences.text),
+      ),
+    );
+  }
+}
+
+class _TextReaderBody extends StatelessWidget {
+  final ReadingChapter chapter;
+  final TextReaderPreferences preferences;
+
+  const _TextReaderBody({required this.chapter, required this.preferences});
+
+  /// Prose measure cap on wide screens (about 70 characters at 19 dp).
+  static const double _maxProseWidth = 680;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.extension<ReaderPalette>()!;
+    final title = chapter.title;
+    // No app bar here, so the status bar icons must follow the reader
+    // surface (a light Sépia under a dark app theme, or the reverse).
+    final overlayStyle = theme.brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: ColoredBox(
+        key: const ValueKey('text-reader-surface'),
+        color: palette.background,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxProseWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (title != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Text(
+                        title.value,
+                        textAlign: preferences.alignment.textAlign,
+                        // Same family as the body (Figma 882:910).
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: palette.text,
+                          fontFamily: preferences.fontFamily.family,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  TextReaderContent(
+                    content: chapter.content?.value ?? '',
+                    format: chapter.contentFormat,
+                    preferences: preferences,
+                    palette: palette,
                   ),
-                ),
+                ],
               ),
-            _textContent,
-          ],
+            ),
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/reading_chapter.dart';
+import 'reader_settings_sheet.dart';
 import 'reading_bottom_overlay.dart';
 import 'reading_top_overlay.dart';
 
@@ -11,11 +12,17 @@ class ReaderOverlayWrapper extends StatefulWidget {
   /// is confirmed after the double-tap window (~300ms).
   final void Function(Offset position)? onDoubleTap;
 
+  /// The reader's rows of the settings sheet. When set, both bars show the
+  /// settings action and the wrapper opens [ReaderSettingsSheet]; a reader
+  /// without settings leaves it null.
+  final ReaderSettingsSections? settingsSections;
+
   const ReaderOverlayWrapper({
     super.key,
     required this.child,
     required this.chapter,
     this.onDoubleTap,
+    this.settingsSections,
   });
 
   @override
@@ -35,6 +42,10 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
   @override
   Widget build(BuildContext context) {
     final onDoubleTap = widget.onDoubleTap;
+    final sections = widget.settingsSections;
+    final onSettingsPressed = sections == null
+        ? null
+        : () => ReaderSettingsSheet.show(context, sections: sections);
     return Stack(
       children: [
         GestureDetector(
@@ -48,10 +59,15 @@ class _ReaderOverlayWrapperState extends State<ReaderOverlayWrapper> {
           behavior: HitTestBehavior.opaque,
           child: widget.child,
         ),
-        ReadingTopOverlay(showOverlay: _showOverlay, chapter: widget.chapter),
+        ReadingTopOverlay(
+          showOverlay: _showOverlay,
+          chapter: widget.chapter,
+          onSettingsPressed: onSettingsPressed,
+        ),
         ReadingBottomOverlay(
           showOverlay: _showOverlay,
           chapter: widget.chapter,
+          onSettingsPressed: onSettingsPressed,
         ),
       ],
     );

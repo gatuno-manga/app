@@ -1235,9 +1235,9 @@
           "Alto contraste": "#000000"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.background",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/superficie": {
@@ -1252,9 +1252,9 @@
           "Alto contraste": "#111111"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.surface",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/texto": {
@@ -1269,9 +1269,9 @@
           "Alto contraste": "#ffffff"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.text",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/texto-suave": {
@@ -1286,9 +1286,9 @@
           "Alto contraste": "#e6e6e6"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.textSoft",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/acento": {
@@ -1303,9 +1303,9 @@
           "Alto contraste": "#ffd600"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.accent",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/destaque": {
@@ -1320,9 +1320,9 @@
           "Alto contraste": "#ffd60038"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.highlight",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       },
       "leitura/borda": {
@@ -1337,9 +1337,9 @@
           "Alto contraste": "#ffffff99"
         },
         "flutter": {
-          "target": null,
-          "status": "missing",
-          "note": "code has no reader themes"
+          "target": "ReaderPalette.border",
+          "status": "match",
+          "note": "lib/core/theme/reader_palette.dart; Padrão is built from the active AppPalette (ReaderPalette.fromAppPalette), the other modes are constants"
         }
       }
     }
@@ -1355,7 +1355,7 @@
     },
     {
       "id": "tokens-without-code",
-      "summary": "radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart."
+      "summary": "radius/*, space/* and Vidro effects have no ThemeData/ThemeExtension counterpart."
     },
     {
       "id": "badge-colors-not-in-figma",
@@ -1376,6 +1376,10 @@
     {
       "id": "cheap-weekly-exploration",
       "summary": "Collection 'Gatuno / The Cheap Weekly' (press-black palette) is a redesign exploration and is excluded from tokens."
+    },
+    {
+      "id": "reader-fonts-not-in-figma",
+      "summary": "The reader font picker offers Atkinson Hyperlegible and OpenDyslexic (bundled, OFL) as the Figma dropdown lists them, but Figma has no text style for either; only Leitura/Serifa (Literata) and Leitura/Dislexia (Lexend) are styled."
     }
   ]
 }

@@ -11,7 +11,8 @@ import 'package:gatuno/features/users/presentation/view_models/me_view_model.dar
 import 'package:gatuno/core/di/injection.dart';
 
 extension PumpApp on WidgetTester {
-  Future<void> pumpApp(Widget widget) {
+  /// [theme] applies to the whole app, as `AppTheme` does in production.
+  Future<void> pumpApp(Widget widget, {ThemeData? theme, Locale? locale}) {
     FlutterSecureStorage.setMockInitialValues({});
 
     final testRouter = GoRouter(
@@ -50,6 +51,8 @@ extension PumpApp on WidgetTester {
     ];
 
     Widget current = MaterialApp.router(
+      theme: theme,
+      locale: locale,
       routerConfig: testRouter,
       localizationsDelegates: const [
         AppLocalizations.delegate,

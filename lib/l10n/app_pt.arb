@@ -195,6 +195,51 @@
   "readingNextChapter": "Próximo Capítulo",
   "readingPreviousChapter": "Capítulo Anterior",
   "readingFinished": "Você chegou ao fim deste capítulo.",
+  "readingSettingsTitle": "Ajustes de leitura",
+  "readingSettingsAction": "Ajustes",
+  "readingThemeTitle": "Tema de leitura",
+  "readingThemeStandard": "Padrão",
+  "readingThemeSepia": "Sépia",
+  "readingThemeCream": "Creme",
+  "readingThemeHighContrast": "Alto contraste",
+  "readingFontFamily": "Fonte",
+  "readingFontFamilyDesc": "Família do texto",
+  "readingFontSerif": "Serifa",
+  "readingFontSans": "Sem serifa",
+  "readingFontLexend": "Lexend",
+  "readingFontAtkinson": "Atkinson Hyperlegible",
+  "readingFontOpenDyslexic": "OpenDyslexic",
+  "readingFontSize": "Tamanho da fonte ({size}px)",
+  "@readingFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "readingFontSizeDesc": "A- / A+",
+  "readingDecreaseFontSize": "Diminuir tamanho da fonte",
+  "readingIncreaseFontSize": "Aumentar tamanho da fonte",
+  "readingLineHeight": "Espaçamento de linhas ({value})",
+  "@readingLineHeight": {
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
+      }
+    }
+  },
+  "readingLineHeightDesc": "Distância entre linhas",
+  "readingDecreaseLineHeight": "Diminuir espaçamento de linhas",
+  "readingIncreaseLineHeight": "Aumentar espaçamento de linhas",
+  "readingAlignment": "Alinhamento",
+  "readingAlignmentDesc": "Esquerda, centro ou justificado",
+  "readingAlignLeft": "Esquerda",
+  "readingAlignCenter": "Centro",
+  "readingAlignJustify": "Justificado",
   "booksDocumentFormat": "Formato: {format}",
   "@booksDocumentFormat": {
     "placeholders": {

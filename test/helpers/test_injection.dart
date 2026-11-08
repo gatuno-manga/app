@@ -14,11 +14,14 @@ import 'package:gatuno/features/users/data/data_sources/user_local_data_source.d
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/users/presentation/view_models/me_view_model.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
+import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
 import 'package:gatuno/features/settings/data/data_sources/settings_local_data_source.dart';
 import 'package:gatuno/features/certificates/domain/use_cases/certificates_service.dart';
 import 'package:gatuno/features/certificates/data/data_sources/certificates_local_data_source.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockAuthService extends Mock implements AuthService {}
 
@@ -93,6 +96,7 @@ Future<void> initTestDI({
   MeViewModel? meViewModel,
   NavigationViewModel? navigationViewModel,
   DioClient? dioClient,
+  ReaderPreferencesService? readerPreferencesService,
 }) async {
   await sl.reset();
 
@@ -157,4 +161,11 @@ Future<void> initTestDI({
     when(() => navVM.state).thenReturn(NavigationState.initial());
   }
   sl.registerFactory<NavigationViewModel>(() => navVM);
+
+  SharedPreferences.setMockInitialValues({});
+  sl.registerLazySingleton<ReaderPreferencesService>(
+    () =>
+        readerPreferencesService ??
+        ReaderPreferencesService(ReaderPreferencesStorage()),
+  );
 }

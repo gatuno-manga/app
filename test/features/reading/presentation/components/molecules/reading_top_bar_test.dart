@@ -4,7 +4,6 @@ import 'package:gatuno/features/books/domain/value_objects/chapter_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/reading_top_bar.dart';
 import '../../../../../helpers/pump_app.dart';
@@ -17,7 +16,11 @@ class _MockChapter extends Fake implements ReadingChapter {
   @override
   final BookTitle bookTitle;
 
-  _MockChapter({this.title, required this.index, this.bookTitle = const BookTitle('Test Book')});
+  _MockChapter({
+    this.title,
+    required this.index,
+    this.bookTitle = const BookTitle('Test Book'),
+  });
 }
 
 void main() {
@@ -46,6 +49,29 @@ void main() {
       );
 
       expect(find.text('Chapter 2.0'), findsOneWidget);
+    });
+
+    testWidgets('shows a settings action only when a callback is given', (
+      tester,
+    ) async {
+      final chapter = _MockChapter(title: null, index: const ChapterIndex(1.0));
+      await tester.pumpApp(
+        Scaffold(body: ReadingTopBar(chapter: chapter, topPadding: 0)),
+      );
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
+
+      var taps = 0;
+      await tester.pumpApp(
+        Scaffold(
+          body: ReadingTopBar(
+            chapter: chapter,
+            topPadding: 0,
+            onSettingsPressed: () => taps++,
+          ),
+        ),
+      );
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      expect(taps, 1);
     });
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../atoms/reader_settings_button.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../view_models/reading_view_model.dart';
 
@@ -9,16 +10,21 @@ class ReadingBottomBar extends StatelessWidget {
   final ReadingChapter chapter;
   final double bottomPadding;
 
+  /// Shows the settings action when set (readers with settings only).
+  final VoidCallback? onSettingsPressed;
+
   const ReadingBottomBar({
     super.key,
     required this.chapter,
     required this.bottomPadding,
+    this.onSettingsPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final viewModel = context.read<ReadingViewModel>();
+    final onSettingsPressed = this.onSettingsPressed;
 
     return StreamBuilder<ReadingState>(
       stream: viewModel.stateStream,
@@ -68,6 +74,8 @@ class ReadingBottomBar extends StatelessWidget {
                         : null,
                     tooltip: l10n.readingPreviousChapter,
                   ),
+                  if (onSettingsPressed != null)
+                    ReaderSettingsButton(onPressed: onSettingsPressed),
                   IconButton(
                     icon: Icon(
                       Icons.skip_next,

@@ -7,10 +7,11 @@ import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 import 'package:gatuno/features/reading/domain/value_objects/chapter_content.dart';
 
-
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/features/reading/presentation/views/reading_screen.dart';
@@ -19,7 +20,7 @@ import 'package:gatuno/features/reading/presentation/components/organisms/text_r
 import 'package:gatuno/features/reading/presentation/components/organisms/document_reader.dart';
 import 'package:gatuno/features/reading/presentation/components/templates/reading_template.dart';
 import 'package:mocktail/mocktail.dart';
-
+import 'package:provider/provider.dart';
 
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
@@ -71,7 +72,9 @@ void main() {
     stateController = StreamController<ReadingState>.broadcast();
     stateController.add(mockState);
     when(() => mockViewModel.state).thenReturn(mockState);
-    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chapter).thenReturn(null);
@@ -80,7 +83,7 @@ void main() {
     sl.registerFactory<ReadingViewModel>(() => mockViewModel);
   });
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(ChapterId('dummy'));
   });
 
@@ -88,7 +91,7 @@ void main() {
     stateController.close();
   });
 
-group('ReadingScreen', () {
+  group('ReadingScreen', () {
     testWidgets('initializes viewModel and loads chapter', (tester) async {
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -152,9 +155,15 @@ group('ReadingScreen', () {
 
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
+        theme: AppTheme.darkTheme,
       );
 
       expect(find.byType(TextReader), findsOneWidget);
+      final readerContext = tester.element(find.byType(TextReader));
+      expect(
+        readerContext.read<ReaderPreferencesService>(),
+        same(sl<ReaderPreferencesService>()),
+      );
     });
 
     testWidgets('renders correct reader for document content', (tester) async {

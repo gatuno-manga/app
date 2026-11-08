@@ -195,6 +195,51 @@
   "readingNextChapter": "Next Chapter",
   "readingPreviousChapter": "Previous Chapter",
   "readingFinished": "You've reached the end of this chapter.",
+  "readingSettingsTitle": "Reading settings",
+  "readingSettingsAction": "Settings",
+  "readingThemeTitle": "Reading theme",
+  "readingThemeStandard": "Default",
+  "readingThemeSepia": "Sepia",
+  "readingThemeCream": "Cream",
+  "readingThemeHighContrast": "High contrast",
+  "readingFontFamily": "Font",
+  "readingFontFamilyDesc": "Text family",
+  "readingFontSerif": "Serif",
+  "readingFontSans": "Sans-serif",
+  "readingFontLexend": "Lexend",
+  "readingFontAtkinson": "Atkinson Hyperlegible",
+  "readingFontOpenDyslexic": "OpenDyslexic",
+  "readingFontSize": "Font size ({size}px)",
+  "@readingFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "readingFontSizeDesc": "A- / A+",
+  "readingDecreaseFontSize": "Decrease font size",
+  "readingIncreaseFontSize": "Increase font size",
+  "readingLineHeight": "Line spacing ({value})",
+  "@readingLineHeight": {
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
+      }
+    }
+  },
+  "readingLineHeightDesc": "Distance between lines",
+  "readingDecreaseLineHeight": "Decrease line spacing",
+  "readingIncreaseLineHeight": "Increase line spacing",
+  "readingAlignment": "Alignment",
+  "readingAlignmentDesc": "Left, center or justified",
+  "readingAlignLeft": "Left",
+  "readingAlignCenter": "Center",
+  "readingAlignJustify": "Justified",
   "booksDocumentFormat": "Format: {format}",
   "@booksDocumentFormat": {
     "placeholders": {

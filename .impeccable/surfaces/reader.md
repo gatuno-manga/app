@@ -21,14 +21,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Leitor/Barra inferior` → `.../molecules/reading_bottom_bar.dart`
 - `Leitor/Progresso por página`
 - `Leitor/Indicador de página`
-- `Leitor/Item de ajuste` → settings sheet row
-- `Leitor/Tema de leitura` → reader theme swatch (4)
+- `Leitor/Item de ajuste` → `.../molecules/reader_setting_row.dart` (settings sheet row)
+- `Leitor/Tema de leitura` → `.../atoms/reader_theme_swatch.dart` (reader theme swatch, 4)
 - `Leitor/Predefinição · Modo dislexia`
 - `Leitor/Régua de leitura` → reading ruler
 - `Menu de contexto/Leitor · página de imagem` → long-press menu
 
 ## Code
-`lib/features/reading/presentation/views/reading_screen.dart`; organisms `image_reader.dart`, `text_reader.dart`, `document_reader.dart`; templates `reading_template.dart`.
+`lib/features/reading/presentation/views/reading_screen.dart`; organisms `image_reader.dart`, `text_reader.dart`, `document_reader.dart`, `reader_settings_sheet.dart`, `text_reader_settings_section.dart`; templates `reading_template.dart`. Reader themes: `lib/core/theme/reader_palette.dart`; preferences: `features/reading/domain/entities/reader_preferences.dart`.
 
 ## Tokens used
 - `leitura/fundo`
@@ -55,5 +55,5 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Reader theme contrast should be checked per mode, especially `Sépia` accent `#9a4a00` and `Creme` accent `#1b5fad`.
 
 ## Gaps (Figma vs code)
-- Reader themes, Literata and Lexend are absent in code.
+- Reader themes and the text settings sheet (font, size, line spacing, alignment) are implemented for the text reader only; the accessibility sheet (dyslexia preset, word spacing, reading ruler), the `Geral`/`Aparência`/`Privacidade` tabs and `Modo noturno` are not.
 - PDF and EPUB are proposals in Figma; code has `document_reader.dart` and its scope is not audited.

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/di/injection.dart';
@@ -16,12 +18,22 @@ void main() {
       'plugins.flutter.io/path_provider',
     );
 
+    late Directory tempDir;
+
     setUp(() async {
       await sl.reset();
+      tempDir = Directory.systemTemp.createTempSync('gatuno-di-test');
+      SharedPreferences.setMockInitialValues({});
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
             if (methodCall.method == 'getApplicationCacheDirectory') {
               return '.';
+            }
+            // initDI awaits ReaderPreferencesService.init(), which yields to
+            // the event loop, so the eagerly opened reading database (MQTT
+            // handler) now runs inside the test and needs a temp directory.
+            if (methodCall.method == 'getTemporaryDirectory') {
+              return tempDir.path;
             }
             return null;
           });
@@ -29,6 +41,7 @@ void main() {
 
     tearDown(() async {
       await sl.reset();
+      tempDir.deleteSync(recursive: true);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
     });

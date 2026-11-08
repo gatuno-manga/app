@@ -53,7 +53,7 @@ Five themes (Figma modes of `Gatuno / Tokens (código)`, table at node `884:104`
 Alpha ramps (same hue as their base token, fixed opacity; values per theme in `design.json`): `color/primary-10`, `color/primary-15`, `color/primary-40`, `color/lilac-15`, `color/lilac-40`, `color/success-15`, `color/success-40`, `color/danger-10`, `color/danger-15`, `color/danger-40`, `color/warning-15`, `color/warning-40`, `color/cyan-15`, `color/cyan-40`, `color/secondary-45`, `color/secondary-60`, `color/text-10`, `color/text-40`, `color/app-background-2`, `color/app-background-3`, `color/app-background-40`, `color/app-background-75`.
 
 ### Reader themes
-`Gatuno / Leitura (temas)` has four modes (Padrão, Sépia, Creme, Alto contraste) with `leitura/fundo`, `leitura/superficie`, `leitura/texto`, `leitura/texto-suave`, `leitura/acento`, `leitura/destaque`, `leitura/borda`. They apply only inside the reader (frame `882:910` uses Creme with the dyslexia preset). Code has no reader themes.
+`Gatuno / Leitura (temas)` has four modes (Padrão, Sépia, Creme, Alto contraste) with `leitura/fundo`, `leitura/superficie`, `leitura/texto`, `leitura/texto-suave`, `leitura/acento`, `leitura/destaque`, `leitura/borda`. They apply only inside the reader (frame `882:910` uses Creme with the dyslexia preset). Code: `ReaderPalette` (`lib/core/theme/reader_palette.dart`, a `ThemeExtension`) holds Sépia, Creme and Alto contraste as constants; Padrão is built from the active `AppPalette` (`ReaderPalette.fromAppPalette`), so it follows the chosen app theme. The text reader applies the chosen palette to its own subtree through `ReaderThemeScope` (`features/reading/presentation/theme/`), which overrides `colorScheme.surface`, `onSurface`, `primary`, `outline` and the container roles; the image reader does not use it yet.
 
 ### Named Rules
 **The Semantic Token Rule.** Never hardcode a color in a screen; use the semantic token. Code today violates this with `AppColors.*` constants used directly (see gaps).
@@ -61,7 +61,7 @@ Alpha ramps (same hue as their base token, fixed opacity; values per theme in `d
 
 ## Typography
 
-**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset). **Code:** all five families are bundled (`assets/fonts/`, declared in `pubspec.yaml`, OFL licences alongside; Manrope also at 500/600/700 and Literata/Lexend at 700 so Material bold does not synthesize). Inknut Antiqua stays the `ThemeData.fontFamily` fallback for roles Figma does not define; `AppTypography.textTheme` maps the Figma styles.
+**Figma families:** Inknut Antiqua (titles), Manrope (body), Plus Jakarta Sans (interface). Reader only: Literata (serif reading), Lexend (dyslexia preset); the reader font picker also offers Atkinson Hyperlegible and OpenDyslexic (see gap `reader-fonts-not-in-figma`). **Code:** all five families are bundled (`assets/fonts/`, declared in `pubspec.yaml`, OFL licences alongside; Manrope also at 500/600/700 and Literata/Lexend at 700 so Material bold does not synthesize). Inknut Antiqua stays the `ThemeData.fontFamily` fallback for roles Figma does not define; `AppTypography.textTheme` maps the Figma styles.
 
 ### Hierarchy
 Styles without a Material role (target column below) are exposed as `AppTypography.overline`, `readingSerif` and `readingDyslexia`; `overline` also needs upper-casing by the caller.
@@ -116,6 +116,7 @@ Figma component library (page "02 · Componentes", node `857:6123`), mapped to c
 | `Capítulo/Item`, `Capítulo/Grupo`, `Capítulo/Status`, `Capítulo/Download` | Chapter list | `features/books/presentation/components/` |
 | `Menu de contexto/*` | Context menus (glass) | no shared component |
 | `Leitor/*` | Reader chrome | `features/reading/presentation/components/{molecules,organisms,templates}/` |
+| `Leitor/Item de ajuste`, `Leitor/Tema de leitura` | Reader settings sheet rows and theme swatches | `features/reading/presentation/components/molecules/reader_setting_row.dart`, `atoms/reader_theme_swatch.dart`, `organisms/reader_settings_sheet.dart` |
 | `Avaliação/*`, `Histórico/*` | Ratings, reading history | no code counterpart found |
 
 Added in issue #52 (page "02 · Componentes", local, not yet published): `Campo/Texto` (`app_text_field`, Estado=Padrão/Foco/Erro), `Avatar/Perfil` (`app_avatar`, initials only) and `Lista/Item` (settings row). Switch rows reuse the reader's `Leitor/Item de ajuste`.
@@ -141,7 +142,8 @@ States: only states drawn in Figma are specified. Figma defines the tokens `colo
 
 - **figma-contrast**: Figma tokens fail WCAG AA 4.5:1 in places and AppTheme follows them as the source of truth. color/on-primary (#fdfdfd) on color/primary: 2.5:1 in Dark, True-dark and Slate, 2.4:1 in Dracula, 4.0:1 in Light. On color/danger: 3.1:1 Dracula, 3.7:1 Slate, 3.9:1 Light, 4.1:1 Dark and True-dark. color/text-secondary on color/app-background: 4.3:1 Light, 3.6:1 True-dark, 3.0:1 Dracula (Dark and Slate pass). color/text-muted: 2.5:1 Light, 3.0:1 True-dark, 4.0:1 Dracula, 4.4:1 Dark and Slate. Needs a Figma decision; PRODUCT.md has no WCAG target yet. Lilac pairings (snackbar, tertiary) are fixed in code with AppPalette.onLilac.
 - **fallback-text-roles**: Material text roles Figma does not define (displayMedium, displaySmall, headlineLarge, titleMedium, titleSmall) keep Material default sizes but render in Inknut Antiqua through ThemeData.fontFamily; bodySmall and other roles use onSurface, not color/text-secondary or color/text-muted. The mapped roles also change Material default sizes globally (bodyLarge 16->18, bodyMedium 14->16, bodySmall 12->14, labelMedium 12->13, labelSmall 11->12) with 150-160% line heights, so ListTile, TextField, dialog and chip text grow; check fixed-height rows at large text scales.
-- **tokens-without-code**: radius/*, space/*, Vidro effects and reader themes have no ThemeData/ThemeExtension counterpart.
+- **tokens-without-code**: radius/*, space/* and Vidro effects have no ThemeData/ThemeExtension counterpart.
+- **reader-fonts-not-in-figma**: the reader font picker offers Atkinson Hyperlegible and OpenDyslexic (bundled under `assets/fonts/`, OFL) because the Figma `Fonte` dropdown lists them, but Figma has no text style for either; only `Leitura/Serifa` (Literata) and `Leitura/Dislexia` (Lexend) are styled.
 - **badge-colors-not-in-figma**: GatunoColors badge colors (badgeDefault, badgeSearch, badgeType, badgeExcluded, badgeSensitive, badgePublication, badgeAuthor) and the AppColors.badge*Light constants have no Figma variable; the Figma Tag/Filtro components should be inspected before mapping.
 - **degrader-not-in-figma**: GatunoColors.degrader gradient has no Figma style.
 - **figma-surfaces-empty**: Figma mobile sections 3 (Library/Profile), 4 (Auth) and 5 (Settings) have frames since issue #52 (Dark theme only, key states). Still without frames: web sections 3 (Auth) and 4 (Settings), web /library and /users/:userId, and the code-only welcome and certificates screens.

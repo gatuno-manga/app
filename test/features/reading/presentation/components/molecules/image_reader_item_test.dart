@@ -6,13 +6,11 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
 import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
 
-
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/presentation/components/molecules/image_reader_item.dart';
 import 'package:gatuno/shared/domain/entities/image_metadata.dart';
 import 'package:gatuno/shared/utils/image_aspect_ratio_cache.dart';
 import 'package:mocktail/mocktail.dart';
-
 
 import '../../../../../helpers/test_injection.dart';
 

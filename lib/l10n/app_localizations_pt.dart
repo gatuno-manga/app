@@ -504,6 +504,98 @@ class AppLocalizationsPt extends AppLocalizations {
   String get readingFinished => 'Você chegou ao fim deste capítulo.';
 
   @override
+  String get readingSettingsTitle => 'Ajustes de leitura';
+
+  @override
+  String get readingSettingsAction => 'Ajustes';
+
+  @override
+  String get readingThemeTitle => 'Tema de leitura';
+
+  @override
+  String get readingThemeStandard => 'Padrão';
+
+  @override
+  String get readingThemeSepia => 'Sépia';
+
+  @override
+  String get readingThemeCream => 'Creme';
+
+  @override
+  String get readingThemeHighContrast => 'Alto contraste';
+
+  @override
+  String get readingFontFamily => 'Fonte';
+
+  @override
+  String get readingFontFamilyDesc => 'Família do texto';
+
+  @override
+  String get readingFontSerif => 'Serifa';
+
+  @override
+  String get readingFontSans => 'Sem serifa';
+
+  @override
+  String get readingFontLexend => 'Lexend';
+
+  @override
+  String get readingFontAtkinson => 'Atkinson Hyperlegible';
+
+  @override
+  String get readingFontOpenDyslexic => 'OpenDyslexic';
+
+  @override
+  String readingFontSize(int size) {
+    return 'Tamanho da fonte (${size}px)';
+  }
+
+  @override
+  String get readingFontSizeDesc => 'A- / A+';
+
+  @override
+  String get readingDecreaseFontSize => 'Diminuir tamanho da fonte';
+
+  @override
+  String get readingIncreaseFontSize => 'Aumentar tamanho da fonte';
+
+  @override
+  String readingLineHeight(double value) {
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.decimalPatternDigits(
+          locale: localeName,
+          decimalDigits: 1,
+        );
+    final String valueString = valueNumberFormat.format(value);
+
+    return 'Espaçamento de linhas ($valueString)';
+  }
+
+  @override
+  String get readingLineHeightDesc => 'Distância entre linhas';
+
+  @override
+  String get readingDecreaseLineHeight => 'Diminuir espaçamento de linhas';
+
+  @override
+  String get readingIncreaseLineHeight => 'Aumentar espaçamento de linhas';
+
+  @override
+  String get readingAlignment => 'Alinhamento';
+
+  @override
+  String get readingAlignmentDesc => 'Esquerda, centro ou justificado';
+
+  @override
+  String get readingAlignLeft => 'Esquerda';
+
+  @override
+  String get readingAlignCenter => 'Centro';
+
+  @override
+  String get readingAlignJustify => 'Justificado';
+
+  @override
   String booksDocumentFormat(String format) {
     return 'Formato: $format';
   }
