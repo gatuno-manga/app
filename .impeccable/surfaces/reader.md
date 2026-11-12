@@ -73,3 +73,5 @@ Gaps:
 - A disabled stepper button is drawn with 38% opacity on the `Leitor/Botão ícone` instance; the component has no disabled variant.
 - Paged mode, reading direction (LTR/RTL) and fit width/height (fit height needs paged mode) are not designed; a follow-up issue is pending.
 - "Manter a tela ligada" needs a wakelock dependency in code; the image reader does not apply the reader theme yet (`ReaderThemeScope`).
+
+Accessibility for the implementation: the stepper buttons (32 dp) and switches in the Figma components are below 48 dp, so code must pad the hit area to at least 48 dp (`gatuno_lints` small tap target rule). Give the two stepper buttons separate labels (decrease and increase page gap; the current value is in the row title) and expose each switch with its row title as the label. The rows reuse the code molecules `reader_stepper_row.dart` and `reader_setting_row.dart`.
