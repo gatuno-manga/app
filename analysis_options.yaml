@@ -1,7 +1,8 @@
 include: package:flutter_lints/flutter.yaml
 
 # Flutter UI rules (tool/gatuno_lints): hardcoded colors, inline TextStyle,
-# small tap targets, missing Semantics. Warnings are on by default; silence a
+# small tap targets, missing Semantics, raw buttons/fields outside atoms
+# (info: existing code still violates it). Warnings are on by default; silence a
 # justified exception with `// ignore: gatuno_lints/<rule>` and a reason.
 plugins:
   gatuno_lints:

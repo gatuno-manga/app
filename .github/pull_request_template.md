@@ -10,6 +10,7 @@ Closes #
 
 - [ ] `just check`
 - [ ] Manually verified on a device or emulator (if the change affects the UI)
+- [ ] UI changes compose existing atoms and molecules, with no inline buttons, fields or rows in an organism (if the change adds UI; see Atomic Design in `AGENTS.md`)
 
 ## Workflow
 

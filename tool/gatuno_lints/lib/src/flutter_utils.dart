@@ -7,9 +7,16 @@ import 'package:analyzer/dart/element/element.dart';
 /// except the theme layer, which is where tokens are legitimately defined.
 bool appliesTo(RuleContext context) {
   if (!context.isInLibDir) return false;
-  final path = context.currentUnit?.file.path.replaceAll(r'\', '/') ?? '';
-  return !path.contains('/lib/core/theme/');
+  return !_unitPath(context).contains('/lib/core/theme/');
 }
+
+/// Whether the unit being analysed is an atom: any file under a
+/// `components/atoms/` folder, shared or feature-level.
+bool isAtomFile(RuleContext context) =>
+    _unitPath(context).contains('/components/atoms/');
+
+String _unitPath(RuleContext context) =>
+    context.currentUnit?.file.path.replaceAll(r'\', '/') ?? '';
 
 /// Whether [element] is declared by Flutter (or `dart:ui`).
 bool isFlutterElement(Element? element) {

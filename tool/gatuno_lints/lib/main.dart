@@ -4,6 +4,7 @@ import 'package:analysis_server_plugin/registry.dart';
 import 'src/rules/hardcoded_color.dart';
 import 'src/rules/inline_text_style.dart';
 import 'src/rules/missing_semantics.dart';
+import 'src/rules/raw_widget_outside_atoms.dart';
 import 'src/rules/small_tap_target.dart';
 
 /// Entry point the analysis server loads (see `plugins:` in the app's
@@ -20,6 +21,9 @@ class GatunoLintsPlugin extends Plugin {
       ..registerWarningRule(HardcodedColor())
       ..registerWarningRule(InlineTextStyle())
       ..registerWarningRule(MissingSemantics())
+      // Enabled by default like the warnings; its severity (info, so existing
+      // violations do not fail `dart analyze`) comes from its LintCode.
+      ..registerWarningRule(RawWidgetOutsideAtoms())
       ..registerWarningRule(SmallTapTarget());
   }
 }

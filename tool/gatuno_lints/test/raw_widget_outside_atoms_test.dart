@@ -1,0 +1,110 @@
+import 'package:gatuno_lints/src/rules/raw_widget_outside_atoms.dart';
+import 'package:test_reflective_loader/test_reflective_loader.dart';
+
+import 'flutter_stub.dart';
+
+void main() {
+  defineReflectiveSuite(() {
+    defineReflectiveTests(RawWidgetOutsideAtomsTest);
+    defineReflectiveTests(RawWidgetInAtomTest);
+    defineReflectiveTests(RawWidgetInFeatureAtomTest);
+  });
+}
+
+@reflectiveTest
+class RawWidgetOutsideAtomsTest extends FlutterRuleTest {
+  @override
+  void setUp() {
+    rule = RawWidgetOutsideAtoms();
+    super.setUp();
+  }
+
+  void test_elevated_button() async {
+    const code = 'final w = ElevatedButton(child: Text("x"));';
+    await assertDiagnostics('${FlutterRuleTest.import}$code', [
+      lint(FlutterRuleTest.import.length + 10, 14),
+    ]);
+  }
+
+  void test_text_field() async {
+    const code = 'final w = TextField();';
+    await assertDiagnostics('${FlutterRuleTest.import}$code', [
+      lint(FlutterRuleTest.import.length + 10, 9),
+    ]);
+  }
+
+  void test_named_constructor() async {
+    const code = 'final w = IconButton.filled(icon: Icon(1));';
+    await assertDiagnostics('${FlutterRuleTest.import}$code', [
+      lint(FlutterRuleTest.import.length + 10, 17),
+    ]);
+  }
+
+  Future<void> _assertFlagged(String name, String args) => assertDiagnostics(
+    '${FlutterRuleTest.import}final w = $name$args;',
+    [lint(FlutterRuleTest.import.length + 10, name.length)],
+  );
+
+  void test_text_button() => _assertFlagged('TextButton', '(child: Text("x"))');
+
+  void test_outlined_button() =>
+      _assertFlagged('OutlinedButton', '(child: Text("x"))');
+
+  void test_filled_button() =>
+      _assertFlagged('FilledButton', '(child: Text("x"))');
+
+  void test_text_form_field() => _assertFlagged('TextFormField', '()');
+
+  void test_other_widgets_allowed() async {
+    await assertNoDiagnostics(
+      '${FlutterRuleTest.import}final w = SizedBox(child: Text("x"));',
+    );
+  }
+
+  void test_app_widget_with_same_name_allowed() async {
+    await assertNoDiagnostics('''
+${FlutterRuleTest.import}
+class TextField extends Widget { const TextField(); }
+final w = TextField();
+''');
+  }
+}
+
+@reflectiveTest
+class RawWidgetInAtomTest extends FlutterRuleTest {
+  @override
+  String get testFilePath =>
+      '$testPackageLibPath/shared/components/atoms/$testFileName';
+
+  @override
+  void setUp() {
+    rule = RawWidgetOutsideAtoms();
+    super.setUp();
+  }
+
+  void test_atoms_may_build_raw_widgets() async {
+    await assertNoDiagnostics(
+      '${FlutterRuleTest.import}final w = TextField();',
+    );
+  }
+}
+
+@reflectiveTest
+class RawWidgetInFeatureAtomTest extends FlutterRuleTest {
+  @override
+  String get testFilePath =>
+      '$testPackageLibPath/features/books/presentation/components/atoms/'
+      '$testFileName';
+
+  @override
+  void setUp() {
+    rule = RawWidgetOutsideAtoms();
+    super.setUp();
+  }
+
+  void test_feature_atoms_may_build_raw_widgets() async {
+    await assertNoDiagnostics(
+      '${FlutterRuleTest.import}final w = IconButton(icon: Icon(1));',
+    );
+  }
+}
