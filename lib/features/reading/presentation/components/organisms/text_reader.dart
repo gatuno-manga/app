@@ -10,7 +10,6 @@ import '../../theme/reader_preferences_builder.dart';
 import '../../theme/reader_text_style.dart';
 import '../molecules/text_reader_content.dart';
 import 'reader_overlay_wrapper.dart';
-import 'reader_settings_sheet.dart';
 import 'text_reader_settings_section.dart';
 
 class TextReader extends StatelessWidget {
@@ -18,23 +17,9 @@ class TextReader extends StatelessWidget {
 
   const TextReader({super.key, required this.chapter});
 
-  /// The sheet rows of this reader; independent of the value being read, so
-  /// built once per [build] rather than per preference change.
-  static ReaderSettingsSections _settingsSections(
-    ReaderPreferencesService service,
-  ) =>
-      (preferences) => [
-        TextReaderSettingsSection(
-          preferences: preferences.text,
-          onChanged: (change) => service.update(
-            (current) => current.copyWith(text: change(current.text)),
-          ),
-        ),
-      ];
-
   @override
   Widget build(BuildContext context) {
-    final sections = _settingsSections(
+    final sections = TextReaderSettingsSection.sectionsFor(
       context.read<ReaderPreferencesService>(),
     );
     return ReaderPreferencesBuilder(

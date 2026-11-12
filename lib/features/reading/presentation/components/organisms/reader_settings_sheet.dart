@@ -7,7 +7,7 @@ import '../../../../../shared/utils/bottom_sheet_utils.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../../theme/reader_preferences_builder.dart';
-import '../molecules/reader_theme_picker.dart';
+import 'reader_preferences_controls.dart';
 
 /// Builds a reader's own rows of the settings sheet for [preferences].
 typedef ReaderSettingsSections =
@@ -44,7 +44,6 @@ class ReaderSettingsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final service = context.read<ReaderPreferencesService>();
     final media = MediaQuery.of(context);
     final maxHeight = media.size.height * 0.85;
     final bottomInset = media.viewPadding.bottom;
@@ -75,14 +74,10 @@ class ReaderSettingsSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ReaderThemePicker(
-                            selected: preferences.theme,
-                            onSelected: (theme) => service.update(
-                              (current) => current.copyWith(theme: theme),
-                            ),
+                          ReaderPreferencesControls(
+                            preferences: preferences,
+                            sections: sections,
                           ),
-                          const SizedBox(height: 8),
-                          ...sections(preferences),
                         ],
                       ),
                     ),

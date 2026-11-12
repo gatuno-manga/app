@@ -320,6 +320,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsGeneralSection => 'Geral';
 
   @override
+  String get settingsReadingSection => 'Leitura';
+
+  @override
   String get settingsApiSection => 'Configuração da API';
 
   @override

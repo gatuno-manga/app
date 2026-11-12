@@ -11,6 +11,7 @@ import '../../../app_lock/presentation/components/molecules/app_lock_settings_ti
 import '../components/molecules/settings_profile_card.dart';
 import '../components/molecules/settings_section_header.dart';
 import '../components/organisms/settings_api_form.dart';
+import '../components/organisms/settings_reading_controls.dart';
 import '../components/organisms/theme_swatch_grid.dart';
 import '../components/templates/settings_template.dart';
 
@@ -99,6 +100,10 @@ class SettingsPage extends StatelessWidget {
                   onTap: () => context.push('/settings/mfa'),
                 )
               : null,
+          readingSectionHeader: SettingsSectionHeader(
+            title: l10n.settingsReadingSection,
+          ),
+          readingControls: const SettingsReadingControls(),
           apiSectionHeader: SettingsSectionHeader(
             title: l10n.settingsApiSection,
           ),

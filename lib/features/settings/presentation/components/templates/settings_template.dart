@@ -7,6 +7,8 @@ class SettingsTemplate extends StatelessWidget {
   final Widget themePicker;
   final Widget sensitiveContentToggle;
   final Widget appLockTile;
+  final Widget readingSectionHeader;
+  final Widget readingControls;
   final Widget apiSectionHeader;
   final Widget apiForm;
   final Widget? securityTile;
@@ -24,6 +26,8 @@ class SettingsTemplate extends StatelessWidget {
     required this.themePicker,
     required this.sensitiveContentToggle,
     required this.appLockTile,
+    required this.readingSectionHeader,
+    required this.readingControls,
     required this.apiSectionHeader,
     required this.apiForm,
     this.securityTile,
@@ -49,6 +53,9 @@ class SettingsTemplate extends StatelessWidget {
           sensitiveContentToggle,
           appLockTile,
           ?securityTile,
+          const Divider(height: 32),
+          readingSectionHeader,
+          readingControls,
           const Divider(height: 32),
           apiSectionHeader,
           const SizedBox(height: 8),

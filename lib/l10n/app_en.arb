@@ -108,6 +108,7 @@
   "settingsThemeDracula": "Dracula",
   "settingsThemeSlate": "Slate",
   "settingsGeneralSection": "General",
+  "settingsReadingSection": "Reading",
   "settingsApiSection": "API Configuration",
   "settingsApiUrlLabel": "API Base URL",
   "settingsApiUrlHint": "http://your-api.com/api",

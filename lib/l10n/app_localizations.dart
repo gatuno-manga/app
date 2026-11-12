@@ -704,6 +704,12 @@ abstract class AppLocalizations {
   /// **'General'**
   String get settingsGeneralSection;
 
+  /// No description provided for @settingsReadingSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get settingsReadingSection;
+
   /// No description provided for @settingsApiSection.
   ///
   /// In en, this message translates to:
