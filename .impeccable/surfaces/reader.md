@@ -57,3 +57,19 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Gaps (Figma vs code)
 - Reader themes and the text settings sheet (font, size, line spacing, alignment) are implemented for the text reader only; the accessibility sheet (dyslexia preset, word spacing, reading ruler), the `Geral`/`Aparência`/`Privacidade` tabs and `Modo noturno` are not.
 - PDF and EPUB are proposals in Figma; code has `document_reader.dart` and its scope is not audited.
+
+## Image reader settings (issue #70)
+
+Frames live in the Figma section `Leitor · Imagem · Ajustes (#70)` (id `979:3184`, inside "2 · Livro e Leitor"), built from the same sheet pattern as `874:694` / `882:959`. Light token mode, like the accessibility sheet.
+- `979:3185` Leitor · Imagem · Ajustes (padrão): theme Padrão, gap 0 dp (minus disabled), indicator on, keep screen on off
+- `979:3326` Leitor · Imagem · Ajustes (extremos: espaço máximo): theme Sépia, gap 16 dp (plus disabled), indicator off, keep screen on on
+- `979:3467` Leitor · Imagem · Ajustes (Creme, espaço 8): theme Creme, gap 8 dp (both steppers enabled)
+- `979:3602` Leitor · Imagem · Espaço entre páginas 8 dp (Sépia): the reader without the sheet, showing the gap on the `leitura/fundo` of Sépia
+- `979:3612` Leitor · Imagem · Ajustes (Alto contraste): theme Alto contraste, gap 4 dp
+
+Decisions: the background is the shared theme picker (`Leitor/Tema de leitura`, no new control or token). Rows below it: page gap stepper (`Leitor/Item de ajuste` Controle=Passos; default 0, range 0-16 dp, step 4), "Mostrar indicador de página" (Switch, default on) and "Manter a tela ligada" (Switch, default off). Components reused: `Leitor/Item de ajuste`, `Leitor/Tema de leitura`, `Leitor/Botão ícone`.
+
+Gaps:
+- A disabled stepper button is drawn with 38% opacity on the `Leitor/Botão ícone` instance; the component has no disabled variant.
+- Paged mode, reading direction (LTR/RTL) and fit width/height (fit height needs paged mode) are not designed; a follow-up issue is pending.
+- "Manter a tela ligada" needs a wakelock dependency in code; the image reader does not apply the reader theme yet (`ReaderThemeScope`).
