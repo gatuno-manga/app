@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/reading_chapter.dart';
+import 'reader_preferences_controls.dart';
 import 'reader_settings_sheet.dart';
 import 'reading_bottom_overlay.dart';
 import 'reading_top_overlay.dart';

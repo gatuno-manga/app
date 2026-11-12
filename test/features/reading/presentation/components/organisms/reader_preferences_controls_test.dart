@@ -21,14 +21,21 @@ void main() {
 
   tearDown(() => service.dispose());
 
-  Future<void> pump(WidgetTester tester) => tester.pumpApp(
-    Provider<ReaderPreferencesService>.value(
-      value: service,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: ReaderPreferencesControls(
-            preferences: service.current,
-            sections: TextReaderSettingsSection.sectionsFor(service),
+  Future<void> pump(
+    WidgetTester tester, {
+    String? themeTitle,
+    TextScaler textScaler = TextScaler.noScaling,
+  }) => tester.pumpApp(
+    MediaQuery(
+      data: MediaQueryData(textScaler: textScaler),
+      child: Provider<ReaderPreferencesService>.value(
+        value: service,
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: ReaderPreferencesControls(
+              sections: TextReaderSettingsSection.sectionsFor(service),
+              themeTitle: themeTitle,
+            ),
           ),
         ),
       ),
@@ -60,5 +67,34 @@ void main() {
 
     expect(service.current.text.fontSize, 20);
     expect(service.current.theme, ReaderTheme.standard);
+  });
+
+  testWidgets('follows changes made elsewhere', (tester) async {
+    await pump(tester);
+
+    await service.update((p) => p.copyWith(theme: ReaderTheme.cream));
+    await tester.pump();
+
+    expect(find.text('Font size (19px)'), findsOneWidget);
+    await service.update((p) => p.copyWith(text: p.text.stepFontSize(1)));
+    await tester.pump();
+    expect(find.text('Font size (20px)'), findsOneWidget);
+  });
+
+  testWidgets('shows the theme caption only when given', (tester) async {
+    await pump(tester);
+    expect(find.text('Reading theme'), findsNothing);
+
+    await pump(tester, themeTitle: 'Reading theme');
+    expect(find.text('Reading theme'), findsOneWidget);
+  });
+
+  testWidgets('lays out at 2x text scale without overflow', (tester) async {
+    tester.view.physicalSize = const Size(400, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, textScaler: const TextScaler.linear(2));
+
+    expect(tester.takeException(), isNull);
   });
 }

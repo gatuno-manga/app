@@ -5,7 +5,7 @@ import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../molecules/reader_choice_row.dart';
 import '../molecules/reader_stepper_row.dart';
-import 'reader_settings_sheet.dart';
+import 'reader_preferences_controls.dart';
 
 /// The text reader's rows of the settings sheet (Figma tab `Texto`): font
 /// family, font size, line spacing and alignment. Changes are functions of

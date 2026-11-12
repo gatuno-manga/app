@@ -233,6 +233,7 @@ void main() {
     await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     expect(find.text('Reading'), findsOneWidget);
+    expect(find.text('Reading theme'), findsOneWidget);
     expect(find.text('Font size (19px)'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Increase font size'));

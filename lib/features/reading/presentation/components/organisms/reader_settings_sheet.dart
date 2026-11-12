@@ -4,14 +4,9 @@ import 'package:provider/provider.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/components/atoms/app_sheet_handle.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
-import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../../theme/reader_preferences_builder.dart';
 import 'reader_preferences_controls.dart';
-
-/// Builds a reader's own rows of the settings sheet for [preferences].
-typedef ReaderSettingsSections =
-    List<Widget> Function(ReaderPreferences preferences);
 
 /// Bottom sheet of the reader settings (Figma `Leitor · Ajustes`): the
 /// shared theme picker followed by each reader's own [sections]. Changes
@@ -74,10 +69,7 @@ class ReaderSettingsSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ReaderPreferencesControls(
-                            preferences: preferences,
-                            sections: sections,
-                          ),
+                          ReaderPreferencesControls(sections: sections),
                         ],
                       ),
                     ),
