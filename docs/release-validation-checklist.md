@@ -1,6 +1,6 @@
 # Release Validation Checklist (Phase 1)
 
-Use this checklist to collect objective evidence for Phase 1 requirements: **TRIG-01**, **TRIG-02**, **TRIG-03**, **TRIG-04**.
+Use this checklist to collect objective evidence for Phase 1 requirements: **TRIG-01**, **TRIG-02**, **TRIG-03**, **TRIG-04**, **TRIG-05**.
 
 ## Preconditions
 
@@ -38,7 +38,7 @@ Use this checklist to collect objective evidence for Phase 1 requirements: **TRI
 - No downstream release/build path runs after validation failure.
 - `ready_for_builds` is skipped because it depends on `needs: validate_and_gate`.
 
-## TRIG-03 — Only one active run per tag
+## TRIG-03 — Runs for the same tag never overlap
 
 1. Push the first run for a valid tag on commit A:
    ```bash
@@ -53,8 +53,8 @@ Use this checklist to collect objective evidence for Phase 1 requirements: **TRI
 3. Check **Actions → Release** run list.
 
 **Expected evidence**
-- Older run for `v1.2.4` is canceled.
-- Newer run continues.
+- The first run for `v1.2.4` is not canceled; it runs to completion.
+- The second run waits in the same concurrency group and starts after the first finishes (a newer pending run replaces an older pending one).
 - Run details show the same concurrency key (`${{ github.workflow }}-${{ github.ref }}`).
 
 ## TRIG-04 — Quality gate blocks continuation on analysis/test failure
@@ -65,6 +65,18 @@ Use this checklist to collect objective evidence for Phase 1 requirements: **TRI
 **Expected evidence**
 - `dart analyze` and/or `flutter test` fails in `validate_and_gate`.
 - No downstream release/build path runs after the gate failure.
+
+## TRIG-05 — Re-running a release for the same tag is safe
+
+1. Let a release run for a valid tag (for example `v1.2.5`) finish successfully, then note the tag commit and the `chore: bump version to 1.2.5+N` commit on `main`.
+2. Optionally edit the release notes by hand.
+3. In **Actions → Release**, re-run all jobs of that run.
+
+**Expected evidence**
+- `Update version and commit` logs `Skipping bump` and pushes nothing: `main` gets no second bump commit and the tag stays on the bump commit.
+- The build number in `pubspec.yaml` is unchanged.
+- `Publish GitHub Release` logs `Release already exists`, replaces the assets and `checksums.txt`, and regenerates the release notes (hand edits are overwritten).
+- If an earlier run was interrupted after the bump reached `main` but before the tag moved, the re-run logs `Reusing bump commit` and only moves the tag.
 
 ## Tag protection
 

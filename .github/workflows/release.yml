@@ -10,7 +10,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a running release: the bump step pushes to main and moves the
+  # tag, and a cancel between the two leaves them out of sync.
+  cancel-in-progress: false
 
 jobs:
   validate_and_gate:
@@ -21,6 +23,9 @@ jobs:
     steps:
       - name: Git checkout
         uses: actions/checkout@v6
+        with:
+          # The bump step searches main's history for an earlier bump commit.
+          fetch-depth: 0
 
       - name: Create LFS file list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
@@ -63,24 +68,47 @@ jobs:
       - name: Update version and commit
         shell: bash
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
           BUILD_NUMBER="${GITHUB_RUN_NUMBER}"
-          
-          # Update pubspec.yaml
-          sed -i -e "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
-          
-          # Configure Git
+
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Commit and push back to main
-          git add pubspec.yaml
-          git commit -m "chore: bump version to ${VERSION}+${BUILD_NUMBER} [skip ci]"
-          git push origin HEAD:main
-          
-          # Force update the tag to the new commit so the release uses it
-          git tag -f "${GITHUB_REF_NAME}"
-          git push origin -f refs/tags/"${GITHUB_REF_NAME}"
+
+          # The remote tag is the source of truth. A re-run is checked out at
+          # the original tag commit, but a previous run may have moved the tag.
+          git fetch --force origin "refs/tags/${TAG}:refs/tags/${TAG}"
+          TAGGED_VERSION="$(git show "refs/tags/${TAG}:pubspec.yaml" | sed -n 's/^version: //p')"
+          if [[ "${TAGGED_VERSION}" == *+* && "${TAGGED_VERSION%%+*}" == "${VERSION}" ]]; then
+              echo "Tag ${TAG} already points at version ${TAGGED_VERSION}. Skipping bump."
+              exit 0
+          fi
+
+          # Partial state: a previous run pushed the bump to main but did not
+          # move the tag. Reuse that commit instead of bumping twice.
+          BUMP_SHA=""
+          while read -r candidate; do
+              candidate_version="$(git show "${candidate}:pubspec.yaml" | sed -n 's/^version: //p')"
+              if [[ "${candidate_version}" == *+* && "${candidate_version%%+*}" == "${VERSION}" ]] \
+                  && git merge-base --is-ancestor "${GITHUB_SHA}" "${candidate}"; then
+                  BUMP_SHA="${candidate}"
+                  break
+              fi
+          done < <(git log origin/main --format=%H --fixed-strings --grep="chore: bump version to ${VERSION}+")
+
+          if [[ -n "${BUMP_SHA}" ]]; then
+              echo "Reusing bump commit ${BUMP_SHA} already on main."
+          else
+              sed -i -e "s/^version: .*/version: ${VERSION}+${BUILD_NUMBER}/" pubspec.yaml
+              git add pubspec.yaml
+              git commit -m "chore: bump version to ${VERSION}+${BUILD_NUMBER} [skip ci]"
+              git push origin HEAD:main
+              BUMP_SHA="$(git rev-parse HEAD)"
+          fi
+
+          # Point the tag at the bump commit so the release builds from it.
+          git tag -f "${TAG}" "${BUMP_SHA}"
+          git push origin -f "refs/tags/${TAG}"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -233,15 +261,19 @@ jobs:
       - name: Publish GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
         run: |
-          if gh release view ${{ github.ref_name }} &>/dev/null; then
-            echo "Release already exists. Updating artifacts..."
-            gh release upload ${{ github.ref_name }} artifacts/* --clobber
+          if gh release view "${TAG}" &>/dev/null; then
+            echo "Release already exists. Updating artifacts and notes..."
+            gh release upload "${TAG}" artifacts/* --clobber
+            NOTES="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+              -f tag_name="${TAG}" --jq .body)"
+            gh release edit "${TAG}" --notes "${NOTES}"
           else
             echo "Creating new release..."
-            gh release create ${{ github.ref_name }} \
+            gh release create "${TAG}" \
               artifacts/* \
-              --title "Release ${{ github.ref_name }}" \
+              --title "Release ${TAG}" \
               --generate-notes \
               --draft=false \
               --prerelease=false
