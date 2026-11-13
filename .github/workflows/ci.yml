@@ -10,8 +10,50 @@ on:
       - main
       - developer
 
+permissions:
+  contents: read
+
 jobs:
+  # Named `ci` so the check keeps its historical name `ci / test-and-analyze`.
+  # The Flutter version comes from flake.lock (devShells.ci in flake.nix), the
+  # same one developers use, instead of floating on the stable channel.
   ci:
-    uses: gatuno-manga/workflows/.github/workflows/flutter-ci.yml@main
-    with:
-      flutter_channel: 'stable'
+    name: ci / test-and-analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create LFS file list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+
+      - name: Restore LFS cache
+        uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}
+          restore-keys: |
+            ${{ runner.os }}-lfs-
+
+      - name: Git LFS Pull
+        run: git lfs pull
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+
+      - name: Restore pub cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: nix develop .#ci --command flutter pub get
+
+      - name: Run static analysis
+        run: nix develop .#ci --command flutter analyze
+
+      - name: Run tests
+        run: nix develop .#ci --command flutter test
