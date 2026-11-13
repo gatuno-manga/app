@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
@@ -10,40 +9,29 @@ import 'package:gatuno/core/network/dio_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../helpers/di_teardown.dart';
+import '../../helpers/path_provider_mock.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('Injection', () {
-    const MethodChannel channel = MethodChannel(
-      'plugins.flutter.io/path_provider',
-    );
-
     late Directory tempDir;
 
     setUp(() async {
       await sl.reset();
       tempDir = Directory.systemTemp.createTempSync('gatuno-di-test');
       SharedPreferences.setMockInitialValues({});
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-            if (methodCall.method == 'getApplicationCacheDirectory') {
-              return '.';
-            }
-            // initDI awaits ReaderPreferencesService.init(), which yields to
-            // the event loop, so the eagerly opened reading database (MQTT
-            // handler) now runs inside the test and needs a temp directory.
-            if (methodCall.method == 'getTemporaryDirectory') {
-              return tempDir.path;
-            }
-            return null;
-          });
+      // initDI yields to the event loop while it awaits, so the eagerly
+      // opened reading database (MQTT handler) and the HTTP cache store run
+      // inside the test and need a real directory, not the working one.
+      mockPathProvider(tempDir);
     });
 
     tearDown(() async {
-      await sl.reset();
+      await tearDownInjectionTest();
+      clearPathProviderMock();
       tempDir.deleteSync(recursive: true);
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null);
     });
 
     test('initDI registers all dependencies', () async {

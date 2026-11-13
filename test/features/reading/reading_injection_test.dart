@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gatuno/core/di/injection.dart';
@@ -11,6 +13,9 @@ import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/app_mqtt_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 
+import '../../helpers/di_teardown.dart';
+import '../../helpers/path_provider_mock.dart';
+
 class MockDioClient extends Mock implements DioClient {}
 
 class MockAppMqttService extends Mock implements AppMqttService {}
@@ -18,8 +23,20 @@ class MockAppMqttService extends Mock implements AppMqttService {}
 class MockAuthService extends Mock implements AuthService {}
 
 void main() {
-  setUp(() {
-    sl.reset();
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late Directory tempDir;
+
+  setUp(() async {
+    await sl.reset();
+    tempDir = Directory.systemTemp.createTempSync('gatuno-reading-di-test');
+    mockPathProvider(tempDir);
+  });
+
+  tearDown(() async {
+    await tearDownInjectionTest();
+    clearPathProviderMock();
+    tempDir.deleteSync(recursive: true);
   });
 
   test('initReadingDI registers expected types', () {
