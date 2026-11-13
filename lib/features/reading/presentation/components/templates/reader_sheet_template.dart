@@ -26,8 +26,9 @@ class ReaderSheetTemplate extends StatelessWidget {
     final bottomInset = media.viewPadding.bottom;
     return ReaderPreferencesBuilder(
       // Only for the theme scope; the body follows the service itself.
-      builder: (context, _) => ColoredBox(
-        // Painted here, not by the route, so it follows live changes.
+      builder: (context, _) => Material(
+        // Painted here, not by the route, so it follows live changes. A
+        // Material, not a ColoredBox, so the rows' ink splashes show.
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxHeight),

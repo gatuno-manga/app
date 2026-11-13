@@ -69,7 +69,10 @@ class _TextReaderBody extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth:
-                        preferences.maxContentWidth(bodyStyle) ??
+                        preferences.maxContentWidth(
+                          bodyStyle,
+                          MediaQuery.textScalerOf(context),
+                        ) ??
                         _maxProseWidth,
                   ),
                   child: Column(

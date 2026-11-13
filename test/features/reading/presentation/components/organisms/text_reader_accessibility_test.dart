@@ -190,6 +190,53 @@ void main() {
       expect(contentWidth(tester), lessThanOrEqualTo(expected));
     });
 
+    testWidgets('grows with the system text scale', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(2400, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await setText((t) => t.copyWith(lineWidth: 40));
+
+      Future<double> columnAt(double scale) async {
+        await tester.pumpApp(
+          MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+            child: MultiProvider(
+              providers: [
+                Provider<ReadingViewModel>.value(value: viewModel),
+                Provider<ReaderPreferencesService>.value(value: preferences),
+              ],
+              child: Scaffold(
+                body: TextReader(
+                  chapter: _Chapter('Hello world', ContentFormat.plain),
+                ),
+              ),
+            ),
+          ),
+          theme: AppTheme.lightTheme,
+        );
+        // The column is the ConstrainedBox around the chapter text.
+        final box = tester.widget<ConstrainedBox>(
+          find
+              .ancestor(
+                of: find.text('Hello world'),
+                matching: find.byType(ConstrainedBox),
+              )
+              .evaluate()
+              .map((e) => find.byWidget(e.widget))
+              .firstWhere(
+                (f) =>
+                    tester.widget<ConstrainedBox>(f).constraints.maxWidth <
+                        double.infinity &&
+                    tester.widget<ConstrainedBox>(f).constraints.maxWidth > 100,
+              ),
+        );
+        return box.constraints.maxWidth;
+      }
+
+      final normal = await columnAt(1);
+      final doubled = await columnAt(2);
+      expect(doubled, closeTo(normal * 2, 0.5));
+    });
+
     testWidgets('without a limit keeps the default prose measure', (
       tester,
     ) async {

@@ -57,7 +57,7 @@ class ReaderAccessibilitySection extends StatelessWidget {
               onChanged((t) => t.copyWith(fontFamily: family)),
         ),
         ReaderStepperRow(
-          icon: Icons.text_fields,
+          icon: Icons.abc,
           title: l10n.readingLetterSpacing(
             (preferences.letterSpacing * 100).round(),
           ),
