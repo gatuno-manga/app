@@ -84,8 +84,8 @@ Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#
 - `983:3920` Leitor · PDF · Ajustes (Sépia, página única, zoom 125%): zoom row visible because fit is Personalizado
 - `983:4138` Leitor · PDF · Ajustes (Alto contraste, zoom mínimo 50%): minus disabled
 - `983:4356` Leitor · EPUB · Ajustes (padrão): Serifa 19 dp, 180%, Esquerda, margens Médias, Paginado
-- `983:4598` Leitor · EPUB · Ajustes (extremos: Sépia): Sem serifa, 28 dp and 220% (plus disabled), Justificado, margens Largas, Contínuo
-- `983:4846` Leitor · EPUB · Ajustes (Alto contraste, mínimos): Lexend, 14 dp and 120% (minus disabled), Centro, margens Estreitas
+- `983:4598` Leitor · EPUB · Ajustes (extremos: Sépia, tamanho e linhas no máximo): Sem serifa, 28 dp and 220% (plus disabled), Justificado, margens Largas, Contínuo
+- `983:4846` Leitor · EPUB · Ajustes (Alto contraste, tamanho e linhas no mínimo): Lexend, 14 dp and 120% (minus disabled), Centro, margens Estreitas, Paginado
 
 Decisions:
 - PDF options: page layout (Contínuo, Página única, Duas páginas; the last only at 600 dp or wider, hidden on phones), scroll direction (Vertical, Horizontal; in Contínuo it is the scroll axis, in Página única the page-turn axis; right-to-left is not designed), zoom fit (Largura, Página, Personalizado), and a zoom stepper (50% to 300%, step 25%) shown only for Personalizado, starting at the zoom the current fit produced (the stepper appears when the fit changes, growing the sheet from 423 to 513 dp; no frame shows that transition). The reader theme is a colour filter over the rendered page (Padrão = no filter, so the page stays white even though the Padrão swatch is dark navy, as on the EPUB).
@@ -102,7 +102,7 @@ Gaps:
 - The EPUB sheet is 657-669 dp tall (78-79% of an 844 dp screen) and hides most of the page while open; no peek or drag mode is designed. It should scroll once it exceeds 85% of the screen height (a proposed rule, not inherited from #70; small screens, large text scale); no frame shows that case.
 - No frame for 600 dp or wider: the "Duas páginas" layout and the sheet on tablets are not designed. On phones the layout row subtitle lists only continuous and single page. Tablet breakpoints are not defined in the design system yet.
 - Rows grow from 64 to 76 dp when a subtitle wraps and selector chips hug their content, so left edges are ragged. Implementation rule: keep the row at 64 dp minimum, wrap the subtitle, and ellipsize a long selector value at a maximum chip width, also at text scale 1.5 to 2.0.
-- The previews show size, alignment and margins only; font family, layout and zoom changes are described in the notes under each frame. The PDF page sample uses no tokens, and the "Padrão" swatch is the theme sample, not the page. Creme is not selected in any frame.
+- The EPUB body paragraphs sit behind the sheet in all three EPUB frames, so only the eyebrow and title show margins (symmetric: 28, 44 and 16 dp) and centre alignment; body size, line spacing and justification are described by the row values and the notes under each frame, not visible. Font family, layout and zoom changes are likewise described in the notes. The page indicator ghosts behind the sheet (inherited from #70), and whether the progress bar stays per page in Contínuo is a question for #19. The PDF page sample uses no tokens, and the "Padrão" swatch is the theme sample, not the page. Creme is not selected in any frame.
 - The selected-theme label (`--primary-color` on the light sheet, about 3.7:1) is inherited from #70 and should be fixed at pattern level.
 - Page theme as a colour filter is a proposal; the PDF renderer in #19 decides whether it is feasible.
 
