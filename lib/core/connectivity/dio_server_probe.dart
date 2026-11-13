@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 
 import '../network/api_constants.dart';
 import '../network/dio_client.dart';
+import '../network/interceptors/cache_interceptor.dart';
 import 'server_connectivity_service.dart';
 
 /// Probes the configured server's liveness endpoint, the same endpoint the
-/// URL validation on the welcome screen uses.
+/// URL validation on the welcome screen uses. Only a 2xx means online. The
+/// probe bypasses the HTTP cache: a cached answer proves nothing.
 ServerProbe dioServerProbe(
   DioClient dioClient, {
   Duration timeout = const Duration(seconds: 3),
@@ -15,12 +17,17 @@ ServerProbe dioServerProbe(
     try {
       final response = await dioClient.dio.get<dynamic>(
         ApiConstants.healthLiveness,
-        options: Options(sendTimeout: timeout, receiveTimeout: timeout),
+        options: noHttpCacheOptions().copyWith(
+          sendTimeout: timeout,
+          receiveTimeout: timeout,
+        ),
       );
-      return response.statusCode == 200;
-    } on DioException catch (e) {
-      // Any answer means the server is reachable, even an error status.
-      return e.response != null;
+      final status = response.statusCode ?? 0;
+      return status >= 200 && status < 300;
+    } on DioException {
+      // An error status counts as down too: a reverse proxy answers 502/503
+      // while the backend behind it is gone.
+      return false;
     }
   };
 }

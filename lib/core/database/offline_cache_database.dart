@@ -170,20 +170,22 @@ class OfflineCacheDatabase extends _$OfflineCacheDatabase {
   /// Deletes books not read or written since [cutoff], with their chapters
   /// and relations, except books whose cover is pinned (downloads). Returns
   /// the evicted ids, so their cover files can be deleted too.
-  Future<List<String>> evictBooksNotAccessedSince(DateTime cutoff) async {
-    final pinned = selectOnly(coverPins)..addColumns([coverPins.bookId]);
-    final stale =
-        await (selectOnly(cachedBooks)
-              ..addColumns([cachedBooks.id])
-              ..where(
-                cachedBooks.lastAccessedAt.isSmallerThanValue(cutoff) &
-                    cachedBooks.id.isNotInQuery(pinned),
-              ))
-            .map((r) => r.read(cachedBooks.id)!)
-            .get();
-    if (stale.isEmpty) return stale;
+  Future<List<String>> evictBooksNotAccessedSince(DateTime cutoff) {
+    // Select and delete in one transaction: a book refreshed between the two
+    // (a screen loading at start) must not be deleted with a stale verdict.
+    return transaction(() async {
+      final pinned = selectOnly(coverPins)..addColumns([coverPins.bookId]);
+      final stale =
+          await (selectOnly(cachedBooks)
+                ..addColumns([cachedBooks.id])
+                ..where(
+                  cachedBooks.lastAccessedAt.isSmallerThanValue(cutoff) &
+                      cachedBooks.id.isNotInQuery(pinned),
+                ))
+              .map((r) => r.read(cachedBooks.id)!)
+              .get();
+      if (stale.isEmpty) return stale;
 
-    await transaction(() async {
       await (delete(
         cachedBookAuthors,
       )..where((r) => r.bookId.isIn(stale))).go();
@@ -196,8 +198,8 @@ class OfflineCacheDatabase extends _$OfflineCacheDatabase {
       )..where((r) => r.bookId.isIn(stale))).go();
       await (delete(cachedChapters)..where((r) => r.bookId.isIn(stale))).go();
       await (delete(cachedBooks)..where((r) => r.id.isIn(stale))).go();
+      return stale;
     });
-    return stale;
   }
 
   /// Deletes every cached row. Cover files are removed by the cover store.

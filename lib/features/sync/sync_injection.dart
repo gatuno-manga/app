@@ -23,5 +23,6 @@ void initSyncDI(GetIt sl) {
 
   sl.registerLazySingleton<ReconnectSyncTrigger>(
     () => ReconnectSyncTrigger(sl(), sl()),
+    dispose: (trigger) => trigger.dispose(),
   );
 }

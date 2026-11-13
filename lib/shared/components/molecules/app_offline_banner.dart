@@ -46,7 +46,7 @@ class _OfflineStrip extends StatelessWidget {
       child: Container(
         width: double.infinity,
         color: Color.alphaBlend(
-          warning.withValues(alpha: 0.15),
+          theme.warningSubtleColor,
           theme.colorScheme.surface,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

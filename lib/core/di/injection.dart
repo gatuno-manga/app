@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 import '../connectivity/connectivity_service.dart';
@@ -13,6 +12,7 @@ import '../covers/cover_store.dart';
 import '../covers/dio_cover_downloader.dart';
 import '../covers/file_cover_store.dart';
 import '../database/offline_cache_database.dart';
+import '../offline/cache_epoch.dart';
 import '../offline/offline_cache_maintenance.dart';
 import '../offline/read_through.dart';
 import '../logging/logger.dart';
@@ -61,9 +61,7 @@ Future<void> initDI() async {
   sl.registerLazySingleton<DioClient>(
     () => DioClient(certificatesService: sl<CertificatesService>()),
   );
-  // Offline: connectivity, the local cache and the cover store. The cover
-  // store needs the HTTP cache options, so it resolves only after the
-  // interceptors below are set up.
+  // Offline: connectivity, the local cache and the cover store.
   sl.registerLazySingleton<ConnectivityTriggers>(
     ConnectivityTriggers.new,
     dispose: (triggers) => triggers.dispose(),
@@ -78,8 +76,9 @@ Future<void> initDI() async {
   sl.registerLazySingleton<ConnectivityService>(
     () => sl<ServerConnectivityService>(),
   );
+  sl.registerLazySingleton<CacheEpoch>(CacheEpoch.new);
   sl.registerLazySingleton<ReadThrough>(
-    () => ReadThrough(sl<ConnectivityService>()),
+    () => ReadThrough(sl<ConnectivityService>(), sl<CacheEpoch>()),
   );
   sl.registerLazySingleton<OfflineCacheDatabase>(
     () => OfflineCacheDatabase(),
@@ -90,7 +89,9 @@ Future<void> initDI() async {
       db: sl<OfflineCacheDatabase>(),
       directory: () async =>
           Directory('${(await getApplicationSupportDirectory()).path}/covers'),
-      download: dioCoverDownloader(sl<DioClient>(), sl<CacheOptions>()),
+      download: dioCoverDownloader(sl<DioClient>()),
+      isOffline: () => sl<ConnectivityService>().isOffline,
+      epoch: sl<CacheEpoch>(),
     ),
   );
   // Every AppImage checks the cover store first; URLs that are not a cached
@@ -102,7 +103,11 @@ Future<void> initDI() async {
     ),
   );
   sl.registerLazySingleton<OfflineCacheMaintenance>(
-    () => OfflineCacheMaintenance(sl<OfflineCacheDatabase>(), sl<CoverStore>()),
+    () => OfflineCacheMaintenance(
+      sl<OfflineCacheDatabase>(),
+      sl<CoverStore>(),
+      sl<CacheEpoch>(),
+    ),
   );
 
   sl.registerLazySingleton<SettingsStorage>(() => SettingsStorage());
@@ -135,9 +140,7 @@ Future<void> initDI() async {
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)
   setupCookieInterceptor(sl<DioClient>());
-  sl.registerSingleton<CacheOptions>(
-    await setupCacheInterceptor(sl<DioClient>()),
-  );
+  await setupCacheInterceptor(sl<DioClient>());
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());

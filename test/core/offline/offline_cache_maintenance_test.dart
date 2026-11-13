@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/covers/cover_store.dart';
 import 'package:gatuno/core/database/offline_cache_database.dart';
+import 'package:gatuno/core/offline/cache_epoch.dart';
 import 'package:gatuno/core/offline/offline_cache_maintenance.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -11,6 +12,7 @@ void main() {
   late OfflineCacheDatabase db;
   late MockCoverStore covers;
   late OfflineCacheMaintenance maintenance;
+  late CacheEpoch epoch;
   final now = DateTime(2026, 11, 13);
 
   Future<void> insertBook(String id, DateTime lastAccessedAt) => db
@@ -30,7 +32,8 @@ void main() {
     when(() => covers.remove(any())).thenAnswer((_) async {});
     when(() => covers.enforceBudget()).thenAnswer((_) async {});
     when(() => covers.clear()).thenAnswer((_) async {});
-    maintenance = OfflineCacheMaintenance(db, covers, now: () => now);
+    epoch = CacheEpoch();
+    maintenance = OfflineCacheMaintenance(db, covers, epoch, now: () => now);
   });
 
   tearDown(() => db.close());
@@ -63,6 +66,31 @@ void main() {
     verify(() => covers.enforceBudget()).called(1);
   });
 
+  test('a book refreshed while eviction runs is kept', () async {
+    final old = now.subtract(const Duration(days: 91));
+    await insertBook('x', old);
+
+    // The refresh is queued while the eviction transaction holds the
+    // database, so eviction decides on the old stamp and the refresh then
+    // writes the book back; or the refresh lands first and eviction skips it.
+    // Either way the book exists afterwards.
+    await Future.wait([
+      maintenance.evictStale(),
+      db
+          .into(db.cachedBooks)
+          .insertOnConflictUpdate(
+            CachedBooksCompanion.insert(
+              id: 'x',
+              title: 'x',
+              cachedAt: now,
+              lastAccessedAt: now,
+            ),
+          ),
+    ]);
+
+    expect(await db.select(db.cachedBooks).map((b) => b.id).get(), ['x']);
+  });
+
   test('eviction never throws', () async {
     when(() => covers.enforceBudget()).thenThrow(StateError('disk'));
 
@@ -75,6 +103,7 @@ void main() {
     await maintenance.clearAll();
 
     expect(await db.select(db.cachedBooks).get(), isEmpty);
+    expect(epoch.value, 1);
     verify(() => covers.clear()).called(1);
   });
 }

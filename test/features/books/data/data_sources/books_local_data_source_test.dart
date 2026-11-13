@@ -11,6 +11,7 @@ import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/domain/entities/chapter_page_options.dart';
 import 'package:gatuno/features/books/domain/value_objects/author_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/author_name.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
@@ -74,6 +75,28 @@ void main() {
     expect(cached.tags.single.id.value, 't1');
     expect(cached.sensitiveContent, ['Gore']);
   });
+
+  test(
+    'a list upsert keeps detail fields the list item leaves empty',
+    () async {
+      await local.saveBook(
+        BookModel(
+          id: const BookId('1'),
+          title: const BookTitle('Book'),
+          description: const BookDescription('Long text'),
+          publication: const PositiveInt(1999),
+        ),
+      );
+      await local.saveBookList([
+        BookModel(id: const BookId('1'), title: const BookTitle('Book v2')),
+      ], options: const BookPageOptions());
+
+      final cached = await local.getBook(const BookId('1'));
+      expect(cached!.title.value, 'Book v2');
+      expect(cached.description?.value, 'Long text');
+      expect(cached.publication?.value, 1999);
+    },
+  );
 
   test('a detail fetch replaces relations', () async {
     await local.saveBook(book('1', tags: ['t1', 't2'], authors: ['a1']));
@@ -149,6 +172,11 @@ void main() {
 
     test('searches titles case-insensitively', () async {
       expect(await ids(const BookPageOptions(search: 'ET')), ['2']);
+    });
+
+    test('% and _ in a search are literal', () async {
+      expect(await ids(const BookPageOptions(search: '%')), isEmpty);
+      expect(await ids(const BookPageOptions(search: 'a_p')), isEmpty);
     });
 
     test('filters by type and publication', () async {
@@ -303,6 +331,30 @@ void main() {
       expect(asc!.data.map((c) => c.id.value), ['c1', 'c2']);
       expect(asc.hasNextPage, isFalse);
       expect(desc!.data.map((c) => c.id.value), ['c2', 'c1']);
+    });
+
+    test('a complete list drops chapters the server no longer has', () async {
+      await local.saveChapters(const BookId('1'), chapters);
+      await local.saveChapters(const BookId('1'), [
+        chapters.first,
+      ], complete: true);
+
+      final cached = await local.getChapters(
+        const BookId('1'),
+        const ChapterPageOptions(),
+      );
+      expect(cached!.data.map((c) => c.id.value), ['c2']);
+    });
+
+    test('a partial page keeps the other cached chapters', () async {
+      await local.saveChapters(const BookId('1'), chapters);
+      await local.saveChapters(const BookId('1'), [chapters.first]);
+
+      final cached = await local.getChapters(
+        const BookId('1'),
+        const ChapterPageOptions(),
+      );
+      expect(cached!.data, hasLength(2));
     });
 
     test('a later cursor page is empty; an unknown book is a miss', () async {

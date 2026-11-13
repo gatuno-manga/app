@@ -1,24 +1,19 @@
 import 'package:drift/drift.dart';
 
+import 'book_query_filter.dart';
+import 'cached_book_mapper.dart';
+
 import '../../../../core/database/offline_cache_database.dart';
-import '../../../../shared/data/models/image_metadata_model.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../domain/entities/author.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/book_page_options.dart';
-import '../../domain/entities/book_type.dart';
 import '../../domain/entities/chapter.dart';
 import '../../domain/entities/chapter_page_options.dart';
 import '../../domain/entities/tag.dart';
 import '../../domain/value_objects/author_id.dart';
 import '../../domain/value_objects/author_name.dart';
-import '../../domain/value_objects/book_cover.dart';
-import '../../domain/value_objects/book_description.dart';
 import '../../domain/value_objects/book_id.dart';
-import '../../domain/value_objects/book_title.dart';
-import '../../domain/value_objects/chapter_id.dart';
-import '../../domain/value_objects/chapter_index.dart';
-import '../../domain/value_objects/chapter_title.dart';
 import '../../domain/value_objects/tag_id.dart';
 import '../../domain/value_objects/tag_name.dart';
 import '../models/author_model.dart';
@@ -36,16 +31,19 @@ class BooksLocalDataSource {
   final OfflineCacheDatabase _db;
   final DateTime Function() _now;
 
-  /// The `sensitiveContent` values the server reads as "no classification".
-  static const Set<String> _safeValues = {'safe', '0'};
+  final CachedBookMapper _mapper;
+  final BookQueryFilter _query;
 
   BooksLocalDataSource(this._db, {DateTime Function()? now})
-    : _now = now ?? DateTime.now;
+    : _now = now ?? DateTime.now,
+      _mapper = CachedBookMapper(_db),
+      _query = BookQueryFilter(_db);
 
   // Books -------------------------------------------------------------------
 
-  /// Upserts the scalar fields of list items. Relations from an earlier detail
-  /// fetch are kept: an empty list in a list item means "not sent".
+  /// Upserts list items. Relations from an earlier detail fetch are kept (an
+  /// empty list in a list item means "not sent"), and so is any field the
+  /// list item leaves empty while the stored row has it.
   Future<void> saveBookList(
     List<Book> books, {
     required BookPageOptions options,
@@ -57,19 +55,12 @@ class BooksLocalDataSource {
       for (final book in books) {
         batch.insert(
           _db.cachedBooks,
-          _bookCompanion(book, now),
-          onConflict: DoUpdate(
-            (_) => _bookCompanion(book, now),
+          _bookCompanion(book, now).copyWith(seenAsSafe: Value(seenAsSafe)),
+          onConflict: DoUpdate<$CachedBooksTable, CachedBook>.withExcluded(
+            (old, excluded) => _mergeListItem(old, excluded, seenAsSafe),
             target: [_db.cachedBooks.id],
           ),
         );
-        if (seenAsSafe) {
-          batch.update(
-            _db.cachedBooks,
-            const CachedBooksCompanion(seenAsSafe: Value(true)),
-            where: (b) => b.id.equals(book.id.value),
-          );
-        }
         if (provenName != null) {
           batch.insert(
             _db.cachedBookSensitiveProvenance,
@@ -82,6 +73,41 @@ class BooksLocalDataSource {
         }
       }
     });
+  }
+
+  /// The update half of a list upsert: new values win, a missing one keeps
+  /// the stored value, and `seenAsSafe` only ever turns on.
+  Insertable<CachedBook> _mergeListItem(
+    $CachedBooksTable old,
+    $CachedBooksTable excluded,
+    bool seenAsSafe,
+  ) {
+    Expression<T> keep<T extends Object>(
+      Expression<T> Function($CachedBooksTable) column,
+    ) => coalesce([column(excluded), column(old)]);
+
+    return CachedBooksCompanion.custom(
+      title: excluded.title,
+      description: keep((t) => t.description),
+      cover: keep((t) => t.cover),
+      type: keep((t) => t.type),
+      publication: keep((t) => t.publication),
+      totalChapters: keep((t) => t.totalChapters),
+      createdAt: keep((t) => t.createdAt),
+      updatedAt: keep((t) => t.updatedAt),
+      coverWidth: keep((t) => t.coverWidth),
+      coverHeight: keep((t) => t.coverHeight),
+      coverSizeBytes: keep((t) => t.coverSizeBytes),
+      coverMimeType: keep((t) => t.coverMimeType),
+      coverBlurHash: keep((t) => t.coverBlurHash),
+      coverDominantColor: keep((t) => t.coverDominantColor),
+      coverPHash: keep((t) => t.coverPHash),
+      coverEntropy: keep((t) => t.coverEntropy),
+      coverFormatOrigin: keep((t) => t.coverFormatOrigin),
+      seenAsSafe: seenAsSafe ? const Constant(true) : null,
+      cachedAt: excluded.cachedAt,
+      lastAccessedAt: excluded.lastAccessedAt,
+    );
   }
 
   /// Upserts a book from a detail response, replacing its relations.
@@ -148,7 +174,7 @@ class BooksLocalDataSource {
     )..where((b) => b.id.equals(bookId.value))).getSingleOrNull();
     if (row == null) return null;
     await _touch([row.id]);
-    return (await _toBooks([row])).single;
+    return (await _mapper.toBooks([row])).single;
   }
 
   /// Answers [options] from the cached books. `null` when nothing is cached
@@ -161,7 +187,7 @@ class BooksLocalDataSource {
             .getSingleOrNull();
     if (anyBook == null) return null;
 
-    final where = _filters(options);
+    final where = _query.where(options);
     final count = countAll();
     final countQuery = _db.selectOnly(_db.cachedBooks)
       ..addColumns([count])
@@ -173,13 +199,16 @@ class BooksLocalDataSource {
     final rows =
         await (_db.select(_db.cachedBooks)
               ..where((_) => where)
-              ..orderBy([_ordering(options), (b) => OrderingTerm.asc(b.id)])
+              ..orderBy([
+                _query.ordering(options),
+                (b) => OrderingTerm.asc(b.id),
+              ])
               ..limit(limit, offset: (page - 1) * limit))
             .get();
     await _touch(rows.map((r) => r.id));
 
     return BookListModel(
-      data: await _toBooks(rows),
+      data: await _mapper.toBooks(rows),
       total: PositiveInt(total),
       page: PositiveInt(page),
       limit: PositiveInt(limit),
@@ -189,9 +218,23 @@ class BooksLocalDataSource {
 
   // Chapters ----------------------------------------------------------------
 
-  Future<void> saveChapters(BookId bookId, List<Chapter> chapters) async {
+  /// Upserts [chapters]. With [complete] (the response held every chapter of
+  /// the book), chapters the server no longer lists are dropped too.
+  Future<void> saveChapters(
+    BookId bookId,
+    List<Chapter> chapters, {
+    bool complete = false,
+  }) async {
     final now = _now();
     await _db.batch((batch) {
+      if (complete) {
+        batch.deleteWhere(
+          _db.cachedChapters,
+          (c) =>
+              c.bookId.equals(bookId.value) &
+              c.id.isNotIn(chapters.map((ch) => ch.id.value)),
+        );
+      }
       batch.insertAllOnConflictUpdate(_db.cachedChapters, [
         for (final chapter in chapters)
           CachedChaptersCompanion.insert(
@@ -233,7 +276,7 @@ class BooksLocalDataSource {
       return const ChapterListModel(data: [], hasNextPage: false);
     }
     return ChapterListModel(
-      data: [for (final row in rows) _toChapter(row)],
+      data: [for (final row in rows) _mapper.toChapter(row)],
       hasNextPage: false,
     );
   }
@@ -327,139 +370,6 @@ class BooksLocalDataSource {
     );
   }
 
-  Future<List<Book>> _toBooks(List<CachedBook> rows) async {
-    if (rows.isEmpty) return const [];
-    final ids = rows.map((r) => r.id).toList();
-
-    final authorRows =
-        await (_db.select(_db.cachedBookAuthors).join([
-                innerJoin(
-                  _db.cachedAuthors,
-                  _db.cachedAuthors.id.equalsExp(
-                    _db.cachedBookAuthors.authorId,
-                  ),
-                ),
-              ])
-              ..where(_db.cachedBookAuthors.bookId.isIn(ids))
-              ..orderBy([OrderingTerm.asc(_db.cachedBookAuthors.position)]))
-            .get();
-    final tagRows =
-        await (_db.select(_db.cachedBookTags).join([
-                innerJoin(
-                  _db.cachedTags,
-                  _db.cachedTags.id.equalsExp(_db.cachedBookTags.tagId),
-                ),
-              ])
-              ..where(_db.cachedBookTags.bookId.isIn(ids))
-              ..orderBy([OrderingTerm.asc(_db.cachedBookTags.position)]))
-            .get();
-    final sensitiveRows = await (_db.select(
-      _db.cachedBookSensitiveContents,
-    )..where((r) => r.bookId.isIn(ids))).get();
-
-    final authors = <String, List<Author>>{};
-    for (final row in authorRows) {
-      final author = row.readTable(_db.cachedAuthors);
-      authors
-          .putIfAbsent(row.readTable(_db.cachedBookAuthors).bookId, () => [])
-          .add(
-            AuthorModel(id: AuthorId(author.id), name: AuthorName(author.name)),
-          );
-    }
-    final tags = <String, List<Tag>>{};
-    for (final row in tagRows) {
-      final tag = row.readTable(_db.cachedTags);
-      tags
-          .putIfAbsent(row.readTable(_db.cachedBookTags).bookId, () => [])
-          .add(TagModel(id: TagId(tag.id), name: TagName(tag.name)));
-    }
-    final sensitive = <String, List<String>>{};
-    for (final row in sensitiveRows) {
-      sensitive.putIfAbsent(row.bookId, () => []).add(row.name);
-    }
-
-    return [
-      for (final row in rows)
-        _toBook(
-          row,
-          authors: authors[row.id] ?? const [],
-          tags: tags[row.id] ?? const [],
-          sensitiveContent: sensitive[row.id] ?? const [],
-        ),
-    ];
-  }
-
-  BookModel _toBook(
-    CachedBook row, {
-    required List<Author> authors,
-    required List<Tag> tags,
-    required List<String> sensitiveContent,
-  }) {
-    final width = row.coverWidth;
-    final height = row.coverHeight;
-    return BookModel(
-      id: BookId(row.id),
-      title: BookTitle(row.title),
-      authors: authors,
-      tags: tags,
-      description: row.description == null
-          ? null
-          : BookDescription(row.description!),
-      cover: row.cover == null ? null : BookCover(row.cover!),
-      imageMetadata: width == null || height == null
-          ? null
-          : ImageMetadataModel(
-              width: width,
-              height: height,
-              sizeBytes: row.coverSizeBytes,
-              mimeType: row.coverMimeType,
-              blurHash: row.coverBlurHash,
-              dominantColor: row.coverDominantColor,
-              pHash: row.coverPHash,
-              entropy: row.coverEntropy,
-              formatOrigin: row.coverFormatOrigin,
-            ),
-      type: _typeFromName(row.type),
-      publication: row.publication == null
-          ? null
-          : PositiveInt(row.publication!),
-      totalChapters: row.totalChapters == null
-          ? null
-          : PositiveInt(row.totalChapters!),
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      sensitiveContent: sensitiveContent,
-    );
-  }
-
-  ChapterModel _toChapter(CachedChapter row) {
-    return ChapterModel(
-      id: ChapterId(row.id),
-      title: row.title == null ? null : ChapterTitle(row.title!),
-      index: ChapterIndex(row.chapterIndex),
-      scrapingStatus: _statusFromName(row.scrapingStatus),
-      read: row.read,
-      completed: row.completed,
-      lastPage: PositiveInt(row.lastPage),
-    );
-  }
-
-  static TypeBook? _typeFromName(String? name) {
-    if (name == null) return null;
-    for (final type in TypeBook.values) {
-      if (type.name == name) return type;
-    }
-    return TypeBook.other;
-  }
-
-  static ScrapingStatus? _statusFromName(String? name) {
-    if (name == null) return null;
-    for (final status in ScrapingStatus.values) {
-      if (status.name == name) return status;
-    }
-    return null;
-  }
-
   /// The name a request filtered on when it asked for exactly one
   /// classification and not "safe": every book it returned carries that name.
   /// With several names a book carries at least one of them, but not which,
@@ -467,173 +377,15 @@ class BooksLocalDataSource {
   static String? _singleName(List<String>? sensitiveContent) {
     if (sensitiveContent == null || sensitiveContent.length != 1) return null;
     final value = sensitiveContent.single;
-    return _safeValues.contains(value.toLowerCase()) ? null : value;
+    return BookQueryFilter.safeValues.contains(value.toLowerCase())
+        ? null
+        : value;
   }
 
   static bool _isSafeOnly(List<String>? sensitiveContent) =>
       sensitiveContent != null &&
       sensitiveContent.isNotEmpty &&
-      sensitiveContent.every((v) => _safeValues.contains(v.toLowerCase()));
-
-  // Query translation -------------------------------------------------------
-
-  OrderingTerm Function($CachedBooksTable) _ordering(BookPageOptions options) {
-    final mode = options.order == SortOrder.asc
-        ? OrderingMode.asc
-        : OrderingMode.desc;
-    return (b) {
-      final Expression<Object> column = switch (options.orderBy) {
-        'updatedAt' => b.updatedAt,
-        'title' => b.title.lower(),
-        'publication' => b.publication,
-        _ => b.createdAt,
-      };
-      return OrderingTerm(expression: column, mode: mode);
-    };
-  }
-
-  Expression<bool> _filters(BookPageOptions options) {
-    final b = _db.cachedBooks;
-    final conditions = <Expression<bool>>[];
-
-    final search = options.search?.trim();
-    if (search != null && search.isNotEmpty) {
-      conditions.add(b.title.lower().like('%${search.toLowerCase()}%'));
-    }
-
-    final types = options.type;
-    if (types != null && types.isNotEmpty) {
-      conditions.add(b.type.isIn(types.map((t) => t.name)));
-    }
-
-    final publication = options.publication?.value;
-    if (publication != null) {
-      conditions.add(switch (options.publicationOperator) {
-        'gt' => b.publication.isBiggerThanValue(publication),
-        'lt' => b.publication.isSmallerThanValue(publication),
-        'gte' => b.publication.isBiggerOrEqualValue(publication),
-        'lte' => b.publication.isSmallerOrEqualValue(publication),
-        _ => b.publication.equals(publication),
-      });
-    }
-
-    final tags = options.tags;
-    if (tags != null && tags.isNotEmpty) {
-      conditions.add(
-        b.relationsKnown.equals(true) &
-            _matchAll(
-              tags.map(_hasTag),
-              all: (options.tagsLogic ?? FilterLogic.and) == FilterLogic.and,
-            ),
+      sensitiveContent.every(
+        (v) => BookQueryFilter.safeValues.contains(v.toLowerCase()),
       );
-    }
-
-    final excludeTags = options.excludeTags;
-    if (excludeTags != null && excludeTags.isNotEmpty) {
-      conditions.add(
-        b.relationsKnown.equals(true) &
-            _matchAll(
-              excludeTags.map(_hasTag),
-              all:
-                  (options.excludeTagsLogic ?? FilterLogic.or) ==
-                  FilterLogic.and,
-            ).not(),
-      );
-    }
-
-    final authors = options.authors;
-    if (authors != null && authors.isNotEmpty) {
-      conditions.add(
-        b.relationsKnown.equals(true) &
-            _matchAll(
-              authors.map(_hasAuthor),
-              all: (options.authorsLogic ?? FilterLogic.and) == FilterLogic.and,
-            ),
-      );
-    }
-
-    final sensitive = options.sensitiveContent;
-    if (sensitive != null && sensitive.isNotEmpty) {
-      conditions.add(_sensitiveFilter(sensitive));
-    }
-
-    return conditions.isEmpty
-        ? const Constant(true)
-        : conditions.reduce((a, c) => a & c);
-  }
-
-  /// Mirrors the server: a book passes when it has any of the named
-  /// classifications, or, when "safe" is asked, none at all. A book whose
-  /// classification is unknown passes "safe" only if a safe-only list request
-  /// returned it.
-  Expression<bool> _sensitiveFilter(List<String> values) {
-    final b = _db.cachedBooks;
-    final names = [
-      for (final v in values)
-        if (!_safeValues.contains(v.toLowerCase())) v.toLowerCase(),
-    ];
-    final wantsSafe = names.length < values.length;
-    final options = <Expression<bool>>[];
-
-    if (names.isNotEmpty) {
-      final s = _db.cachedBookSensitiveContents;
-      final p = _db.cachedBookSensitiveProvenance;
-      options.add(
-        (b.relationsKnown.equals(true) &
-                existsQuery(
-                  _db.selectOnly(s)
-                    ..addColumns([s.name])
-                    ..where(
-                      s.bookId.equalsExp(b.id) & s.name.lower().isIn(names),
-                    ),
-                )) |
-            (b.relationsKnown.equals(false) &
-                existsQuery(
-                  _db.selectOnly(p)
-                    ..addColumns([p.name])
-                    ..where(
-                      p.bookId.equalsExp(b.id) & p.name.lower().isIn(names),
-                    ),
-                )),
-      );
-    }
-    if (wantsSafe) {
-      final s = _db.cachedBookSensitiveContents;
-      final hasNone = notExistsQuery(
-        _db.selectOnly(s)
-          ..addColumns([s.name])
-          ..where(s.bookId.equalsExp(b.id)),
-      );
-      options.add(
-        (b.relationsKnown.equals(true) & hasNone) |
-            (b.relationsKnown.equals(false) & b.seenAsSafe.equals(true)),
-      );
-    }
-    return options.reduce((a, c) => a | c);
-  }
-
-  Expression<bool> _matchAll(
-    Iterable<Expression<bool>> each, {
-    required bool all,
-  }) => each.reduce((a, c) => all ? a & c : a | c);
-
-  Expression<bool> _hasTag(String tagId) {
-    final t = _db.cachedBookTags;
-    return existsQuery(
-      _db.selectOnly(t)
-        ..addColumns([t.tagId])
-        ..where(t.bookId.equalsExp(_db.cachedBooks.id) & t.tagId.equals(tagId)),
-    );
-  }
-
-  Expression<bool> _hasAuthor(String authorId) {
-    final a = _db.cachedBookAuthors;
-    return existsQuery(
-      _db.selectOnly(a)
-        ..addColumns([a.authorId])
-        ..where(
-          a.bookId.equalsExp(_db.cachedBooks.id) & a.authorId.equals(authorId),
-        ),
-    );
-  }
 }

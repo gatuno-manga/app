@@ -1,6 +1,7 @@
 import '../connectivity/connectivity_service.dart';
 import '../logging/logger.dart';
 import '../network/exceptions.dart';
+import 'cache_epoch.dart';
 
 /// Network first, cache when offline.
 ///
@@ -13,12 +14,16 @@ import '../network/exceptions.dart';
 ///
 /// Any other error, including server 4xx/5xx, propagates unchanged: the
 /// server answered, so stale data would hide a real problem.
+///
+/// A response that arrives after the cache was wiped ([CacheEpoch] moved) is
+/// returned but not saved: it belongs to the server the user just left.
 class ReadThrough {
   final ConnectivityService _connectivity;
+  final CacheEpoch _epoch;
 
   static const String _logTag = 'ReadThrough';
 
-  ReadThrough(this._connectivity);
+  ReadThrough(this._connectivity, this._epoch);
 
   Future<T> call<T>({
     required Future<T> Function() fetch,
@@ -27,6 +32,7 @@ class ReadThrough {
   }) async {
     if (_connectivity.isOffline) return _fromCache(load);
 
+    final epoch = _epoch.value;
     final T value;
     try {
       value = await fetch();
@@ -34,6 +40,7 @@ class ReadThrough {
       return _fromCache(load);
     }
 
+    if (_epoch.value != epoch) return value;
     try {
       await save(value);
     } catch (e, stackTrace) {

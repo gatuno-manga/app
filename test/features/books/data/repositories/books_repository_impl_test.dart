@@ -12,6 +12,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:drift/native.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/core/database/offline_cache_database.dart';
+import 'package:gatuno/core/offline/cache_epoch.dart';
 import 'package:gatuno/core/offline/read_through.dart';
 import 'package:gatuno/features/books/data/data_sources/books_local_data_source.dart';
 
@@ -43,7 +44,7 @@ void main() {
     repository = BooksRepositoryImpl(
       mockDioClient,
       local: BooksLocalDataSource(db),
-      readThrough: ReadThrough(connectivity),
+      readThrough: ReadThrough(connectivity, CacheEpoch()),
     );
   });
 

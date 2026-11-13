@@ -30,6 +30,9 @@ extension SemanticThemeColors on ThemeData {
   /// Pending state.
   Color get warningColor => _palette.warning;
 
+  /// Tinted background for a warning strip (`color/warning-15`).
+  Color get warningSubtleColor => _palette.warning15;
+
   /// In-progress state.
   Color get infoColor => _palette.cyan;
 

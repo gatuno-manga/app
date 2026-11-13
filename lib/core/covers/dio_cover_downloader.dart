@@ -1,22 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 
 import '../logging/logger.dart';
 import '../network/dio_client.dart';
+import '../network/interceptors/cache_interceptor.dart';
 import 'file_cover_store.dart';
 
 /// Downloads covers through [DioClient], bypassing the HTTP cache: the cover
 /// store keeps its own copy, so a second one in the HTTP cache is waste.
-CoverDownloader dioCoverDownloader(
-  DioClient dioClient,
-  CacheOptions httpCacheOptions,
-) {
-  final options = httpCacheOptions
-      .copyWith(policy: CachePolicy.noCache)
-      .toOptions()
-      .copyWith(responseType: ResponseType.bytes);
+CoverDownloader dioCoverDownloader(DioClient dioClient) {
+  final options = noHttpCacheOptions().copyWith(
+    responseType: ResponseType.bytes,
+  );
 
   return (url) async {
     try {

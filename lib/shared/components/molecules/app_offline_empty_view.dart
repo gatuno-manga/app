@@ -6,10 +6,24 @@ import '../atoms/app_button.dart';
 
 /// Shown in place of content that is not saved on the device while the app
 /// is offline (an `OfflineException` from a repository).
+///
+/// The message promises the content loads once the server is back, so the
+/// screen that shows this view must reload on `ConnectivityService
+/// .onReconnected`.
 class AppOfflineEmptyView extends StatelessWidget {
+  /// Runs when the user taps retry. While offline, repositories skip the
+  /// network, so a plain reload only misses the cache again: call
+  /// `ConnectivityService.checkNow()` first, then reload.
   final VoidCallback onRetry;
 
-  const AppOfflineEmptyView({super.key, required this.onRetry});
+  /// Shows progress on the retry button while [onRetry]'s work runs.
+  final bool isRetrying;
+
+  const AppOfflineEmptyView({
+    super.key,
+    required this.onRetry,
+    this.isRetrying = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +55,17 @@ class AppOfflineEmptyView extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               l10n.offlineEmptyMessage,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.mutedColor,
-              ),
+              // Essential copy: the default text color, since
+              // `color/text-secondary` misses AA in some themes.
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            AppButton(text: l10n.errorRetry, onPressed: onRetry),
+            AppButton(
+              text: l10n.errorRetry,
+              onPressed: onRetry,
+              isLoading: isRetrying,
+            ),
           ],
         ),
       ),

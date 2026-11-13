@@ -477,5 +477,5 @@
   "readingRulerSemantics": "Régua de leitura. Deslize para cima ou para baixo para movê-la.",
   "offlineBannerMessage": "Offline: mostrando dados salvos",
   "offlineEmptyTitle": "Você está offline",
-  "offlineEmptyMessage": "Isto ainda não está salvo neste aparelho. Ele carrega quando o servidor voltar a responder."
+  "offlineEmptyMessage": "Isto ainda não está salvo neste aparelho. Vai carregar quando o servidor voltar a responder."
 }

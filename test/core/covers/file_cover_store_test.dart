@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/covers/file_cover_store.dart';
 import 'package:gatuno/core/database/offline_cache_database.dart';
+import 'package:gatuno/core/offline/cache_epoch.dart';
 
 void main() {
   late OfflineCacheDatabase db;
@@ -76,6 +77,58 @@ void main() {
     expect(await store.ensure('2', 'https://s3/2.webp'), isNull);
   });
 
+  test('offline, ensure answers from storage without downloading', () async {
+    var offline = false;
+    final store = FileCoverStore(
+      db: db,
+      directory: () async => Directory('${dir.path}/covers'),
+      download: (url) async {
+        downloads.add(url);
+        return remote[url];
+      },
+      now: () => now,
+      isOffline: () => offline,
+    );
+    remote['https://s3/1.webp'] = bytes(10);
+    await store.ensure('1', 'https://s3/1.webp');
+    offline = true;
+
+    expect(await store.ensure('1', 'https://s3/1-new.webp'), isNotNull);
+    expect(await store.ensure('2', 'https://s3/2.webp'), isNull);
+    expect(downloads, ['https://s3/1.webp']);
+  });
+
+  test('a download that lands after a wipe is dropped', () async {
+    final epoch = CacheEpoch();
+    final store = FileCoverStore(
+      db: db,
+      directory: () async => Directory('${dir.path}/covers'),
+      download: (url) async {
+        epoch.bump(); // the server changed mid-download
+        return bytes(10);
+      },
+      epoch: epoch,
+    );
+
+    expect(await store.ensure('1', 'https://s3/1.webp'), isNull);
+    expect(await db.select(db.cachedCovers).get(), isEmpty);
+  });
+
+  test('a recent cover is not re-stamped on every display', () async {
+    final store = build();
+    remote['https://s3/1.webp'] = bytes(10);
+    await store.ensure('1', 'https://s3/1.webp');
+    final stamped = (await db.select(db.cachedCovers).getSingle()).lastUsedAt;
+
+    now = now.add(const Duration(minutes: 5));
+    await store.file('1');
+    expect((await db.select(db.cachedCovers).getSingle()).lastUsedAt, stamped);
+
+    now = now.add(const Duration(hours: 2));
+    await store.file('1');
+    expect((await db.select(db.cachedCovers).getSingle()).lastUsedAt, now);
+  });
+
   test('concurrent ensures share one download', () async {
     final store = build();
     remote['https://s3/1.webp'] = bytes(10);
@@ -122,11 +175,11 @@ void main() {
         remote['https://s3/$id.webp'] = bytes(10);
       }
       await store.ensure('1', 'https://s3/1.webp');
-      now = now.add(const Duration(minutes: 1));
+      now = now.add(const Duration(hours: 2));
       await store.ensure('2', 'https://s3/2.webp');
-      now = now.add(const Duration(minutes: 1));
+      now = now.add(const Duration(hours: 2));
       await store.file('1'); // 1 is now more recent than 2
-      now = now.add(const Duration(minutes: 1));
+      now = now.add(const Duration(hours: 2));
       await store.ensure('3', 'https://s3/3.webp');
       await store.enforceBudget();
 

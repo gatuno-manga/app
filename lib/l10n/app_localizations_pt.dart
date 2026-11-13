@@ -1105,5 +1105,5 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get offlineEmptyMessage =>
-      'Isto ainda não está salvo neste aparelho. Ele carrega quando o servidor voltar a responder.';
+      'Isto ainda não está salvo neste aparelho. Vai carregar quando o servidor voltar a responder.';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/core/network/exceptions.dart';
+import 'package:gatuno/core/offline/cache_epoch.dart';
 import 'package:gatuno/core/offline/read_through.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -9,12 +10,14 @@ class MockConnectivityService extends Mock implements ConnectivityService {}
 void main() {
   late MockConnectivityService connectivity;
   late ReadThrough readThrough;
+  late CacheEpoch epoch;
   late List<String> saved;
   late int fetches;
 
   setUp(() {
     connectivity = MockConnectivityService();
-    readThrough = ReadThrough(connectivity);
+    epoch = CacheEpoch();
+    readThrough = ReadThrough(connectivity, epoch);
     saved = [];
     fetches = 0;
   });
@@ -42,6 +45,18 @@ void main() {
 
       expect(result, 'net');
       expect(saved, ['net']);
+    });
+
+    test('a response that lands after a wipe is not saved', () async {
+      final result = await run(
+        fetch: () async {
+          epoch.bump(); // the server changed while the request was in flight
+          return 'old server';
+        },
+      );
+
+      expect(result, 'old server');
+      expect(saved, isEmpty);
     });
 
     test('a failed save does not fail the call', () async {

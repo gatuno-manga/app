@@ -33,6 +33,12 @@ class ServerConnectivityService implements ConnectivityService {
   Timer? _reconnectTimer;
   Future<void>? _inFlightProbe;
 
+  /// Set by a failed request until its confirming probe answers. If that
+  /// probe finds the server up, the failure was a slow request, not an
+  /// outage: the status goes back online without [onReconnected], so screens
+  /// that reload on it do not retry the slow request in a loop.
+  bool _confirmingFailure = false;
+
   ServerConnectivityService({
     required ServerProbe probe,
     Stream<void> triggers = const Stream<void>.empty(),
@@ -66,6 +72,7 @@ class ServerConnectivityService implements ConnectivityService {
     // One slow request (the receive timeout is short) should not hold the app
     // offline until the next poll: confirm with a probe right away. A probe
     // already in flight is reused, so a failing probe does not loop.
+    _confirmingFailure = true;
     checkNow();
   }
 
@@ -73,6 +80,8 @@ class ServerConnectivityService implements ConnectivityService {
   Future<void> checkNow() =>
       _inFlightProbe ??= _runProbe().whenComplete(() => _inFlightProbe = null);
 
+  // A probe that started before a request outcome may land after it and
+  // override it; the next request or probe corrects that, so it is accepted.
   Future<void> _runProbe() async {
     bool? reachable;
     try {
@@ -81,11 +90,16 @@ class ServerConnectivityService implements ConnectivityService {
       AppLogger.e('Connectivity probe failed', e, stackTrace, _logTag);
       reachable = false;
     }
+    final falseAlarm = _confirmingFailure && reachable == true;
+    _confirmingFailure = false;
     if (reachable == null) return;
-    _set(reachable ? ConnectivityStatus.online : ConnectivityStatus.offline);
+    _set(
+      reachable ? ConnectivityStatus.online : ConnectivityStatus.offline,
+      announceReconnect: !falseAlarm,
+    );
   }
 
-  void _set(ConnectivityStatus next) {
+  void _set(ConnectivityStatus next, {bool announceReconnect = true}) {
     if (_status.isClosed || _status.value == next) return;
     AppLogger.i('Server is now ${next.name}', _logTag);
     _status.add(next);
@@ -100,6 +114,8 @@ class ServerConnectivityService implements ConnectivityService {
     _pollTimer?.cancel();
     _pollTimer = null;
     _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    if (!announceReconnect) return;
     _reconnectTimer = Timer(reconnectDebounce, () {
       _reconnectTimer = null;
       if (status == ConnectivityStatus.online && !_reconnected.isClosed) {

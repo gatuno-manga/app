@@ -25,6 +25,17 @@ void main() {
       expect(retries, 1);
     });
 
+    testWidgets('shows progress while retrying', (tester) async {
+      await tester.pumpApp(
+        Scaffold(body: AppOfflineEmptyView(onRetry: () {}, isRetrying: true)),
+      );
+
+      expect(
+        tester.widget<AppButton>(find.byType(AppButton)).isLoading,
+        isTrue,
+      );
+    });
+
     testWidgets('the title is a heading', (tester) async {
       final handle = tester.ensureSemantics();
       await tester.pumpApp(Scaffold(body: AppOfflineEmptyView(onRetry: () {})));

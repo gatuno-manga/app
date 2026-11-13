@@ -105,6 +105,40 @@ void main() {
     });
   });
 
+  test('a failure the confirming probe disproves is silent', () {
+    fakeAsync((async) {
+      final service = build();
+      var reconnects = 0;
+      service.onReconnected.listen((_) => reconnects++);
+      probeResults = [true];
+
+      service.reportUnreachable();
+      async.elapse(const Duration(seconds: 5));
+
+      expect(service.status, ConnectivityStatus.online);
+      expect(reconnects, 0);
+      service.dispose();
+    });
+  });
+
+  test('a real outage still announces the reconnect', () {
+    fakeAsync((async) {
+      final service = build();
+      var reconnects = 0;
+      service.onReconnected.listen((_) => reconnects++);
+      probeResults = [false, true];
+
+      service.reportUnreachable();
+      async.flushMicrotasks();
+      expect(service.status, ConnectivityStatus.offline);
+
+      async.elapse(const Duration(seconds: 32));
+      expect(service.status, ConnectivityStatus.online);
+      expect(reconnects, 1);
+      service.dispose();
+    });
+  });
+
   test('polls every 30 s while offline and stops once online', () {
     fakeAsync((async) {
       final service = build();
