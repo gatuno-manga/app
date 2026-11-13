@@ -13,7 +13,7 @@ just setup
 
 The Flutter version comes from `flake.lock` (nixpkgs). `ci.yml` and
 `lints.yml` run through `nix develop .#ci`, a lean shell in `flake.nix` with
-Flutter and the JDK only, so CI and your local shell use the same version.
+Flutter only, so CI and your local shell use the same version.
 `release.yml` builds for Android and iOS without Nix (the flake shell is
 unverified on macOS), so it pins `flutter-version` literally. When a flake bump
 changes Flutter (check `flutter --version` in `nix develop`), update the pin in

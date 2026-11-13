@@ -13,15 +13,22 @@ on:
       - main
       - developer
 
+permissions:
+  contents: read
+
 jobs:
   lints:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       # Flutter and Dart come from flake.lock (devShells.ci), not the stable channel.
       - name: Install Nix
         uses: cachix/install-nix-action@v31
+        with:
+          # Avoids the unauthenticated GitHub API rate limit when fetching flake inputs.
+          extra_nix_config: access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: nix develop .#ci --command flutter pub get
