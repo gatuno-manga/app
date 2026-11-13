@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gatuno/core/theme/app_theme_choice.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gatuno/features/settings/data/data_sources/settings_local_data_source.dart';
 
 void main() {
@@ -10,7 +9,6 @@ void main() {
   late SettingsStorage settingsStorage;
 
   setUp(() {
-    FlutterSecureStorage.setMockInitialValues({});
     SharedPreferences.setMockInitialValues({});
     settingsStorage = SettingsStorage();
   });

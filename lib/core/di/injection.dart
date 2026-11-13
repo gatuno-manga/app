@@ -17,6 +17,7 @@ import '../../features/reading/reading_injection.dart';
 import '../../features/reading/domain/use_cases/reader_preferences_service.dart';
 import '../../features/sync/sync_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
+import '../../features/settings/data/data_sources/settings_migration.dart';
 import '../../features/settings/domain/use_cases/settings_service.dart';
 import '../../features/certificates/certificates_injection.dart';
 import '../../features/certificates/domain/use_cases/certificates_service.dart';
@@ -31,6 +32,9 @@ final GetIt sl = GetIt.instance;
 Future<void> initDI() async {
   // Logger
   await AppLogger.init();
+
+  // Before any storage reads: moves non-sensitive values out of secure storage.
+  await SettingsMigration().run();
 
   // Core
   initCertificatesInjection(sl);
