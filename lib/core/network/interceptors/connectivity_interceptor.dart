@@ -14,6 +14,10 @@ import '../exceptions.dart';
 /// that came over the network: the HTTP cache interceptor resolves fresh hits
 /// with `callFollowingResponseInterceptor`, so they do reach this one.
 class ConnectivityInterceptor extends Interceptor {
+  /// Marks the connectivity probe's own request. The probe judges its answer
+  /// itself (only a 2xx is online), so the interceptor skips it.
+  static const String probeExtraKey = 'connectivity_probe';
+
   final ConnectivityService _connectivity;
   final String Function() _baseUrl;
 
@@ -54,6 +58,7 @@ class ConnectivityInterceptor extends Interceptor {
   }
 
   bool _isServer(RequestOptions options) {
+    if (options.extra[probeExtraKey] == true) return false;
     final base = Uri.tryParse(_baseUrl());
     if (base == null || base.host.isEmpty) return false;
     final uri = options.uri;

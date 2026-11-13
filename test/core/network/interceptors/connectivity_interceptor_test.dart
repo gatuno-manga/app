@@ -99,6 +99,25 @@ void main() {
     verifyNever(() => connectivity.reportReachable());
   });
 
+  test('the probe\'s own request is ignored', () {
+    final probe = RequestOptions(
+      baseUrl: base,
+      path: '/health/liveness',
+      extra: {ConnectivityInterceptor.probeExtraKey: true},
+    );
+
+    interceptor.onError(
+      error(DioExceptionType.badResponse, status: 500, options: probe),
+      errorHandler,
+    );
+    interceptor.onResponse(
+      Response<dynamic>(requestOptions: probe),
+      MockResponseInterceptorHandler(),
+    );
+
+    verifyNever(() => connectivity.reportReachable());
+  });
+
   test('requests to another host are ignored', () {
     final other = RequestOptions(path: 'https://cdn.other/x.webp');
 

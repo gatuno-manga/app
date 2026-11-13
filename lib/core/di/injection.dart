@@ -116,8 +116,13 @@ Future<void> initDI() async {
       sl<SettingsStorage>(),
       sl<DioClient>(),
       onServerChanged: () async {
-        await sl<OfflineCacheMaintenance>().clearAll();
-        unawaited(sl<ConnectivityService>().checkNow());
+        try {
+          await sl<OfflineCacheMaintenance>().clearAll();
+        } finally {
+          // The status still describes the old server: probe the new one
+          // even if the wipe failed.
+          unawaited(sl<ConnectivityService>().checkNow());
+        }
       },
     ),
   );
@@ -147,8 +152,8 @@ Future<void> initDI() async {
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
-  // First in the chain, so responses served by the HTTP cache never count as
-  // the server being reachable.
+  // First in the chain. HTTP cache hits still reach it (the cache resolves
+  // them with callFollowingResponseInterceptor); it filters them itself.
   setupConnectivityInterceptor(sl<DioClient>(), sl<ConnectivityService>());
 
   // Needs the interceptors: probes go through DioClient. Not awaited, so a

@@ -14,9 +14,10 @@ import 'package:mocktail/mocktail.dart';
 class MockDioClient extends Mock implements DioClient {}
 
 /// Times out on every path except the liveness endpoint, whose answer is
-/// [healthy].
+/// [healthy], or [healthStatus] when set.
 class _ServerAdapter implements HttpClientAdapter {
   bool healthy = true;
+  int? healthStatus;
 
   @override
   Future<ResponseBody> fetch(
@@ -33,7 +34,7 @@ class _ServerAdapter implements HttpClientAdapter {
       }
       return ResponseBody.fromString(
         jsonEncode({'status': 'ok'}),
-        200,
+        healthStatus ?? 200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
         },
@@ -74,29 +75,50 @@ void main() {
 
   tearDown(() => service.dispose());
 
-  Future<void> slowRequest() async {
+  /// A request that times out, then the confirming probe it started:
+  /// checkNow() joins the probe already in flight instead of starting one.
+  Future<void> slowRequestConfirmed() async {
     await expectLater(dio.get<dynamic>('/books'), throwsA(isA<DioException>()));
+    await service.checkNow();
   }
 
-  test('a slow request on a healthy server is a silent false alarm', () async {
-    await slowRequest();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+  /// Longer than the reconnect debounce, so a pending announcement fires.
+  Future<void> pastDebounce() =>
+      Future<void>.delayed(const Duration(milliseconds: 200));
 
+  test('a slow request on a healthy server is a silent false alarm', () async {
+    await slowRequestConfirmed();
     expect(service.status, ConnectivityStatus.online);
+
+    await pastDebounce();
     expect(reconnects, 0);
   });
 
   test('a real outage that ends announces one reconnect', () async {
     adapter.healthy = false;
-    await slowRequest();
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await slowRequestConfirmed();
     expect(service.status, ConnectivityStatus.offline);
 
     adapter.healthy = true;
+    final reconnected = service.onReconnected.first;
     await service.checkNow();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-
     expect(service.status, ConnectivityStatus.online);
+
+    await reconnected.timeout(const Duration(seconds: 5));
+    await pastDebounce();
     expect(reconnects, 1);
+  });
+
+  test('an unhealthy liveness answer does not flap the status', () async {
+    adapter.healthStatus = 500;
+    final statuses = <ConnectivityStatus>[];
+    service.statusStream.listen(statuses.add);
+
+    await slowRequestConfirmed();
+    await service.checkNow();
+    await pastDebounce();
+
+    expect(statuses, [ConnectivityStatus.online, ConnectivityStatus.offline]);
+    expect(reconnects, 0);
   });
 }
