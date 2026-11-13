@@ -88,10 +88,10 @@ Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#
 - `983:4846` Leitor · EPUB · Ajustes (Alto contraste, mínimos): Lexend, 14 dp and 120% (minus disabled), Centro, margens Estreitas
 
 Decisions:
-- PDF options: page layout (Contínuo, Página única, Duas páginas; the last only at 600 dp or wider, hidden on phones), scroll direction (Vertical, Horizontal), zoom fit (Largura, Página, Personalizado), and a zoom stepper (50% to 300%, step 25%) shown only for Personalizado. The reader theme is a colour filter over the rendered page (Padrão = no filter).
+- PDF options: page layout (Contínuo, Página única, Duas páginas; the last only at 600 dp or wider, hidden on phones), scroll direction (Vertical, Horizontal; in Contínuo it is the scroll axis, in Página única the page-turn axis; right-to-left is not designed), zoom fit (Largura, Página, Personalizado), and a zoom stepper (50% to 300%, step 25%) shown only for Personalizado, starting at the zoom the current fit produced (the stepper appears when the fit changes, growing the sheet from 423 to 513 dp; no frame shows that transition). The reader theme is a colour filter over the rendered page (Padrão = no filter, so the page stays white even though the Padrão swatch is dark navy, as on the EPUB).
 - EPUB options: reader theme, typography (font from the text reader list: Serifa, Sem serifa, Lexend, Atkinson, OpenDyslexic; size 14-28 dp; line spacing 120-220%; alignment), margins (Estreitas, Médias, Largas) and pagination (Paginado, Contínuo).
-- Document preferences are separate from the text reader preferences: the EPUB has its own theme and typography values, so the implementation (#73) must not reuse `TextReaderPreferences` state as is.
-- Components reused: `Leitor/Item de ajuste` (Passos, Seletor), `Leitor/Tema de leitura`, `Leitor/Botão ícone`. No new tokens; the theme comes from the `leitura/*` tokens.
+- Document preferences are separate from the text reader preferences: PDF and EPUB share one document theme (the PDF applies it as a filter, the EPUB as a real theme), and the EPUB has its own typography values, so the implementation (#73) must not reuse `TextReaderPreferences` state as is.
+- Components reused (the notes list above omits `Leitor/Botão ícone`, also used by #70): `Leitor/Item de ajuste` (Passos, Seletor), `Leitor/Tema de leitura`, `Leitor/Botão ícone`. No new tokens; the theme comes from the `leitura/*` tokens.
 - Non-goals: PDF crop margins and an EPUB publisher-styles toggle.
 
 Dependencies on #19 (the PDF and EPUB reader; `document_reader.dart` is still a placeholder): every option here acts on the reader, so none can be applied before #19 exists. The sheet, its preferences model and persistence can be built first.
@@ -99,7 +99,7 @@ Dependencies on #19 (the PDF and EPUB reader; `document_reader.dart` is still a 
 Gaps:
 - Selectors have no open (dropdown) state in Figma; the implementation can use a bottom sheet or menu, as for the other selector rows.
 - A disabled stepper button is drawn with 38% opacity (same as #70); there is no disabled variant.
-- The EPUB sheet is 657-669 dp tall (about 78% of an 844 dp screen) and hides most of the page while open; no peek or drag mode is designed. It should scroll once it exceeds 85% of the screen height (small screens, large text scale); no frame shows that case.
+- The EPUB sheet is 657-669 dp tall (78-79% of an 844 dp screen) and hides most of the page while open; no peek or drag mode is designed. It should scroll once it exceeds 85% of the screen height (a proposed rule, not inherited from #70; small screens, large text scale); no frame shows that case.
 - No frame for 600 dp or wider: the "Duas páginas" layout and the sheet on tablets are not designed. On phones the layout row subtitle lists only continuous and single page. Tablet breakpoints are not defined in the design system yet.
 - Rows grow from 64 to 76 dp when a subtitle wraps and selector chips hug their content, so left edges are ragged. Implementation rule: keep the row at 64 dp minimum, wrap the subtitle, and ellipsize a long selector value at a maximum chip width, also at text scale 1.5 to 2.0.
 - The previews show size, alignment and margins only; font family, layout and zoom changes are described in the notes under each frame. The PDF page sample uses no tokens, and the "Padrão" swatch is the theme sample, not the page. Creme is not selected in any frame.
