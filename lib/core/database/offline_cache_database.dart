@@ -202,9 +202,11 @@ class OfflineCacheDatabase extends _$OfflineCacheDatabase {
     });
   }
 
-  /// Deletes every cached row. Cover files are removed by the cover store.
+  /// Deletes every cached book, chapter, tag and author. The cover tables
+  /// belong to the cover store, which clears them with their files.
   Future<void> clearAll() => transaction(() async {
     for (final table in allTables) {
+      if (table == cachedCovers || table == coverPins) continue;
       await delete(table).go();
     }
   });

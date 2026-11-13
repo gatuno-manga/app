@@ -63,7 +63,17 @@ class ServerConnectivityService implements ConnectivityService {
   }
 
   @override
-  void reportReachable() => _set(ConnectivityStatus.online);
+  void reportReachable() {
+    // Any answer while a failure is being confirmed (the confirming probe's
+    // own response included, since it goes through the same interceptor)
+    // proves the outage was not real: back online without a reconnect.
+    if (_confirmingFailure) {
+      _confirmingFailure = false;
+      _set(ConnectivityStatus.online, announceReconnect: false);
+      return;
+    }
+    _set(ConnectivityStatus.online);
+  }
 
   @override
   void reportUnreachable() {

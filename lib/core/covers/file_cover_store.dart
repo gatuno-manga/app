@@ -39,17 +39,15 @@ class FileCoverStore implements CoverStore {
     required Future<Directory> Function() directory,
     required CoverDownloader download,
     this.budgetBytes = defaultBudgetBytes,
+    required bool Function() isOffline,
+    required CacheEpoch epoch,
     DateTime Function()? now,
-    bool Function()? isOffline,
-    CacheEpoch? epoch,
   }) : _db = db,
        _directory = directory,
        _download = download,
        _now = now ?? DateTime.now,
-       _isOffline = isOffline ?? _never,
-       _epoch = epoch ?? CacheEpoch();
-
-  static bool _never() => false;
+       _isOffline = isOffline,
+       _epoch = epoch;
 
   @override
   Future<File?> file(String bookId) async => _use(await _row(bookId));
@@ -167,7 +165,8 @@ class FileCoverStore implements CoverStore {
   Future<void> enforceBudget() async {
     // Rows are chosen and deleted in one transaction, so a cover written or
     // pinned meanwhile is not evicted on a stale reading. Files go after the
-    // rows: an orphan file is harmless, a row without its file is not.
+    // rows; if the same cover is downloaded again in between, its new file
+    // can be deleted here, and the next read drops the row and fetches again.
     final evicted = await _db.transaction(() async {
       final pinned = _db.selectOnly(_db.coverPins)
         ..addColumns([_db.coverPins.bookId]);
@@ -194,6 +193,8 @@ class FileCoverStore implements CoverStore {
 
   @override
   Future<void> clear() async {
+    // The store owns the cover tables; OfflineCacheDatabase.clearAll leaves
+    // them to it.
     await _db.delete(_db.cachedCovers).go();
     await _db.delete(_db.coverPins).go();
     final dir = await _directory();

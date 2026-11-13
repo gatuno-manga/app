@@ -18,13 +18,27 @@ class AppOfflineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
-    return AnimatedSize(
+    // The strip stays painted while it slides in and out: only its visible
+    // height animates, and it leaves the tree once fully collapsed.
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(end: offline ? 1 : 0),
       duration: reduceMotion ? Duration.zero : _duration,
       curve: Curves.easeOutCubic,
-      alignment: Alignment.bottomCenter,
-      child: offline
-          ? const _OfflineStrip()
-          : const SizedBox(width: double.infinity),
+      builder: (context, visible, strip) {
+        if (visible == 0) return const SizedBox(width: double.infinity);
+        return ExcludeSemantics(
+          // While collapsing after reconnecting it is no longer true.
+          excluding: !offline,
+          child: ClipRect(
+            child: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: visible,
+              child: strip,
+            ),
+          ),
+        );
+      },
+      child: const _OfflineStrip(),
     );
   }
 }

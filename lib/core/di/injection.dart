@@ -115,7 +115,10 @@ Future<void> initDI() async {
     () => SettingsService(
       sl<SettingsStorage>(),
       sl<DioClient>(),
-      onServerChanged: () => sl<OfflineCacheMaintenance>().clearAll(),
+      onServerChanged: () async {
+        await sl<OfflineCacheMaintenance>().clearAll();
+        unawaited(sl<ConnectivityService>().checkNow());
+      },
     ),
   );
 

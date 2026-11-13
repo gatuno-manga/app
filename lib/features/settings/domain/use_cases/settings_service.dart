@@ -44,8 +44,9 @@ class SettingsService {
   Stream<SettingsState> get settingsStream => _stateSubject.stream;
   SettingsState get state => _stateSubject.value;
 
-  /// Runs when the server URL changes to a different server, before the new
-  /// URL is used: the offline cache belongs to the old library.
+  /// Runs when the server URL changes to a different server, right after the
+  /// switch: the offline cache belongs to the old library, and the
+  /// connectivity status describes the old server.
   final Future<void> Function()? _onServerChanged;
 
   SettingsService(
@@ -92,12 +93,15 @@ class SettingsService {
   Future<void> setApiUrl(String url) async {
     try {
       final previous = state.apiUrl;
-      if (previous != null && _normalize(previous) != _normalize(url)) {
-        await _clearServerData();
-      }
       await _storage.setApiUrl(url);
       _dioClient.updateBaseUrl(url);
       _stateSubject.add(state.copyWith(apiUrl: url));
+      // After the switch: anything that starts from now on goes to the new
+      // server, and what was still in flight to the old one is dropped by
+      // the wipe's cache epoch.
+      if (previous != null && _normalize(previous) != _normalize(url)) {
+        await _clearServerData();
+      }
     } catch (e, stackTrace) {
       AppLogger.e('Error setting API URL', e, stackTrace, _logTag);
       rethrow;

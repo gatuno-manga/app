@@ -24,6 +24,8 @@ void main() {
     },
     budgetBytes: budgetBytes,
     now: () => now,
+    isOffline: () => false,
+    epoch: CacheEpoch(),
   );
 
   Uint8List bytes(int length, [int fill = 1]) =>
@@ -88,6 +90,7 @@ void main() {
       },
       now: () => now,
       isOffline: () => offline,
+      epoch: CacheEpoch(),
     );
     remote['https://s3/1.webp'] = bytes(10);
     await store.ensure('1', 'https://s3/1.webp');
@@ -108,6 +111,7 @@ void main() {
         return bytes(10);
       },
       epoch: epoch,
+      isOffline: () => false,
     );
 
     expect(await store.ensure('1', 'https://s3/1.webp'), isNull);

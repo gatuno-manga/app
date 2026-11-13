@@ -98,6 +98,23 @@ void main() {
         expect(wipes, 1);
       });
 
+      test('the wipe runs after the switch to the new server', () async {
+        final order = <String>[];
+        when(() => mockDioClient.updateBaseUrl(any())).thenAnswer((inv) {
+          order.add('switch ${inv.positionalArguments.first}');
+        });
+        settingsService = SettingsService(
+          mockStorage,
+          mockDioClient,
+          onServerChanged: () async => order.add('wipe'),
+        );
+
+        await settingsService.setApiUrl('http://a.com');
+        await settingsService.setApiUrl('http://b.com');
+
+        expect(order, ['switch http://a.com', 'switch http://b.com', 'wipe']);
+      });
+
       test('the same server (trailing slash aside) wipes nothing', () async {
         await settingsService.setApiUrl('http://a.com');
         await settingsService.setApiUrl('http://a.com/');

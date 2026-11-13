@@ -69,9 +69,32 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(_message), findsOneWidget);
 
+      final fullHeight = tester.getSize(find.byType(AppOfflineBanner)).height;
       await tester.tap(find.text('toggle'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      // Mid-collapse the strip is still painted, just shorter.
+      expect(find.text(_message), findsOneWidget);
+      final midHeight = tester.getSize(find.byType(AppOfflineBanner)).height;
+      expect(midHeight, inExclusiveRange(0, fullHeight));
+
       await tester.pumpAndSettle();
       expect(find.text(_message), findsNothing);
+      expect(tester.getSize(find.byType(AppOfflineBanner)).height, 0);
+    });
+
+    testWidgets('reduced motion switches at once', (tester) async {
+      await tester.pumpApp(
+        const MediaQuery(
+          data: MediaQueryData(disableAnimations: true),
+          child: _Toggle(),
+        ),
+      );
+      await tester.tap(find.text('toggle'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text(_message), findsOneWidget);
     });
 
     testWidgets('localized in Portuguese', (tester) async {
