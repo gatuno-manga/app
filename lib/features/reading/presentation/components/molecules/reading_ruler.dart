@@ -47,8 +47,14 @@ class _ReadingRulerState extends State<ReadingRuler> {
       builder: (context, constraints) {
         final height = constraints.maxHeight;
         final top = _clamped(_top ?? (height - widget.lineHeight) / 2, height);
-        void moveBy(double delta) =>
-            setState(() => _top = _clamped(top + delta, height));
+        // From the stored position, not the one this build saw, so two drag
+        // updates before a rebuild both count.
+        void moveBy(double delta) => setState(
+          () => _top = _clamped(
+            (_top ?? (height - widget.lineHeight) / 2) + delta,
+            height,
+          ),
+        );
         return Stack(
           children: [
             Positioned(left: 0, right: 0, top: 0, height: top, child: mask),
