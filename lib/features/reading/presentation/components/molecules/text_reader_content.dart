@@ -37,8 +37,13 @@ class TextReaderContent extends StatelessWidget {
               lineHeight: LineHeight(preferences.lineHeight),
               textAlign: preferences.alignment.textAlign,
               color: palette.text,
+              letterSpacing: style.letterSpacing,
+              wordSpacing: style.wordSpacing,
             ),
             'a': Style(color: palette.accent),
+            if (preferences.suppressItalics)
+              for (final tag in _italicTags)
+                tag: Style(fontStyle: FontStyle.normal),
           },
         );
       case ContentFormat.markdown:
@@ -56,6 +61,11 @@ class TextReaderContent extends StatelessWidget {
     }
   }
 
+  /// Elements `flutter_html` renders in italics by default. Italics are
+  /// suppressed once per renderer: the plain text style
+  /// (`reader_text_style.dart`), these tags for html and `em` for markdown.
+  static const List<String> _italicTags = ['em', 'i', 'cite', 'dfn', 'var'];
+
   // Heading sizes relative to the body, so they scale with the font size
   // setting and never fall below the paragraphs.
   static const List<double> _headingScale = [1.6, 1.4, 1.2, 1.1, 1.0, 1.0];
@@ -70,6 +80,8 @@ class TextReaderContent extends StatelessWidget {
       fontFamily: body.fontFamily,
       fontSize: bodySize * _headingScale[level],
       height: body.height,
+      letterSpacing: body.letterSpacing,
+      wordSpacing: body.wordSpacing,
       fontWeight: level >= 4 ? FontWeight.w700 : null,
     );
     final align = preferences.alignment.wrapAlignment;
@@ -95,6 +107,7 @@ class TextReaderContent extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
       blockquote: body.copyWith(color: palette.textSoft),
+      em: preferences.suppressItalics ? body : null,
       blockquoteDecoration: BoxDecoration(
         color: palette.highlight,
         border: Border(left: BorderSide(color: palette.accent, width: 3)),

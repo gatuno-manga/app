@@ -40,5 +40,26 @@ extension TextReaderPreferencesStyle on TextReaderPreferences {
     fontSize: fontSize,
     height: lineHeight,
     color: color,
+    letterSpacing: letterSpacing * fontSize,
+    wordSpacing: wordSpacing * fontSize,
+    fontStyle: suppressItalics ? FontStyle.normal : null,
   );
+
+  /// Width of the line limit in dp, or null without one. `ch` is the width
+  /// of the glyph `0` in [style] as rendered under [textScaler] (the body
+  /// scales with the system text size, so the limit must too), like the CSS
+  /// unit. The letter spacing counts: the limit approximates characters per
+  /// line.
+  double? maxContentWidth(TextStyle style, TextScaler textScaler) {
+    final chars = lineWidth;
+    if (chars == null) return null;
+    final painter = TextPainter(
+      text: TextSpan(text: '0', style: style),
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+    final zero = painter.width;
+    painter.dispose();
+    return chars * zero;
+  }
 }

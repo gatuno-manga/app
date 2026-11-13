@@ -369,5 +369,110 @@
   "appLockErrorNoBiometricHardware": "Nenhum sensor de digital ou rosto está disponível neste aparelho.",
   "appLockErrorSave": "Não foi possível salvar a configuração. Tente novamente.",
   "appLockErrorUnavailable": "A autenticação do aparelho não está disponível agora. Tente novamente em instantes.",
-  "appLockErrorFailed": "Não foi possível confirmar que é você. Tente novamente."
+  "appLockErrorFailed": "Não foi possível confirmar que é você. Tente novamente.",
+  "readingAccessibilityTitle": "Acessibilidade",
+  "readingAccessibilityDesc": "Modo dislexia, espaçamento, largura da linha, régua",
+  "readingDyslexiaTitle": "Modo dislexia",
+  "readingDyslexiaDesc": "Aplica de uma vez as recomendações de legibilidade. Você ainda pode ajustar cada item abaixo.",
+  "readingChipFont": "Fonte {name}",
+  "@readingChipFont": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipAlignment": "Alinhamento: {name}",
+  "@readingChipAlignment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipLetters": "Letras +{percent}%",
+  "@readingChipLetters": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipWords": "Palavras +{percent}%",
+  "@readingChipWords": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipLine": "Linha {value}",
+  "@readingChipLine": {
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
+      }
+    }
+  },
+  "readingChipWidth": "~{chars} caracteres",
+  "@readingChipWidth": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "readingChipBackground": "Fundo {name}",
+  "@readingChipBackground": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipNoItalics": "Sem itálico",
+  "readingChipRuler": "Régua de leitura",
+  "readingLetterSpacing": "Espaço entre letras (+{percent}%)",
+  "@readingLetterSpacing": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "readingLetterSpacingDesc": "Separa melhor as letras",
+  "readingDecreaseLetterSpacing": "Diminuir espaço entre letras",
+  "readingIncreaseLetterSpacing": "Aumentar espaço entre letras",
+  "readingWordSpacing": "Espaço entre palavras (+{percent}%)",
+  "@readingWordSpacing": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "readingWordSpacingDesc": "Separa melhor as palavras",
+  "readingDecreaseWordSpacing": "Diminuir espaço entre palavras",
+  "readingIncreaseWordSpacing": "Aumentar espaço entre palavras",
+  "readingLineWidth": "Largura da linha ({chars} caracteres)",
+  "@readingLineWidth": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "readingLineWidthOff": "Largura da linha (sem limite)",
+  "readingLineWidthDesc": "Mantém as linhas curtas",
+  "readingDecreaseLineWidth": "Diminuir largura da linha",
+  "readingIncreaseLineWidth": "Aumentar largura da linha",
+  "readingSuppressItalics": "Sem itálico",
+  "readingSuppressItalicsDesc": "Mostra o texto em ênfase como normal",
+  "readingRulerTitle": "Régua de leitura",
+  "readingRulerDesc": "Destaca a linha atual",
+  "readingRulerSemantics": "Régua de leitura. Deslize para cima ou para baixo para movê-la."
 }
