@@ -14,6 +14,24 @@ extension DioExceptionCertificateExtension on DioException {
     }
     return false;
   }
+
+  /// Whether the server could not be reached at all, as opposed to answering
+  /// with an error status or failing the certificate check.
+  bool get isUnreachable {
+    switch (type) {
+      case DioExceptionType.connectionError:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return true;
+      case DioExceptionType.unknown:
+        return error is SocketException;
+      case DioExceptionType.badCertificate:
+      case DioExceptionType.badResponse:
+      case DioExceptionType.cancel:
+        return false;
+    }
+  }
 }
 
 class NetworkException extends AppExceptions {
@@ -30,6 +48,14 @@ class ValidationException extends AppExceptions {
 class TooManyRequestsException extends AppExceptions {
   TooManyRequestsException({String? message})
     : super(message ?? 'Too many requests', statusCode: 429);
+}
+
+/// The server cannot be reached and the requested data is not cached.
+///
+/// View models show the shared offline empty state for it.
+class OfflineException extends AppExceptions {
+  OfflineException({String? message})
+    : super(message ?? 'Offline and the requested data is not saved');
 }
 
 class ServerException extends AppExceptions {
@@ -67,10 +93,7 @@ class ApiExceptionHandler {
       case 500:
         return ServerException(message: message, statusCode: 500);
       default:
-        if (error.type == DioExceptionType.connectionError ||
-            error.type == DioExceptionType.connectionTimeout ||
-            error.type == DioExceptionType.sendTimeout ||
-            error.type == DioExceptionType.receiveTimeout) {
+        if (error.isUnreachable) {
           return NetworkException();
         }
         return AuthException(

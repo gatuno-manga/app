@@ -1096,4 +1096,14 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get readingRulerSemantics =>
       'Régua de leitura. Deslize para cima ou para baixo para movê-la.';
+
+  @override
+  String get offlineBannerMessage => 'Offline: mostrando dados salvos';
+
+  @override
+  String get offlineEmptyTitle => 'Você está offline';
+
+  @override
+  String get offlineEmptyMessage =>
+      'Isto ainda não está salvo neste aparelho. Ele carrega quando o servidor voltar a responder.';
 }

@@ -1,4 +1,7 @@
 class ApiConstants {
+  // Health: URL validation and the connectivity probe
+  static const String healthLiveness = '/health/liveness';
+
   // Auth Routes
   static const String signIn = '/auth/signin';
   static const String signUp = '/auth/signup';

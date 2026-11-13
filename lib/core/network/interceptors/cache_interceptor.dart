@@ -8,7 +8,14 @@ Future<FileCacheStore> _createFileCacheStore() async {
   return FileCacheStore(cacheDir.path);
 }
 
-Future<void> setupCacheInterceptor(
+/// Adds the HTTP cache and returns its options, so a request can override
+/// the policy (the cover store downloads with [CachePolicy.noCache]).
+///
+/// An online-only optimisation: it revalidates JSON and images while the
+/// server answers, and never answers in place of an unreachable server
+/// (`hitCacheOnNetworkFailure: false`). The offline source of truth is the
+/// drift offline cache, so a connection error must reach the repository.
+Future<CacheOptions> setupCacheInterceptor(
   DioClient dioClient, {
   CacheStore? store,
 }) async {
@@ -21,7 +28,9 @@ Future<void> setupCacheInterceptor(
     priority: CachePriority.normal,
     keyBuilder: CacheOptions.defaultCacheKeyBuilder,
     allowPostMethod: false,
+    hitCacheOnNetworkFailure: false,
   );
 
   dioClient.dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
+  return cacheOptions;
 }

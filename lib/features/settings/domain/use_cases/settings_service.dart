@@ -1,5 +1,6 @@
 import '../../../../core/theme/app_theme_choice.dart';
 import '../../data/data_sources/settings_local_data_source.dart';
+import '../../../../core/network/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../../core/logging/logger.dart';
 
@@ -43,7 +44,15 @@ class SettingsService {
   Stream<SettingsState> get settingsStream => _stateSubject.stream;
   SettingsState get state => _stateSubject.value;
 
-  SettingsService(this._storage, this._dioClient);
+  /// Runs when the server URL changes to a different server, before the new
+  /// URL is used: the offline cache belongs to the old library.
+  final Future<void> Function()? _onServerChanged;
+
+  SettingsService(
+    this._storage,
+    this._dioClient, {
+    Future<void> Function()? onServerChanged,
+  }) : _onServerChanged = onServerChanged;
 
   String? get apiUrl => state.apiUrl;
   bool get sensitiveContentEnabled => state.sensitiveContentEnabled;
@@ -82,6 +91,10 @@ class SettingsService {
 
   Future<void> setApiUrl(String url) async {
     try {
+      final previous = state.apiUrl;
+      if (previous != null && _normalize(previous) != _normalize(url)) {
+        await _clearServerData();
+      }
       await _storage.setApiUrl(url);
       _dioClient.updateBaseUrl(url);
       _stateSubject.add(state.copyWith(apiUrl: url));
@@ -116,6 +129,18 @@ class SettingsService {
     }
   }
 
+  /// A failed wipe must not block switching servers; it is logged instead.
+  Future<void> _clearServerData() async {
+    try {
+      await _onServerChanged?.call();
+    } catch (e, stackTrace) {
+      AppLogger.e('Error clearing the old server data', e, stackTrace, _logTag);
+    }
+  }
+
+  static String _normalize(String url) =>
+      url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+
   Future<bool> validateApiUrl(String url) async {
     if (url.isEmpty) return false;
 
@@ -128,7 +153,7 @@ class SettingsService {
       if (uri == null) return false;
 
       final response = await _dioClient.dio.get<Map<String, dynamic>>(
-        '$formattedUrl/health/liveness',
+        '$formattedUrl${ApiConstants.healthLiveness}',
       );
       return response.statusCode == 200;
     } catch (e, stackTrace) {

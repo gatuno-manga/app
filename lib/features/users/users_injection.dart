@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../../core/connectivity/connectivity_service.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
 import '../../core/network/dio_client.dart';
 import 'data/data_sources/user_local_data_source.dart';
@@ -27,6 +28,10 @@ void initUsersInjection(GetIt sl) {
   // View Models
   sl.registerFactory<MeViewModel>(() => MeViewModel(sl<UserService>()));
   sl.registerFactory<NavigationViewModel>(
-    () => NavigationViewModel(sl<UserService>(), sl<AuthService>()),
+    () => NavigationViewModel(
+      sl<UserService>(),
+      sl<AuthService>(),
+      sl<ConnectivityService>(),
+    ),
   );
 }

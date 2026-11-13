@@ -73,6 +73,50 @@ void main() {
       verify(() => mockDioClient.updateBaseUrl('http://new.com')).called(1);
     });
 
+    group('server change', () {
+      late int wipes;
+
+      setUp(() {
+        wipes = 0;
+        settingsService = SettingsService(
+          mockStorage,
+          mockDioClient,
+          onServerChanged: () async => wipes++,
+        );
+        when(() => mockStorage.setApiUrl(any())).thenAnswer((_) async {});
+        when(() => mockDioClient.updateBaseUrl(any())).thenAnswer((_) {});
+      });
+
+      test('the first URL wipes nothing', () async {
+        await settingsService.setApiUrl('http://a.com');
+        expect(wipes, 0);
+      });
+
+      test('a different server wipes the offline cache', () async {
+        await settingsService.setApiUrl('http://a.com');
+        await settingsService.setApiUrl('http://b.com');
+        expect(wipes, 1);
+      });
+
+      test('the same server (trailing slash aside) wipes nothing', () async {
+        await settingsService.setApiUrl('http://a.com');
+        await settingsService.setApiUrl('http://a.com/');
+        expect(wipes, 0);
+      });
+
+      test('a failed wipe does not block the switch', () async {
+        settingsService = SettingsService(
+          mockStorage,
+          mockDioClient,
+          onServerChanged: () async => throw StateError('disk'),
+        );
+        await settingsService.setApiUrl('http://a.com');
+        await settingsService.setApiUrl('http://b.com');
+
+        expect(settingsService.apiUrl, 'http://b.com');
+      });
+    });
+
     test('setSensitiveContentEnabled should update storage', () async {
       when(
         () => mockStorage.setSensitiveContentEnabled(any()),

@@ -474,5 +474,8 @@
   "readingSuppressItalicsDesc": "Mostra o texto em ênfase como normal",
   "readingRulerTitle": "Régua de leitura",
   "readingRulerDesc": "Destaca a linha atual",
-  "readingRulerSemantics": "Régua de leitura. Deslize para cima ou para baixo para movê-la."
+  "readingRulerSemantics": "Régua de leitura. Deslize para cima ou para baixo para movê-la.",
+  "offlineBannerMessage": "Offline: mostrando dados salvos",
+  "offlineEmptyTitle": "Você está offline",
+  "offlineEmptyMessage": "Isto ainda não está salvo neste aparelho. Ele carrega quando o servidor voltar a responder."
 }

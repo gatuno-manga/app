@@ -1,4 +1,20 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
+import '../connectivity/connectivity_service.dart';
+import '../connectivity/connectivity_triggers.dart';
+import '../connectivity/dio_server_probe.dart';
+import '../connectivity/server_connectivity_service.dart';
+import '../covers/cover_image_loading_strategy.dart';
+import '../covers/cover_store.dart';
+import '../covers/dio_cover_downloader.dart';
+import '../covers/file_cover_store.dart';
+import '../database/offline_cache_database.dart';
+import '../offline/offline_cache_maintenance.dart';
+import '../offline/read_through.dart';
 import '../logging/logger.dart';
 import '../network/dio_client.dart';
 import '../network/token_provider.dart';
@@ -7,6 +23,7 @@ import '../network/interceptors/cache_interceptor.dart';
 import '../network/interceptors/cookie_interceptor.dart';
 import '../network/interceptors/logging_interceptor.dart';
 import '../network/interceptors/bad_certificate_interceptor.dart';
+import '../network/interceptors/connectivity_interceptor.dart';
 import '../../features/authentication/authentication_injection.dart';
 import '../../features/users/domain/use_cases/user_service.dart';
 import '../../features/users/users_injection.dart';
@@ -15,6 +32,7 @@ import '../../features/books/books_injection.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
 import '../../features/reading/domain/use_cases/reader_preferences_service.dart';
+import '../../features/sync/domain/use_cases/reconnect_sync_trigger.dart';
 import '../../features/sync/sync_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
 import '../../features/settings/data/data_sources/settings_migration.dart';
@@ -43,12 +61,57 @@ Future<void> initDI() async {
   sl.registerLazySingleton<DioClient>(
     () => DioClient(certificatesService: sl<CertificatesService>()),
   );
-  sl.registerLazySingleton<ImageLoadingStrategy>(
-    () => DioImageLoadingStrategy(sl<DioClient>()),
+  // Offline: connectivity, the local cache and the cover store. The cover
+  // store needs the HTTP cache options, so it resolves only after the
+  // interceptors below are set up.
+  sl.registerLazySingleton<ConnectivityTriggers>(
+    ConnectivityTriggers.new,
+    dispose: (triggers) => triggers.dispose(),
   );
+  sl.registerLazySingleton<ServerConnectivityService>(
+    () => ServerConnectivityService(
+      probe: dioServerProbe(sl<DioClient>()),
+      triggers: sl<ConnectivityTriggers>().stream,
+    ),
+    dispose: (service) => service.dispose(),
+  );
+  sl.registerLazySingleton<ConnectivityService>(
+    () => sl<ServerConnectivityService>(),
+  );
+  sl.registerLazySingleton<ReadThrough>(
+    () => ReadThrough(sl<ConnectivityService>()),
+  );
+  sl.registerLazySingleton<OfflineCacheDatabase>(
+    () => OfflineCacheDatabase(),
+    dispose: (db) => db.close(),
+  );
+  sl.registerLazySingleton<CoverStore>(
+    () => FileCoverStore(
+      db: sl<OfflineCacheDatabase>(),
+      directory: () async =>
+          Directory('${(await getApplicationSupportDirectory()).path}/covers'),
+      download: dioCoverDownloader(sl<DioClient>(), sl<CacheOptions>()),
+    ),
+  );
+  // Every AppImage checks the cover store first; URLs that are not a cached
+  // book's cover go straight to the network.
+  sl.registerLazySingleton<ImageLoadingStrategy>(
+    () => CoverImageLoadingStrategy(
+      sl<CoverStore>(),
+      DioImageLoadingStrategy(sl<DioClient>()),
+    ),
+  );
+  sl.registerLazySingleton<OfflineCacheMaintenance>(
+    () => OfflineCacheMaintenance(sl<OfflineCacheDatabase>(), sl<CoverStore>()),
+  );
+
   sl.registerLazySingleton<SettingsStorage>(() => SettingsStorage());
   sl.registerLazySingleton<SettingsService>(
-    () => SettingsService(sl<SettingsStorage>(), sl<DioClient>()),
+    () => SettingsService(
+      sl<SettingsStorage>(),
+      sl<DioClient>(),
+      onServerChanged: () => sl<OfflineCacheMaintenance>().clearAll(),
+    ),
   );
 
   // Initialize settings (including base URL)
@@ -72,10 +135,22 @@ Future<void> initDI() async {
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)
   setupCookieInterceptor(sl<DioClient>());
-  await setupCacheInterceptor(sl<DioClient>());
+  sl.registerSingleton<CacheOptions>(
+    await setupCacheInterceptor(sl<DioClient>()),
+  );
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());
+  // First in the chain, so responses served by the HTTP cache never count as
+  // the server being reachable.
+  setupConnectivityInterceptor(sl<DioClient>(), sl<ConnectivityService>());
+
+  // Needs the interceptors: probes go through DioClient. Not awaited, so a
+  // slow server does not hold the first frame.
+  sl<ConnectivityTriggers>().start();
+  unawaited(sl<ServerConnectivityService>().start());
+  sl<ReconnectSyncTrigger>().start();
+  unawaited(sl<OfflineCacheMaintenance>().evictStale());
 
   // Last: refreshes the profile on sign-in, so it needs the interceptors
   // above and must be listening before any screen appears.
