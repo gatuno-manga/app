@@ -266,7 +266,6 @@ class ReaderPreferences extends Equatable {
   /// which the preset does not touch. Either call is a no-op when the mode
   /// already has that value.
   ReaderPreferences withDyslexiaMode(bool enabled) {
-    final snapshot = dyslexiaSnapshot;
     if (enabled == dyslexiaMode) return this;
     if (enabled) {
       return ReaderPreferences(
@@ -275,8 +274,9 @@ class ReaderPreferences extends Equatable {
         dyslexiaSnapshot: DyslexiaSnapshot(theme: theme, text: text),
       );
     }
+    final snapshot = dyslexiaSnapshot!;
     return ReaderPreferences(
-      theme: snapshot!.theme,
+      theme: snapshot.theme,
       text: snapshot.text.copyWith(fontSize: text.fontSize),
     );
   }

@@ -106,7 +106,13 @@ class _TextReaderBody extends StatelessWidget {
               Positioned.fill(
                 child: ReadingRuler(
                   palette: palette,
-                  lineHeight: preferences.fontSize * preferences.lineHeight,
+                  // The body text scales with the system text size, so the
+                  // band must too to cover one whole line.
+                  lineHeight:
+                      MediaQuery.textScalerOf(
+                        context,
+                      ).scale(preferences.fontSize) *
+                      preferences.lineHeight,
                 ),
               ),
           ],

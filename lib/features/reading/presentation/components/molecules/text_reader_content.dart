@@ -61,7 +61,9 @@ class TextReaderContent extends StatelessWidget {
     }
   }
 
-  /// Elements `flutter_html` renders in italics by default.
+  /// Elements `flutter_html` renders in italics by default. Italics are
+  /// suppressed once per renderer: the plain text style
+  /// (`reader_text_style.dart`), these tags for html and `em` for markdown.
   static const List<String> _italicTags = ['em', 'i', 'cite', 'dfn', 'var'];
 
   // Heading sizes relative to the body, so they scale with the font size

@@ -148,7 +148,7 @@ void main() {
       });
 
       test('a corrupt snapshot means the preset is off', () async {
-        for (final raw in ['not json', '[1,2]', '"x"', '{"theme": 3}']) {
+        for (final raw in ['not json', '[1,2]', '"x"']) {
           SharedPreferences.setMockInitialValues({
             'reader.dyslexia_snapshot': raw,
           });

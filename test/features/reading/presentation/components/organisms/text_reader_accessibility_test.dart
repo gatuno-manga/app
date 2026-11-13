@@ -236,5 +236,27 @@ void main() {
       final ruler = tester.widget<ReadingRuler>(find.byType(ReadingRuler));
       expect(ruler.lineHeight, closeTo(20 * 1.8, 1e-9));
     });
+
+    testWidgets('grows with the system text scale', (tester) async {
+      await setText((t) => t.copyWith(readingRuler: true, fontSize: 20));
+      await tester.pumpApp(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: MultiProvider(
+            providers: [
+              Provider<ReadingViewModel>.value(value: viewModel),
+              Provider<ReaderPreferencesService>.value(value: preferences),
+            ],
+            child: Scaffold(
+              body: TextReader(chapter: _Chapter('Hello', ContentFormat.plain)),
+            ),
+          ),
+        ),
+        theme: AppTheme.lightTheme,
+      );
+
+      final ruler = tester.widget<ReadingRuler>(find.byType(ReadingRuler));
+      expect(ruler.lineHeight, closeTo(20 * 2 * 1.8, 1e-9));
+    });
   });
 }

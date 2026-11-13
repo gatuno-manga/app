@@ -4,10 +4,10 @@ import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../molecules/reader_alignment_row.dart';
-import '../molecules/reader_dyslexia_preset_card.dart';
 import '../molecules/reader_font_family_row.dart';
 import '../molecules/reader_stepper_row.dart';
 import '../molecules/reader_switch_row.dart';
+import 'reader_dyslexia_preset_card.dart';
 import 'reader_preferences_controls.dart';
 
 /// The rows of the accessibility sheet (Figma `Leitor · Ajustes ·

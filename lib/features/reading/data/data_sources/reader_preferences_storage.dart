@@ -94,14 +94,16 @@ class ReaderPreferencesStorage {
       final json = jsonDecode(raw);
       if (json is! Map<String, dynamic>) return null;
       num? number(String key) => json[key] is num ? json[key] as num : null;
+      String? string(String key) =>
+          json[key] is String ? json[key] as String : null;
       bool? flag(String key) => json[key] is bool ? json[key] as bool : null;
       return DyslexiaSnapshot(
-        theme: ReaderTheme.fromName(json['theme'] as String?),
+        theme: ReaderTheme.fromName(string('theme')),
         text: TextReaderPreferences.defaults.copyWith(
-          fontFamily: ReaderFontFamily.fromName(json['fontFamily'] as String?),
+          fontFamily: ReaderFontFamily.fromName(string('fontFamily')),
           fontSize: number('fontSize')?.toDouble(),
           lineHeight: number('lineHeight')?.toDouble(),
-          alignment: ReaderTextAlignment.fromName(json['alignment'] as String?),
+          alignment: ReaderTextAlignment.fromName(string('alignment')),
           letterSpacing: number('letterSpacing')?.toDouble(),
           wordSpacing: number('wordSpacing')?.toDouble(),
           lineWidth: number('lineWidth')?.toDouble(),
@@ -110,8 +112,6 @@ class ReaderPreferencesStorage {
         ),
       );
     } on FormatException {
-      return null;
-    } on TypeError {
       return null;
     }
   }

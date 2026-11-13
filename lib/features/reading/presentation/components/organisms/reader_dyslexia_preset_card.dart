@@ -5,9 +5,9 @@ import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../atoms/reader_summary_chip.dart';
 import '../atoms/reader_switch.dart';
-import 'reader_alignment_row.dart';
-import 'reader_font_family_row.dart';
-import 'reader_theme_picker.dart';
+import '../molecules/reader_alignment_row.dart';
+import '../molecules/reader_font_family_row.dart';
+import '../molecules/reader_theme_picker.dart';
 
 /// The dyslexia preset (Figma `Leitor/Predefinição · Modo dislexia`): a
 /// switch and a chip per setting it controls, showing the current values

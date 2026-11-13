@@ -5,7 +5,7 @@ import 'package:gatuno/core/theme/theme.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gatuno/features/reading/presentation/components/molecules/reader_dyslexia_preset_card.dart';
+import 'package:gatuno/features/reading/presentation/components/organisms/reader_dyslexia_preset_card.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
