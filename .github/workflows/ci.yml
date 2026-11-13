@@ -55,8 +55,10 @@ jobs:
       - name: Install dependencies
         run: nix develop .#ci --command flutter pub get
 
+      # `dart analyze` is the repo gate (AGENTS.md): it fails on warnings, not infos,
+      # and reports gatuno_lints diagnostics that `flutter analyze` drops.
       - name: Run static analysis
-        run: nix develop .#ci --command flutter analyze
+        run: nix develop .#ci --command dart analyze
 
       - name: Run tests
         run: nix develop .#ci --command flutter test
