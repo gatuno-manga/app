@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/di/injection.dart';
-import 'package:gatuno/features/reading/data/database/reading_database.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
@@ -10,6 +9,7 @@ import 'package:gatuno/core/network/dio_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../helpers/di_teardown.dart';
 import '../../helpers/path_provider_mock.dart';
 
 void main() {
@@ -29,13 +29,7 @@ void main() {
     });
 
     tearDown(() async {
-      // Let pending database opens settle, then close what initDI opened so
-      // nothing touches the next test's `sl` or the deleted temp directory.
-      await Future<void>.delayed(Duration.zero);
-      if (sl.isRegistered<ReadingDatabase>()) {
-        await sl<ReadingDatabase>().close();
-      }
-      await sl.reset();
+      await tearDownInjectionTest();
       clearPathProviderMock();
       tempDir.deleteSync(recursive: true);
     });

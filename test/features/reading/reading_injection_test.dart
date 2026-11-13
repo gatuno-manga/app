@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gatuno/core/di/injection.dart';
-import 'package:gatuno/features/reading/data/database/reading_database.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
@@ -14,6 +13,7 @@ import 'package:gatuno/core/network/dio_client.dart';
 import 'package:gatuno/core/network/app_mqtt_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 
+import '../../helpers/di_teardown.dart';
 import '../../helpers/path_provider_mock.dart';
 
 class MockDioClient extends Mock implements DioClient {}
@@ -34,13 +34,7 @@ void main() {
   });
 
   tearDown(() async {
-    // initReadingDI builds the reading database; close it so it cannot open
-    // a file after this test has ended.
-    await Future<void>.delayed(Duration.zero);
-    if (sl.isRegistered<ReadingDatabase>()) {
-      await sl<ReadingDatabase>().close();
-    }
-    await sl.reset();
+    await tearDownInjectionTest();
     clearPathProviderMock();
     tempDir.deleteSync(recursive: true);
   });
