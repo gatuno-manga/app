@@ -13,23 +13,28 @@ on:
       - main
       - developer
 
+permissions:
+  contents: read
+
 jobs:
   lints:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      # Flutter and Dart come from flake.lock (devShells.ci), not the stable channel.
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
         with:
-          channel: 'stable'
-          cache: true
+          # Avoids the unauthenticated GitHub API rate limit when fetching flake inputs.
+          extra_nix_config: access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: flutter pub get
+        run: nix develop .#ci --command flutter pub get
 
       - name: Analyze (includes gatuno_lints rules)
-        run: dart analyze
+        run: nix develop .#ci --command dart analyze
 
       - name: Test lint rules
-        run: cd tool/gatuno_lints && dart pub get && dart test
+        run: nix develop .#ci --command bash -c 'cd tool/gatuno_lints && dart pub get && dart test'

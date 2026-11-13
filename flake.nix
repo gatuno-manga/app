@@ -121,6 +121,13 @@
             ANDROID_SDK_ROOT = androidSdkRoot;
           };
 
+          # Lean shell for CI analyze/test: Flutter only (Dart ships with it). Nix evaluates
+          # `let` bindings lazily, so this does not touch androidSdk or the NDK
+          # import-from-derivation above.
+          devShells.ci = pkgs.mkShell {
+            packages = [ pkgs.flutter ];
+          };
+
           formatter = pkgs.nixfmt;
         }
       );
