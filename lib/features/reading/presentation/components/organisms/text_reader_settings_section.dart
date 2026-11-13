@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
-import '../molecules/reader_choice_row.dart';
+import '../molecules/reader_alignment_row.dart';
+import '../molecules/reader_font_family_row.dart';
+import '../molecules/reader_navigation_row.dart';
 import '../molecules/reader_stepper_row.dart';
+import 'reader_accessibility_sheet.dart';
 import 'reader_preferences_controls.dart';
 
 /// The text reader's rows of the settings sheet (Figma tab `Texto`): font
-/// family, font size, line spacing and alignment. Changes are functions of
+/// family, font size, line spacing and alignment, then a row that opens the
+/// accessibility sheet. Changes are functions of
 /// the current value, so rapid changes compose instead of overwriting.
 class TextReaderSettingsSection extends StatelessWidget {
   final TextReaderPreferences preferences;
@@ -37,21 +41,8 @@ class TextReaderSettingsSection extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        ReaderChoiceRow<ReaderFontFamily>(
-          icon: Icons.text_fields,
-          title: l10n.readingFontFamily,
-          subtitle: l10n.readingFontFamilyDesc,
+        ReaderFontFamilyRow(
           value: preferences.fontFamily,
-          options: [
-            ReaderChoice(ReaderFontFamily.serif, l10n.readingFontSerif),
-            ReaderChoice(ReaderFontFamily.sans, l10n.readingFontSans),
-            ReaderChoice(ReaderFontFamily.lexend, l10n.readingFontLexend),
-            ReaderChoice(ReaderFontFamily.atkinson, l10n.readingFontAtkinson),
-            ReaderChoice(
-              ReaderFontFamily.openDyslexic,
-              l10n.readingFontOpenDyslexic,
-            ),
-          ],
           onChanged: (family) =>
               onChanged((t) => t.copyWith(fontFamily: family)),
         ),
@@ -81,18 +72,16 @@ class TextReaderSettingsSection extends StatelessWidget {
           decrementTooltip: l10n.readingDecreaseLineHeight,
           incrementTooltip: l10n.readingIncreaseLineHeight,
         ),
-        ReaderChoiceRow<ReaderTextAlignment>(
-          icon: Icons.format_align_left,
-          title: l10n.readingAlignment,
-          subtitle: l10n.readingAlignmentDesc,
+        ReaderAlignmentRow(
           value: preferences.alignment,
-          options: [
-            ReaderChoice(ReaderTextAlignment.left, l10n.readingAlignLeft),
-            ReaderChoice(ReaderTextAlignment.center, l10n.readingAlignCenter),
-            ReaderChoice(ReaderTextAlignment.justify, l10n.readingAlignJustify),
-          ],
           onChanged: (alignment) =>
               onChanged((t) => t.copyWith(alignment: alignment)),
+        ),
+        ReaderNavigationRow(
+          icon: Icons.accessibility_new,
+          title: l10n.readingAccessibilityTitle,
+          subtitle: l10n.readingAccessibilityDesc,
+          onTap: () => ReaderAccessibilitySheet.show(context),
         ),
       ],
     );

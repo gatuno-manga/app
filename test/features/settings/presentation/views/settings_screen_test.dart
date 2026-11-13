@@ -5,6 +5,7 @@ import 'package:gatuno/core/theme/theme.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gatuno/features/reading/presentation/components/molecules/reader_dyslexia_preset_card.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
@@ -244,5 +245,28 @@ void main() {
     await tester.tap(find.text('Sepia'));
     await tester.pump();
     expect(readerPreferences.current.theme, ReaderTheme.sepia);
+  });
+
+  testWidgets('SettingsPage Reading section opens the accessibility sheet', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+
+    await tester.tap(find.text('Accessibility'));
+    await tester.pumpAndSettle();
+    expect(find.text('Dyslexia mode'), findsOneWidget);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byType(ReaderDyslexiaPresetCard),
+        matching: find.byType(Switch),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(readerPreferences.current.dyslexiaMode, isTrue);
+    expect(readerPreferences.current.theme, ReaderTheme.cream);
   });
 }

@@ -1849,6 +1849,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not verify it\'s you. Try again.'**
   String get appLockErrorFailed;
+
+  /// No description provided for @readingAccessibilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessibility'**
+  String get readingAccessibilityTitle;
+
+  /// No description provided for @readingAccessibilityDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Dyslexia mode, spacing, line width, ruler'**
+  String get readingAccessibilityDesc;
+
+  /// No description provided for @readingDyslexiaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dyslexia mode'**
+  String get readingDyslexiaTitle;
+
+  /// No description provided for @readingDyslexiaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies the legibility recommendations at once. You can still adjust each item below.'**
+  String get readingDyslexiaDesc;
+
+  /// No description provided for @readingChipFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font {name}'**
+  String readingChipFont(String name);
+
+  /// No description provided for @readingChipAlignment.
+  ///
+  /// In en, this message translates to:
+  /// **'Alignment: {name}'**
+  String readingChipAlignment(String name);
+
+  /// No description provided for @readingChipLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters +{percent}%'**
+  String readingChipLetters(String percent);
+
+  /// No description provided for @readingChipWords.
+  ///
+  /// In en, this message translates to:
+  /// **'Words +{percent}%'**
+  String readingChipWords(String percent);
+
+  /// No description provided for @readingChipLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {value}'**
+  String readingChipLine(double value);
+
+  /// No description provided for @readingChipWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'~{chars} characters'**
+  String readingChipWidth(int chars);
+
+  /// No description provided for @readingChipBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} background'**
+  String readingChipBackground(String name);
+
+  /// No description provided for @readingChipNoItalics.
+  ///
+  /// In en, this message translates to:
+  /// **'No italics'**
+  String get readingChipNoItalics;
+
+  /// No description provided for @readingChipRuler.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading ruler'**
+  String get readingChipRuler;
+
+  /// No description provided for @readingLetterSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Letter spacing (+{percent}%)'**
+  String readingLetterSpacing(int percent);
+
+  /// No description provided for @readingLetterSpacingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Separates the letters'**
+  String get readingLetterSpacingDesc;
+
+  /// No description provided for @readingDecreaseLetterSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease letter spacing'**
+  String get readingDecreaseLetterSpacing;
+
+  /// No description provided for @readingIncreaseLetterSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase letter spacing'**
+  String get readingIncreaseLetterSpacing;
+
+  /// No description provided for @readingWordSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Word spacing (+{percent}%)'**
+  String readingWordSpacing(int percent);
+
+  /// No description provided for @readingWordSpacingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Separates the words'**
+  String get readingWordSpacingDesc;
+
+  /// No description provided for @readingDecreaseWordSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease word spacing'**
+  String get readingDecreaseWordSpacing;
+
+  /// No description provided for @readingIncreaseWordSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase word spacing'**
+  String get readingIncreaseWordSpacing;
+
+  /// No description provided for @readingLineWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Line width ({chars} characters)'**
+  String readingLineWidth(int chars);
+
+  /// No description provided for @readingLineWidthOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Line width (no limit)'**
+  String get readingLineWidthOff;
+
+  /// No description provided for @readingLineWidthDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps lines short'**
+  String get readingLineWidthDesc;
+
+  /// No description provided for @readingDecreaseLineWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease line width'**
+  String get readingDecreaseLineWidth;
+
+  /// No description provided for @readingIncreaseLineWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase line width'**
+  String get readingIncreaseLineWidth;
+
+  /// No description provided for @readingSuppressItalics.
+  ///
+  /// In en, this message translates to:
+  /// **'No italics'**
+  String get readingSuppressItalics;
+
+  /// No description provided for @readingSuppressItalicsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows emphasised text as regular'**
+  String get readingSuppressItalicsDesc;
+
+  /// No description provided for @readingRulerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading ruler'**
+  String get readingRulerTitle;
+
+  /// No description provided for @readingRulerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights the current line'**
+  String get readingRulerDesc;
+
+  /// No description provided for @readingRulerSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading ruler. Swipe up or down to move it.'**
+  String get readingRulerSemantics;
 }
 
 class _AppLocalizationsDelegate

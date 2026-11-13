@@ -18,7 +18,14 @@ typedef ReaderSettingsSections =
 class ReaderPreferencesControls extends StatelessWidget {
   final ReaderSettingsSections sections;
 
-  const ReaderPreferencesControls({super.key, required this.sections});
+  /// Rows shown before the theme picker (the accessibility sheet's preset).
+  final ReaderSettingsSections? leading;
+
+  const ReaderPreferencesControls({
+    super.key,
+    required this.sections,
+    this.leading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +38,7 @@ class ReaderPreferencesControls extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ...?leading?.call(preferences),
             ReaderThemePicker(
               selected: preferences.theme,
               onSelected: (theme) =>

@@ -966,4 +966,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockErrorFailed => 'Could not verify it\'s you. Try again.';
+
+  @override
+  String get readingAccessibilityTitle => 'Accessibility';
+
+  @override
+  String get readingAccessibilityDesc =>
+      'Dyslexia mode, spacing, line width, ruler';
+
+  @override
+  String get readingDyslexiaTitle => 'Dyslexia mode';
+
+  @override
+  String get readingDyslexiaDesc =>
+      'Applies the legibility recommendations at once. You can still adjust each item below.';
+
+  @override
+  String readingChipFont(String name) {
+    return 'Font $name';
+  }
+
+  @override
+  String readingChipAlignment(String name) {
+    return 'Alignment: $name';
+  }
+
+  @override
+  String readingChipLetters(String percent) {
+    return 'Letters +$percent%';
+  }
+
+  @override
+  String readingChipWords(String percent) {
+    return 'Words +$percent%';
+  }
+
+  @override
+  String readingChipLine(double value) {
+    final intl.NumberFormat valueNumberFormat =
+        intl.NumberFormat.decimalPatternDigits(
+          locale: localeName,
+          decimalDigits: 1,
+        );
+    final String valueString = valueNumberFormat.format(value);
+
+    return 'Line $valueString';
+  }
+
+  @override
+  String readingChipWidth(int chars) {
+    return '~$chars characters';
+  }
+
+  @override
+  String readingChipBackground(String name) {
+    return '$name background';
+  }
+
+  @override
+  String get readingChipNoItalics => 'No italics';
+
+  @override
+  String get readingChipRuler => 'Reading ruler';
+
+  @override
+  String readingLetterSpacing(int percent) {
+    return 'Letter spacing (+$percent%)';
+  }
+
+  @override
+  String get readingLetterSpacingDesc => 'Separates the letters';
+
+  @override
+  String get readingDecreaseLetterSpacing => 'Decrease letter spacing';
+
+  @override
+  String get readingIncreaseLetterSpacing => 'Increase letter spacing';
+
+  @override
+  String readingWordSpacing(int percent) {
+    return 'Word spacing (+$percent%)';
+  }
+
+  @override
+  String get readingWordSpacingDesc => 'Separates the words';
+
+  @override
+  String get readingDecreaseWordSpacing => 'Decrease word spacing';
+
+  @override
+  String get readingIncreaseWordSpacing => 'Increase word spacing';
+
+  @override
+  String readingLineWidth(int chars) {
+    return 'Line width ($chars characters)';
+  }
+
+  @override
+  String get readingLineWidthOff => 'Line width (no limit)';
+
+  @override
+  String get readingLineWidthDesc => 'Keeps lines short';
+
+  @override
+  String get readingDecreaseLineWidth => 'Decrease line width';
+
+  @override
+  String get readingIncreaseLineWidth => 'Increase line width';
+
+  @override
+  String get readingSuppressItalics => 'No italics';
+
+  @override
+  String get readingSuppressItalicsDesc => 'Shows emphasised text as regular';
+
+  @override
+  String get readingRulerTitle => 'Reading ruler';
+
+  @override
+  String get readingRulerDesc => 'Highlights the current line';
+
+  @override
+  String get readingRulerSemantics =>
+      'Reading ruler. Swipe up or down to move it.';
 }

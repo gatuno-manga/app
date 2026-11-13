@@ -369,5 +369,110 @@
   "appLockErrorNoBiometricHardware": "No fingerprint or face sensor is available on this device.",
   "appLockErrorSave": "Could not save the setting. Try again.",
   "appLockErrorUnavailable": "Device authentication is not available right now. Try again in a moment.",
-  "appLockErrorFailed": "Could not verify it's you. Try again."
+  "appLockErrorFailed": "Could not verify it's you. Try again.",
+  "readingAccessibilityTitle": "Accessibility",
+  "readingAccessibilityDesc": "Dyslexia mode, spacing, line width, ruler",
+  "readingDyslexiaTitle": "Dyslexia mode",
+  "readingDyslexiaDesc": "Applies the legibility recommendations at once. You can still adjust each item below.",
+  "readingChipFont": "Font {name}",
+  "@readingChipFont": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipAlignment": "Alignment: {name}",
+  "@readingChipAlignment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipLetters": "Letters +{percent}%",
+  "@readingChipLetters": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipWords": "Words +{percent}%",
+  "@readingChipWords": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipLine": "Line {value}",
+  "@readingChipLine": {
+    "placeholders": {
+      "value": {
+        "type": "double",
+        "format": "decimalPatternDigits",
+        "optionalParameters": {
+          "decimalDigits": 1
+        }
+      }
+    }
+  },
+  "readingChipWidth": "~{chars} characters",
+  "@readingChipWidth": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "readingChipBackground": "{name} background",
+  "@readingChipBackground": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "readingChipNoItalics": "No italics",
+  "readingChipRuler": "Reading ruler",
+  "readingLetterSpacing": "Letter spacing (+{percent}%)",
+  "@readingLetterSpacing": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "readingLetterSpacingDesc": "Separates the letters",
+  "readingDecreaseLetterSpacing": "Decrease letter spacing",
+  "readingIncreaseLetterSpacing": "Increase letter spacing",
+  "readingWordSpacing": "Word spacing (+{percent}%)",
+  "@readingWordSpacing": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "readingWordSpacingDesc": "Separates the words",
+  "readingDecreaseWordSpacing": "Decrease word spacing",
+  "readingIncreaseWordSpacing": "Increase word spacing",
+  "readingLineWidth": "Line width ({chars} characters)",
+  "@readingLineWidth": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "readingLineWidthOff": "Line width (no limit)",
+  "readingLineWidthDesc": "Keeps lines short",
+  "readingDecreaseLineWidth": "Decrease line width",
+  "readingIncreaseLineWidth": "Increase line width",
+  "readingSuppressItalics": "No italics",
+  "readingSuppressItalicsDesc": "Shows emphasised text as regular",
+  "readingRulerTitle": "Reading ruler",
+  "readingRulerDesc": "Highlights the current line",
+  "readingRulerSemantics": "Reading ruler. Swipe up or down to move it."
 }

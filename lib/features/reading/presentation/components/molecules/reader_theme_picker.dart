@@ -20,7 +20,8 @@ class ReaderThemePicker extends StatelessWidget {
 
   static const double _gap = 8;
 
-  static String _labelOf(AppLocalizations l10n, ReaderTheme theme) =>
+  /// Label of [theme] in the reader theme picker and the preset summary.
+  static String labelOf(AppLocalizations l10n, ReaderTheme theme) =>
       switch (theme) {
         ReaderTheme.standard => l10n.readingThemeStandard,
         ReaderTheme.sepia => l10n.readingThemeSepia,
@@ -52,7 +53,7 @@ class ReaderThemePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final themes = ReaderTheme.values;
-    final labels = {for (final t in themes) t: _labelOf(l10n, t)};
+    final labels = {for (final t in themes) t: labelOf(l10n, t)};
     return Semantics(
       container: true,
       label: l10n.readingThemeTitle,
