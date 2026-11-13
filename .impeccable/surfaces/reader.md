@@ -15,6 +15,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `882:910` Leitor · Texto · Modo dislexia (Creme)
 - `882:959` Leitor · Ajustes · Acessibilidade (folha)
 - `894:1837` Leitor · Imagem · menu de contexto (toque longo)
+- `983:3725` section Leitor · Documento (PDF e EPUB) · Ajustes (#72): six frames, see "Document reader settings (issue #72)"
 
 ## Figma components used
 - `Leitor/Barra superior` → `.../molecules/reading_top_bar.dart`
@@ -78,27 +79,31 @@ Accessibility for the implementation: the stepper buttons (32 dp) and switches i
 
 ## Document reader settings (issue #72)
 
-Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#72)` (id `983:3725`, inside "2 · Livro e Leitor"), built from the same sheet pattern as `874:694` / `979:3185` (#70). The sheet is one pattern with sections per format; the reader theme is applied through the `Gatuno / Leitura (temas)` mode of each frame.
+Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#72)` (id `983:3725`, inside "2 · Livro e Leitor"), built from the same sheet pattern as `874:694` / `882:959` (as #70). The sheet is one pattern with sections per format; the reader theme is applied through the `Gatuno / Leitura (temas)` mode of each frame.
 - `983:3726` Leitor · PDF · Ajustes (padrão): theme Padrão, layout Contínuo, direction Vertical, zoom fit Largura
 - `983:3920` Leitor · PDF · Ajustes (Sépia, página única, zoom 125%): zoom row visible because fit is Personalizado
 - `983:4138` Leitor · PDF · Ajustes (Alto contraste, zoom mínimo 50%): minus disabled
 - `983:4356` Leitor · EPUB · Ajustes (padrão): Serifa 19 dp, 180%, Esquerda, margens Médias, Paginado
-- `983:4598` Leitor · EPUB · Ajustes (extremos: Sépia): 28 dp and 220% (plus disabled), Justificado, margens Largas, Contínuo
-- `983:4846` Leitor · EPUB · Ajustes (Alto contraste, mínimos): 14 dp and 120% (minus disabled), Centro, margens Estreitas
+- `983:4598` Leitor · EPUB · Ajustes (extremos: Sépia): Sem serifa, 28 dp and 220% (plus disabled), Justificado, margens Largas, Contínuo
+- `983:4846` Leitor · EPUB · Ajustes (Alto contraste, mínimos): Lexend, 14 dp and 120% (minus disabled), Centro, margens Estreitas
 
 Decisions:
 - PDF options: page layout (Contínuo, Página única, Duas páginas; the last only at 600 dp or wider, hidden on phones), scroll direction (Vertical, Horizontal), zoom fit (Largura, Página, Personalizado), and a zoom stepper (50% to 300%, step 25%) shown only for Personalizado. The reader theme is a colour filter over the rendered page (Padrão = no filter).
-- EPUB options: reader theme, typography (font, size 14-28 dp, line spacing 120-220%, alignment), margins (Estreitas, Médias, Largas) and pagination (Paginado, Contínuo).
+- EPUB options: reader theme, typography (font from the text reader list: Serifa, Sem serifa, Lexend, Atkinson, OpenDyslexic; size 14-28 dp; line spacing 120-220%; alignment), margins (Estreitas, Médias, Largas) and pagination (Paginado, Contínuo).
 - Document preferences are separate from the text reader preferences: the EPUB has its own theme and typography values, so the implementation (#73) must not reuse `TextReaderPreferences` state as is.
 - Components reused: `Leitor/Item de ajuste` (Passos, Seletor), `Leitor/Tema de leitura`, `Leitor/Botão ícone`. No new tokens; the theme comes from the `leitura/*` tokens.
 - Non-goals: PDF crop margins and an EPUB publisher-styles toggle.
 
-Dependencies on #19 (the PDF and EPUB reader, not built yet): every option here acts on the reader, so none can be applied before #19 exists. The sheet, its preferences model and persistence can be built first.
+Dependencies on #19 (the PDF and EPUB reader; `document_reader.dart` is still a placeholder): every option here acts on the reader, so none can be applied before #19 exists. The sheet, its preferences model and persistence can be built first.
 
 Gaps:
 - Selectors have no open (dropdown) state in Figma; the implementation can use a bottom sheet or menu, as for the other selector rows.
 - A disabled stepper button is drawn with 38% opacity (same as #70); there is no disabled variant.
-- The sheet is 657 dp tall with six rows (EPUB); it should scroll once it exceeds 85% of the screen height.
+- The EPUB sheet is 657-669 dp tall (about 78% of an 844 dp screen) and hides most of the page while open; no peek or drag mode is designed. It should scroll once it exceeds 85% of the screen height (small screens, large text scale); no frame shows that case.
+- No frame for 600 dp or wider: the "Duas páginas" layout and the sheet on tablets are not designed. On phones the layout row subtitle lists only continuous and single page. Tablet breakpoints are not defined in the design system yet.
+- Rows grow from 64 to 76 dp when a subtitle wraps and selector chips hug their content, so left edges are ragged. Implementation rule: keep the row at 64 dp minimum, wrap the subtitle, and ellipsize a long selector value at a maximum chip width, also at text scale 1.5 to 2.0.
+- The previews show size, alignment and margins only; font family, layout and zoom changes are described in the notes under each frame. The PDF page sample uses no tokens, and the "Padrão" swatch is the theme sample, not the page. Creme is not selected in any frame.
+- The selected-theme label (`--primary-color` on the light sheet, about 3.7:1) is inherited from #70 and should be fixed at pattern level.
 - Page theme as a colour filter is a proposal; the PDF renderer in #19 decides whether it is feasible.
 
 Accessibility for the implementation: stepper buttons and selectors are below 48 dp in the Figma components, so code must pad the hit area to at least 48 dp. Give each stepper button a separate label (decrease and increase) with the current value in the row title, and expose each selector with its row title as the label.
