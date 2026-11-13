@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/theme/app_theme_choice.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
+import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
+import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
 import 'package:gatuno/features/settings/presentation/views/settings_screen.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/presentation/components/molecules/settings_profile_card.dart';
@@ -16,6 +21,7 @@ import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
+
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
 import '../../../app_lock/helpers/app_lock_mocks.dart';
@@ -27,10 +33,22 @@ void main() {
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
   late SettingsViewModel viewModel;
+  late ReaderPreferencesService readerPreferences;
+
+  Widget settingsPage() => MultiProvider(
+    providers: [
+      Provider<SettingsViewModel>.value(value: viewModel),
+      Provider<ReaderPreferencesService>.value(value: readerPreferences),
+    ],
+    child: const SettingsPage(),
+  );
 
   setUpAll(() => registerFallbackValue(AppThemeChoice.system));
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    readerPreferences = ReaderPreferencesService(ReaderPreferencesStorage());
+    addTearDown(readerPreferences.dispose);
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
@@ -72,12 +90,7 @@ void main() {
   testWidgets('SettingsPage shows the App lock entry in General', (
     tester,
   ) async {
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     expect(find.byType(AppLockSettingsTile), findsOneWidget);
     expect(find.text('App lock'), findsOneWidget);
@@ -87,12 +100,7 @@ void main() {
     tester.view.physicalSize = const Size(800, 3000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     expect(find.text('Settings'), findsOneWidget);
     expect(find.byType(SettingsProfileCard), findsOneWidget);
@@ -106,12 +114,7 @@ void main() {
       () => mockSettingsService.setSensitiveContentEnabled(any()),
     ).thenAnswer((_) async {});
 
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     await tester.tap(find.byType(Switch));
     await tester.pump();
@@ -130,12 +133,7 @@ void main() {
     ).thenAnswer((_) async => true);
     when(() => mockSettingsService.setApiUrl(any())).thenAnswer((_) async {});
 
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     await tester.enterText(find.byType(TextField).first, 'https://new-api.com');
     await tester.tap(find.text('Connect'));
@@ -161,12 +159,7 @@ void main() {
       () => mockSettingsService.setThemeChoice(any()),
     ).thenAnswer((_) async {});
 
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
 
     await tester.tap(find.byKey(const ValueKey('theme-swatch-dracula')));
     await tester.pump();
@@ -200,12 +193,7 @@ void main() {
       userService: mockUserService,
     );
 
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
     await tester.pump();
 
     expect(find.text('maria@example.com'), findsOneWidget);
@@ -228,17 +216,33 @@ void main() {
       userService: mockUserService,
     );
 
-    await tester.pumpApp(
-      Provider<SettingsViewModel>.value(
-        value: viewModel,
-        child: const SettingsPage(),
-      ),
-    );
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
     await tester.pump();
 
     // Signed in, profile not delivered yet: localized placeholder, never the
     // raw guest model.
     expect(find.text('Guest'), findsOneWidget);
     expect(find.text('guest'), findsNothing);
+  });
+
+  testWidgets('SettingsPage Reading section changes the shared reader '
+      'preferences', (tester) async {
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+
+    expect(find.text('Reading'), findsOneWidget);
+    expect(find.text('Reading theme'), findsOneWidget);
+    expect(find.text('Font size (19px)'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Increase font size'));
+    await tester.pump();
+    expect(readerPreferences.current.text.fontSize, 20);
+    expect(find.text('Font size (20px)'), findsOneWidget);
+
+    await tester.tap(find.text('Sepia'));
+    await tester.pump();
+    expect(readerPreferences.current.theme, ReaderTheme.sepia);
   });
 }

@@ -108,6 +108,7 @@
   "settingsThemeDracula": "Dracula",
   "settingsThemeSlate": "Ardósia",
   "settingsGeneralSection": "Geral",
+  "settingsReadingSection": "Leitura",
   "settingsApiSection": "Configuração da API",
   "settingsApiUrlLabel": "URL Base da API",
   "settingsApiUrlHint": "http://sua-api.com/api",

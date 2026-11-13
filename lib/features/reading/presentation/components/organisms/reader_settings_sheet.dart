@@ -4,14 +4,9 @@ import 'package:provider/provider.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../shared/components/atoms/app_sheet_handle.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
-import '../../../domain/entities/reader_preferences.dart';
 import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../../theme/reader_preferences_builder.dart';
-import '../molecules/reader_theme_picker.dart';
-
-/// Builds a reader's own rows of the settings sheet for [preferences].
-typedef ReaderSettingsSections =
-    List<Widget> Function(ReaderPreferences preferences);
+import 'reader_preferences_controls.dart';
 
 /// Bottom sheet of the reader settings (Figma `Leitor · Ajustes`): the
 /// shared theme picker followed by each reader's own [sections]. Changes
@@ -44,12 +39,12 @@ class ReaderSettingsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final service = context.read<ReaderPreferencesService>();
     final media = MediaQuery.of(context);
     final maxHeight = media.size.height * 0.85;
     final bottomInset = media.viewPadding.bottom;
     return ReaderPreferencesBuilder(
-      builder: (context, preferences) => ColoredBox(
+      // Only for the theme scope; the controls follow the service themselves.
+      builder: (context, _) => ColoredBox(
         // Painted here, not by the route, so it follows live changes.
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         child: ConstrainedBox(
@@ -75,14 +70,7 @@ class ReaderSettingsSheet extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          ReaderThemePicker(
-                            selected: preferences.theme,
-                            onSelected: (theme) => service.update(
-                              (current) => current.copyWith(theme: theme),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...sections(preferences),
+                          ReaderPreferencesControls(sections: sections),
                         ],
                       ),
                     ),

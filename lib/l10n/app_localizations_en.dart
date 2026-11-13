@@ -321,6 +321,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsGeneralSection => 'General';
 
   @override
+  String get settingsReadingSection => 'Reading';
+
+  @override
   String get settingsApiSection => 'API Configuration';
 
   @override
