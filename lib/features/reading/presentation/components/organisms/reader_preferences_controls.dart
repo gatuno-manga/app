@@ -14,24 +14,15 @@ typedef ReaderSettingsSections =
 /// [sections]. Follows and changes the [ReaderPreferencesService] in the
 /// tree, without applying the reader theme to its surroundings. Add new
 /// shared rows here so both entry points get them. The sheet passes only
-/// the open reader's sections; Settings passes every reader's.
+/// the open reader's sections; Settings passes the readers' sections.
 class ReaderPreferencesControls extends StatelessWidget {
   final ReaderSettingsSections sections;
 
-  /// Visible caption above the theme picker, for screens where nothing else
-  /// says what the swatches change.
-  final String? themeTitle;
-
-  const ReaderPreferencesControls({
-    super.key,
-    required this.sections,
-    this.themeTitle,
-  });
+  const ReaderPreferencesControls({super.key, required this.sections});
 
   @override
   Widget build(BuildContext context) {
     final service = context.read<ReaderPreferencesService>();
-    final title = themeTitle;
     return StreamBuilder<ReaderPreferences>(
       stream: service.stream,
       initialData: service.current,
@@ -40,16 +31,6 @@ class ReaderPreferencesControls extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
             ReaderThemePicker(
               selected: preferences.theme,
               onSelected: (theme) =>

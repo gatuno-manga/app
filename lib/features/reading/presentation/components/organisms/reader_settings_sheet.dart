@@ -43,7 +43,8 @@ class ReaderSettingsSheet extends StatelessWidget {
     final maxHeight = media.size.height * 0.85;
     final bottomInset = media.viewPadding.bottom;
     return ReaderPreferencesBuilder(
-      builder: (context, preferences) => ColoredBox(
+      // Only for the theme scope; the controls follow the service themselves.
+      builder: (context, _) => ColoredBox(
         // Painted here, not by the route, so it follows live changes.
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         child: ConstrainedBox(

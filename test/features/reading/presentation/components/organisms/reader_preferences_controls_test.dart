@@ -23,7 +23,6 @@ void main() {
 
   Future<void> pump(
     WidgetTester tester, {
-    String? themeTitle,
     TextScaler textScaler = TextScaler.noScaling,
   }) => tester.pumpApp(
     MediaQuery(
@@ -34,7 +33,6 @@ void main() {
           body: SingleChildScrollView(
             child: ReaderPreferencesControls(
               sections: TextReaderSettingsSection.sectionsFor(service),
-              themeTitle: themeTitle,
             ),
           ),
         ),
@@ -79,14 +77,6 @@ void main() {
     await service.update((p) => p.copyWith(text: p.text.stepFontSize(1)));
     await tester.pump();
     expect(find.text('Font size (20px)'), findsOneWidget);
-  });
-
-  testWidgets('shows the theme caption only when given', (tester) async {
-    await pump(tester);
-    expect(find.text('Reading theme'), findsNothing);
-
-    await pump(tester, themeTitle: 'Reading theme');
-    expect(find.text('Reading theme'), findsOneWidget);
   });
 
   testWidgets('lays out at 2x text scale without overflow', (tester) async {
