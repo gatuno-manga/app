@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/connectivity/connectivity_service.dart';
+import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 
 import 'package:gatuno/features/books/domain/entities/book.dart';
@@ -24,11 +26,62 @@ class MockSettingsService extends Mock implements SettingsService {}
 class MockViewPreferencesRepository extends Mock
     implements BooksViewPreferencesRepository {}
 
+/// Connectivity the test drives: [goOffline] / [goOnline] change the status,
+/// [reconnect] fires `onReconnected`, and [checkNow] applies [probeResult].
+class FakeConnectivityService implements ConnectivityService {
+  final _statuses = StreamController<ConnectivityStatus>.broadcast();
+  final _reconnects = StreamController<void>.broadcast();
+  ConnectivityStatus _status = ConnectivityStatus.online;
+  ConnectivityStatus probeResult = ConnectivityStatus.offline;
+  int checks = 0;
+
+  @override
+  ConnectivityStatus get status => _status;
+
+  @override
+  Stream<ConnectivityStatus> get statusStream => _statuses.stream;
+
+  @override
+  Stream<void> get onReconnected => _reconnects.stream;
+
+  void _set(ConnectivityStatus value) {
+    _status = value;
+    _statuses.add(value);
+  }
+
+  void goOffline() => _set(ConnectivityStatus.offline);
+
+  void goOnline() => _set(ConnectivityStatus.online);
+
+  void reconnect() {
+    goOnline();
+    _reconnects.add(null);
+  }
+
+  @override
+  void reportReachable() => _set(ConnectivityStatus.online);
+
+  @override
+  void reportUnreachable() => _set(ConnectivityStatus.offline);
+
+  @override
+  Future<void> checkNow() async {
+    checks++;
+    _set(probeResult);
+  }
+
+  Future<void> close() async {
+    await _statuses.close();
+    await _reconnects.close();
+  }
+}
+
 void main() {
   late BooksViewModel viewModel;
   late MockBooksRepository mockRepository;
   late MockSettingsService mockSettingsService;
   late MockViewPreferencesRepository mockPrefsRepository;
+  late FakeConnectivityService connectivity;
 
   setUpAll(() {
     registerFallbackValue(const BookPageOptions());
@@ -43,11 +96,18 @@ void main() {
       () => mockPrefsRepository.current,
     ).thenReturn(const BooksViewPreferences());
     when(() => mockPrefsRepository.save(any())).thenAnswer((_) async {});
+    connectivity = FakeConnectivityService();
     viewModel = BooksViewModel(
       repository: mockRepository,
       settingsService: mockSettingsService,
       viewPreferencesRepository: mockPrefsRepository,
+      connectivity: connectivity,
     );
+  });
+
+  tearDown(() async {
+    viewModel.dispose();
+    await connectivity.close();
   });
 
   BookList page({
@@ -248,10 +308,12 @@ void main() {
       );
       when(() => mockPrefsRepository.current).thenReturn(stored);
 
+      viewModel.dispose();
       viewModel = BooksViewModel(
         repository: mockRepository,
         settingsService: mockSettingsService,
         viewPreferencesRepository: mockPrefsRepository,
+        connectivity: connectivity,
       );
 
       expect(viewModel.preferences, stored);
@@ -613,6 +675,274 @@ void main() {
       await append;
 
       expect(viewModel.isLoadingMore, isFalse);
+    });
+  });
+
+  group('BooksViewModel offline', () {
+    setUp(() {
+      when(() => mockSettingsService.sensitiveContentEnabled).thenReturn(true);
+    });
+
+    /// Answers every page out of [totalPages]; while [connectivity] is
+    /// offline the answer stands for the cache, as the read-through
+    /// repository does.
+    void stubPages({int totalPages = 3}) {
+      when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
+        final o = inv.positionalArguments.first as BookPageOptions;
+        final prefix = connectivity.isOffline ? 'cache' : 'server';
+        return page(
+          number: o.page.value,
+          totalPages: totalPages,
+          ids: ['$prefix-${o.page.value}'],
+        );
+      });
+    }
+
+    List<int> requestedPages() => [
+      for (final call in verify(
+        () => mockRepository.getBooks(captureAny()),
+      ).captured)
+        (call as BookPageOptions).page.value,
+    ];
+
+    BooksViewModel inPagesMode() {
+      when(() => mockPrefsRepository.current).thenReturn(
+        const BooksViewPreferences(navigation: BooksNavigationMode.pages),
+      );
+      viewModel.dispose();
+      return viewModel = BooksViewModel(
+        repository: mockRepository,
+        settingsService: mockSettingsService,
+        viewPreferencesRepository: mockPrefsRepository,
+        connectivity: connectivity,
+      );
+    }
+
+    test('marks a list fetched online as coming from the server', () async {
+      stubPages();
+      await viewModel.fetchBooks();
+
+      expect(viewModel.state.source, BooksListSource.server);
+      expect(viewModel.isCacheList, isFalse);
+    });
+
+    test('marks a list answered while offline as the cache', () async {
+      stubPages();
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+
+      expect(viewModel.state.source, BooksListSource.cache);
+      expect(viewModel.isCacheList, isTrue);
+      expect(viewModel.isOffline, isTrue);
+    });
+
+    test('a request that falls back to the cache is a cache list', () async {
+      when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
+        connectivity.reportUnreachable();
+        return page(number: 1, totalPages: 1, ids: ['cache-1']);
+      });
+      await viewModel.fetchBooks();
+
+      expect(viewModel.state.source, BooksListSource.cache);
+    });
+
+    test('going offline keeps the list and does not fetch', () async {
+      stubPages();
+      await viewModel.fetchBooks();
+      clearInteractions(mockRepository);
+
+      connectivity.goOffline();
+      await flush();
+
+      verifyNever(() => mockRepository.getBooks(any()));
+      expect(viewModel.bookList!.data.single.id.value, 'server-1');
+      expect(viewModel.isOffline, isTrue);
+      expect(viewModel.isPagingPaused, isTrue);
+    });
+
+    test('a server list pauses loadMore while offline', () async {
+      stubPages();
+      await viewModel.fetchBooks();
+      clearInteractions(mockRepository);
+      connectivity.goOffline();
+      await flush();
+
+      await viewModel.loadMore();
+
+      verifyNever(() => mockRepository.getBooks(any()));
+      expect(viewModel.options.page.value, 1);
+    });
+
+    test('a server list pauses page changes while offline', () async {
+      inPagesMode();
+      stubPages();
+      await viewModel.fetchBooks();
+      clearInteractions(mockRepository);
+      connectivity.goOffline();
+      await flush();
+
+      viewModel.setPage(2);
+      await flush();
+
+      verifyNever(() => mockRepository.getBooks(any()));
+      expect(viewModel.options.page.value, 1);
+    });
+
+    test('a cache list pages against the cache', () async {
+      stubPages();
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+
+      await viewModel.loadMore();
+
+      expect(viewModel.bookList!.data.map((b) => b.id.value), [
+        'cache-1',
+        'cache-2',
+      ]);
+      expect(viewModel.isPagingPaused, isFalse);
+    });
+
+    test('an offline refresh probes the server, then loads page 1', () async {
+      inPagesMode();
+      stubPages();
+      await viewModel.fetchBooks();
+      viewModel.setPage(2);
+      await flush();
+      connectivity.goOffline();
+      await flush();
+      clearInteractions(mockRepository);
+
+      final refreshing = viewModel.refresh();
+      expect(viewModel.isRefreshing, isTrue);
+      await refreshing;
+
+      expect(connectivity.checks, 1);
+      expect(requestedPages(), [1]);
+      expect(viewModel.isRefreshing, isFalse);
+      expect(viewModel.state.source, BooksListSource.cache);
+      expect(viewModel.bookList!.data.single.id.value, 'cache-1');
+    });
+
+    test(
+      'an offline refresh gets server data when the probe succeeds',
+      () async {
+        stubPages();
+        connectivity.goOffline();
+        await flush();
+        await viewModel.fetchBooks();
+        connectivity.probeResult = ConnectivityStatus.online;
+
+        await viewModel.refresh();
+
+        expect(viewModel.state.source, BooksListSource.server);
+        expect(viewModel.isOffline, isFalse);
+        expect(viewModel.bookList!.data.single.id.value, 'server-1');
+      },
+    );
+
+    test('an online refresh does not probe', () async {
+      stubPages();
+      await viewModel.refresh();
+
+      expect(connectivity.checks, 0);
+      expect(viewModel.state.source, BooksListSource.server);
+    });
+
+    test('OfflineException shows the offline miss, not an error', () async {
+      when(() => mockRepository.getBooks(any())).thenThrow(OfflineException());
+      connectivity.goOffline();
+      await flush();
+
+      await viewModel.fetchBooks();
+
+      expect(viewModel.isOfflineMiss, isTrue);
+      expect(viewModel.error, isNull);
+      expect(viewModel.bookList, isNull);
+    });
+
+    test('reconnecting reloads page 1 after an offline miss', () async {
+      when(() => mockRepository.getBooks(any())).thenThrow(OfflineException());
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+      stubPages();
+      clearInteractions(mockRepository);
+
+      connectivity.reconnect();
+      await flush();
+      await flush();
+
+      expect(requestedPages(), [1]);
+      expect(viewModel.isOfflineMiss, isFalse);
+      expect(viewModel.state.source, BooksListSource.server);
+    });
+
+    test('reconnecting reloads a cache list from page 1', () async {
+      stubPages();
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+      await viewModel.loadMore();
+      clearInteractions(mockRepository);
+
+      connectivity.reconnect();
+      await flush();
+      await flush();
+
+      expect(requestedPages(), [1]);
+      expect(viewModel.bookList!.data.single.id.value, 'server-1');
+    });
+
+    test('reconnecting keeps a server list', () async {
+      stubPages();
+      await viewModel.fetchBooks();
+      await viewModel.loadMore();
+      connectivity.goOffline();
+      await flush();
+      clearInteractions(mockRepository);
+
+      connectivity.reconnect();
+      await flush();
+
+      verifyNever(() => mockRepository.getBooks(any()));
+      expect(viewModel.bookList!.data, hasLength(2));
+      expect(viewModel.isPagingPaused, isFalse);
+    });
+
+    test('picker options are requested again after going offline and '
+        'after reconnecting', () async {
+      when(() => mockRepository.getTags()).thenAnswer(
+        (_) async => [const Tag(id: TagId('t'), name: TagName('T'))],
+      );
+      await viewModel.loadTagOptions();
+      await viewModel.loadTagOptions();
+      verify(() => mockRepository.getTags()).called(1);
+
+      connectivity.goOffline();
+      await flush();
+      await viewModel.loadTagOptions();
+      verify(() => mockRepository.getTags()).called(1);
+
+      connectivity.reconnect();
+      await flush();
+      await viewModel.loadTagOptions();
+      verify(() => mockRepository.getTags()).called(1);
+    });
+
+    test('dispose cancels the connectivity subscriptions', () async {
+      stubPages();
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+      clearInteractions(mockRepository);
+      viewModel.dispose();
+
+      connectivity.reconnect();
+      await flush();
+
+      verifyNever(() => mockRepository.getBooks(any()));
     });
   });
 }

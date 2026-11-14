@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../../core/connectivity/connectivity_service.dart';
 import '../../core/database/offline_cache_database.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/offline/read_through.dart';
@@ -38,6 +39,7 @@ Future<void> initBooksInjection(GetIt sl) async {
       repository: sl<BooksRepository>(),
       settingsService: sl<SettingsService>(),
       viewPreferencesRepository: sl<BooksViewPreferencesRepository>(),
+      connectivity: sl<ConnectivityService>(),
     ),
   );
 

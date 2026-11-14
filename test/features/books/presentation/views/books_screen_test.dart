@@ -12,7 +12,9 @@ import 'package:gatuno/features/books/presentation/components/organisms/books_vi
 import 'package:gatuno/features/books/presentation/components/molecules/books_view_mode_selector.dart';
 import 'package:gatuno/features/books/presentation/views/books_screen.dart';
 import 'package:gatuno/shared/components/atoms/app_load_more_footer.dart';
+import 'package:gatuno/shared/components/molecules/app_offline_empty_view.dart';
 import 'package:gatuno/shared/components/molecules/pagination.dart';
+import 'package:gatuno/features/books/presentation/components/molecules/books_offline_notice.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../helpers/pump_app.dart';
@@ -47,6 +49,12 @@ void main() {
     ).thenReturn(const BooksViewPreferences());
     when(() => mockViewModel.hasMore).thenReturn(false);
     when(() => mockViewModel.isLoadingMore).thenReturn(false);
+    when(() => mockViewModel.isOffline).thenReturn(false);
+    when(() => mockViewModel.isCacheList).thenReturn(false);
+    when(() => mockViewModel.isPagingPaused).thenReturn(false);
+    when(() => mockViewModel.isOfflineMiss).thenReturn(false);
+    when(() => mockViewModel.isRefreshing).thenReturn(false);
+    when(() => mockViewModel.refresh()).thenAnswer((_) async {});
     when(() => mockViewModel.loadMore()).thenAnswer((_) async {});
     const options = BookPageOptions();
     when(() => mockViewModel.options).thenReturn(options);
@@ -155,6 +163,11 @@ void main() {
     when(() => mockViewModel.hasMore).thenReturn(state.hasMore);
     when(() => mockViewModel.isLoadingMore).thenReturn(state.isLoadingMore);
     when(() => mockViewModel.options).thenReturn(state.options);
+    when(() => mockViewModel.isOffline).thenReturn(state.isOffline);
+    when(() => mockViewModel.isCacheList).thenReturn(state.isCacheList);
+    when(() => mockViewModel.isPagingPaused).thenReturn(state.isPagingPaused);
+    when(() => mockViewModel.isOfflineMiss).thenReturn(state.isOfflineMiss);
+    when(() => mockViewModel.isRefreshing).thenReturn(state.isRefreshing);
   }
 
   group('view options', () {
@@ -259,7 +272,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      verify(() => mockViewModel.fetchBooks()).called(1);
+      verify(() => mockViewModel.refresh()).called(1);
     });
 
     testWidgets('tapping a layout segment calls setLayoutMode', (tester) async {
@@ -285,6 +298,136 @@ void main() {
         ),
         findsNothing,
       );
+    });
+  });
+
+  group('offline', () {
+    // Four columns keep the end of the list on the test screen.
+    const infinite = BooksViewPreferences(
+      navigation: BooksNavigationMode.infinite,
+      columns: 4,
+    );
+    const pages = BooksViewPreferences(navigation: BooksNavigationMode.pages);
+
+    testWidgets('a cache list shows the offline notice', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1),
+          source: () => BooksListSource.cache,
+          isOffline: true,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(BooksOfflineNotice), findsOneWidget);
+      expect(
+        find.textContaining('Showing books saved on this device.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a server list shows no offline notice', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1),
+          source: () => BooksListSource.server,
+          isOffline: true,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(BooksOfflineNotice), findsNothing);
+    });
+
+    testWidgets('a server list offline shows the paused-paging hint', (
+      tester,
+    ) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 3),
+          source: () => BooksListSource.server,
+          isOffline: true,
+          preferences: infinite,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.textContaining('Pull to refresh'), findsOneWidget);
+    });
+
+    testWidgets('pages mode replaces the pagination with the hint offline', (
+      tester,
+    ) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 3),
+          source: () => BooksListSource.server,
+          isOffline: true,
+          preferences: pages,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(Pagination), findsNothing);
+      expect(find.textContaining('Pull to refresh'), findsOneWidget);
+    });
+
+    testWidgets('the end of an infinite cache list says so', (tester) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1),
+          source: () => BooksListSource.cache,
+          isOffline: true,
+          preferences: infinite,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(
+        find.text('End of the books saved on this device'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a cache list with no match shows the offline copy', (
+      tester,
+    ) async {
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(0),
+          source: () => BooksListSource.cache,
+          isOffline: true,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(
+        find.text(
+          'No saved books match. Try clearing filters or reconnecting.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('No books found'), findsNothing);
+    });
+
+    testWidgets('an offline miss shows the empty view and retry refreshes', (
+      tester,
+    ) async {
+      stubState(
+        BooksState.initial().copyWith(isOffline: true, isOfflineMiss: true),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+
+      expect(find.byType(AppOfflineEmptyView), findsOneWidget);
+      await tester.tap(find.text('Retry'));
+      verify(() => mockViewModel.refresh()).called(1);
     });
   });
 }
