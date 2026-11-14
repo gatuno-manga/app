@@ -1089,4 +1089,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get readingRulerSemantics =>
       'Reading ruler. Swipe up or down to move it.';
+
+  @override
+  String get offlineBannerMessage => 'Offline: showing saved data';
+
+  @override
+  String get offlineEmptyTitle => 'You\'re offline';
+
+  @override
+  String get offlineEmptyMessage =>
+      'This isn\'t saved on this device yet. It loads once the server is reachable again.';
 }

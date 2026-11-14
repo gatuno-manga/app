@@ -4,28 +4,25 @@ import 'data/repositories/sync_repository_impl.dart';
 import 'domain/repositories/sync_repository.dart';
 import 'domain/use_cases/app_sync_coordinator.dart';
 import 'domain/use_cases/local_sync_feature_provider.dart';
+import 'domain/use_cases/reconnect_sync_trigger.dart';
 import '../reading/domain/entities/reading_progress.dart';
 
 void initSyncDI(GetIt sl) {
   // Data Sources
-  sl.registerLazySingleton<SyncLocalDataSource>(
-    () => SyncLocalDataSource(),
-  );
+  sl.registerLazySingleton<SyncLocalDataSource>(() => SyncLocalDataSource());
 
   // Services
-  sl.registerLazySingleton<SyncRepository>(
-    () => SyncRepositoryImpl(sl()),
-  );
+  sl.registerLazySingleton<SyncRepository>(() => SyncRepositoryImpl(sl()));
 
   // Coordinator
   sl.registerLazySingleton<AppSyncCoordinator>(
-    () => AppSyncCoordinator(
-      sl(),
-      sl(),
-      sl(),
-      [
-        sl<LocalSyncFeatureProvider<ReadingProgress>>(),
-      ],
-    ),
+    () => AppSyncCoordinator(sl(), sl(), sl(), [
+      sl<LocalSyncFeatureProvider<ReadingProgress>>(),
+    ]),
+  );
+
+  sl.registerLazySingleton<ReconnectSyncTrigger>(
+    () => ReconnectSyncTrigger(sl(), sl()),
+    dispose: (trigger) => trigger.dispose(),
   );
 }

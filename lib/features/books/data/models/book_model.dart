@@ -45,6 +45,24 @@ class TagListConverter implements JsonConverter<List<Tag>, List<dynamic>?> {
   }
 }
 
+/// The API sends sensitive content as objects; the book keeps their names.
+/// Book has no other `List<String>` field, so this converter only meets
+/// `sensitiveContent`.
+class SensitiveContentConverter
+    implements JsonConverter<List<String>, List<dynamic>?> {
+  const SensitiveContentConverter();
+  @override
+  List<String> fromJson(List<dynamic>? json) => [
+    for (final item in json ?? const <dynamic>[])
+      if (item is Map && item['name'] != null) item['name'].toString(),
+  ];
+
+  @override
+  List<dynamic> toJson(List<String> object) => [
+    for (final name in object) {'name': name},
+  ];
+}
+
 class TypeBookConverter implements JsonConverter<TypeBook?, dynamic> {
   const TypeBookConverter();
   @override
@@ -66,7 +84,12 @@ class TypeBookConverter implements JsonConverter<TypeBook?, dynamic> {
 
 @JsonSerializable(
   explicitToJson: true,
-  converters: [AuthorListConverter(), TagListConverter(), TypeBookConverter()],
+  converters: [
+    AuthorListConverter(),
+    TagListConverter(),
+    TypeBookConverter(),
+    SensitiveContentConverter(),
+  ],
 )
 class BookModel extends Book {
   @JsonKey(name: 'coverMetadata')
@@ -85,6 +108,7 @@ class BookModel extends Book {
     super.totalChapters,
     super.createdAt,
     super.updatedAt,
+    super.sensitiveContent = const [],
   }) : super(metadata: imageMetadata);
 
   factory BookModel.fromJson(Map<String, dynamic> json) =>

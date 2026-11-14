@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../presentation/view_models/navigation_view_model.dart';
 import '../../../core/di/injection.dart';
 import '../molecules/app_bottom_nav_bar.dart';
+import '../molecules/app_offline_banner.dart';
 
 class NavigationShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -18,6 +19,7 @@ class NavigationShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Provider<NavigationViewModel>(
       create: (_) => sl<NavigationViewModel>(),
+      dispose: (_, viewModel) => viewModel.dispose(),
       child: Builder(
         builder: (context) {
           final viewModel = context.read<NavigationViewModel>();
@@ -27,9 +29,15 @@ class NavigationShell extends StatelessWidget {
             builder: (context, snapshot) {
               return Scaffold(
                 body: navigationShell,
-                bottomNavigationBar: AppBottomNavBar(
-                  currentIndex: navigationShell.currentIndex,
-                  onTap: (index) => _onTap(context, index),
+                bottomNavigationBar: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppOfflineBanner(offline: snapshot.data!.isOffline),
+                    AppBottomNavBar(
+                      currentIndex: navigationShell.currentIndex,
+                      onTap: (index) => _onTap(context, index),
+                    ),
+                  ],
                 ),
               );
             },

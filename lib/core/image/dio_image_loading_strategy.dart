@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../logging/logger.dart';
 import '../network/dio_client.dart';
 import 'image_loading_strategy.dart';
+import 'image_size.dart';
 
 class DioImageLoadingStrategy implements ImageLoadingStrategy {
   final DioClient _dioClient;
@@ -27,19 +27,7 @@ class DioImageLoadingStrategy implements ImageLoadingStrategy {
       if (response.data != null) {
         final bytes = Uint8List.fromList(response.data!);
 
-        if (onImageLoaded != null) {
-          final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-          try {
-            final descriptor = await ui.ImageDescriptor.encoded(buffer);
-            onImageLoaded(
-              Size(descriptor.width.toDouble(), descriptor.height.toDouble()),
-            );
-            descriptor.dispose();
-          } catch (e) {
-            buffer.dispose();
-            rethrow;
-          }
-        }
+        await reportImageSize(bytes, onImageLoaded);
 
         return bytes;
       }

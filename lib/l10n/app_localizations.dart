@@ -2035,6 +2035,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reading ruler. Swipe up or down to move it.'**
   String get readingRulerSemantics;
+
+  /// No description provided for @offlineBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: showing saved data'**
+  String get offlineBannerMessage;
+
+  /// No description provided for @offlineEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline'**
+  String get offlineEmptyTitle;
+
+  /// No description provided for @offlineEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t saved on this device yet. It loads once the server is reachable again.'**
+  String get offlineEmptyMessage;
 }
 
 class _AppLocalizationsDelegate

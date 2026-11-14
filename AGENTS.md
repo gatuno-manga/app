@@ -49,7 +49,8 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md):
 lib/
   main.dart, router.dart   Entry point and root GoRouter
   core/                    Config, DI, network, exceptions, logging, theme,
-                           router keys, image loading, base classes, utils
+                           router keys, image loading, base classes, utils,
+                           connectivity, offline cache (database, covers)
   features/<feature>/      One folder per feature (see below)
   shared/                  Cross-feature components, presentation (ErrorScreen,
                            NavigationViewModel), domain, data, validators,
@@ -128,6 +129,16 @@ registered inline in `initDI()`, and `authentication` pairs
   images use the `AppImage` atom with `sl<ImageLoadingStrategy>()` so they
   also go through `DioClient`; `user_banner.dart` still uses `Image.network`,
   do not copy it.
+- **Offline.** `ConnectivityService` (`lib/core/connectivity/`) says whether
+  the server answers: view models subscribe to `statusStream` for the
+  indicator and to `onReconnected` to reload. Repositories read through the
+  drift `OfflineCacheDatabase` (`lib/core/database/`) with `ReadThrough`
+  (`lib/core/offline/`): network first, cache when offline, and
+  `OfflineException` when offline and nothing is saved; show
+  `AppOfflineEmptyView` for it. `NavigationShell` already mounts
+  `AppOfflineBanner`. Covers live in `CoverStore` (`lib/core/covers/`); pin a
+  cover to keep it, and its book row, from eviction. The HTTP cache
+  interceptor is an online-only optimisation, never the offline source.
 - **Models.** New models that read or write JSON use `json_serializable`
   (`@JsonSerializable`, generated `*.g.dart` via `just gen`); `UserModel` and
   the MFA models are older hand-written exceptions. Value objects expose

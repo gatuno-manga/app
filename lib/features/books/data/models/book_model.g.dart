@@ -39,6 +39,11 @@ BookModel _$BookModelFromJson(Map<String, dynamic> json) => BookModel(
   updatedAt: json['updatedAt'] == null
       ? null
       : DateTime.parse(json['updatedAt'] as String),
+  sensitiveContent: json['sensitiveContent'] == null
+      ? const []
+      : const SensitiveContentConverter().fromJson(
+          json['sensitiveContent'] as List?,
+        ),
 );
 
 Map<String, dynamic> _$BookModelToJson(BookModel instance) => <String, dynamic>{
@@ -53,6 +58,9 @@ Map<String, dynamic> _$BookModelToJson(BookModel instance) => <String, dynamic>{
   'totalChapters': instance.totalChapters?.toJson(),
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
+  'sensitiveContent': const SensitiveContentConverter().toJson(
+    instance.sensitiveContent,
+  ),
   'coverMetadata': instance.imageMetadata?.toJson(),
 };
 

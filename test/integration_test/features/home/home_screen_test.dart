@@ -33,7 +33,9 @@ void main() {
       () => mockAuthService.isAuthenticated(),
     ).thenAnswer((_) async => false);
 
-    when(() => mockHomeViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockHomeViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockHomeViewModel.state).thenReturn(HomeState.initial());
   });
 
@@ -96,8 +98,12 @@ void main() {
   testWidgets('NavigationShell renders bottom navigation items', (
     WidgetTester tester,
   ) async {
-    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
+    when(
+      () => mockNavigationViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockNavigationViewModel.state,
+    ).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
     expect(find.byIcon(Icons.home), findsOneWidget);
@@ -109,8 +115,12 @@ void main() {
   testWidgets('NavigationShell navigates between branches', (
     WidgetTester tester,
   ) async {
-    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
+    when(
+      () => mockNavigationViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockNavigationViewModel.state,
+    ).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
     // Tap Books
@@ -126,6 +136,21 @@ void main() {
     // Tap Home
     await tester.tap(find.byIcon(Icons.home));
     await tester.pumpAndSettle();
+    expect(find.text('Home Content'), findsOneWidget);
+  });
+
+  testWidgets('NavigationShell shows the offline banner while offline', (
+    WidgetTester tester,
+  ) async {
+    when(
+      () => mockNavigationViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockNavigationViewModel.state,
+    ).thenReturn(NavigationState.initial().copyWith(isOffline: true));
+    await pumpNavigationShell(tester);
+
+    expect(find.text('Offline: showing saved data'), findsOneWidget);
     expect(find.text('Home Content'), findsOneWidget);
   });
 }

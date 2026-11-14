@@ -474,5 +474,8 @@
   "readingSuppressItalicsDesc": "Shows emphasised text as regular",
   "readingRulerTitle": "Reading ruler",
   "readingRulerDesc": "Highlights the current line",
-  "readingRulerSemantics": "Reading ruler. Swipe up or down to move it."
+  "readingRulerSemantics": "Reading ruler. Swipe up or down to move it.",
+  "offlineBannerMessage": "Offline: showing saved data",
+  "offlineEmptyTitle": "You're offline",
+  "offlineEmptyMessage": "This isn't saved on this device yet. It loads once the server is reachable again."
 }

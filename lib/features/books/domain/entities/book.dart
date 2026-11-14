@@ -22,6 +22,10 @@ class Book {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
+  /// Names of the book's sensitive-content classifications. Only detail
+  /// responses carry them; list items leave this empty.
+  final List<String> sensitiveContent;
+
   const Book({
     required this.id,
     required this.title,
@@ -35,6 +39,7 @@ class Book {
     this.totalChapters,
     this.createdAt,
     this.updatedAt,
+    this.sensitiveContent = const [],
   });
 }
 
