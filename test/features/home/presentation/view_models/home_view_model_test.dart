@@ -513,6 +513,31 @@ void main() {
       expect(viewModel.state.showOfflineEmpty, isFalse);
     });
 
+    test(
+      'a reconnect during a reload that went offline fetches again',
+      () async {
+        final pending = Completer<BookList>();
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) => pending.future);
+        viewModel = buildViewModel();
+        await settle();
+
+        connectivity.setStatus(ConnectivityStatus.offline);
+        connectivity.setStatus(ConnectivityStatus.online);
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) async => listOf([book('fresh')]));
+        connectivity.reconnect();
+        await settle();
+        pending.completeError(OfflineException());
+        await settle();
+        await settle();
+
+        expect(viewModel.state.latestUpdated.books.single.id.value, 'fresh');
+      },
+    );
+
     test('a reload requested while one runs joins it', () async {
       final pending = Completer<BookList>();
       when(

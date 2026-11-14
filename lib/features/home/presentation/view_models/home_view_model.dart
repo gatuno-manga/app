@@ -203,7 +203,8 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   }
 
   /// Reloads every section, keeping what is on screen until fresh data
-  /// arrives. Joins the reload already in flight, if any.
+  /// arrives. Joins the reload in flight, or queues a fresh one after it when
+  /// that one only read the cache.
   Future<void> reload() {
     final offline = _connectivity.isOffline;
     final inFlight = _reloading;
@@ -246,7 +247,12 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
 
   void _onStatus(ConnectivityStatus status) {
     final offline = status == ConnectivityStatus.offline;
-    if (offline) _reloadedSinceOnline = false;
+    if (offline) {
+      _reloadedSinceOnline = false;
+      // A reload in flight now falls back to the cache, even one that
+      // started online, so a reconnect must queue a fresh one.
+      _reloadingOffline = true;
+    }
     emit(state.copyWith(isOffline: offline));
   }
 
