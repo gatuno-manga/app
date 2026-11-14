@@ -57,8 +57,7 @@ class HomeSections extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Mounted only once it has books: the carousel starts its
-          // auto-advance timer in initState.
+          // Left out while empty, like the rows below.
           if (featuredBooks.isNotEmpty) FeaturedCarousel(books: featuredBooks),
           _BookRow(
             title: l10n.homeContinueReadingTitle,

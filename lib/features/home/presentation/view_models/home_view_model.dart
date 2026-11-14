@@ -156,15 +156,15 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
 
   // Three guards keep the home from fetching the same thing twice:
   // - [_reloading]: a reload requested while one runs (a reconnect during
-  //   the first load) joins it. One that started offline only read the
-  //   cache, so a request made once online queues a fresh reload after it
-  //   instead ([_reloadingOffline]).
+  //   the first load) joins it. One that started offline, or saw the link
+  //   drop, may have read only the cache, so a request made once online
+  //   queues a fresh reload after it instead ([_reloadMayBeStale]).
   // - [_reloadedSinceOnline]: the retry reloads as soon as its probe
   //   succeeds, and `onReconnected` fires a debounce later, usually after
   //   that reload finished; the flag drops that event.
   // - `state.isRetrying`: a second tap on retry while one runs is ignored.
   Future<void>? _reloading;
-  bool _reloadingOffline = false;
+  bool _reloadMayBeStale = false;
   bool _reloadedSinceOnline = false;
 
   static const String _logTag = 'HomeViewModel';
@@ -209,11 +209,11 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     final offline = _connectivity.isOffline;
     final inFlight = _reloading;
     if (inFlight != null) {
-      return _reloadingOffline && !offline
+      return _reloadMayBeStale && !offline
           ? inFlight.then((_) => reload())
           : inFlight;
     }
-    _reloadingOffline = offline;
+    _reloadMayBeStale = offline;
     if (!offline) _reloadedSinceOnline = true;
     return _reloading = Future.wait([
       _loadSection(
@@ -251,7 +251,7 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
       _reloadedSinceOnline = false;
       // A reload in flight now falls back to the cache, even one that
       // started online, so a reconnect must queue a fresh one.
-      _reloadingOffline = true;
+      _reloadMayBeStale = true;
     }
     emit(state.copyWith(isOffline: offline));
   }

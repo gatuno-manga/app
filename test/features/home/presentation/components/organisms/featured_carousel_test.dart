@@ -83,6 +83,57 @@ void main() {
     expect(currentPage(tester), 0);
   });
 
+  testWidgets('does not move the page while a finger rests on it', (
+    tester,
+  ) async {
+    await pumpCarousel(tester, booksOf(3));
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(PageView)),
+    );
+    await tester.pump(interval * 2);
+    // Cancel, not up: lifting would be a tap that opens the book.
+    await gesture.cancel();
+    await tester.pump(settle);
+    expect(currentPage(tester), 0);
+
+    await tester.pump(interval);
+    await tester.pump(settle);
+    expect(currentPage(tester), 1);
+  });
+
+  testWidgets('stops while hidden and waits a full interval on return', (
+    tester,
+  ) async {
+    var visible = true;
+    late StateSetter setVisible;
+    await tester.pumpApp(
+      Scaffold(
+        body: StatefulBuilder(
+          builder: (context, setState) {
+            setVisible = setState;
+            return TickerMode(
+              enabled: visible,
+              child: FeaturedCarousel(books: booksOf(3)),
+            );
+          },
+        ),
+      ),
+    );
+
+    setVisible(() => visible = false);
+    await tester.pump();
+    await tester.pump(interval * 2);
+    setVisible(() => visible = true);
+    await tester.pump();
+    await tester.pump(settle);
+    expect(currentPage(tester), 0);
+
+    await tester.pump(interval);
+    await tester.pump(settle);
+    expect(currentPage(tester), 1);
+  });
+
   testWidgets('waits a full interval after a swipe', (tester) async {
     await pumpCarousel(tester, booksOf(3));
 

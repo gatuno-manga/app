@@ -4,6 +4,8 @@ import '../../../../books/domain/entities/book.dart';
 import '../molecules/featured_carousel_item.dart';
 import '../molecules/carousel_indicator.dart';
 
+/// The hero carousel of the home screen. Expects at least one book; the
+/// parent leaves it out while the list is empty.
 class FeaturedCarousel extends StatefulWidget {
   final List<Book> books;
 
@@ -22,11 +24,13 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
 
   /// Auto-advance moves content on its own, so it stays off when the user
   /// asked for less motion or browses with a screen reader (the focused page
-  /// would scroll away).
-  bool _autoAdvanceAllowed = false;
+  /// would scroll away), and while the home is hidden behind another tab or
+  /// route (its muted slide would play on return).
+  late bool _autoAdvanceAllowed;
 
-  /// The user is swiping; a tick must not take the page from under them.
-  bool _dragging = false;
+  /// Fingers on the carousel. A tick must not take the page from under a
+  /// swipe, or from a reader holding the hero.
+  int _pointers = 0;
 
   @override
   void initState() {
@@ -37,13 +41,13 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final allowed =
+    // Runs on mount and whenever one of these flips; showing the home
+    // again starts a fresh interval.
+    _autoAdvanceAllowed =
         !MediaQuery.disableAnimationsOf(context) &&
-        !MediaQuery.accessibleNavigationOf(context);
-    if (allowed != _autoAdvanceAllowed || _timer == null) {
-      _autoAdvanceAllowed = allowed;
-      _restartTimer();
-    }
+        !MediaQuery.accessibleNavigationOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    _restartTimer();
   }
 
   @override
@@ -63,12 +67,14 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
   void _restartTimer() {
     _timer?.cancel();
     _timer = null;
-    if (!_autoAdvanceAllowed || _dragging || widget.books.length < 2) return;
+    if (!_autoAdvanceAllowed || _pointers > 0 || widget.books.length < 2) {
+      return;
+    }
     _timer = Timer.periodic(_interval, (_) => _advance());
   }
 
   void _advance() {
-    if (_dragging || !_pageController.hasClients) return;
+    if (_pointers > 0 || !_pageController.hasClients) return;
     _pageController.animateToPage(
       (_currentPage + 1) % widget.books.length,
       duration: const Duration(milliseconds: 800),
@@ -76,16 +82,14 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
     );
   }
 
-  bool _onScroll(ScrollNotification notification) {
-    if (notification is ScrollStartNotification &&
-        notification.dragDetails != null) {
-      _dragging = true;
-      _restartTimer();
-    } else if (notification is ScrollEndNotification && _dragging) {
-      _dragging = false;
-      _restartTimer();
-    }
-    return false;
+  void _onPointerDown(PointerDownEvent _) {
+    _pointers++;
+    _restartTimer();
+  }
+
+  void _onPointerUp(PointerEvent _) {
+    if (_pointers > 0) _pointers--;
+    _restartTimer();
   }
 
   @override
@@ -97,14 +101,14 @@ class _FeaturedCarouselState extends State<FeaturedCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.books.isEmpty) return const SizedBox.shrink();
-
     return SizedBox(
       height: 350,
       child: Stack(
         children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: _onScroll,
+          Listener(
+            onPointerDown: _onPointerDown,
+            onPointerUp: _onPointerUp,
+            onPointerCancel: _onPointerUp,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) {
