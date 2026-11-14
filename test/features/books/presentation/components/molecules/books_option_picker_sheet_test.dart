@@ -24,6 +24,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Could not load options'), findsNothing);
+    // Retrying offline would only miss the cache again.
+    expect(find.text('Try again'), findsNothing);
   });
 
   testWidgets('keeps the generic error for other failures', (tester) async {
@@ -31,5 +33,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Could not load options'), findsOneWidget);
+    expect(find.text('Try again'), findsOneWidget);
   });
 }

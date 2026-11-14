@@ -804,6 +804,65 @@ void main() {
       expect(viewModel.isPagingPaused, isFalse);
     });
 
+    test(
+      'a cache page answering loadMore is not appended to a server list',
+      () async {
+        stubPages();
+        await viewModel.fetchBooks();
+        when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
+          connectivity.reportUnreachable();
+          return page(number: 2, totalPages: 1, ids: ['cache-2']);
+        });
+
+        await viewModel.loadMore();
+
+        expect(viewModel.bookList!.data.map((b) => b.id.value), ['server-1']);
+        expect(viewModel.state.source, BooksListSource.server);
+        expect(viewModel.options.page.value, 1);
+        expect(viewModel.isPagingPaused, isTrue);
+        expect(viewModel.isLoading, isFalse);
+      },
+    );
+
+    test(
+      'a server page answering loadMore replaces a cache list from page 1',
+      () async {
+        stubPages();
+        connectivity.goOffline();
+        await flush();
+        await viewModel.fetchBooks();
+        // Back online without onReconnected (a false alarm, or before the
+        // debounce): the next page comes from the server.
+        connectivity.goOnline();
+        await flush();
+        clearInteractions(mockRepository);
+
+        await viewModel.loadMore();
+
+        expect(requestedPages(), [2, 1]);
+        expect(viewModel.bookList!.data.map((b) => b.id.value), ['server-1']);
+        expect(viewModel.state.source, BooksListSource.server);
+        expect(viewModel.options.page.value, 1);
+      },
+    );
+
+    test('the picker reset runs even when a fetch saw offline first', () async {
+      when(() => mockRepository.getTags()).thenAnswer(
+        (_) async => [const Tag(id: TagId('t'), name: TagName('T'))],
+      );
+      await viewModel.loadTagOptions();
+      when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
+        connectivity.reportUnreachable();
+        return page(number: 1, totalPages: 1, ids: ['cache-1']);
+      });
+      // The fetch writes isOffline before the status event is delivered.
+      await viewModel.fetchBooks();
+      await flush();
+
+      await viewModel.loadTagOptions();
+      verify(() => mockRepository.getTags()).called(2);
+    });
+
     test('an offline refresh probes the server, then loads page 1', () async {
       inPagesMode();
       stubPages();

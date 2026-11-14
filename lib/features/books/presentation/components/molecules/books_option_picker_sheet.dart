@@ -124,10 +124,13 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
                                 : l10n.booksFilterLoadError,
                             textAlign: TextAlign.center,
                           ),
-                          TextButton(
-                            onPressed: _retry,
-                            child: Text(l10n.booksFilterRetry),
-                          ),
+                          // Offline, retrying only misses the cache again; the
+                          // options load once the server is back.
+                          if (snapshot.error is! OfflineException)
+                            TextButton(
+                              onPressed: _retry,
+                              child: Text(l10n.booksFilterRetry),
+                            ),
                         ],
                       ),
                     );

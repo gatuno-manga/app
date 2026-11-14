@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
+import '../../../../../core/theme/semantic_colors.dart';
+
 /// Says the books on screen come from this device's offline cache and what
 /// that limits. Shown above a cache list and in the filter sheet offline.
 ///
@@ -31,7 +33,7 @@ class BooksOfflineNotice extends StatelessWidget {
             Icon(
               Icons.info_outline,
               size: 18,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: theme.legible(theme.infoColor),
             ),
             const SizedBox(width: 8),
             Expanded(

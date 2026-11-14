@@ -35,17 +35,20 @@ class BooksContent extends StatelessWidget {
         ),
         if (viewModel.isCacheList) const BooksOfflineNotice(),
         Expanded(child: _body(context)),
-        if (!_infinite && _hasBooks && viewModel.isPagingPaused)
-          BooksListNote(
-            message: AppLocalizations.of(context)!.booksOfflinePagingPaused,
-          )
-        else if (!_infinite && _hasBooks)
-          Pagination(
-            currentPage: viewModel.options.page.value,
-            totalPages: viewModel.bookList?.totalPages.value ?? 1,
-            isLoading: viewModel.isLoading,
-            onPageChanged: viewModel.setPage,
-          ),
+        if (!_infinite && _hasBooks)
+          viewModel.isPagingPaused
+              ? BooksListNote(
+                  message: AppLocalizations.of(
+                    context,
+                  )!.booksOfflinePagingPaused,
+                  announce: true,
+                )
+              : Pagination(
+                  currentPage: viewModel.options.page.value,
+                  totalPages: viewModel.bookList?.totalPages.value ?? 1,
+                  isLoading: viewModel.isLoading,
+                  onPageChanged: viewModel.setPage,
+                ),
       ],
     );
   }
@@ -108,7 +111,10 @@ class BooksContent extends StatelessWidget {
     if (viewModel.isLoadingMore) return const AppLoadMoreFooter();
     if (!_infinite) return null;
     if (viewModel.isPagingPaused) {
-      return BooksListNote(message: l10n.booksOfflinePagingPaused);
+      return BooksListNote(
+        message: l10n.booksOfflinePagingPaused,
+        announce: true,
+      );
     }
     if (viewModel.isCacheList && !viewModel.hasMore) {
       return BooksListNote(message: l10n.booksOfflineEndOfList);

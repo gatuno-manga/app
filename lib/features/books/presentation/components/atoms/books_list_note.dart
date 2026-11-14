@@ -5,18 +5,29 @@ import 'package:flutter/material.dart';
 class BooksListNote extends StatelessWidget {
   final String message;
 
-  const BooksListNote({super.key, required this.message});
+  /// Announce the note when it appears, for a note that replaces controls
+  /// (paging) so a screen reader user learns why they went away.
+  final bool announce;
+
+  const BooksListNote({
+    super.key,
+    required this.message,
+    this.announce = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Center(
-        child: Text(
-          message,
-          style: theme.textTheme.bodyMedium,
-          textAlign: TextAlign.center,
+    return Semantics(
+      liveRegion: announce,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Center(
+          child: Text(
+            message,
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );

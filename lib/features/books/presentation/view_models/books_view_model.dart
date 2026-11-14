@@ -130,6 +130,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   final ConnectivityService _connectivity;
   late final StreamSubscription<ConnectivityStatus> _statusSubscription;
   late final StreamSubscription<void> _reconnectSubscription;
+
+  /// The last status seen on the stream. Fetches also write
+  /// `state.isOffline`, so transitions are detected against this instead.
+  late ConnectivityStatus _lastStatus;
   static const String _logTag = 'BooksViewModel';
 
   BooksViewModel({
@@ -147,6 +151,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
            isOffline: connectivity.isOffline,
          ),
        ) {
+    _lastStatus = connectivity.status;
     _statusSubscription = connectivity.statusStream.listen(_onStatus);
     _reconnectSubscription = connectivity.onReconnected.listen(
       (_) => _onReconnected(),
@@ -163,8 +168,9 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   /// Going offline never reloads the list: the user decides when to switch
   /// to the saved books (see [refresh]).
   void _onStatus(ConnectivityStatus status) {
+    if (status == _lastStatus) return;
+    _lastStatus = status;
     final offline = status == ConnectivityStatus.offline;
-    if (offline == state.isOffline) return;
     if (offline) _resetPickerOptions();
     emit(state.copyWith(isOffline: offline));
   }
@@ -288,6 +294,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         _logTag,
       );
 
+      if (append && state.source != null && source != state.source) {
+        return await _onSourceChangedWhileAppending(source, requestedPage);
+      }
+
       final previous = state.bookList;
       final merged = append && previous != null
           ? BookList(
@@ -341,6 +351,36 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         ),
       );
     }
+  }
+
+  /// The next page came from the other source than the list on screen, and
+  /// the two sources' offsets don't line up, so it is never appended. Back
+  /// online under a cache list, the server list replaces it from page 1. A
+  /// server list that went offline mid-load is kept, with paging paused
+  /// until the user refreshes.
+  Future<void> _onSourceChangedWhileAppending(
+    BooksListSource source,
+    PositiveInt requestedPage,
+  ) {
+    final offline = source == BooksListSource.cache;
+    AppLogger.i(
+      'Discarding an appended page from the ${source.name}: the list on '
+      'screen came from the ${state.source?.name}',
+      _logTag,
+    );
+    final rolledBack = state.options.page == requestedPage
+        ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
+        : state.options;
+    emit(
+      state.copyWith(
+        isLoading: false,
+        isLoadingMore: false,
+        isOffline: offline,
+        options: rolledBack,
+      ),
+    );
+    if (offline) return Future.value();
+    return _fetch(append: false);
   }
 
   /// Whether a follow-up fetch was requested meanwhile; clears the flag.
