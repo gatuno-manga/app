@@ -262,6 +262,7 @@
   "bookRequestsFormUrl": "URL",
   "bookRequestsFormReason": "Motivo (opcional)",
   "homeCtaSignInButton": "Faça Login para Solicitar",
+  "homeCtaOfflineNote": "Disponível quando você estiver online de novo.",
   "bookRequestsFormTitleRequired": "Por favor, insira um título",
   "bookRequestsFormUrlRequired": "Por favor, insira uma URL",
   "bookRequestsFormUrlInvalid": "Por favor, insira uma URL válida",

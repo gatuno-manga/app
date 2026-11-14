@@ -46,5 +46,25 @@ void main() {
       );
       handle.dispose();
     });
+
+    testWidgets('caps the content width on wide screens', (tester) async {
+      tester.view.physicalSize = const Size(1200, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpApp(Scaffold(body: AppOfflineEmptyView(onRetry: () {})));
+
+      final column = tester.getSize(
+        find
+            .descendant(
+              of: find.byType(AppOfflineEmptyView),
+              matching: find.byType(Column),
+            )
+            .first,
+      );
+      expect(
+        column.width,
+        lessThanOrEqualTo(AppOfflineEmptyView.maxContentWidth),
+      );
+    });
   });
 }

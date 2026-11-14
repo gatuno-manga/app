@@ -262,6 +262,10 @@
   "bookRequestsFormUrl": "URL",
   "bookRequestsFormReason": "Reason (optional)",
   "homeCtaSignInButton": "Sign In to Request",
+  "homeCtaOfflineNote": "Available when you're back online.",
+  "@homeCtaOfflineNote": {
+    "description": "Under the home call-to-action card while offline, explaining why its button is disabled."
+  },
   "bookRequestsFormTitleRequired": "Please enter a title",
   "bookRequestsFormUrlRequired": "Please enter a URL",
   "bookRequestsFormUrlInvalid": "Please enter a valid URL",

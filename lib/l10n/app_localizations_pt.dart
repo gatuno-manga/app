@@ -644,6 +644,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeCtaSignInButton => 'Faça Login para Solicitar';
 
   @override
+  String get homeCtaOfflineNote =>
+      'Disponível quando você estiver online de novo.';
+
+  @override
   String get bookRequestsFormTitleRequired => 'Por favor, insira um título';
 
   @override

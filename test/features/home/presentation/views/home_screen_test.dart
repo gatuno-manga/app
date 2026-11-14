@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/home/presentation/components/molecules/login_icon.dart';
@@ -11,6 +12,9 @@ import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+import 'package:gatuno/shared/components/atoms/app_button.dart';
+import 'package:gatuno/shared/components/molecules/app_cta_card.dart';
+import 'package:gatuno/shared/components/molecules/app_offline_empty_view.dart';
 
 import '../../../../helpers/pump_app.dart';
 import '../../../../helpers/test_injection.dart';
@@ -97,5 +101,67 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Signin Page'), findsOneWidget);
+  });
+
+  group('offline', () {
+    final nothingSaved = HomeState.initial().copyWith(
+      isInitialized: true,
+      isOffline: true,
+      isLoadingFeatured: false,
+      isLoadingGrid: false,
+      isLoadingRecentlyAdded: false,
+      latestUnavailableOffline: true,
+      recentUnavailableOffline: true,
+    );
+
+    testWidgets('shows the offline empty view when nothing is saved', (
+      tester,
+    ) async {
+      when(() => viewModel.retry()).thenAnswer((_) async {});
+      await pumpHome(tester, nothingSaved);
+
+      expect(find.byType(AppOfflineEmptyView), findsOneWidget);
+      expect(find.byType(AppCtaCard), findsNothing);
+      expect(find.byType(LoginIcon), findsOneWidget);
+
+      await tester.tap(find.byType(AppButton));
+      verify(() => viewModel.retry()).called(1);
+    });
+
+    testWidgets('shows retry progress', (tester) async {
+      await pumpHome(tester, nothingSaved.copyWith(isRetrying: true));
+
+      expect(
+        tester
+            .widget<AppOfflineEmptyView>(find.byType(AppOfflineEmptyView))
+            .isRetrying,
+        isTrue,
+      );
+    });
+
+    testWidgets('disables the call to action with a note', (tester) async {
+      await pumpHome(
+        tester,
+        HomeState.initial().copyWith(isInitialized: true, isOffline: true),
+      );
+      await tester.scrollUntilVisible(
+        find.byType(AppCtaCard),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      final cta = tester.widget<AppCtaCard>(find.byType(AppCtaCard));
+      expect(cta.onPressed, isNull);
+      expect(find.text("Available when you're back online."), findsOneWidget);
+      expect(find.byType(AppOfflineEmptyView), findsNothing);
+    });
+
+    testWidgets('enables the call to action online', (tester) async {
+      await pumpHome(tester, HomeState.initial().copyWith(isInitialized: true));
+
+      final cta = tester.widget<AppCtaCard>(find.byType(AppCtaCard));
+      expect(cta.onPressed, isNotNull);
+      expect(cta.note, isNull);
+    });
   });
 }

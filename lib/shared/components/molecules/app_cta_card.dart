@@ -5,7 +5,12 @@ class AppCtaCard extends StatelessWidget {
   final String description;
   final String buttonText;
   final IconData buttonIcon;
-  final VoidCallback onPressed;
+
+  /// Null disables the button; say why in [note].
+  final VoidCallback? onPressed;
+
+  /// A short line under the description, such as why the button is disabled.
+  final String? note;
 
   const AppCtaCard({
     super.key,
@@ -14,6 +19,7 @@ class AppCtaCard extends StatelessWidget {
     required this.buttonText,
     required this.buttonIcon,
     required this.onPressed,
+    this.note,
   });
 
   @override
@@ -28,15 +34,16 @@ class AppCtaCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              description,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(description, style: Theme.of(context).textTheme.bodyMedium),
+            if (note != null) ...[
+              const SizedBox(height: 8),
+              Text(note!, style: Theme.of(context).textTheme.bodySmall),
+            ],
             const SizedBox(height: 20),
             Align(
               alignment: Alignment.centerRight,
