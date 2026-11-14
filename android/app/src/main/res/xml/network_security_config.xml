@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Native downloads (background_downloader) use the platform TLS stack, not
+     Dart's. Self-hosted servers often use a self-signed CA installed by the
+     user, and some run on plain http on a LAN: trust user CAs and allow
+     cleartext, as the Dart client already does. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

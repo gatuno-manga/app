@@ -488,5 +488,39 @@
   "readingRulerSemantics": "Reading ruler. Swipe up or down to move it.",
   "offlineBannerMessage": "Offline: showing saved data",
   "offlineEmptyTitle": "You're offline",
-  "offlineEmptyMessage": "This isn't saved on this device yet. It loads once the server is reachable again."
+  "offlineEmptyMessage": "This isn't saved on this device yet. It loads once the server is reachable again.",
+  "downloadsNotificationRunningTitle": "Downloading chapters",
+  "downloadsNotificationRunningBody": "{finished} of {total} files",
+  "@downloadsNotificationRunningBody": {
+    "description": "Progress of the download notification; the arguments are filled in by the system.",
+    "placeholders": {
+      "finished": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadsNotificationCompleteTitle": "Downloads finished",
+  "downloadsNotificationCompleteBody": "{total} files downloaded",
+  "@downloadsNotificationCompleteBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadsNotificationErrorTitle": "Some downloads failed",
+  "downloadsNotificationErrorBody": "{failed} of {total} files failed",
+  "@downloadsNotificationErrorBody": {
+    "placeholders": {
+      "failed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -485,5 +485,11 @@
   "readingRulerSemantics": "Régua de leitura. Deslize para cima ou para baixo para movê-la.",
   "offlineBannerMessage": "Offline: mostrando dados salvos",
   "offlineEmptyTitle": "Você está offline",
-  "offlineEmptyMessage": "Isto ainda não está salvo neste aparelho. Vai carregar quando o servidor voltar a responder."
+  "offlineEmptyMessage": "Isto ainda não está salvo neste aparelho. Vai carregar quando o servidor voltar a responder.",
+  "downloadsNotificationRunningTitle": "Baixando capítulos",
+  "downloadsNotificationRunningBody": "{finished} de {total} arquivos",
+  "downloadsNotificationCompleteTitle": "Downloads concluídos",
+  "downloadsNotificationCompleteBody": "{total} arquivos baixados",
+  "downloadsNotificationErrorTitle": "Alguns downloads falharam",
+  "downloadsNotificationErrorBody": "{failed} de {total} arquivos falharam"
 }

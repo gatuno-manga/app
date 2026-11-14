@@ -29,6 +29,8 @@ import '../../features/users/domain/use_cases/user_service.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
+import '../../features/downloads/data/repositories/download_manager.dart';
+import '../../features/downloads/downloads_injection.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
 import '../../features/reading/domain/use_cases/reader_preferences_service.dart';
@@ -117,6 +119,16 @@ Future<void> initDI() async {
       sl<DioClient>(),
       onServerChanged: () async {
         try {
+          // Downloads belong to the old server too. A failure here must not
+          // keep the cache of the old library.
+          await sl<DownloadManager>().clearAll().catchError(
+            (Object e, StackTrace stackTrace) => AppLogger.e(
+              'Could not delete downloads on a server change',
+              e,
+              stackTrace,
+              'initDI',
+            ),
+          );
           await sl<OfflineCacheMaintenance>().clearAll();
         } finally {
           // The status still describes the old server: probe the new one
@@ -145,6 +157,8 @@ Future<void> initDI() async {
   initReadingDI(sl);
   await sl<ReaderPreferencesService>().init();
   initBookRequestsInjection(sl);
+  // Needs books (book type, chapter list) and the cover store.
+  initDownloadsInjection(sl);
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)
   setupCookieInterceptor(sl<DioClient>());
@@ -162,6 +176,15 @@ Future<void> initDI() async {
   unawaited(sl<ServerConnectivityService>().start());
   sl<ReconnectSyncTrigger>().start();
   unawaited(sl<OfflineCacheMaintenance>().evictStale());
+  // Plans chapters through DioClient, so after the interceptors. Not
+  // awaited: replaying what finished in the background must not hold the
+  // first frame.
+  unawaited(
+    startDownloads(sl).catchError(
+      (Object e, StackTrace stackTrace) =>
+          AppLogger.e('Downloads did not start', e, stackTrace, 'initDI'),
+    ),
+  );
 
   // Last: refreshes the profile on sign-in, so it needs the interceptors
   // above and must be listening before any screen appears.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- background_downloader notification channel and buttons -->
+    <string name="bg_downloader_notification_channel_name">Downloads</string>
+    <string name="bg_downloader_notification_channel_description">Chapter download progress</string>
+    <string name="bg_downloader_cancel">Cancel</string>
+    <string name="bg_downloader_pause">Pause</string>
+    <string name="bg_downloader_resume">Resume</string>
+</resources>
