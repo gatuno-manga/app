@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import '../../../../../core/network/exceptions.dart';
 import '../../../domain/entities/book_page_options.dart';
 import '../../models/filter_option.dart';
 import 'books_option_picker_sheet.dart';
@@ -60,7 +61,13 @@ class _BooksOptionFilterState extends State<BooksOptionFilter> {
       future: _options ??= widget.loadOptions(),
       initialData: _resolved,
       builder: (context, snapshot) {
-        if (snapshot.hasError) return Text(l10n.booksFilterLoadError);
+        if (snapshot.hasError) {
+          return Text(
+            snapshot.error is OfflineException
+                ? l10n.booksFilterOfflineNotSaved
+                : l10n.booksFilterLoadError,
+          );
+        }
         final data = snapshot.data;
         if (data == null) return const SizedBox.shrink();
         _resolved = data;

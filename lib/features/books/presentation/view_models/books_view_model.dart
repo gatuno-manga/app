@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:optional/optional.dart';
 import '../../../../core/base/base_stream_view_model.dart';
+import '../../../../core/connectivity/connectivity_service.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../core/network/exceptions.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../settings/domain/use_cases/settings_service.dart';
 import '../../domain/entities/book.dart';
@@ -12,6 +16,16 @@ import '../../domain/repositories/books_view_preferences_repository.dart';
 import 'package:equatable/equatable.dart';
 import '../models/filter_option.dart';
 
+/// Where the list on screen came from.
+enum BooksListSource {
+  /// The server answered the request.
+  server,
+
+  /// The app was offline, so the offline cache answered: only the books this
+  /// device has seen, with local totals.
+  cache,
+}
+
 class BooksState extends Equatable {
   final BookList? bookList;
   final bool isLoading;
@@ -22,6 +36,18 @@ class BooksState extends Equatable {
   final BooksViewPreferences preferences;
   final BookPageOptions options;
 
+  /// Where [bookList] came from; `null` while there is no list.
+  final BooksListSource? source;
+
+  /// Whether the server is unreachable right now.
+  final bool isOffline;
+
+  /// The last fetch found nothing saved on the device while offline.
+  final bool isOfflineMiss;
+
+  /// True while a user-initiated refresh probes the server and reloads.
+  final bool isRefreshing;
+
   const BooksState({
     this.bookList,
     required this.isLoading,
@@ -29,6 +55,10 @@ class BooksState extends Equatable {
     this.error,
     required this.preferences,
     required this.options,
+    this.source,
+    this.isOffline = false,
+    this.isOfflineMiss = false,
+    this.isRefreshing = false,
   });
 
   factory BooksState.initial() {
@@ -45,6 +75,13 @@ class BooksState extends Equatable {
   bool get hasMore =>
       bookList != null && options.page.value < bookList!.totalPages.value;
 
+  /// Whether the list shows the offline cache rather than the server.
+  bool get isCacheList => source == BooksListSource.cache;
+
+  /// A server list while offline: its pages don't line up with the cache's,
+  /// so paging waits until the user refreshes (or the server is back).
+  bool get isPagingPaused => isOffline && source == BooksListSource.server;
+
   BooksState copyWith({
     BookList? Function()? bookList,
     bool? isLoading,
@@ -52,6 +89,10 @@ class BooksState extends Equatable {
     String? Function()? error,
     BooksViewPreferences? preferences,
     BookPageOptions? options,
+    BooksListSource? Function()? source,
+    bool? isOffline,
+    bool? isOfflineMiss,
+    bool? isRefreshing,
   }) {
     return BooksState(
       bookList: bookList != null ? bookList() : this.bookList,
@@ -60,6 +101,10 @@ class BooksState extends Equatable {
       error: error != null ? error() : this.error,
       preferences: preferences ?? this.preferences,
       options: options ?? this.options,
+      source: source != null ? source() : this.source,
+      isOffline: isOffline ?? this.isOffline,
+      isOfflineMiss: isOfflineMiss ?? this.isOfflineMiss,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
 
@@ -71,6 +116,10 @@ class BooksState extends Equatable {
     error,
     preferences,
     options,
+    source,
+    isOffline,
+    isOfflineMiss,
+    isRefreshing,
   ];
 }
 
@@ -78,20 +127,102 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   final BooksRepository _repository;
   final SettingsService _settingsService;
   final BooksViewPreferencesRepository _viewPreferencesRepository;
+  final ConnectivityService _connectivity;
+  late final StreamSubscription<ConnectivityStatus> _statusSubscription;
+  late final StreamSubscription<void> _reconnectSubscription;
+
+  /// The last status seen on the stream. Fetches also write
+  /// `state.isOffline`, so transitions are detected against this instead.
+  late ConnectivityStatus _lastStatus;
   static const String _logTag = 'BooksViewModel';
 
   BooksViewModel({
     required BooksRepository repository,
     required SettingsService settingsService,
     required BooksViewPreferencesRepository viewPreferencesRepository,
+    required ConnectivityService connectivity,
   }) : _repository = repository,
        _settingsService = settingsService,
        _viewPreferencesRepository = viewPreferencesRepository,
+       _connectivity = connectivity,
        super(
          BooksState.initial().copyWith(
            preferences: viewPreferencesRepository.current,
+           isOffline: connectivity.isOffline,
          ),
-       );
+       ) {
+    _lastStatus = connectivity.status;
+    _statusSubscription = connectivity.statusStream.listen(_onStatus);
+    _reconnectSubscription = connectivity.onReconnected.listen(
+      (_) => _onReconnected(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _statusSubscription.cancel();
+    _reconnectSubscription.cancel();
+    super.dispose();
+  }
+
+  /// Going offline never reloads the list: the user decides when to switch
+  /// to the saved books (see [refresh]).
+  void _onStatus(ConnectivityStatus status) {
+    if (status == _lastStatus) return;
+    _lastStatus = status;
+    final offline = status == ConnectivityStatus.offline;
+    if (offline) _resetPickerOptions();
+    emit(state.copyWith(isOffline: offline));
+  }
+
+  /// Reloads what offline left behind (the saved books or the empty view);
+  /// a server list that stayed on screen is still valid and is kept.
+  void _onReconnected() {
+    _resetPickerOptions();
+    emit(state.copyWith(isOffline: false));
+    if (state.isOfflineMiss || state.isCacheList) {
+      AppLogger.i('Reconnected: reloading books from page 1', _logTag);
+      emit(
+        state.copyWith(
+          options: state.options.copyWith(page: const PositiveInt(1)),
+        ),
+      );
+      fetchBooks();
+    }
+  }
+
+  /// User-initiated reload (pull to refresh, the offline retry). Offline, the
+  /// repository skips the network, so the server is probed first; then the
+  /// list restarts from page 1, from whichever source answers.
+  Future<void> refresh() {
+    if (!_connectivity.isOffline) return fetchBooks();
+    // A second request joins the running one, so its spinner lasts as long.
+    return _refreshing ??= _refreshOffline().whenComplete(
+      () => _refreshing = null,
+    );
+  }
+
+  Future<void>? _refreshing;
+
+  Future<void> _refreshOffline() async {
+    emit(state.copyWith(isRefreshing: true));
+    try {
+      await _connectivity.checkNow();
+    } catch (e, stackTrace) {
+      AppLogger.e('Connectivity probe failed', e, stackTrace, _logTag);
+    }
+    emit(
+      state.copyWith(
+        isOffline: _connectivity.isOffline,
+        options: state.options.copyWith(page: const PositiveInt(1)),
+      ),
+    );
+    try {
+      await fetchBooks();
+    } finally {
+      emit(state.copyWith(isRefreshing: false));
+    }
+  }
 
   BookList? get bookList => state.bookList;
   bool get isLoading => state.isLoading;
@@ -100,6 +231,11 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   BooksViewPreferences get preferences => state.preferences;
   bool get hasMore => state.hasMore;
   BookPageOptions get options => state.options;
+  bool get isOffline => state.isOffline;
+  bool get isCacheList => state.isCacheList;
+  bool get isPagingPaused => state.isPagingPaused;
+  bool get isOfflineMiss => state.isOfflineMiss;
+  bool get isRefreshing => state.isRefreshing;
 
   bool get _infinite =>
       state.preferences.navigation == BooksNavigationMode.infinite;
@@ -156,11 +292,23 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
 
       final result = await _repository.getBooks(currentOptions);
       if (_takeQueued()) return await _fetch(append: false);
+      // A failed request flips the status before the cache answers, so the
+      // status now tells which source produced [result].
+      final offline = _connectivity.isOffline;
+      final source = offline ? BooksListSource.cache : BooksListSource.server;
 
       AppLogger.i(
         'Books fetched successfully: page=${result.page}, count=${result.data.length}, total=${result.total}',
         _logTag,
       );
+
+      // A page past the first, in either mode, sits at an offset of the
+      // list on screen; on the other source that offset means nothing.
+      if (state.source != null &&
+          source != state.source &&
+          requestedPage.value > 1) {
+        return await _onSourceChanged(source);
+      }
 
       final previous = state.bookList;
       final merged = append && previous != null
@@ -177,27 +325,86 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
           isLoading: false,
           isLoadingMore: false,
           bookList: () => merged,
+          source: () => source,
+          isOffline: offline,
+          isOfflineMiss: false,
+        ),
+      );
+    } on OfflineException catch (e) {
+      AppLogger.w('No saved books for this request: $e', _logTag);
+      if (_takeQueued()) return await _fetch(append: false);
+      // Nothing saved at all: like a cache answer, it never takes away the
+      // server list being read.
+      if (state.source == BooksListSource.server && requestedPage.value > 1) {
+        return await _onSourceChanged(BooksListSource.cache);
+      }
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          bookList: () => null,
+          source: () => null,
+          isOffline: true,
+          isOfflineMiss: true,
+          options: state.options.copyWith(page: const PositiveInt(1)),
         ),
       );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching books', e, stackTrace, _logTag);
       if (_takeQueued()) return await _fetch(append: false);
 
-      // Only undo the bump this append made; a sort or filter change that
-      // happened meanwhile already moved the page elsewhere.
-      final rolledBack = append && state.options.page == requestedPage
-          ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
-          : state.options;
+      final rolledBack = append ? _undoPageBump(requestedPage) : state.options;
       emit(
         state.copyWith(
           isLoading: false,
           isLoadingMore: false,
           error: () => e.toString(),
+          isOfflineMiss: false,
           options: rolledBack,
         ),
       );
     }
   }
+
+  /// The requested page came from the other source than the list on screen,
+  /// so it is discarded. A server list that went offline mid-request stays,
+  /// on the page it shows, with paging paused until the user refreshes.
+  /// Back online under a cache list, the server list replaces it from
+  /// page 1.
+  Future<void> _onSourceChanged(BooksListSource source) {
+    AppLogger.i(
+      'Discarding a page from the ${source.name}: the list on screen came '
+      'from the ${state.source?.name}',
+      _logTag,
+    );
+    if (source == BooksListSource.cache) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          isOffline: true,
+          options: state.options.copyWith(
+            page: state.bookList?.page ?? const PositiveInt(1),
+          ),
+        ),
+      );
+      return Future.value();
+    }
+    emit(
+      state.copyWith(
+        options: state.options.copyWith(page: const PositiveInt(1)),
+      ),
+    );
+    return _fetch(append: false);
+  }
+
+  /// The options with the page bump of an append to [requestedPage] undone,
+  /// so the next attempt retries it. Only that bump: a sort or filter change
+  /// made meanwhile already moved the page elsewhere.
+  BookPageOptions _undoPageBump(PositiveInt requestedPage) =>
+      state.options.page == requestedPage
+      ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
+      : state.options;
 
   /// Whether a follow-up fetch was requested meanwhile; clears the flag.
   bool _takeQueued() {
@@ -209,6 +416,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   /// Pages mode only: infinite mode appends through [loadMore].
   void setPage(int page) {
     if (_infinite ||
+        state.isPagingPaused ||
         page < 1 ||
         (state.bookList != null && page > state.bookList!.totalPages.value)) {
       return;
@@ -223,7 +431,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   /// Appends the next page in infinite mode; a no-op otherwise, while a fetch
   /// is in flight, or when the last page is already loaded.
   Future<void> loadMore() async {
-    if (!_infinite || state.isLoading || !state.hasMore) {
+    if (!_infinite ||
+        state.isLoading ||
+        state.isPagingPaused ||
+        !state.hasMore) {
       return;
     }
     final next = state.options.page.value + 1;
@@ -271,6 +482,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       state.copyWith(
         preferences: preferences,
         bookList: () => null,
+        source: () => null,
         options: state.options.copyWith(page: const PositiveInt(1)),
       ),
     );
@@ -383,6 +595,13 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     ],
     () => _authorOptions = null,
   );
+
+  /// Options loaded on one side of a connectivity change come from the other
+  /// source (server or cache), so they are requested again.
+  void _resetPickerOptions() {
+    _tagOptions = null;
+    _authorOptions = null;
+  }
 
   Future<List<FilterOption>> _cached(
     Future<List<FilterOption>> Function() load,

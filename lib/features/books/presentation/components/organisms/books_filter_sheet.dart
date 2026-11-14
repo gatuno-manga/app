@@ -10,6 +10,7 @@ import '../../view_models/books_view_model.dart';
 import '../../models/filter_option.dart';
 import '../molecules/books_filter_content.dart';
 import '../molecules/books_filter_header.dart';
+import '../molecules/books_offline_notice.dart';
 
 class BooksFilterSheet extends StatefulWidget {
   final BookPageOptions initialOptions;
@@ -17,6 +18,10 @@ class BooksFilterSheet extends StatefulWidget {
   final VoidCallback onClear;
   final Future<List<FilterOption>> Function() loadTags;
   final Future<List<FilterOption>> Function() loadAuthors;
+
+  /// Offline, filters run against the saved books; the sheet says so.
+  final bool isOffline;
+
   const BooksFilterSheet({
     super.key,
     required this.initialOptions,
@@ -24,6 +29,7 @@ class BooksFilterSheet extends StatefulWidget {
     required this.onClear,
     required this.loadTags,
     required this.loadAuthors,
+    this.isOffline = false,
   });
 
   static Future<void> show(BuildContext context, BooksViewModel viewModel) {
@@ -48,6 +54,7 @@ class BooksFilterSheet extends StatefulWidget {
         onClear: viewModel.clearFilters,
         loadTags: viewModel.loadTagOptions,
         loadAuthors: viewModel.loadAuthorOptions,
+        isOffline: viewModel.isOffline,
       ),
     );
   }
@@ -157,6 +164,10 @@ class _BooksFilterSheetState extends State<BooksFilterSheet> {
           children: [
             BooksFilterHeader(onClear: _onClear),
             const Divider(),
+            if (widget.isOffline) ...[
+              const BooksOfflineNotice(),
+              const SizedBox(height: 8),
+            ],
             Flexible(
               child: BooksFilterContent(
                 options: _currentOptions,

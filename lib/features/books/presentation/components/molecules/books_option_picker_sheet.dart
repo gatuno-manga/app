@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import '../../../../../core/network/exceptions.dart';
 import '../../../../../shared/components/atoms/app_loading_indicator.dart';
 import '../../../../../shared/components/atoms/app_sheet_title.dart';
 import '../../../../../shared/utils/bottom_sheet_utils.dart';
@@ -117,11 +118,19 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(l10n.booksFilterLoadError),
-                          TextButton(
-                            onPressed: _retry,
-                            child: Text(l10n.booksFilterRetry),
+                          Text(
+                            snapshot.error is OfflineException
+                                ? l10n.booksFilterOfflineNotSaved
+                                : l10n.booksFilterLoadError,
+                            textAlign: TextAlign.center,
                           ),
+                          // Offline, retrying only misses the cache again; the
+                          // options load once the server is back.
+                          if (snapshot.error is! OfflineException)
+                            TextButton(
+                              onPressed: _retry,
+                              child: Text(l10n.booksFilterRetry),
+                            ),
                         ],
                       ),
                     );

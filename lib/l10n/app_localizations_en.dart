@@ -191,6 +191,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksNoBooksFound => 'No books found';
 
   @override
+  String get booksOfflineNotice => 'Showing books saved on this device.';
+
+  @override
+  String get booksOfflineFiltersNotice =>
+      'Some filters may hide books that haven\'t been opened yet.';
+
+  @override
+  String get booksOfflinePagingPaused =>
+      'Pull to refresh to see the books saved on this device.';
+
+  @override
+  String get booksOfflineRefreshAction => 'show the books saved on this device';
+
+  @override
+  String get booksOfflineNoMatch =>
+      'No saved books match. Try clearing filters or reconnecting.';
+
+  @override
+  String get booksOfflineEndOfList => 'End of the books saved on this device';
+
+  @override
+  String get booksFilterOfflineNotSaved =>
+      'These options aren\'t saved on this device yet. They load once the server is reachable again.';
+
+  @override
   String get booksNoChaptersFound => 'No chapters found';
 
   @override

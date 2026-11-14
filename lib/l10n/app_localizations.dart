@@ -452,6 +452,48 @@ abstract class AppLocalizations {
   /// **'No books found'**
   String get booksNoBooksFound;
 
+  /// No description provided for @booksOfflineNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing books saved on this device.'**
+  String get booksOfflineNotice;
+
+  /// No description provided for @booksOfflineFiltersNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Some filters may hide books that haven\'t been opened yet.'**
+  String get booksOfflineFiltersNotice;
+
+  /// No description provided for @booksOfflinePagingPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull to refresh to see the books saved on this device.'**
+  String get booksOfflinePagingPaused;
+
+  /// No description provided for @booksOfflineRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'show the books saved on this device'**
+  String get booksOfflineRefreshAction;
+
+  /// No description provided for @booksOfflineNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved books match. Try clearing filters or reconnecting.'**
+  String get booksOfflineNoMatch;
+
+  /// No description provided for @booksOfflineEndOfList.
+  ///
+  /// In en, this message translates to:
+  /// **'End of the books saved on this device'**
+  String get booksOfflineEndOfList;
+
+  /// No description provided for @booksFilterOfflineNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'These options aren\'t saved on this device yet. They load once the server is reachable again.'**
+  String get booksFilterOfflineNotSaved;
+
   /// No description provided for @booksNoChaptersFound.
   ///
   /// In en, this message translates to:

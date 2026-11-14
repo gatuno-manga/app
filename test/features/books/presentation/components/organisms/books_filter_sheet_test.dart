@@ -4,6 +4,7 @@ import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/entities/book_page_options.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
+import 'package:gatuno/features/books/presentation/components/molecules/books_offline_notice.dart';
 import 'package:gatuno/features/books/presentation/components/organisms/books_filter_sheet.dart';
 import 'package:gatuno/shared/components/atoms/app_button.dart';
 import 'package:gatuno/features/books/presentation/models/filter_option.dart';
@@ -292,6 +293,31 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Action'), findsOneWidget);
+    });
+  });
+
+  group('BooksFilterSheet offline', () {
+    Widget sheet({required bool isOffline}) => Scaffold(
+      body: BooksFilterSheet(
+        initialOptions: const BookPageOptions(),
+        onApply: (_) {},
+        onClear: () {},
+        loadTags: _tags,
+        loadAuthors: _authors,
+        isOffline: isOffline,
+      ),
+    );
+
+    testWidgets('shows the offline notice while offline', (tester) async {
+      await tester.pumpApp(sheet(isOffline: true));
+
+      expect(find.byType(BooksOfflineNotice), findsOneWidget);
+    });
+
+    testWidgets('shows no offline notice online', (tester) async {
+      await tester.pumpApp(sheet(isOffline: false));
+
+      expect(find.byType(BooksOfflineNotice), findsNothing);
     });
   });
 }

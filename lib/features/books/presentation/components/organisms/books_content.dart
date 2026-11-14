@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../../../shared/components/atoms/app_load_more_footer.dart';
+import '../../../../../shared/components/molecules/app_offline_empty_view.dart';
 import '../../../../../shared/components/molecules/pagination.dart';
 import '../../../../../shared/utils/load_more_listener.dart';
 import '../../../domain/entities/books_view_preferences.dart';
 import '../../view_models/books_view_model.dart';
+import '../atoms/books_list_note.dart';
+import '../molecules/books_offline_notice.dart';
 import 'books_collection.dart';
 import 'books_view_options_sheet.dart';
 import 'books_view_toolbar.dart';
@@ -30,20 +33,30 @@ class BooksContent extends StatelessWidget {
           onOptionsPressed: () =>
               BooksViewOptionsSheet.show(context, viewModel),
         ),
+        if (viewModel.isCacheList) const BooksOfflineNotice(),
         Expanded(child: _body(context)),
         if (!_infinite && _hasBooks)
-          Pagination(
-            currentPage: viewModel.options.page.value,
-            totalPages: viewModel.bookList?.totalPages.value ?? 1,
-            isLoading: viewModel.isLoading,
-            onPageChanged: viewModel.setPage,
-          ),
+          viewModel.isPagingPaused
+              ? _pausedNote(AppLocalizations.of(context)!, announce: true)
+              : Pagination(
+                  currentPage: viewModel.options.page.value,
+                  totalPages: viewModel.bookList?.totalPages.value ?? 1,
+                  isLoading: viewModel.isLoading,
+                  onPageChanged: viewModel.setPage,
+                ),
       ],
     );
   }
 
   Widget _body(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (viewModel.isOfflineMiss && !_hasBooks) {
+      return AppOfflineEmptyView(
+        onRetry: viewModel.refresh,
+        isRetrying: viewModel.isRefreshing || viewModel.isLoading,
+      );
+    }
 
     if (viewModel.isLoading && !_hasBooks) {
       return const Center(child: CircularProgressIndicator());
@@ -55,12 +68,16 @@ class BooksContent extends StatelessWidget {
 
     if (!_hasBooks) {
       return RefreshIndicator(
-        onRefresh: viewModel.fetchBooks,
+        onRefresh: viewModel.refresh,
         child: ListView(
           children: [
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.8,
-              child: Center(child: Text(l10n.booksNoBooksFound)),
+              child: BooksListNote(
+                message: viewModel.isCacheList
+                    ? l10n.booksOfflineNoMatch
+                    : l10n.booksNoBooksFound,
+              ),
             ),
           ],
         ),
@@ -68,16 +85,43 @@ class BooksContent extends StatelessWidget {
     }
 
     return LoadMoreListener(
-      enabled: _infinite && viewModel.hasMore && !viewModel.isLoading,
+      enabled:
+          _infinite &&
+          viewModel.hasMore &&
+          !viewModel.isLoading &&
+          !viewModel.isPagingPaused,
       onLoadMore: viewModel.loadMore,
       child: RefreshIndicator(
-        onRefresh: viewModel.fetchBooks,
+        onRefresh: viewModel.refresh,
         child: BooksCollection(
           books: viewModel.bookList!.data,
           preferences: viewModel.preferences,
-          footer: viewModel.isLoadingMore ? const AppLoadMoreFooter() : null,
+          footer: _footer(l10n),
         ),
       ),
     );
+  }
+
+  /// Pull to refresh has no accessibility action, so the note offers the
+  /// refresh itself to screen readers.
+  Widget _pausedNote(AppLocalizations l10n, {required bool announce}) {
+    return BooksListNote(
+      message: l10n.booksOfflinePagingPaused,
+      announce: announce,
+      onAction: viewModel.refresh,
+      actionHint: l10n.booksOfflineRefreshAction,
+    );
+  }
+
+  Widget? _footer(AppLocalizations l10n) {
+    if (viewModel.isLoadingMore) return const AppLoadMoreFooter();
+    if (!_infinite) return null;
+    // Reached by scrolling, so it is read in order; announcing it again
+    // each time it is rebuilt would only repeat the shell's banner.
+    if (viewModel.isPagingPaused) return _pausedNote(l10n, announce: false);
+    if (viewModel.isCacheList && !viewModel.hasMore) {
+      return BooksListNote(message: l10n.booksOfflineEndOfList);
+    }
+    return null;
   }
 }

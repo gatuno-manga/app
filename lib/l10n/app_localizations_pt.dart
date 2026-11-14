@@ -189,6 +189,32 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksNoBooksFound => 'Nenhum livro encontrado';
 
   @override
+  String get booksOfflineNotice => 'Mostrando os livros salvos neste aparelho.';
+
+  @override
+  String get booksOfflineFiltersNotice =>
+      'Alguns filtros podem esconder livros que ainda não foram abertos.';
+
+  @override
+  String get booksOfflinePagingPaused =>
+      'Puxe para atualizar e ver os livros salvos neste aparelho.';
+
+  @override
+  String get booksOfflineRefreshAction =>
+      'mostrar os livros salvos neste aparelho';
+
+  @override
+  String get booksOfflineNoMatch =>
+      'Nenhum livro salvo corresponde. Tente limpar os filtros ou reconectar.';
+
+  @override
+  String get booksOfflineEndOfList => 'Fim dos livros salvos neste aparelho';
+
+  @override
+  String get booksFilterOfflineNotSaved =>
+      'Estas opções ainda não estão salvas neste aparelho. Vão carregar quando o servidor voltar a responder.';
+
+  @override
   String get booksNoChaptersFound => 'Nenhum capítulo encontrado';
 
   @override

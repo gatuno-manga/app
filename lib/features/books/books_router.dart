@@ -17,6 +17,7 @@ final StatefulShellBranch booksBranch = StatefulShellBranch(
       path: '/books',
       builder: (context, state) => Provider<BooksViewModel>(
         create: (_) => sl<BooksViewModel>(),
+        dispose: (_, vm) => vm.dispose(),
         child: const BooksPage(),
       ),
       routes: [
