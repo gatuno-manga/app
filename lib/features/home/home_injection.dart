@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../../core/connectivity/connectivity_service.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
 import '../users/domain/use_cases/user_service.dart';
 import '../books/domain/repositories/books_repository.dart';
@@ -13,6 +14,7 @@ void initHomeInjection(GetIt sl) {
       sl<UserService>(),
       sl<BooksRepository>(),
       sl<ReadingProgressCoordinator>(),
+      sl<ConnectivityService>(),
     ),
   );
 }

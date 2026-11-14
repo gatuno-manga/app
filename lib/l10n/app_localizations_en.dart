@@ -644,6 +644,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeCtaSignInButton => 'Sign In to Request';
 
   @override
+  String get homeCtaOfflineNote => 'Available when you\'re back online.';
+
+  @override
   String get bookRequestsFormTitleRequired => 'Please enter a title';
 
   @override

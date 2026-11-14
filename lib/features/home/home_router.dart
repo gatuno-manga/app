@@ -14,6 +14,7 @@ final StatefulShellBranch homeBranch = StatefulShellBranch(
       path: '/home',
       builder: (context, state) => Provider<HomeViewModel>(
         create: (_) => sl<HomeViewModel>(),
+        dispose: (_, vm) => vm.dispose(),
         child: const HomePage(),
       ),
     ),

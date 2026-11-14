@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:gatuno/core/connectivity/connectivity_service.dart';
+import 'package:gatuno/core/network/exceptions.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
@@ -26,15 +30,71 @@ class MockBooksRepository extends Mock implements BooksRepository {}
 class MockReadingProgressCoordinator extends Mock
     implements ReadingProgressCoordinator {}
 
+/// Drives the status and reconnect streams by hand; [checkNow] lands on
+/// [probeResult].
+class FakeConnectivityService implements ConnectivityService {
+  FakeConnectivityService({
+    ConnectivityStatus status = ConnectivityStatus.online,
+  }) : _status = status;
+
+  ConnectivityStatus _status;
+  ConnectivityStatus probeResult = ConnectivityStatus.online;
+  int checks = 0;
+  final _statuses = StreamController<ConnectivityStatus>.broadcast();
+  final _reconnected = StreamController<void>.broadcast();
+
+  @override
+  ConnectivityStatus get status => _status;
+
+  /// Emits the current status on listen, then every change, as the
+  /// contract says.
+  @override
+  Stream<ConnectivityStatus> get statusStream async* {
+    yield _status;
+    yield* _statuses.stream;
+  }
+
+  @override
+  Stream<void> get onReconnected => _reconnected.stream;
+
+  void setStatus(ConnectivityStatus status) {
+    _status = status;
+    _statuses.add(status);
+  }
+
+  void reconnect() => _reconnected.add(null);
+
+  bool get hasListeners => _statuses.hasListener || _reconnected.hasListener;
+
+  @override
+  Future<void> checkNow() async {
+    checks++;
+    setStatus(probeResult);
+  }
+
+  @override
+  void reportReachable() {}
+
+  @override
+  void reportUnreachable() {}
+
+  Future<void> close() async {
+    await _statuses.close();
+    await _reconnected.close();
+  }
+}
+
 void main() {
   late HomeViewModel viewModel;
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
   late MockBooksRepository mockBooksRepository;
   late MockReadingProgressCoordinator mockReadingCoordinator;
+  late FakeConnectivityService connectivity;
 
   setUpAll(() {
     registerFallbackValue(const BookPageOptions());
+    registerFallbackValue(const BookId('fallback'));
   });
 
   UserModel user({String? name, String? imageUrl}) => UserModel(
@@ -46,18 +106,25 @@ void main() {
     profilePictureUrl: imageUrl,
   );
 
-  HomeViewModel buildViewModel() => HomeViewModel(
-    mockAuthService,
-    mockUserService,
-    mockBooksRepository,
-    mockReadingCoordinator,
-  );
+  HomeViewModel buildViewModel() {
+    final vm = HomeViewModel(
+      mockAuthService,
+      mockUserService,
+      mockBooksRepository,
+      mockReadingCoordinator,
+      connectivity,
+    );
+    addTearDown(vm.dispose);
+    return vm;
+  }
 
   setUp(() {
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
     mockBooksRepository = MockBooksRepository();
     mockReadingCoordinator = MockReadingProgressCoordinator();
+    connectivity = FakeConnectivityService();
+    addTearDown(connectivity.close);
 
     when(
       () => mockAuthService.authStateStream,
@@ -125,6 +192,373 @@ void main() {
       profiles.add(UserModel.guest);
       await Future<void>.delayed(Duration.zero);
       expect(viewModel.state.user, same(UserModel.guest));
+    });
+  });
+
+  group('HomeViewModel offline', () {
+    Book book(String id) => Book(id: BookId(id), title: BookTitle('Book $id'));
+
+    BookList listOf(List<Book> books) => BookList(
+      data: books,
+      total: PositiveInt(books.isEmpty ? 0 : books.length),
+      page: const PositiveInt(1),
+      limit: const PositiveInt(12),
+      totalPages: const PositiveInt(1),
+    );
+
+    void stubList(String orderBy, Future<BookList> Function() answer) {
+      when(
+        () => mockBooksRepository.getBooks(
+          any(
+            that: isA<BookPageOptions>().having(
+              (o) => o.orderBy,
+              'orderBy',
+              orderBy,
+            ),
+          ),
+        ),
+      ).thenAnswer((_) => answer());
+    }
+
+    Future<void> settle() => Future<void>.delayed(Duration.zero);
+
+    test('shows the offline empty view when neither list is saved', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenThrow(OfflineException());
+
+      viewModel = buildViewModel();
+      await settle();
+
+      expect(viewModel.state.isOffline, isTrue);
+      expect(viewModel.state.showOfflineEmpty, isTrue);
+      expect(viewModel.state.latestUpdated.isLoading, isFalse);
+      expect(viewModel.state.recentlyAdded.isLoading, isFalse);
+    });
+
+    test('shows the saved list when only the other one misses', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      stubList('updatedAt', () async => listOf([book('a'), book('b')]));
+      stubList('createdAt', () async => throw OfflineException());
+
+      viewModel = buildViewModel();
+      await settle();
+
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+      expect(viewModel.state.latestUpdated.books, hasLength(2));
+      expect(viewModel.state.featuredBooks, hasLength(2));
+      expect(viewModel.state.recentlyAdded.books, isEmpty);
+    });
+
+    test('a server error is not the offline empty view', () async {
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenThrow(ServerException());
+
+      viewModel = buildViewModel();
+      await settle();
+
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+    });
+
+    test('continue reading skips books that fail and keeps order', () async {
+      when(() => mockAuthService.authenticated).thenReturn(true);
+      when(
+        () => mockReadingCoordinator.getContinueReadingBooks(
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer(
+        (_) async => const [BookId('1'), BookId('2'), BookId('3'), BookId('4')],
+      );
+      when(
+        () => mockBooksRepository.getBook(const BookId('1')),
+      ).thenAnswer((_) async => book('1'));
+      when(
+        () => mockBooksRepository.getBook(const BookId('2')),
+      ).thenThrow(OfflineException());
+      when(
+        () => mockBooksRepository.getBook(const BookId('3')),
+      ).thenThrow(ServerException());
+      when(
+        () => mockBooksRepository.getBook(const BookId('4')),
+      ).thenAnswer((_) async => book('4'));
+
+      viewModel = buildViewModel();
+      await settle();
+
+      expect(viewModel.state.continueReadingBooks.map((b) => b.id.value), [
+        '1',
+        '4',
+      ]);
+      expect(viewModel.state.isLoadingContinueReading, isFalse);
+    });
+
+    test('follows the connectivity status', () async {
+      viewModel = buildViewModel();
+      expect(viewModel.state.isOffline, isFalse);
+
+      connectivity.setStatus(ConnectivityStatus.offline);
+      await settle();
+      expect(viewModel.state.isOffline, isTrue);
+
+      connectivity.setStatus(ConnectivityStatus.online);
+      await settle();
+      expect(viewModel.state.isOffline, isFalse);
+    });
+
+    test('reloads silently on reconnect, keeping what is shown', () async {
+      stubList('updatedAt', () async => listOf([book('old')]));
+      viewModel = buildViewModel();
+      await settle();
+      connectivity.setStatus(ConnectivityStatus.offline);
+      await settle();
+
+      final fresh = Completer<BookList>();
+      stubList('updatedAt', () => fresh.future);
+      final loadingStates = <bool>[];
+      final sub = viewModel.stateStream.listen(
+        (s) => loadingStates.add(s.latestUpdated.isLoading),
+      );
+      addTearDown(sub.cancel);
+
+      connectivity.setStatus(ConnectivityStatus.online);
+      connectivity.reconnect();
+      await settle();
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'old');
+      expect(loadingStates, everyElement(isFalse));
+
+      fresh.complete(listOf([book('new')]));
+      await settle();
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'new');
+    });
+
+    test('a failed refresh keeps the old content', () async {
+      stubList('updatedAt', () async => listOf([book('old')]));
+      viewModel = buildViewModel();
+      await settle();
+
+      stubList('updatedAt', () async => throw ServerException());
+      await viewModel.reload();
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'old');
+    });
+
+    test('an offline refresh over shown books keeps them', () async {
+      stubList('updatedAt', () async => listOf([book('old')]));
+      viewModel = buildViewModel();
+      await settle();
+
+      stubList('updatedAt', () async => throw OfflineException());
+      await viewModel.reload();
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'old');
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+    });
+
+    test('continue reading keeps its books when every one fails', () async {
+      when(() => mockAuthService.authenticated).thenReturn(true);
+      when(
+        () => mockReadingCoordinator.getContinueReadingBooks(
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer((_) async => const [BookId('1')]);
+      when(
+        () => mockBooksRepository.getBook(const BookId('1')),
+      ).thenAnswer((_) async => book('1'));
+      viewModel = buildViewModel();
+      await settle();
+      expect(viewModel.state.continueReadingBooks, hasLength(1));
+
+      when(
+        () => mockBooksRepository.getBook(const BookId('1')),
+      ).thenThrow(ServerException());
+      await viewModel.reload();
+
+      expect(viewModel.state.continueReadingBooks, hasLength(1));
+    });
+
+    test('a reconnect after everything missed shows skeletons', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenThrow(OfflineException());
+      viewModel = buildViewModel();
+      await settle();
+
+      final fresh = Completer<BookList>();
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) => fresh.future);
+      connectivity.setStatus(ConnectivityStatus.online);
+      connectivity.reconnect();
+      await settle();
+
+      expect(viewModel.state.latestUpdated.isLoading, isTrue);
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+      fresh.complete(listOf([book('a')]));
+      await settle();
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+      expect(viewModel.state.latestUpdated.books, hasLength(1));
+    });
+
+    test('a server error after reconnecting leaves the offline view', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenThrow(OfflineException());
+      viewModel = buildViewModel();
+      await settle();
+      expect(viewModel.state.showOfflineEmpty, isTrue);
+
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenThrow(ServerException());
+      connectivity.setStatus(ConnectivityStatus.online);
+      connectivity.reconnect();
+      await settle();
+
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+    });
+
+    group('retry', () {
+      setUp(() {
+        connectivity = FakeConnectivityService(
+          status: ConnectivityStatus.offline,
+        );
+        addTearDown(connectivity.close);
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenThrow(OfflineException());
+        viewModel = buildViewModel();
+      });
+
+      test('stays on the empty view while still offline', () async {
+        await settle();
+        clearInteractions(mockBooksRepository);
+        connectivity.probeResult = ConnectivityStatus.offline;
+
+        await viewModel.retry();
+
+        expect(connectivity.checks, 1);
+        verifyNever(() => mockBooksRepository.getBooks(any()));
+        expect(viewModel.state.showOfflineEmpty, isTrue);
+        expect(viewModel.state.isRetrying, isFalse);
+      });
+
+      test('reloads once the server answers', () async {
+        await settle();
+        clearInteractions(mockBooksRepository);
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) async => listOf([book('a')]));
+
+        final retrying = viewModel.retry();
+        expect(viewModel.state.isRetrying, isTrue);
+        await retrying;
+
+        verify(() => mockBooksRepository.getBooks(any())).called(2);
+        expect(viewModel.state.showOfflineEmpty, isFalse);
+        expect(viewModel.state.isRetrying, isFalse);
+      });
+
+      test('the reconnect that follows does not fetch again', () async {
+        await settle();
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) async => listOf([book('a')]));
+        await viewModel.retry();
+        clearInteractions(mockBooksRepository);
+
+        connectivity.reconnect();
+        await settle();
+
+        verifyNever(() => mockBooksRepository.getBooks(any()));
+      });
+    });
+
+    test('a reload asked online after an offline one fetches again', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      final cacheRead = Completer<BookList>();
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) => cacheRead.future);
+      viewModel = buildViewModel();
+
+      connectivity.setStatus(ConnectivityStatus.online);
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) async => listOf([book('fresh')]));
+      final again = viewModel.reload();
+      cacheRead.completeError(OfflineException());
+      await again;
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'fresh');
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+    });
+
+    test(
+      'a reconnect during a reload that went offline fetches again',
+      () async {
+        final pending = Completer<BookList>();
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) => pending.future);
+        viewModel = buildViewModel();
+        await settle();
+
+        connectivity.setStatus(ConnectivityStatus.offline);
+        connectivity.setStatus(ConnectivityStatus.online);
+        when(
+          () => mockBooksRepository.getBooks(any()),
+        ).thenAnswer((_) async => listOf([book('fresh')]));
+        connectivity.reconnect();
+        await settle();
+        pending.completeError(OfflineException());
+        await settle();
+        await settle();
+
+        expect(viewModel.state.latestUpdated.books.single.id.value, 'fresh');
+      },
+    );
+
+    test('a reload requested while one runs joins it', () async {
+      final pending = Completer<BookList>();
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) => pending.future);
+      viewModel = buildViewModel();
+      clearInteractions(mockBooksRepository);
+
+      final again = viewModel.reload();
+      pending.complete(listOf(const []));
+      await again;
+
+      verifyNever(() => mockBooksRepository.getBooks(any()));
+    });
+
+    test('dispose cancels the connectivity subscriptions', () {
+      expect(connectivity.hasListeners, isTrue);
+
+      viewModel.dispose();
+
+      expect(connectivity.hasListeners, isFalse);
     });
   });
 }

@@ -1292,6 +1292,12 @@ abstract class AppLocalizations {
   /// **'Sign In to Request'**
   String get homeCtaSignInButton;
 
+  /// Under the home call-to-action card while offline, explaining why its button is disabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Available when you\'re back online.'**
+  String get homeCtaOfflineNote;
+
   /// No description provided for @bookRequestsFormTitleRequired.
   ///
   /// In en, this message translates to:
