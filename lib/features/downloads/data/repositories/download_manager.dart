@@ -136,7 +136,14 @@ class DownloadManager implements DownloadService {
             (_) => _guard('Network rule change', _onRulesChanged),
           ),
         )
-        ..add(_connectivity.onReconnected.listen((_) => unawaited(_plan())));
+        ..add(
+          _connectivity.onReconnected.listen((_) {
+            // Back online: no reason to wait out the backoff.
+            _planRetry?.cancel();
+            _planRetry = null;
+            unawaited(_plan());
+          }),
+        );
       return _serial(() async {
         try {
           await _transfers.start();
@@ -182,7 +189,6 @@ class DownloadManager implements DownloadService {
       final now = _now();
       // Only database writes in the transaction: requeueing talks to the
       // native queue and the file system, which a rollback cannot undo.
-      final typeBefore = await _records.bookType(bookId.value);
       final existing = await _records.transaction(() async {
         await _records.upsertBook(bookId.value, book?.type.asBookType, now);
         final existing = <DownloadChapter>[];
@@ -196,15 +202,8 @@ class DownloadManager implements DownloadService {
         }
         return existing;
       });
-      // A type known only now may change the network rule of files queued
-      // under the old one.
-      final type = book?.type.asBookType;
-      if (type != null && _rules.value[type] != _rules.value[typeBefore]) {
-        await _requeueUnderRules([
-          for (final c in await _records.activePlanned())
-            if (c.bookId == bookId.value) c.chapterId,
-        ]);
-      }
+      // A type known only now may change the rule of files already queued.
+      await _applyRules();
       for (final row in existing) {
         await _requeue(
           row,
@@ -238,13 +237,11 @@ class DownloadManager implements DownloadService {
 
   @override
   Future<void> pause(DownloadScope scope) => _serial(() async {
-    final paused = <String>[];
+    final cancelled = <String>[];
     for (final row in await _records.chaptersIn(scope)) {
-      if (await _transition(row, DownloadEvent.pause)) {
-        paused.add(row.chapterId);
-      }
+      await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
     }
-    await _cancelFiles(paused);
+    await _cancelTasks(cancelled);
   });
 
   @override
@@ -315,7 +312,7 @@ class DownloadManager implements DownloadService {
   @override
   Stream<List<BookDownload>> watchAll() => Rx.combineLatest3(
     _records.watchRows(),
-    _unmetered.startWith(false).distinct(),
+    _unmetered.distinct(),
     _rules.stream,
     _toBooks,
   );
@@ -373,6 +370,9 @@ class DownloadManager implements DownloadService {
   /// and tries again on reconnect or after [_planRetryDelay] (a slow request
   /// does not always end in a reconnect event).
   Future<void> _plan() async {
+    // Backing off from an unreachable or busy server: only the retry timer
+    // or a reconnect plans again, not every new command.
+    if (_planRetry != null) return;
     if (_planning) {
       _planAgain = true;
       return;
@@ -399,7 +399,8 @@ class DownloadManager implements DownloadService {
           });
           if (outcomes.any((o) => o is _Unreachable)) {
             _schedulePlanRetry();
-            break;
+            _planAgain = false;
+            return;
           }
         }
       } while (_planAgain && !_connectivity.isOffline);
@@ -540,9 +541,7 @@ class DownloadManager implements DownloadService {
         // Not cancelled by us (we clear the id first): the user cancelled
         // from the notification. Treat it as a pause, so nothing is lost.
         await _records.setTask(file.fileId, null);
-        if (await _transition(chapter, DownloadEvent.pause)) {
-          await _cancelFiles([chapter.chapterId]);
-        }
+        await _transition(chapter, DownloadEvent.pause);
     }
   }
 
@@ -552,9 +551,6 @@ class DownloadManager implements DownloadService {
   /// its stored failure arrives after this, under the old, now stale, id.
   Future<void> _reconcile() async {
     final active = await _transfers.activeTaskIds();
-    // An app killed between a pause and its cancel leaves ids on paused
-    // chapters: clear them, so [_resync] cancels their tasks as orphans.
-    await _records.clearInactiveTasks();
     await _resync(active);
     // Files a cancelled task moved in after its chapter was deleted.
     await _storage.sweep(await _records.chapterKeys());
@@ -578,23 +574,20 @@ class DownloadManager implements DownloadService {
   /// changes apply in order.
   Future<void> _onRulesChanged() => _serial(() async {
     final rules = await _loadRules();
-    final before = _rules.value;
-    final changed = {
-      for (final type in BookType.values)
-        if (before[type] != rules[type]) type,
-    };
     if (!_rules.isClosed) _rules.add(rules);
-    if (changed.isEmpty) return;
-    // Queue the pending files of those types again under the new rule.
-    final affected = [
-      for (final chapter in await _records.activePlanned())
-        if (changed.contains(await _records.bookType(chapter.bookId)))
-          chapter.chapterId,
-    ];
-    await _requeueUnderRules(affected);
+    await _applyRules();
   });
 
-  Future<void> _requeueUnderRules(List<String> chapterIds) async {
+  /// Requeues the chapters with a queued file whose stored rule differs from
+  /// what the current rules want for its book type.
+  Future<void> _applyRules() async {
+    final rules = _rules.value;
+    final chapterIds = {
+      for (final file in await _records.queuedFiles())
+        if (file.queuedOnWifi !=
+            (rules[file.bookType] == DownloadNetwork.unmetered))
+          file.chapterId,
+    }.toList();
     await _cancelFiles(chapterIds);
     for (final chapterId in chapterIds) {
       await _continue(chapterId);
@@ -685,7 +678,7 @@ class DownloadManager implements DownloadService {
         ),
       );
     }
-    await _records.assignTasks(taskIds);
+    await _records.assignTasks(taskIds, queuedOnWifi: wifi);
     await _transfers.enqueue(transfers);
   }
 
@@ -694,9 +687,7 @@ class DownloadManager implements DownloadService {
   Future<void> _fail(String chapterId, String error) async {
     final chapter = await _records.chapter(chapterId);
     if (chapter == null) return;
-    if (await _transition(chapter, DownloadEvent.fail, error: error)) {
-      await _cancelFiles([chapterId]);
-    }
+    await _transition(chapter, DownloadEvent.fail, error: error);
   }
 
   /// Cancels the native tasks of the chapters' pending files, in one call. Their ids are
@@ -709,23 +700,37 @@ class DownloadManager implements DownloadService {
     ];
     if (queued.isEmpty) return;
     await _records.assignTasks({for (final f in queued) f.fileId: null});
-    await _transfers.cancel([for (final f in queued) f.nativeTaskId!]);
+    await _cancelTasks([for (final f in queued) f.nativeTaskId!]);
+  }
+
+  Future<void> _cancelTasks(List<String> taskIds) async {
+    if (taskIds.isNotEmpty) await _transfers.cancel(taskIds);
   }
 
   /// Applies [event] through [DownloadStateMachine]; `false` when it does not
-  /// apply to the chapter's state.
+  /// apply to the chapter's state. Leaving the active states clears the
+  /// chapter's native task ids in the same write, so an inactive chapter
+  /// never holds one; the tasks are then cancelled, or their ids added to
+  /// [cancelInto] for one batched cancel.
   Future<bool> _transition(
     DownloadChapter chapter,
     DownloadEvent event, {
     String? error,
+    List<String>? cancelInto,
   }) async {
     final next = DownloadStateMachine.next(chapter.state, event);
     if (next == null) return false;
-    await _records.setState(
+    final cleared = await _records.setState(
       chapter.chapterId,
       next,
       next == DownloadState.failed ? error : null,
+      clearTasks: !DownloadStateMachine.isActive(next),
     );
+    if (cancelInto != null) {
+      cancelInto.addAll(cleared);
+    } else {
+      await _cancelTasks(cleared);
+    }
     return true;
   }
 

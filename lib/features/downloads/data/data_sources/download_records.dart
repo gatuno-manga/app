@@ -30,6 +30,19 @@ class ChapterDownloadRow {
   });
 }
 
+/// A file with a native task, for re-checking network rules.
+class QueuedFile {
+  final String chapterId;
+  final BookType bookType;
+  final bool queuedOnWifi;
+
+  const QueuedFile({
+    required this.chapterId,
+    required this.bookType,
+    required this.queuedOnWifi,
+  });
+}
+
 /// Reads and writes of the downloads database. No decisions: the caller
 /// applies the state machine and keeps writes serialized.
 class DownloadRecords {
@@ -155,12 +168,31 @@ class DownloadRecords {
             ..limit(limit))
           .get();
 
-  Future<void> setState(String chapterId, DownloadState state, String? error) =>
-      (_db.update(
-        _db.downloadChapters,
-      )..where((c) => c.chapterId.equals(chapterId))).write(
-        DownloadChaptersCompanion(state: Value(state), error: Value(error)),
-      );
+  /// Sets the chapter's state. With [clearTasks], also clears its files'
+  /// native task ids in the same transaction and returns them.
+  Future<List<String>> setState(
+    String chapterId,
+    DownloadState state,
+    String? error, {
+    bool clearTasks = false,
+  }) => _db.transaction(() async {
+    await (_db.update(
+      _db.downloadChapters,
+    )..where((c) => c.chapterId.equals(chapterId))).write(
+      DownloadChaptersCompanion(state: Value(state), error: Value(error)),
+    );
+    if (!clearTasks) return const <String>[];
+    final queued =
+        await (_db.select(_db.downloadFiles)..where(
+              (f) => f.chapterId.equals(chapterId) & f.nativeTaskId.isNotNull(),
+            ))
+            .get();
+    await (_db.update(_db.downloadFiles)..where(
+          (f) => f.chapterId.equals(chapterId) & f.nativeTaskId.isNotNull(),
+        ))
+        .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
+    return [for (final f in queued) f.nativeTaskId!];
+  });
 
   /// Stores a planned chapter's files; [files] URLs must be absolute.
   Future<void> recordPlan(
@@ -241,13 +273,43 @@ class DownloadRecords {
         ),
       );
 
-  /// Sets or clears (`null`) the native task of several files at once.
-  Future<void> assignTasks(Map<String, String?> taskIdsByFile) =>
-      _db.transaction(() async {
-        for (final entry in taskIdsByFile.entries) {
-          await setTask(entry.key, entry.value);
-        }
-      });
+  /// Sets or clears (`null`) the native task of several files at once,
+  /// recording the network rule they were queued under.
+  Future<void> assignTasks(
+    Map<String, String?> taskIdsByFile, {
+    bool queuedOnWifi = false,
+  }) => _db.transaction(() async {
+    for (final entry in taskIdsByFile.entries) {
+      await (_db.update(
+        _db.downloadFiles,
+      )..where((f) => f.fileId.equals(entry.key))).write(
+        DownloadFilesCompanion(
+          nativeTaskId: Value(entry.value),
+          queuedOnWifi: Value(queuedOnWifi),
+        ),
+      );
+    }
+  });
+
+  /// Files with a native task, with their book type and the rule they were
+  /// queued under.
+  Future<List<QueuedFile>> queuedFiles() async {
+    final f = _db.downloadFiles;
+    final c = _db.downloadChapters;
+    final b = _db.downloadBooks;
+    final query = _db.select(f).join([
+      innerJoin(c, c.chapterId.equalsExp(f.chapterId)),
+      leftOuterJoin(b, b.bookId.equalsExp(c.bookId)),
+    ])..where(f.nativeTaskId.isNotNull());
+    return [
+      for (final row in await query.get())
+        QueuedFile(
+          chapterId: row.readTable(f).chapterId,
+          bookType: row.readTableOrNull(b)?.bookType ?? BookType.other,
+          queuedOnWifi: row.readTable(f).queuedOnWifi,
+        ),
+    ];
+  }
 
   /// Every native task id a file of a queued or running chapter points at.
   Future<Set<String>> recordedTaskIds() async {
@@ -260,18 +322,6 @@ class DownloadRecords {
           ..addColumns([f.nativeTaskId])
           ..where(f.nativeTaskId.isNotNull() & c.state.isInValues(_active));
     return {for (final row in await query.get()) row.read(f.nativeTaskId)!};
-  }
-
-  /// Clears task ids left on chapters that are not queued or running (an
-  /// app killed between a pause and its cancel).
-  Future<void> clearInactiveTasks() async {
-    final active = _db.selectOnly(_db.downloadChapters)
-      ..addColumns([_db.downloadChapters.chapterId])
-      ..where(_db.downloadChapters.state.isInValues(_active));
-    await (_db.update(_db.downloadFiles)..where(
-          (f) => f.nativeTaskId.isNotNull() & f.chapterId.isNotInQuery(active),
-        ))
-        .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
   }
 
   /// Clears these native task ids from the files that hold them.

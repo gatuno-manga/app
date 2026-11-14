@@ -107,7 +107,8 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
       await _downloader.allTaskIds(group: group);
       await Future<void>.delayed(resumeSettle);
       _sweepTimer?.cancel();
-      await _sweep();
+      // No resync event: the caller reconciles right after start.
+      await _sweep(notify: false);
     }
   }
 
@@ -155,14 +156,16 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   /// task from its paused list before resuming it, so serial sweeps never
   /// resume a task twice. A task without resume data is dropped by the
   /// plugin; the resync lets the owner queue it again.
-  Future<void> _sweep() {
+  Future<void> _sweep({bool notify = true}) {
     return _sweeps = _sweeps.then((_) async {
       try {
         await _downloader.resumeAll(group: group);
       } catch (e, stackTrace) {
         AppLogger.e('Could not resume paused files', e, stackTrace, _logTag);
       }
-      if (!_events.isClosed) _events.add(const TransfersResynced());
+      if (notify && !_events.isClosed) {
+        _events.add(const TransfersResynced());
+      }
     });
   }
 
@@ -188,7 +191,8 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     return switch (exception) {
       TaskHttpException(httpResponseCode: 404) => DownloadErrors.notFound,
       TaskFileSystemException(:final description)
-          when description.toLowerCase().contains('space') =>
+          // Both platforms say "Insufficient space to store the file...".
+          when description.toLowerCase().contains('insufficient space') =>
         DownloadErrors.storageFull,
       TaskHttpException() || TaskConnectionException() => DownloadErrors.server,
       _ => DownloadErrors.unknown,

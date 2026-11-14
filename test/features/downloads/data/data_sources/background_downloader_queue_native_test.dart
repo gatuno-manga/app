@@ -153,7 +153,8 @@ void main() {
         ),
       ]);
       verifyNever(() => downloader.resume(any()));
-      expect(events, [const TransfersResynced()]);
+      // The caller reconciles right after start: no extra resync.
+      expect(events, isEmpty);
     });
 
     test('paused updates settle into one resume sweep', () async {

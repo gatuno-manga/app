@@ -65,6 +65,10 @@ class DownloadFiles extends Table {
   /// Events of any other task id are stale and ignored.
   TextColumn get nativeTaskId => text().nullable()();
 
+  /// Whether the current task was queued for Wi-Fi only, so a rule change
+  /// requeues exactly the files queued under another rule.
+  BoolColumn get queuedOnWifi => boolean().withDefault(const Constant(false))();
+
   BoolColumn get done => boolean().withDefault(const Constant(false))();
   IntColumn get bytes => integer().withDefault(const Constant(0))();
 

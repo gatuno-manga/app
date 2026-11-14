@@ -832,6 +832,21 @@ class $DownloadFilesTable extends DownloadFiles
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _queuedOnWifiMeta = const VerificationMeta(
+    'queuedOnWifi',
+  );
+  @override
+  late final GeneratedColumn<bool> queuedOnWifi = GeneratedColumn<bool>(
+    'queued_on_wifi',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("queued_on_wifi" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _doneMeta = const VerificationMeta('done');
   @override
   late final GeneratedColumn<bool> done = GeneratedColumn<bool>(
@@ -863,6 +878,7 @@ class $DownloadFilesTable extends DownloadFiles
     url,
     relativePath,
     nativeTaskId,
+    queuedOnWifi,
     done,
     bytes,
   ];
@@ -930,6 +946,15 @@ class $DownloadFilesTable extends DownloadFiles
         ),
       );
     }
+    if (data.containsKey('queued_on_wifi')) {
+      context.handle(
+        _queuedOnWifiMeta,
+        queuedOnWifi.isAcceptableOrUnknown(
+          data['queued_on_wifi']!,
+          _queuedOnWifiMeta,
+        ),
+      );
+    }
     if (data.containsKey('done')) {
       context.handle(
         _doneMeta,
@@ -975,6 +1000,10 @@ class $DownloadFilesTable extends DownloadFiles
         DriftSqlType.string,
         data['${effectivePrefix}native_task_id'],
       ),
+      queuedOnWifi: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}queued_on_wifi'],
+      )!,
       done: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}done'],
@@ -1009,6 +1038,10 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
   /// The native task of the current attempt; `null` when none is queued.
   /// Events of any other task id are stale and ignored.
   final String? nativeTaskId;
+
+  /// Whether the current task was queued for Wi-Fi only, so a rule change
+  /// requeues exactly the files queued under another rule.
+  final bool queuedOnWifi;
   final bool done;
   final int bytes;
   const DownloadFile({
@@ -1018,6 +1051,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
     required this.url,
     required this.relativePath,
     this.nativeTaskId,
+    required this.queuedOnWifi,
     required this.done,
     required this.bytes,
   });
@@ -1032,6 +1066,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
     if (!nullToAbsent || nativeTaskId != null) {
       map['native_task_id'] = Variable<String>(nativeTaskId);
     }
+    map['queued_on_wifi'] = Variable<bool>(queuedOnWifi);
     map['done'] = Variable<bool>(done);
     map['bytes'] = Variable<int>(bytes);
     return map;
@@ -1047,6 +1082,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
       nativeTaskId: nativeTaskId == null && nullToAbsent
           ? const Value.absent()
           : Value(nativeTaskId),
+      queuedOnWifi: Value(queuedOnWifi),
       done: Value(done),
       bytes: Value(bytes),
     );
@@ -1064,6 +1100,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
       url: serializer.fromJson<String>(json['url']),
       relativePath: serializer.fromJson<String>(json['relativePath']),
       nativeTaskId: serializer.fromJson<String?>(json['nativeTaskId']),
+      queuedOnWifi: serializer.fromJson<bool>(json['queuedOnWifi']),
       done: serializer.fromJson<bool>(json['done']),
       bytes: serializer.fromJson<int>(json['bytes']),
     );
@@ -1078,6 +1115,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
       'url': serializer.toJson<String>(url),
       'relativePath': serializer.toJson<String>(relativePath),
       'nativeTaskId': serializer.toJson<String?>(nativeTaskId),
+      'queuedOnWifi': serializer.toJson<bool>(queuedOnWifi),
       'done': serializer.toJson<bool>(done),
       'bytes': serializer.toJson<int>(bytes),
     };
@@ -1090,6 +1128,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
     String? url,
     String? relativePath,
     Value<String?> nativeTaskId = const Value.absent(),
+    bool? queuedOnWifi,
     bool? done,
     int? bytes,
   }) => DownloadFile(
@@ -1099,6 +1138,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
     url: url ?? this.url,
     relativePath: relativePath ?? this.relativePath,
     nativeTaskId: nativeTaskId.present ? nativeTaskId.value : this.nativeTaskId,
+    queuedOnWifi: queuedOnWifi ?? this.queuedOnWifi,
     done: done ?? this.done,
     bytes: bytes ?? this.bytes,
   );
@@ -1114,6 +1154,9 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
       nativeTaskId: data.nativeTaskId.present
           ? data.nativeTaskId.value
           : this.nativeTaskId,
+      queuedOnWifi: data.queuedOnWifi.present
+          ? data.queuedOnWifi.value
+          : this.queuedOnWifi,
       done: data.done.present ? data.done.value : this.done,
       bytes: data.bytes.present ? data.bytes.value : this.bytes,
     );
@@ -1128,6 +1171,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
           ..write('url: $url, ')
           ..write('relativePath: $relativePath, ')
           ..write('nativeTaskId: $nativeTaskId, ')
+          ..write('queuedOnWifi: $queuedOnWifi, ')
           ..write('done: $done, ')
           ..write('bytes: $bytes')
           ..write(')'))
@@ -1142,6 +1186,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
     url,
     relativePath,
     nativeTaskId,
+    queuedOnWifi,
     done,
     bytes,
   );
@@ -1155,6 +1200,7 @@ class DownloadFile extends DataClass implements Insertable<DownloadFile> {
           other.url == this.url &&
           other.relativePath == this.relativePath &&
           other.nativeTaskId == this.nativeTaskId &&
+          other.queuedOnWifi == this.queuedOnWifi &&
           other.done == this.done &&
           other.bytes == this.bytes);
 }
@@ -1166,6 +1212,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
   final Value<String> url;
   final Value<String> relativePath;
   final Value<String?> nativeTaskId;
+  final Value<bool> queuedOnWifi;
   final Value<bool> done;
   final Value<int> bytes;
   final Value<int> rowid;
@@ -1176,6 +1223,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
     this.url = const Value.absent(),
     this.relativePath = const Value.absent(),
     this.nativeTaskId = const Value.absent(),
+    this.queuedOnWifi = const Value.absent(),
     this.done = const Value.absent(),
     this.bytes = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1187,6 +1235,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
     required String url,
     required String relativePath,
     this.nativeTaskId = const Value.absent(),
+    this.queuedOnWifi = const Value.absent(),
     this.done = const Value.absent(),
     this.bytes = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1202,6 +1251,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
     Expression<String>? url,
     Expression<String>? relativePath,
     Expression<String>? nativeTaskId,
+    Expression<bool>? queuedOnWifi,
     Expression<bool>? done,
     Expression<int>? bytes,
     Expression<int>? rowid,
@@ -1213,6 +1263,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
       if (url != null) 'url': url,
       if (relativePath != null) 'relative_path': relativePath,
       if (nativeTaskId != null) 'native_task_id': nativeTaskId,
+      if (queuedOnWifi != null) 'queued_on_wifi': queuedOnWifi,
       if (done != null) 'done': done,
       if (bytes != null) 'bytes': bytes,
       if (rowid != null) 'rowid': rowid,
@@ -1226,6 +1277,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
     Value<String>? url,
     Value<String>? relativePath,
     Value<String?>? nativeTaskId,
+    Value<bool>? queuedOnWifi,
     Value<bool>? done,
     Value<int>? bytes,
     Value<int>? rowid,
@@ -1237,6 +1289,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
       url: url ?? this.url,
       relativePath: relativePath ?? this.relativePath,
       nativeTaskId: nativeTaskId ?? this.nativeTaskId,
+      queuedOnWifi: queuedOnWifi ?? this.queuedOnWifi,
       done: done ?? this.done,
       bytes: bytes ?? this.bytes,
       rowid: rowid ?? this.rowid,
@@ -1264,6 +1317,9 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
     if (nativeTaskId.present) {
       map['native_task_id'] = Variable<String>(nativeTaskId.value);
     }
+    if (queuedOnWifi.present) {
+      map['queued_on_wifi'] = Variable<bool>(queuedOnWifi.value);
+    }
     if (done.present) {
       map['done'] = Variable<bool>(done.value);
     }
@@ -1285,6 +1341,7 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
           ..write('url: $url, ')
           ..write('relativePath: $relativePath, ')
           ..write('nativeTaskId: $nativeTaskId, ')
+          ..write('queuedOnWifi: $queuedOnWifi, ')
           ..write('done: $done, ')
           ..write('bytes: $bytes, ')
           ..write('rowid: $rowid')
@@ -1764,6 +1821,7 @@ typedef $$DownloadFilesTableCreateCompanionBuilder =
       required String url,
       required String relativePath,
       Value<String?> nativeTaskId,
+      Value<bool> queuedOnWifi,
       Value<bool> done,
       Value<int> bytes,
       Value<int> rowid,
@@ -1776,6 +1834,7 @@ typedef $$DownloadFilesTableUpdateCompanionBuilder =
       Value<String> url,
       Value<String> relativePath,
       Value<String?> nativeTaskId,
+      Value<bool> queuedOnWifi,
       Value<bool> done,
       Value<int> bytes,
       Value<int> rowid,
@@ -1817,6 +1876,11 @@ class $$DownloadFilesTableFilterComposer
 
   ColumnFilters<String> get nativeTaskId => $composableBuilder(
     column: $table.nativeTaskId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get queuedOnWifi => $composableBuilder(
+    column: $table.queuedOnWifi,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1870,6 +1934,11 @@ class $$DownloadFilesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get queuedOnWifi => $composableBuilder(
+    column: $table.queuedOnWifi,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get done => $composableBuilder(
     column: $table.done,
     builder: (column) => ColumnOrderings(column),
@@ -1909,6 +1978,11 @@ class $$DownloadFilesTableAnnotationComposer
 
   GeneratedColumn<String> get nativeTaskId => $composableBuilder(
     column: $table.nativeTaskId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get queuedOnWifi => $composableBuilder(
+    column: $table.queuedOnWifi,
     builder: (column) => column,
   );
 
@@ -1962,6 +2036,7 @@ class $$DownloadFilesTableTableManager
                 Value<String> url = const Value.absent(),
                 Value<String> relativePath = const Value.absent(),
                 Value<String?> nativeTaskId = const Value.absent(),
+                Value<bool> queuedOnWifi = const Value.absent(),
                 Value<bool> done = const Value.absent(),
                 Value<int> bytes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1972,6 +2047,7 @@ class $$DownloadFilesTableTableManager
                 url: url,
                 relativePath: relativePath,
                 nativeTaskId: nativeTaskId,
+                queuedOnWifi: queuedOnWifi,
                 done: done,
                 bytes: bytes,
                 rowid: rowid,
@@ -1984,6 +2060,7 @@ class $$DownloadFilesTableTableManager
                 required String url,
                 required String relativePath,
                 Value<String?> nativeTaskId = const Value.absent(),
+                Value<bool> queuedOnWifi = const Value.absent(),
                 Value<bool> done = const Value.absent(),
                 Value<int> bytes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1994,6 +2071,7 @@ class $$DownloadFilesTableTableManager
                 url: url,
                 relativePath: relativePath,
                 nativeTaskId: nativeTaskId,
+                queuedOnWifi: queuedOnWifi,
                 done: done,
                 bytes: bytes,
                 rowid: rowid,
