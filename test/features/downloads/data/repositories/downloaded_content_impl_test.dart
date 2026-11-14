@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
+import 'package:gatuno/features/downloads/data/data_sources/download_records.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
 import 'package:gatuno/features/downloads/data/database/downloads_database.dart';
 import 'package:gatuno/features/downloads/data/repositories/downloaded_content_impl.dart';
@@ -77,7 +78,7 @@ void main() {
     db = DownloadsDatabase(NativeDatabase.memory());
     dir = Directory.systemTemp.createTempSync('gatuno-downloaded');
     storage = DownloadStorage(() async => dir);
-    content = DownloadedContentImpl(db, storage);
+    content = DownloadedContentImpl(DownloadRecords(db), storage);
   });
 
   tearDown(() async {

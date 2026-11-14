@@ -44,6 +44,10 @@ class DownloadRecords {
   /// Insertion order; `enqueuedAt` only has second precision.
   static const Expression<int> _rowId = CustomExpression<int>('rowid');
 
+  /// Runs [action] in one transaction: one commit, one stream update.
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      _db.transaction(action);
+
   // Books
 
   /// Records the book, or updates its type when [bookType] is known now.
@@ -220,6 +224,41 @@ class DownloadRecords {
           nativeTaskId: const Value(null),
         ),
       );
+
+  /// Sets or clears (`null`) the native task of several files at once.
+  Future<void> assignTasks(Map<String, String?> taskIdsByFile) =>
+      _db.transaction(() async {
+        for (final entry in taskIdsByFile.entries) {
+          await setTask(entry.key, entry.value);
+        }
+      });
+
+  /// Every native task id a file points at.
+  Future<Set<String>> recordedTaskIds() async {
+    final query = _db.selectOnly(_db.downloadFiles)
+      ..addColumns([_db.downloadFiles.nativeTaskId])
+      ..where(_db.downloadFiles.nativeTaskId.isNotNull());
+    return {
+      for (final row in await query.get())
+        row.read(_db.downloadFiles.nativeTaskId)!,
+    };
+  }
+
+  /// A chapter whose download is done.
+  Future<DownloadChapter?> doneChapter(String chapterId) =>
+      (_db.select(_db.downloadChapters)..where(
+            (c) =>
+                c.chapterId.equals(chapterId) &
+                c.state.equalsValue(DownloadState.done),
+          ))
+          .getSingleOrNull();
+
+  /// Every file of a chapter, in order.
+  Future<List<DownloadFile>> files(String chapterId) =>
+      (_db.select(_db.downloadFiles)
+            ..where((f) => f.chapterId.equals(chapterId))
+            ..orderBy([(f) => OrderingTerm.asc(f.position)]))
+          .get();
 
   Future<void> setTask(String fileId, String? nativeTaskId) =>
       (_db.update(_db.downloadFiles)..where((f) => f.fileId.equals(fileId)))

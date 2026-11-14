@@ -1,44 +1,32 @@
 import 'dart:io';
 
-import 'package:drift/drift.dart';
-
 import '../../../../core/logging/logger.dart';
 import '../../../books/domain/value_objects/chapter_id.dart';
 import '../../../reading/data/models/reading_chapter_model.dart';
-import '../../domain/entities/download_state.dart';
 import '../../domain/entities/downloaded_chapter.dart';
 import '../../domain/repositories/downloaded_content.dart';
 import '../data_sources/download_storage.dart';
-import '../database/downloads_database.dart';
+import '../../domain/use_cases/chapter_file_plan.dart';
+import '../data_sources/download_records.dart';
 
-/// [DownloadedContent] read from the downloads database and storage.
+/// [DownloadedContent] read from the download records and storage.
 class DownloadedContentImpl implements DownloadedContent {
-  final DownloadsDatabase _db;
+  final DownloadRecords _records;
   final DownloadStorage _storage;
 
   static const String _logTag = 'DownloadedContent';
 
-  DownloadedContentImpl(this._db, this._storage);
+  DownloadedContentImpl(this._records, this._storage);
 
   @override
   Future<DownloadedChapter?> chapter(ChapterId chapterId) async {
-    final row =
-        await (_db.select(_db.downloadChapters)..where(
-              (c) =>
-                  c.chapterId.equals(chapterId.value) &
-                  c.state.equalsValue(DownloadState.done),
-            ))
-            .getSingleOrNull();
+    final row = await _records.doneChapter(chapterId.value);
     if (row == null) return null;
 
     final manifest = await _storage.readManifest(row.bookId, row.chapterId);
     if (manifest == null) return null;
 
-    final files =
-        await (_db.select(_db.downloadFiles)
-              ..where((f) => f.chapterId.equals(row.chapterId))
-              ..orderBy([(f) => OrderingTerm.asc(f.position)]))
-            .get();
+    final files = await _records.files(row.chapterId);
     final pages = <File>[];
     File? document;
     for (final file in files) {
@@ -52,7 +40,7 @@ class DownloadedContentImpl implements DownloadedContent {
         AppLogger.w('A downloaded file is missing', _logTag);
         return null;
       }
-      if (file.relativePath.startsWith('pages/')) {
+      if (file.relativePath.startsWith('${ChapterFilePlan.pagesDirectory}/')) {
         pages.add(local);
       } else {
         document = local;

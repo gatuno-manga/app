@@ -781,7 +781,56 @@ void main() {
     expect(all.single.chapters.map((c) => c.chapterId.value), ['t2', 't1']);
   });
 
-  group('review round 1', () {
+  group('resilience', () {
+    test('retry after notFound downloads every page again', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      final [first, second] = transfers.enqueued;
+      await land(first);
+      await until(() async => (await chapter('c1'))!.filesDone == 1);
+      transfers.controller.add(
+        TransferFailed(second.taskId, DownloadErrors.notFound),
+      );
+      await untilState('c1', DownloadState.failed);
+
+      await manager.retry(const DownloadScope.chapters([ChapterId('c1')]));
+
+      await until(
+        () => transfers.queuedFor('c1').length == 2,
+        reason: 'both pages again',
+      );
+      expect((await chapter('c1'))!.filesDone, 0);
+      expect(
+        File('${dir.path}/${first.directory}/${first.filename}').existsSync(),
+        isFalse,
+      );
+    });
+
+    test('start cancels native tasks no record points at', () async {
+      await manager.dispose();
+      transfers.active.add('ghost@old.1');
+
+      manager = build();
+      await manager.start();
+
+      expect(transfers.cancelled, ['ghost@old.1']);
+    });
+
+    test('an enqueue issued before a delete does not come back', () async {
+      final details = Completer<Book>();
+      when(() => books.getBook(any())).thenAnswer((_) => details.future);
+      manifest('t1', textManifest('t1'));
+
+      final enqueued = manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await manager.delete(const DownloadScope.book(_book));
+      details.complete(const Book(id: _book, title: BookTitle('Book')));
+      await enqueued;
+
+      expect(await manager.watchBook(_book).first, isNull);
+      verifyNever(() => covers.pin(any(), any()));
+    });
+
     test('native task ids differ across app sessions', () async {
       manifest('c1', imageManifest('c1'));
       await manager.enqueueChapters(_book, const [ChapterId('c1')]);

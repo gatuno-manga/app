@@ -39,7 +39,9 @@ import '../database/downloads_database.dart';
 /// `DioClient`), stores it, and records one row per file; that needs the app
 /// running. Every file then goes straight to WorkManager or URLSession, which
 /// keep downloading with the app closed; their outcome is applied when
-/// events arrive or, on the next [start], from what is on disk.
+/// events arrive or, on the next [start], from what is on disk. A file that
+/// fails while the app is closed waits for the next launch for its retries:
+/// the plugin schedules them from Dart.
 ///
 /// Every change to the records runs through [_serial], so a native event, a
 /// user command and a finished plan never interleave.
@@ -75,6 +77,12 @@ class DownloadManager implements DownloadService {
   final List<StreamSubscription<Object?>> _subscriptions = [];
   final BehaviorSubject<Map<BookType, DownloadNetwork>> _rules =
       BehaviorSubject.seeded(const {});
+
+  /// Bumped by deletes, per book and for everything, so an enqueue issued
+  /// before a delete does not come back after it (its book lookup or chapter
+  /// paging can take a while).
+  final Map<String, int> _deletedBooks = {};
+  int _deletedAll = 0;
   bool _planning = false;
   bool _planAgain = false;
   Timer? _planRetry;
@@ -149,28 +157,42 @@ class DownloadManager implements DownloadService {
   // Commands
 
   @override
-  Future<void> enqueueChapters(
+  Future<void> enqueueChapters(BookId bookId, List<ChapterId> chapterIds) =>
+      _enqueue(bookId, chapterIds, _deletionMark(bookId));
+
+  ({int book, int all}) _deletionMark(BookId bookId) =>
+      (book: _deletedBooks[bookId.value] ?? 0, all: _deletedAll);
+
+  Future<void> _enqueue(
     BookId bookId,
     List<ChapterId> chapterIds,
+    ({int book, int all}) mark,
   ) async {
     if (chapterIds.isEmpty) return;
     final book = await _bookOrNull(bookId);
     await _serial(() async {
+      if (_deletionMark(bookId) != mark) return;
       final now = _now();
-      await _records.upsertBook(bookId.value, book?.type.asBookType.value, now);
-      for (final chapterId in chapterIds) {
-        final row = await _records.chapter(chapterId.value);
-        if (row == null) {
-          await _records.insertChapter(chapterId.value, bookId.value, now);
-        } else {
-          await _requeue(
-            row,
-            row.state == DownloadState.failed
-                ? DownloadEvent.retry
-                : DownloadEvent.resume,
-          );
+      await _records.transaction(() async {
+        await _records.upsertBook(
+          bookId.value,
+          book?.type.asBookType.value,
+          now,
+        );
+        for (final chapterId in chapterIds) {
+          final row = await _records.chapter(chapterId.value);
+          if (row == null) {
+            await _records.insertChapter(chapterId.value, bookId.value, now);
+          } else {
+            await _requeue(
+              row,
+              row.state == DownloadState.failed
+                  ? DownloadEvent.retry
+                  : DownloadEvent.resume,
+            );
+          }
         }
-      }
+      });
       // Inside the serial block, so a delete queued meanwhile unpins after.
       await _pinCover(bookId, book);
     });
@@ -180,6 +202,7 @@ class DownloadManager implements DownloadService {
 
   @override
   Future<void> enqueueBook(BookId bookId) async {
+    final mark = _deletionMark(bookId);
     final ids = <ChapterId>[];
     String? cursor;
     do {
@@ -190,7 +213,7 @@ class DownloadManager implements DownloadService {
       ids.addAll(page.data.map((c) => c.id));
       cursor = page.hasNextPage ? page.nextCursor : null;
     } while (cursor != null);
-    await enqueueChapters(bookId, ids);
+    await _enqueue(bookId, ids, mark);
   }
 
   @override
@@ -221,6 +244,14 @@ class DownloadManager implements DownloadService {
 
   @override
   Future<void> delete(DownloadScope scope) => _serial(() async {
+    switch (scope) {
+      case BookScope(:final bookId):
+        _deletedBooks.update(bookId.value, (v) => v + 1, ifAbsent: () => 1);
+      case AllScope():
+        _deletedAll++;
+      case ChaptersScope():
+        break;
+    }
     final rows = await _records.chaptersIn(scope);
     if (rows.isEmpty) return;
     for (final row in rows) {
@@ -241,6 +272,7 @@ class DownloadManager implements DownloadService {
   /// Deletes every download: the server changed, and they belong to the old
   /// one. Cancels every native task, recorded or not.
   Future<void> clearAll() => _serial(() async {
+    _deletedAll++;
     await _transfers.cancelAll();
     final books = await _records.bookIds();
     await _records.clear();
@@ -341,6 +373,7 @@ class DownloadManager implements DownloadService {
       } while (_planAgain && !_connectivity.isOffline);
     } catch (e, stackTrace) {
       AppLogger.e('Planning downloads failed', e, stackTrace, _logTag);
+      _schedulePlanRetry();
     } finally {
       _planning = false;
     }
@@ -391,7 +424,7 @@ class DownloadManager implements DownloadService {
           );
         } on FileSystemException catch (e, stackTrace) {
           AppLogger.e('Could not store a manifest', e, stackTrace, _logTag);
-          await _fail(chapterId, DownloadErrors.storageFull);
+          await _fail(chapterId, _errorOf(e));
           return;
         }
         await _records.recordPlan(chapterId, manifestBytes, [
@@ -410,10 +443,13 @@ class DownloadManager implements DownloadService {
   static String _errorOf(Object error) => switch (error) {
     UnauthorizedException() => DownloadErrors.signInRequired,
     ChapterUnavailableException() => DownloadErrors.notFound,
-    FileSystemException() => DownloadErrors.storageFull,
+    FileSystemException() when _isDiskFull(error) => DownloadErrors.storageFull,
     AppExceptions() => DownloadErrors.server,
     _ => DownloadErrors.unknown,
   };
+
+  /// ENOSPC is 28 on Linux, Android, macOS and iOS.
+  static bool _isDiskFull(FileSystemException e) => e.osError?.errorCode == 28;
 
   // ---------------------------------------------------------------------------
   // Native events, reconciliation and rules (inside _serial)
@@ -458,6 +494,10 @@ class DownloadManager implements DownloadService {
   /// its stored failure arrives after this, under the old, now stale, id.
   Future<void> _reconcile() async {
     final active = await _transfers.activeTaskIds();
+    // Native tasks no record points at: their pause, delete or rule change
+    // was recorded but the cancel never reached the plugin.
+    final orphans = active.difference(await _records.recordedTaskIds());
+    if (orphans.isNotEmpty) await _transfers.cancel(orphans);
     for (final chapter in await _records.activePlanned()) {
       for (final file in await _records.pendingFiles(chapter.chapterId)) {
         final taskId = file.nativeTaskId;
@@ -469,9 +509,11 @@ class DownloadManager implements DownloadService {
     }
   }
 
-  Future<void> _onRulesChanged() async {
+  /// Loads and applies the rules inside one serial step, so two quick
+  /// changes apply in order.
+  Future<void> _onRulesChanged() => _serial(() async {
     final rules = await _loadRules();
-    await _serial(() async {
+    {
       final before = _rules.value;
       final changed = {
         for (final type in BookType.values)
@@ -486,8 +528,8 @@ class DownloadManager implements DownloadService {
         await _cancelFiles(chapter.chapterId);
         await _continue(chapter.chapterId);
       }
-    });
-  }
+    }
+  });
 
   Future<Map<BookType, DownloadNetwork>> _loadRules() async {
     final rules = <BookType, DownloadNetwork>{};
@@ -514,6 +556,9 @@ class DownloadManager implements DownloadService {
         row.error == DownloadErrors.notFound &&
         row.planned) {
       await _records.resetPlan(row.chapterId);
+      // File names follow page positions, not content: old pages would pass
+      // for new ones.
+      await _storage.deleteChapter(row.bookId, row.chapterId);
       return;
     }
     await _continue(row.chapterId);
@@ -550,9 +595,10 @@ class DownloadManager implements DownloadService {
     final wifi = _rules.value[type] == DownloadNetwork.unmetered;
     final headers = _remote.fileHeaders;
     final transfers = <FileTransfer>[];
+    final taskIds = <String, String>{};
     for (final file in unqueued) {
       final taskId = TransferIds.forAttempt(file.fileId, _session, ++_attempt);
-      await _records.setTask(file.fileId, taskId);
+      taskIds[file.fileId] = taskId;
       final target = DownloadStorage.transferTarget(
         chapter.bookId,
         chapterId,
@@ -570,6 +616,7 @@ class DownloadManager implements DownloadService {
         ),
       );
     }
+    await _records.assignTasks(taskIds);
     await _transfers.enqueue(transfers);
   }
 
@@ -591,9 +638,7 @@ class DownloadManager implements DownloadService {
         if (file.nativeTaskId != null) file,
     ];
     if (queued.isEmpty) return;
-    for (final file in queued) {
-      await _records.setTask(file.fileId, null);
-    }
+    await _records.assignTasks({for (final f in queued) f.fileId: null});
     await _transfers.cancel([for (final f in queued) f.nativeTaskId!]);
   }
 

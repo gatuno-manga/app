@@ -20,7 +20,7 @@ import 'data/repositories/downloaded_content_impl.dart';
 import 'domain/repositories/download_network_policy.dart';
 import 'domain/repositories/download_service.dart';
 import 'domain/repositories/downloaded_content.dart';
-import 'domain/use_cases/any_network_policy.dart';
+import 'data/repositories/any_network_policy.dart';
 
 /// Registers downloads. Needs DioClient, ConnectivityService, CoverStore and
 /// BooksRepository. Start the engine with [startDownloads] once the Dio
@@ -70,7 +70,7 @@ void initDownloadsInjection(GetIt sl) {
   );
   sl.registerLazySingleton<DownloadService>(() => sl<DownloadManager>());
   sl.registerLazySingleton<DownloadedContent>(
-    () => DownloadedContentImpl(sl<DownloadsDatabase>(), sl<DownloadStorage>()),
+    () => DownloadedContentImpl(sl<DownloadRecords>(), sl<DownloadStorage>()),
   );
 }
 
@@ -78,8 +78,11 @@ void initDownloadsInjection(GetIt sl) {
 /// finished while the app was closed. Needs the Dio interceptors: planning
 /// goes through DioClient.
 Future<void> startDownloads(GetIt sl) async {
+  // The manager first: its start must be its first serial operation, before
+  // any command.
+  final started = sl<DownloadManager>().start();
   await sl<UnmeteredNetworkMonitor>().start();
-  await sl<DownloadManager>().start();
+  await started;
 }
 
 /// Deletes every download, for a server change: they belong to the old

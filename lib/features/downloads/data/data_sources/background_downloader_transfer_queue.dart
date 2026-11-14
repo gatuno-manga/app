@@ -79,6 +79,11 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     );
     _configureNotifications();
     await _downloader.resumeFromBackground();
+    // iOS reports a task the system cancelled with resume data (a force-quit
+    // mid-file, for example) as paused, and the plugin keeps it as a paused
+    // task that still counts as active. Nothing in the app pauses natively,
+    // so resume them all.
+    await _downloader.resumeAll();
   }
 
   void _configureNotifications() {
@@ -95,12 +100,33 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   }
 
   void _onUpdate(TaskUpdate update) {
+    if (update is TaskStatusUpdate &&
+        update.status == TaskStatus.paused &&
+        update.task is DownloadTask) {
+      unawaited(_resumeOrFail(update.task as DownloadTask));
+      return;
+    }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
   }
 
+  /// A paused task would sit in the plugin forever: resume it, or report it
+  /// failed so the chapter can be retried.
+  Future<void> _resumeOrFail(DownloadTask task) async {
+    var resumed = false;
+    try {
+      resumed = await _downloader.resume(task);
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not resume a paused file', e, stackTrace, _logTag);
+    }
+    if (!resumed && !_events.isClosed) {
+      await _downloader.cancelTasksWithIds([task.taskId]);
+      _events.add(TransferFailed(task.taskId, DownloadErrors.unknown));
+    }
+  }
+
   /// The [TransferEvent] for a native update; `null` for progress and for
-  /// intermediate states.
+  /// intermediate states. A pause is handled before this (resumed).
   @visibleForTesting
   static TransferEvent? eventOf(TaskUpdate update) {
     if (update is! TaskStatusUpdate) return null;
@@ -131,21 +157,34 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   @override
   Future<void> enqueue(List<FileTransfer> transfers) async {
     if (transfers.isEmpty) return;
-    final results = await _downloader.enqueueAll([
-      for (final t in transfers)
-        DownloadTask(
-          taskId: t.taskId,
-          url: t.url,
-          headers: t.headers,
-          baseDirectory: BaseDirectory.applicationSupport,
-          directory: t.directory,
-          filename: t.filename,
-          group: t.group,
-          requiresWiFi: t.requiresWiFi,
-          retries: retries,
-          updates: Updates.status,
-        ),
-    ]);
+    final List<bool> results;
+    try {
+      results = await _downloader.enqueueAll([
+        for (final t in transfers)
+          DownloadTask(
+            taskId: t.taskId,
+            url: t.url,
+            headers: t.headers,
+            baseDirectory: BaseDirectory.applicationSupport,
+            directory: t.directory,
+            filename: t.filename,
+            group: t.group,
+            requiresWiFi: t.requiresWiFi,
+            retries: retries,
+            updates: Updates.status,
+          ),
+      ]);
+    } catch (e, stackTrace) {
+      // Reported per file, as a refused enqueue is: the chapters fail and can
+      // be retried, instead of waiting on tasks that do not exist.
+      AppLogger.e('Native enqueue failed', e, stackTrace, _logTag);
+      for (final t in transfers) {
+        if (!_events.isClosed) {
+          _events.add(TransferFailed(t.taskId, DownloadErrors.unknown));
+        }
+      }
+      return;
+    }
     for (var i = 0; i < results.length; i++) {
       if (!results[i] && !_events.isClosed) {
         AppLogger.w('Could not enqueue a download file', _logTag);

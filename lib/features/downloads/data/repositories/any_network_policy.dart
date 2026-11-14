@@ -1,6 +1,6 @@
 import '../../../reading/domain/entities/reading_enums.dart';
-import '../entities/download_network.dart';
-import '../repositories/download_network_policy.dart';
+import '../../domain/entities/download_network.dart';
+import '../../domain/repositories/download_network_policy.dart';
 
 /// Every book type downloads on any network. The default until a user setting
 /// replaces it.
