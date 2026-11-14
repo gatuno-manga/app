@@ -52,6 +52,10 @@ class DownloadManager implements DownloadService {
   /// Manifests fetched at once.
   static const int planConcurrency = 4;
 
+  /// Tries of a manifest that keeps timing out or answering busy (429,
+  /// 502-504) while the server is reachable.
+  static const int maxTransientAttempts = 3;
+
   final DownloadRecords _records;
   final DownloadStorage _storage;
   final TransferQueue _transfers;
@@ -83,6 +87,10 @@ class DownloadManager implements DownloadService {
   /// paging can take a while).
   final Map<String, int> _deletedBooks = {};
   int _deletedAll = 0;
+
+  /// Transient manifest failures per chapter in this session; a chapter
+  /// fails after [maxTransientAttempts] instead of blocking the queue head.
+  final Map<String, int> _transientFailures = {};
   bool _planning = false;
   bool _planAgain = false;
   Timer? _planRetry;
@@ -138,7 +146,8 @@ class DownloadManager implements DownloadService {
           // Planning and the records still work; files wait for a restart.
           AppLogger.e('Native downloader unavailable', e, stackTrace, _logTag);
         }
-        _rules.add(await _loadRules());
+        final rules = await _loadRules();
+        if (!_rules.isClosed) _rules.add(rules);
         await _reconcile();
       }).whenComplete(() => unawaited(_plan()));
     }();
@@ -173,26 +182,29 @@ class DownloadManager implements DownloadService {
     await _serial(() async {
       if (_deletionMark(bookId) != mark) return;
       final now = _now();
-      await _records.transaction(() async {
-        await _records.upsertBook(
-          bookId.value,
-          book?.type.asBookType.value,
-          now,
-        );
+      // Only database writes in the transaction: requeueing talks to the
+      // native queue and the file system, which a rollback cannot undo.
+      final existing = await _records.transaction(() async {
+        await _records.upsertBook(bookId.value, book?.type.asBookType, now);
+        final existing = <DownloadChapter>[];
         for (final chapterId in chapterIds) {
           final row = await _records.chapter(chapterId.value);
           if (row == null) {
             await _records.insertChapter(chapterId.value, bookId.value, now);
           } else {
-            await _requeue(
-              row,
-              row.state == DownloadState.failed
-                  ? DownloadEvent.retry
-                  : DownloadEvent.resume,
-            );
+            existing.add(row);
           }
         }
+        return existing;
       });
+      for (final row in existing) {
+        await _requeue(
+          row,
+          row.state == DownloadState.failed
+              ? DownloadEvent.retry
+              : DownloadEvent.resume,
+        );
+      }
       // Inside the serial block, so a delete queued meanwhile unpins after.
       await _pinCover(bookId, book);
     });
@@ -273,7 +285,13 @@ class DownloadManager implements DownloadService {
   /// one. Cancels every native task, recorded or not.
   Future<void> clearAll() => _serial(() async {
     _deletedAll++;
-    await _transfers.cancelAll();
+    try {
+      await _transfers.cancelAll();
+    } catch (e, stackTrace) {
+      // The wipe must happen regardless; the next start cancels native
+      // tasks no record points at.
+      AppLogger.e('Could not cancel native downloads', e, stackTrace, _logTag);
+    }
     final books = await _records.bookIds();
     await _records.clear();
     await _storage.deleteAll();
@@ -315,7 +333,7 @@ class DownloadManager implements DownloadService {
       final waiting =
           !unmetered &&
           DownloadStateMachine.isActive(row.state) &&
-          rules[bookTypeFromValue(row.bookType)] == DownloadNetwork.unmetered;
+          rules[row.bookType] == DownloadNetwork.unmetered;
       byBook
           .putIfAbsent(row.bookId, () => [])
           .add(
@@ -403,15 +421,26 @@ class DownloadManager implements DownloadService {
     }
   }
 
-  /// Every outcome but [_Unreachable] leaves the chapter planned or failed,
-  /// so the planning loop always advances.
+  /// Every outcome leaves the chapter planned or failed, except
+  /// [_Unreachable], which does so after [maxTransientAttempts] while the
+  /// server is reachable: the planning loop always advances.
   Future<void> _applyPlan(_PlanOutcome outcome) async {
     switch (outcome) {
-      case _Unreachable():
-        return;
+      case _Unreachable(:final chapterId):
+        // Offline is not the chapter's fault: wait without counting.
+        if (_connectivity.isOffline) return;
+        final failures = (_transientFailures[chapterId] ?? 0) + 1;
+        if (failures < maxTransientAttempts) {
+          _transientFailures[chapterId] = failures;
+          return;
+        }
+        _transientFailures.remove(chapterId);
+        await _fail(chapterId, DownloadErrors.server);
       case _Failed(:final chapterId, :final error):
+        _transientFailures.remove(chapterId);
         await _fail(chapterId, error);
       case _Planned(:final chapterId, :final manifest, :final files):
+        _transientFailures.remove(chapterId);
         // Deleted or planned meanwhile: the fresh row decides.
         final current = await _records.chapter(chapterId);
         if (current == null || current.planned) return;
@@ -498,6 +527,8 @@ class DownloadManager implements DownloadService {
     // was recorded but the cancel never reached the plugin.
     final orphans = active.difference(await _records.recordedTaskIds());
     if (orphans.isNotEmpty) await _transfers.cancel(orphans);
+    // Files a cancelled task moved in after its chapter was deleted.
+    await _storage.sweep(await _records.chapterKeys());
     for (final chapter in await _records.activePlanned()) {
       for (final file in await _records.pendingFiles(chapter.chapterId)) {
         final taskId = file.nativeTaskId;
@@ -513,21 +544,19 @@ class DownloadManager implements DownloadService {
   /// changes apply in order.
   Future<void> _onRulesChanged() => _serial(() async {
     final rules = await _loadRules();
-    {
-      final before = _rules.value;
-      final changed = {
-        for (final type in BookType.values)
-          if (before[type] != rules[type]) type,
-      };
-      if (!_rules.isClosed) _rules.add(rules);
-      if (changed.isEmpty) return;
-      // Queue the pending files of those types again under the new rule.
-      for (final chapter in await _records.activePlanned()) {
-        final type = bookTypeFromValue(await _records.bookType(chapter.bookId));
-        if (!changed.contains(type)) continue;
-        await _cancelFiles(chapter.chapterId);
-        await _continue(chapter.chapterId);
-      }
+    final before = _rules.value;
+    final changed = {
+      for (final type in BookType.values)
+        if (before[type] != rules[type]) type,
+    };
+    if (!_rules.isClosed) _rules.add(rules);
+    if (changed.isEmpty) return;
+    // Queue the pending files of those types again under the new rule.
+    for (final chapter in await _records.activePlanned()) {
+      final type = await _records.bookType(chapter.bookId);
+      if (!changed.contains(type)) continue;
+      await _cancelFiles(chapter.chapterId);
+      await _continue(chapter.chapterId);
     }
   });
 
@@ -591,7 +620,7 @@ class DownloadManager implements DownloadService {
 
     final unqueued = missing.where((f) => f.nativeTaskId == null).toList();
     if (unqueued.isEmpty) return;
-    final type = bookTypeFromValue(await _records.bookType(chapter.bookId));
+    final type = await _records.bookType(chapter.bookId);
     final wifi = _rules.value[type] == DownloadNetwork.unmetered;
     final headers = _remote.fileHeaders;
     final transfers = <FileTransfer>[];

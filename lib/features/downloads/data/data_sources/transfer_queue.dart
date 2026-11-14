@@ -78,6 +78,11 @@ class TransferCancelled extends TransferEvent {
 abstract final class TransferIds {
   static String forAttempt(String fileId, String session, int attempt) =>
       '$fileId@$session.$attempt';
+
+  static final RegExp _format = RegExp(r'^.+/\d+@[0-9a-z]+\.\d+$');
+
+  /// Whether [taskId] has the format of [forAttempt].
+  static bool isDownloadTask(String taskId) => _format.hasMatch(taskId);
 }
 
 /// The native background downloader. Transfers keep running when the app is
@@ -95,7 +100,7 @@ abstract class TransferQueue {
 
   Future<void> cancel(Iterable<String> taskIds);
 
-  /// Cancels every download task, recorded or not.
+  /// Cancels every download task of this queue, recorded or not.
   Future<void> cancelAll();
 
   /// Ids of transfers still queued or running natively.

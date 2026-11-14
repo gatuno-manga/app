@@ -18,17 +18,15 @@ class $DownloadBooksTable extends DownloadBooks
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _bookTypeMeta = const VerificationMeta(
-    'bookType',
-  );
   @override
-  late final GeneratedColumn<String> bookType = GeneratedColumn<String>(
-    'book_type',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<BookType, String> bookType =
+      GeneratedColumn<String>(
+        'book_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<BookType>($DownloadBooksTable.$converterbookType);
   static const VerificationMeta _enqueuedAtMeta = const VerificationMeta(
     'enqueuedAt',
   );
@@ -62,14 +60,6 @@ class $DownloadBooksTable extends DownloadBooks
     } else if (isInserting) {
       context.missing(_bookIdMeta);
     }
-    if (data.containsKey('book_type')) {
-      context.handle(
-        _bookTypeMeta,
-        bookType.isAcceptableOrUnknown(data['book_type']!, _bookTypeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_bookTypeMeta);
-    }
     if (data.containsKey('enqueued_at')) {
       context.handle(
         _enqueuedAtMeta,
@@ -91,10 +81,12 @@ class $DownloadBooksTable extends DownloadBooks
         DriftSqlType.string,
         data['${effectivePrefix}book_id'],
       )!,
-      bookType: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}book_type'],
-      )!,
+      bookType: $DownloadBooksTable.$converterbookType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}book_type'],
+        )!,
+      ),
       enqueuedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}enqueued_at'],
@@ -106,13 +98,16 @@ class $DownloadBooksTable extends DownloadBooks
   $DownloadBooksTable createAlias(String alias) {
     return $DownloadBooksTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<BookType, String, String> $converterbookType =
+      const EnumNameConverter<BookType>(BookType.values);
 }
 
 class DownloadBook extends DataClass implements Insertable<DownloadBook> {
   final String bookId;
 
-  /// `BookType.value`, for the network rule; `other` when unknown.
-  final String bookType;
+  /// For the network rule; `other` until the book's details are known.
+  final BookType bookType;
   final DateTime enqueuedAt;
   const DownloadBook({
     required this.bookId,
@@ -123,7 +118,11 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['book_id'] = Variable<String>(bookId);
-    map['book_type'] = Variable<String>(bookType);
+    {
+      map['book_type'] = Variable<String>(
+        $DownloadBooksTable.$converterbookType.toSql(bookType),
+      );
+    }
     map['enqueued_at'] = Variable<DateTime>(enqueuedAt);
     return map;
   }
@@ -143,7 +142,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DownloadBook(
       bookId: serializer.fromJson<String>(json['bookId']),
-      bookType: serializer.fromJson<String>(json['bookType']),
+      bookType: $DownloadBooksTable.$converterbookType.fromJson(
+        serializer.fromJson<String>(json['bookType']),
+      ),
       enqueuedAt: serializer.fromJson<DateTime>(json['enqueuedAt']),
     );
   }
@@ -152,14 +153,16 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'bookId': serializer.toJson<String>(bookId),
-      'bookType': serializer.toJson<String>(bookType),
+      'bookType': serializer.toJson<String>(
+        $DownloadBooksTable.$converterbookType.toJson(bookType),
+      ),
       'enqueuedAt': serializer.toJson<DateTime>(enqueuedAt),
     };
   }
 
   DownloadBook copyWith({
     String? bookId,
-    String? bookType,
+    BookType? bookType,
     DateTime? enqueuedAt,
   }) => DownloadBook(
     bookId: bookId ?? this.bookId,
@@ -199,7 +202,7 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
 
 class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
   final Value<String> bookId;
-  final Value<String> bookType;
+  final Value<BookType> bookType;
   final Value<DateTime> enqueuedAt;
   final Value<int> rowid;
   const DownloadBooksCompanion({
@@ -210,7 +213,7 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
   });
   DownloadBooksCompanion.insert({
     required String bookId,
-    required String bookType,
+    required BookType bookType,
     required DateTime enqueuedAt,
     this.rowid = const Value.absent(),
   }) : bookId = Value(bookId),
@@ -232,7 +235,7 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
 
   DownloadBooksCompanion copyWith({
     Value<String>? bookId,
-    Value<String>? bookType,
+    Value<BookType>? bookType,
     Value<DateTime>? enqueuedAt,
     Value<int>? rowid,
   }) {
@@ -251,7 +254,9 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
       map['book_id'] = Variable<String>(bookId.value);
     }
     if (bookType.present) {
-      map['book_type'] = Variable<String>(bookType.value);
+      map['book_type'] = Variable<String>(
+        $DownloadBooksTable.$converterbookType.toSql(bookType.value),
+      );
     }
     if (enqueuedAt.present) {
       map['enqueued_at'] = Variable<DateTime>(enqueuedAt.value);
@@ -1330,14 +1335,14 @@ abstract class _$DownloadsDatabase extends GeneratedDatabase {
 typedef $$DownloadBooksTableCreateCompanionBuilder =
     DownloadBooksCompanion Function({
       required String bookId,
-      required String bookType,
+      required BookType bookType,
       required DateTime enqueuedAt,
       Value<int> rowid,
     });
 typedef $$DownloadBooksTableUpdateCompanionBuilder =
     DownloadBooksCompanion Function({
       Value<String> bookId,
-      Value<String> bookType,
+      Value<BookType> bookType,
       Value<DateTime> enqueuedAt,
       Value<int> rowid,
     });
@@ -1356,10 +1361,11 @@ class $$DownloadBooksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get bookType => $composableBuilder(
-    column: $table.bookType,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<BookType, BookType, String> get bookType =>
+      $composableBuilder(
+        column: $table.bookType,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get enqueuedAt => $composableBuilder(
     column: $table.enqueuedAt,
@@ -1404,7 +1410,7 @@ class $$DownloadBooksTableAnnotationComposer
   GeneratedColumn<String> get bookId =>
       $composableBuilder(column: $table.bookId, builder: (column) => column);
 
-  GeneratedColumn<String> get bookType =>
+  GeneratedColumnWithTypeConverter<BookType, String> get bookType =>
       $composableBuilder(column: $table.bookType, builder: (column) => column);
 
   GeneratedColumn<DateTime> get enqueuedAt => $composableBuilder(
@@ -1451,7 +1457,7 @@ class $$DownloadBooksTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> bookId = const Value.absent(),
-                Value<String> bookType = const Value.absent(),
+                Value<BookType> bookType = const Value.absent(),
                 Value<DateTime> enqueuedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion(
@@ -1463,7 +1469,7 @@ class $$DownloadBooksTableTableManager
           createCompanionCallback:
               ({
                 required String bookId,
-                required String bookType,
+                required BookType bookType,
                 required DateTime enqueuedAt,
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion.insert(

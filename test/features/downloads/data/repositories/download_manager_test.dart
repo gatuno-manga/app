@@ -782,6 +782,97 @@ void main() {
   });
 
   group('resilience', () {
+    test('a manifest that keeps timing out fails after 3 tries', () async {
+      var calls = 0;
+      when(() => remote.fetchManifest('slow')).thenAnswer((_) async {
+        calls++;
+        throw NetworkException();
+      });
+      manifest('t1', textManifest('t1'));
+
+      await manager.enqueueChapters(_book, const [
+        ChapterId('slow'),
+        ChapterId('t1'),
+      ]);
+
+      await untilState('slow', DownloadState.failed);
+      expect(calls, DownloadManager.maxTransientAttempts);
+      expect((await chapter('slow'))!.error, DownloadErrors.server);
+      await untilState('t1', DownloadState.done);
+    });
+
+    test('offline does not count against a chapter', () async {
+      connectivity.status = ConnectivityStatus.offline;
+      when(() => remote.fetchManifest('c1')).thenThrow(NetworkException());
+
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect((await chapter('c1'))!.state, DownloadState.queued);
+    });
+
+    test('clearAll wipes even when the native cancel throws', () async {
+      await manager.dispose();
+      transfers = _ThrowingCancelQueue();
+      manager = build();
+      await manager.start();
+      manifest('t1', textManifest('t1'));
+      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await untilState('t1', DownloadState.done);
+
+      await manager.clearAll();
+
+      expect(await manager.watchAll().first, isEmpty);
+      expect(Directory('${dir.path}/downloads').existsSync(), isFalse);
+    });
+
+    test('a failed re-plan does not keep counting the old manifest', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      transfers.controller.add(
+        TransferFailed(
+          transfers.enqueued.first.taskId,
+          DownloadErrors.notFound,
+        ),
+      );
+      await untilState('c1', DownloadState.failed);
+      when(
+        () => remote.fetchManifest('c1'),
+      ).thenThrow(ChapterUnavailableException('c1'));
+
+      await manager.retry(const DownloadScope.chapters([ChapterId('c1')]));
+
+      await until(
+        () async => (await chapter('c1'))!.filesTotal == 0,
+        reason: 'plan reset',
+      );
+      await untilState('c1', DownloadState.failed);
+      expect((await chapter('c1'))!.bytes, 0);
+      expect(await manager.totals(), DownloadTotals(chapters: 1, bytes: 0));
+    });
+
+    test('start deletes chapter directories no download owns', () async {
+      manifest('t1', textManifest('t1'));
+      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await untilState('t1', DownloadState.done);
+      await manager.dispose();
+      final stray = Directory('${dir.path}/downloads/book-1/gone/pages')
+        ..createSync(recursive: true);
+      final strayBook = Directory('${dir.path}/downloads/other-book/c9')
+        ..createSync(recursive: true);
+
+      manager = build();
+      await manager.start();
+
+      expect(stray.parent.existsSync(), isFalse);
+      expect(strayBook.parent.existsSync(), isFalse);
+      expect(
+        File('${dir.path}/downloads/book-1/t1/chapter.json').existsSync(),
+        isTrue,
+      );
+    });
+
     test('retry after notFound downloads every page again', () async {
       manifest('c1', imageManifest('c1'));
       await manager.enqueueChapters(_book, const [ChapterId('c1')]);
@@ -976,4 +1067,10 @@ class _GatedTransferQueue extends FakeTransferQueue {
 
   @override
   Future<void> start() => gate;
+}
+
+/// A transfer queue whose cancelAll fails, as with the plugin unavailable.
+class _ThrowingCancelQueue extends FakeTransferQueue {
+  @override
+  Future<void> cancelAll() => Future.error(StateError('no plugin'));
 }

@@ -33,6 +33,11 @@ class DownloadNotificationTexts {
 /// WorkManager and iOS background URLSession, so files keep downloading when
 /// the app is closed.
 class BackgroundDownloaderTransferQueue implements TransferQueue {
+  /// Android cuts plain WorkManager tasks at 9 minutes, and a retry starts
+  /// over: files larger than this (documents, mostly) run as a foreground
+  /// service, under the running notification.
+  static const int foregroundAboveMegabytes = 10;
+
   /// A file fails once this little would be left on the device.
   static const int minFreeMegabytes = 200;
 
@@ -71,7 +76,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
         (Config.holdingQueue, false),
         (Config.checkAvailableSpace, minFreeMegabytes),
       ],
-      androidConfig: [(Config.useCacheDir, Config.never)],
+      androidConfig: [
+        (Config.useCacheDir, Config.never),
+        (Config.runInForegroundIfFileLargerThan, foregroundAboveMegabytes),
+      ],
       iOSConfig: [
         (Config.excludeFromCloudBackup, Config.always),
         (Config.localize, {'Cancel': _texts().cancel}),
@@ -119,8 +127,13 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     } catch (e, stackTrace) {
       AppLogger.e('Could not resume a paused file', e, stackTrace, _logTag);
     }
-    if (!resumed && !_events.isClosed) {
+    if (resumed) return;
+    try {
       await _downloader.cancelTasksWithIds([task.taskId]);
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not cancel a paused file', e, stackTrace, _logTag);
+    }
+    if (!_events.isClosed) {
       _events.add(TransferFailed(task.taskId, DownloadErrors.unknown));
     }
   }
@@ -207,10 +220,12 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     await cancel(await activeTaskIds());
   }
 
+  /// Only download tasks of this queue (by id format): another use of the
+  /// plugin in the app must not be cancelled as an orphan.
   @override
   Future<Set<String>> activeTaskIds() async {
     final ids = await _downloader.allTaskIds(allGroups: true);
-    return ids.toSet();
+    return ids.where(TransferIds.isDownloadTask).toSet();
   }
 
   @override

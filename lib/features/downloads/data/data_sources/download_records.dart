@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../../../reading/domain/entities/reading_enums.dart';
 import '../../domain/entities/download_scope.dart';
 import '../../domain/entities/download_state.dart';
 import '../../domain/entities/download_totals.dart';
@@ -10,7 +11,7 @@ import '../database/downloads_database.dart';
 class ChapterDownloadRow {
   final String chapterId;
   final String bookId;
-  final String? bookType;
+  final BookType bookType;
   final DownloadState state;
   final String? error;
   final int filesDone;
@@ -51,13 +52,17 @@ class DownloadRecords {
   // Books
 
   /// Records the book, or updates its type when [bookType] is known now.
-  Future<void> upsertBook(String bookId, String? bookType, DateTime now) async {
+  Future<void> upsertBook(
+    String bookId,
+    BookType? bookType,
+    DateTime now,
+  ) async {
     await _db
         .into(_db.downloadBooks)
         .insert(
           DownloadBooksCompanion.insert(
             bookId: bookId,
-            bookType: bookType ?? 'other',
+            bookType: bookType ?? BookType.other,
             enqueuedAt: now,
           ),
           onConflict: bookType == null
@@ -68,12 +73,18 @@ class DownloadRecords {
         );
   }
 
-  Future<String?> bookType(String bookId) async {
+  Future<BookType> bookType(String bookId) async {
     final row = await (_db.select(
       _db.downloadBooks,
     )..where((b) => b.bookId.equals(bookId))).getSingleOrNull();
-    return row?.bookType;
+    return row?.bookType ?? BookType.other;
   }
+
+  /// `(bookId, chapterId)` of every chapter download.
+  Future<Set<(String, String)>> chapterKeys() async => {
+    for (final c in await _db.select(_db.downloadChapters).get())
+      (c.bookId, c.chapterId),
+  };
 
   Future<List<String>> bookIds() =>
       _db.select(_db.downloadBooks).map((b) => b.bookId).get();
@@ -186,9 +197,14 @@ class DownloadRecords {
     await (_db.delete(
       _db.downloadFiles,
     )..where((f) => f.chapterId.equals(chapterId))).go();
-    await (_db.update(_db.downloadChapters)
-          ..where((c) => c.chapterId.equals(chapterId)))
-        .write(const DownloadChaptersCompanion(planned: Value(false)));
+    await (_db.update(
+      _db.downloadChapters,
+    )..where((c) => c.chapterId.equals(chapterId))).write(
+      const DownloadChaptersCompanion(
+        planned: Value(false),
+        manifestBytes: Value(0),
+      ),
+    );
   });
 
   Future<void> deleteChapters(List<String> chapterIds) =>
@@ -290,7 +306,7 @@ class DownloadRecords {
             ChapterDownloadRow(
               chapterId: row.read<String>('chapter_id'),
               bookId: row.read<String>('book_id'),
-              bookType: row.readNullable<String>('book_type'),
+              bookType: _bookType(row.readNullable<String>('book_type')),
               state: $DownloadChaptersTable.$converterstate.fromSql(
                 row.read<String>('state'),
               ),
@@ -317,6 +333,10 @@ class DownloadRecords {
       bytes: row.read<int>('bytes'),
     );
   }
+
+  static BookType _bookType(String? sql) => sql == null
+      ? BookType.other
+      : $DownloadBooksTable.$converterbookType.fromSql(sql);
 
   static List<OrderClauseGenerator<$DownloadChaptersTable>> get _fifo => [
     (c) => OrderingTerm.asc(c.enqueuedAt),

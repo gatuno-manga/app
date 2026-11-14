@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../../reading/domain/entities/reading_enums.dart';
 import '../../domain/entities/download_state.dart';
 
 part 'downloads_database.g.dart';
@@ -9,8 +10,8 @@ part 'downloads_database.g.dart';
 class DownloadBooks extends Table {
   TextColumn get bookId => text()();
 
-  /// `BookType.value`, for the network rule; `other` when unknown.
-  TextColumn get bookType => text()();
+  /// For the network rule; `other` until the book's details are known.
+  TextColumn get bookType => textEnum<BookType>()();
 
   DateTimeColumn get enqueuedAt => dateTime()();
 

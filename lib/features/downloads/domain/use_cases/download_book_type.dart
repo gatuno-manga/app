@@ -11,11 +11,3 @@ extension DownloadBookType on TypeBook? {
     TypeBook.other || null => BookType.other,
   };
 }
-
-/// A stored `BookType.value`; [BookType.other] when unknown.
-BookType bookTypeFromValue(String? value) {
-  for (final type in BookType.values) {
-    if (type.value == value) return type;
-  }
-  return BookType.other;
-}

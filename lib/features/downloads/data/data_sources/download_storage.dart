@@ -21,7 +21,16 @@ class DownloadStorage {
 
   static const String _logTag = 'DownloadStorage';
 
-  DownloadStorage(this._supportDirectory);
+  DownloadStorage(Future<Directory> Function() supportDirectory)
+    : _supportDirectory = _once(supportDirectory);
+
+  /// The support directory never moves: ask the platform once, not per file.
+  static Future<Directory> Function() _once(
+    Future<Directory> Function() resolve,
+  ) {
+    Future<Directory>? cached;
+    return () => cached ??= resolve();
+  }
 
   /// The chapter directory relative to the application support directory,
   /// as the native downloader wants it.
@@ -109,6 +118,30 @@ class DownloadStorage {
   }
 
   Future<void> deleteAll() async => _delete(await root());
+
+  /// Deletes chapter directories, and book directories, that no download
+  /// in [keep] (`(bookId, chapterId)`) owns.
+  Future<void> sweep(Set<(String, String)> keep) async {
+    final rootDir = await root();
+    if (!await rootDir.exists()) return;
+    final owned = {for (final (b, c) in keep) chapterPath(b, c)};
+    final ownedBooks = {for (final path in owned) path.split('/')[1]};
+    await for (final book in rootDir.list()) {
+      if (book is! Directory) continue;
+      final bookName = book.uri.pathSegments.lastWhere((s) => s.isNotEmpty);
+      if (!ownedBooks.contains(bookName)) {
+        await _delete(book);
+        continue;
+      }
+      await for (final chapter in book.list()) {
+        if (chapter is! Directory) continue;
+        final name = chapter.uri.pathSegments.lastWhere((s) => s.isNotEmpty);
+        if (!owned.contains('$rootName/$bookName/$name')) {
+          await _delete(chapter);
+        }
+      }
+    }
+  }
 
   Future<void> _delete(Directory dir) async {
     try {

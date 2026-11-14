@@ -79,6 +79,33 @@ void main() {
     await updates.close();
   });
 
+  test('large files run in the foreground on Android', () {
+    final android =
+        verify(
+              () => downloader.configure(
+                globalConfig: any<dynamic>(named: 'globalConfig'),
+                androidConfig: captureAny<dynamic>(named: 'androidConfig'),
+                iOSConfig: any<dynamic>(named: 'iOSConfig'),
+              ),
+            ).captured.single
+            as List<Object?>;
+    expect(
+      android,
+      contains((
+        Config.runInForegroundIfFileLargerThan,
+        BackgroundDownloaderTransferQueue.foregroundAboveMegabytes,
+      )),
+    );
+  });
+
+  test('only this queue\'s tasks count as active', () async {
+    when(
+      () => downloader.allTaskIds(allGroups: true),
+    ).thenAnswer((_) async => ['c1/1@s1.2', 'someone-else', 'x@y']);
+
+    expect(await queue.activeTaskIds(), {'c1/1@s1.2'});
+  });
+
   test('start disables the holding queue and resumes paused tasks', () {
     final config =
         verify(
