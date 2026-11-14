@@ -40,9 +40,9 @@ class AppCtaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(description, style: Theme.of(context).textTheme.bodyMedium),
-            if (note != null) ...[
+            if (note case final note?) ...[
               const SizedBox(height: 8),
-              Text(note!, style: Theme.of(context).textTheme.bodySmall),
+              Text(note, style: Theme.of(context).textTheme.bodySmall),
             ],
             const SizedBox(height: 20),
             Align(

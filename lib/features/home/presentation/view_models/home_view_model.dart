@@ -14,113 +14,118 @@ import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import 'package:equatable/equatable.dart';
 
+/// One book list on the home screen and how its last load went.
+class HomeBookSection extends Equatable {
+  final List<Book> books;
+  final bool isLoading;
+
+  /// The last load threw `OfflineException`: nothing is saved for this list.
+  final bool unavailableOffline;
+
+  const HomeBookSection({
+    this.books = const [],
+    this.isLoading = false,
+    this.unavailableOffline = false,
+  });
+
+  /// Before the first load: skeletons.
+  const HomeBookSection.loading() : this(isLoading: true);
+
+  /// Settled with nothing to show because nothing is saved offline.
+  bool get isMissingOffline =>
+      unavailableOffline && books.isEmpty && !isLoading;
+
+  HomeBookSection copyWith({
+    List<Book>? books,
+    bool? isLoading,
+    bool? unavailableOffline,
+  }) {
+    return HomeBookSection(
+      books: books ?? this.books,
+      isLoading: isLoading ?? this.isLoading,
+      unavailableOffline: unavailableOffline ?? this.unavailableOffline,
+    );
+  }
+
+  @override
+  List<Object?> get props => [books, isLoading, unavailableOffline];
+}
+
 class HomeState extends Equatable {
   final bool isAuthenticated;
   final bool isInitialized;
   final UserModel user;
 
-  final List<Book> featuredBooks;
-  final List<Book> continueReadingBooks;
-  final List<Book> latestUpdatedBooks;
-  final List<Book> recentlyAddedBooks;
+  /// Latest updates; its first books also feed the featured carousel.
+  final HomeBookSection latestUpdated;
+  final HomeBookSection recentlyAdded;
 
-  final bool isLoadingFeatured;
-  final bool isLoadingGrid;
-  final bool isLoadingRecentlyAdded;
+  final List<Book> continueReadingBooks;
   final bool isLoadingContinueReading;
 
   /// The server cannot be reached; the screen shows saved data only.
   final bool isOffline;
 
-  /// The last load of a list threw `OfflineException`: nothing saved for it.
-  final bool latestUnavailableOffline;
-  final bool recentUnavailableOffline;
-
   /// The offline retry is probing the server and reloading.
   final bool isRetrying;
+
+  static const int featuredCount = 5;
 
   const HomeState({
     required this.isAuthenticated,
     required this.isInitialized,
     required this.user,
-    required this.featuredBooks,
+    required this.latestUpdated,
+    required this.recentlyAdded,
     required this.continueReadingBooks,
-    required this.latestUpdatedBooks,
-    required this.recentlyAddedBooks,
-    required this.isLoadingFeatured,
-    required this.isLoadingGrid,
-    required this.isLoadingRecentlyAdded,
     required this.isLoadingContinueReading,
     required this.isOffline,
-    required this.latestUnavailableOffline,
-    required this.recentUnavailableOffline,
     required this.isRetrying,
   });
-
-  /// Neither book list has anything saved while offline, so the home has
-  /// nothing to show but the offline empty view.
-  bool get showOfflineEmpty =>
-      latestUnavailableOffline &&
-      recentUnavailableOffline &&
-      latestUpdatedBooks.isEmpty &&
-      recentlyAddedBooks.isEmpty;
 
   factory HomeState.initial() {
     return HomeState(
       isAuthenticated: false,
       isInitialized: false,
       user: UserModel.guest,
-      featuredBooks: [],
-      continueReadingBooks: [],
-      latestUpdatedBooks: [],
-      recentlyAddedBooks: [],
-      isLoadingFeatured: true,
-      isLoadingGrid: true,
-      isLoadingRecentlyAdded: true,
+      latestUpdated: const HomeBookSection.loading(),
+      recentlyAdded: const HomeBookSection.loading(),
+      continueReadingBooks: const [],
       isLoadingContinueReading: false,
       isOffline: false,
-      latestUnavailableOffline: false,
-      recentUnavailableOffline: false,
       isRetrying: false,
     );
   }
+
+  List<Book> get featuredBooks =>
+      latestUpdated.books.take(featuredCount).toList();
+
+  /// Neither book list has anything saved while offline, so the home has
+  /// nothing to show but the offline empty view.
+  bool get showOfflineEmpty =>
+      latestUpdated.isMissingOffline && recentlyAdded.isMissingOffline;
 
   HomeState copyWith({
     bool? isAuthenticated,
     bool? isInitialized,
     UserModel? user,
-    List<Book>? featuredBooks,
+    HomeBookSection? latestUpdated,
+    HomeBookSection? recentlyAdded,
     List<Book>? continueReadingBooks,
-    List<Book>? latestUpdatedBooks,
-    List<Book>? recentlyAddedBooks,
-    bool? isLoadingFeatured,
-    bool? isLoadingGrid,
-    bool? isLoadingRecentlyAdded,
     bool? isLoadingContinueReading,
     bool? isOffline,
-    bool? latestUnavailableOffline,
-    bool? recentUnavailableOffline,
     bool? isRetrying,
   }) {
     return HomeState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isInitialized: isInitialized ?? this.isInitialized,
       user: user ?? this.user,
-      featuredBooks: featuredBooks ?? this.featuredBooks,
+      latestUpdated: latestUpdated ?? this.latestUpdated,
+      recentlyAdded: recentlyAdded ?? this.recentlyAdded,
       continueReadingBooks: continueReadingBooks ?? this.continueReadingBooks,
-      latestUpdatedBooks: latestUpdatedBooks ?? this.latestUpdatedBooks,
-      recentlyAddedBooks: recentlyAddedBooks ?? this.recentlyAddedBooks,
-      isLoadingFeatured: isLoadingFeatured ?? this.isLoadingFeatured,
-      isLoadingGrid: isLoadingGrid ?? this.isLoadingGrid,
-      isLoadingRecentlyAdded:
-          isLoadingRecentlyAdded ?? this.isLoadingRecentlyAdded,
       isLoadingContinueReading:
           isLoadingContinueReading ?? this.isLoadingContinueReading,
       isOffline: isOffline ?? this.isOffline,
-      latestUnavailableOffline:
-          latestUnavailableOffline ?? this.latestUnavailableOffline,
-      recentUnavailableOffline:
-          recentUnavailableOffline ?? this.recentUnavailableOffline,
       isRetrying: isRetrying ?? this.isRetrying,
     );
   }
@@ -130,17 +135,11 @@ class HomeState extends Equatable {
     isAuthenticated,
     isInitialized,
     user,
-    featuredBooks,
+    latestUpdated,
+    recentlyAdded,
     continueReadingBooks,
-    latestUpdatedBooks,
-    recentlyAddedBooks,
-    isLoadingFeatured,
-    isLoadingGrid,
-    isLoadingRecentlyAdded,
     isLoadingContinueReading,
     isOffline,
-    latestUnavailableOffline,
-    recentUnavailableOffline,
     isRetrying,
   ];
 }
@@ -156,14 +155,14 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   late final StreamSubscription<ConnectivityStatus> _statusSubscription;
   late final StreamSubscription<void> _reconnectSubscription;
 
-  /// The reload in flight, so a second request (retry, then the reconnect it
-  /// causes) joins it instead of fetching twice.
+  // Three guards keep the home from fetching the same thing twice:
+  // - [_reloading]: a reload requested while one runs (a reconnect during
+  //   the first load) joins it.
+  // - [_reloadedSinceOnline]: the retry reloads as soon as its probe
+  //   succeeds, and `onReconnected` fires a debounce later, usually after
+  //   that reload finished; the flag drops that event.
+  // - `state.isRetrying`: a second tap on retry while one runs is ignored.
   Future<void>? _reloading;
-
-  /// A reload started while online since the last time the app went offline.
-  /// The retry reloads right after its probe succeeds, and `onReconnected`
-  /// fires a debounce later; this flag keeps that second event from fetching
-  /// everything again.
   bool _reloadedSinceOnline = false;
 
   static const String _logTag = 'HomeViewModel';
@@ -204,10 +203,20 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   /// Reloads every section, keeping what is on screen until fresh data
   /// arrives. Joins the reload already in flight, if any.
   Future<void> reload() {
+    final inFlight = _reloading;
+    if (inFlight != null) return inFlight;
     if (!_connectivity.isOffline) _reloadedSinceOnline = true;
-    return _reloading ??= Future.wait([
-      _loadLatestUpdated(),
-      _loadRecentlyAdded(),
+    return _reloading = Future.wait([
+      _loadSection(
+        _latestUpdatedOptions,
+        read: (s) => s.latestUpdated,
+        write: (s, section) => s.copyWith(latestUpdated: section),
+      ),
+      _loadSection(
+        _recentlyAddedOptions,
+        read: (s) => s.recentlyAdded,
+        write: (s, section) => s.copyWith(recentlyAdded: section),
+      ),
       _loadContinueReading(),
     ]).whenComplete(() => _reloading = null);
   }
@@ -247,53 +256,35 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     _loadContinueReading();
   }
 
-  Future<void> _loadLatestUpdated() async {
-    // Skeletons only where nothing is shown yet: a refresh is silent.
-    final showSkeleton = state.latestUpdatedBooks.isEmpty;
-    emit(
-      state.copyWith(
-        isLoadingFeatured: showSkeleton,
-        isLoadingGrid: showSkeleton,
-      ),
+  /// Loads one book list. Skeletons only where nothing is shown yet, so a
+  /// refresh is silent; a failed refresh keeps the old books.
+  Future<void> _loadSection(
+    BookPageOptions options, {
+    required HomeBookSection Function(HomeState) read,
+    required HomeState Function(HomeState, HomeBookSection) write,
+  }) async {
+    void update(HomeBookSection Function(HomeBookSection) change) =>
+        emit(write(state, change(read(state))));
+
+    // Clearing the offline miss up front takes the offline empty view down
+    // while a reload (on reconnect) runs.
+    update(
+      (s) => s.copyWith(isLoading: s.books.isEmpty, unavailableOffline: false),
     );
-
     try {
-      final res = await _booksRepository.getBooks(_latestUpdatedOptions);
-      emit(
-        state.copyWith(
-          featuredBooks: res.data.take(5).toList(),
-          latestUpdatedBooks: res.data,
-          latestUnavailableOffline: false,
-        ),
-      );
+      final res = await _booksRepository.getBooks(options);
+      update((s) => s.copyWith(books: res.data));
     } on OfflineException {
-      emit(state.copyWith(latestUnavailableOffline: true));
+      update((s) => s.copyWith(unavailableOffline: true));
     } catch (e, stackTrace) {
-      AppLogger.e('Error loading latest books data', e, stackTrace, _logTag);
-    } finally {
-      emit(state.copyWith(isLoadingFeatured: false, isLoadingGrid: false));
-    }
-  }
-
-  Future<void> _loadRecentlyAdded() async {
-    emit(
-      state.copyWith(isLoadingRecentlyAdded: state.recentlyAddedBooks.isEmpty),
-    );
-
-    try {
-      final res = await _booksRepository.getBooks(_recentlyAddedOptions);
-      emit(
-        state.copyWith(
-          recentlyAddedBooks: res.data,
-          recentUnavailableOffline: false,
-        ),
+      AppLogger.e(
+        'Error loading books (${options.orderBy})',
+        e,
+        stackTrace,
+        _logTag,
       );
-    } on OfflineException {
-      emit(state.copyWith(recentUnavailableOffline: true));
-    } catch (e, stackTrace) {
-      AppLogger.e('Error loading recently added books', e, stackTrace, _logTag);
     } finally {
-      emit(state.copyWith(isLoadingRecentlyAdded: false));
+      update((s) => s.copyWith(isLoading: false));
     }
   }
 

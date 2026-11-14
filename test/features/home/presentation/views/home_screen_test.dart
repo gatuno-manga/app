@@ -5,6 +5,9 @@ import 'package:gatuno/features/home/presentation/components/molecules/login_ico
 import 'package:gatuno/features/home/presentation/components/molecules/user_profile_icon.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/home/presentation/views/home_screen.dart';
+import 'package:gatuno/features/books/domain/entities/book.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
 import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
@@ -107,11 +110,8 @@ void main() {
     final nothingSaved = HomeState.initial().copyWith(
       isInitialized: true,
       isOffline: true,
-      isLoadingFeatured: false,
-      isLoadingGrid: false,
-      isLoadingRecentlyAdded: false,
-      latestUnavailableOffline: true,
-      recentUnavailableOffline: true,
+      latestUpdated: const HomeBookSection(unavailableOffline: true),
+      recentlyAdded: const HomeBookSection(unavailableOffline: true),
     );
 
     testWidgets('shows the offline empty view when nothing is saved', (
@@ -137,6 +137,23 @@ void main() {
             .isRetrying,
         isTrue,
       );
+    });
+
+    testWidgets('leaves out the header of a list with nothing saved', (
+      tester,
+    ) async {
+      await pumpHome(
+        tester,
+        nothingSaved.copyWith(
+          latestUpdated: HomeBookSection(
+            books: [Book(id: const BookId('a'), title: BookTitle('A'))],
+          ),
+        ),
+      );
+
+      expect(find.byType(AppOfflineEmptyView), findsNothing);
+      expect(find.text('Latest Updates'), findsOneWidget);
+      expect(find.text('New on Gatuno'), findsNothing);
     });
 
     testWidgets('disables the call to action with a note', (tester) async {

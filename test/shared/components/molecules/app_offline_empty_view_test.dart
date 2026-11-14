@@ -53,16 +53,20 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpApp(Scaffold(body: AppOfflineEmptyView(onRetry: () {})));
 
-      final column = tester.getSize(
+      final box = tester.widget<ConstrainedBox>(
         find
             .descendant(
               of: find.byType(AppOfflineEmptyView),
-              matching: find.byType(Column),
+              matching: find.byType(ConstrainedBox),
             )
             .first,
       );
+      expect(box.constraints.maxWidth, AppOfflineEmptyView.maxContentWidth);
+      final message = tester.getSize(
+        find.textContaining("This isn't saved on this device yet"),
+      );
       expect(
-        column.width,
+        message.width,
         lessThanOrEqualTo(AppOfflineEmptyView.maxContentWidth),
       );
     });
