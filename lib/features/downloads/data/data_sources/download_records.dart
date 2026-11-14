@@ -249,16 +249,40 @@ class DownloadRecords {
         }
       });
 
-  /// Every native task id a file points at.
+  /// Every native task id a file of a queued or running chapter points at.
   Future<Set<String>> recordedTaskIds() async {
-    final query = _db.selectOnly(_db.downloadFiles)
-      ..addColumns([_db.downloadFiles.nativeTaskId])
-      ..where(_db.downloadFiles.nativeTaskId.isNotNull());
-    return {
-      for (final row in await query.get())
-        row.read(_db.downloadFiles.nativeTaskId)!,
-    };
+    final f = _db.downloadFiles;
+    final c = _db.downloadChapters;
+    final query =
+        _db.selectOnly(f).join([
+            innerJoin(c, c.chapterId.equalsExp(f.chapterId)),
+          ])
+          ..addColumns([f.nativeTaskId])
+          ..where(f.nativeTaskId.isNotNull() & c.state.isInValues(_active));
+    return {for (final row in await query.get()) row.read(f.nativeTaskId)!};
   }
+
+  /// Clears task ids left on chapters that are not queued or running (an
+  /// app killed between a pause and its cancel).
+  Future<void> clearInactiveTasks() async {
+    final active = _db.selectOnly(_db.downloadChapters)
+      ..addColumns([_db.downloadChapters.chapterId])
+      ..where(_db.downloadChapters.state.isInValues(_active));
+    await (_db.update(_db.downloadFiles)..where(
+          (f) => f.nativeTaskId.isNotNull() & f.chapterId.isNotInQuery(active),
+        ))
+        .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
+  }
+
+  /// Pending files of several chapters, in chapter and page order.
+  Future<List<DownloadFile>> pendingFilesOf(List<String> chapterIds) =>
+      (_db.select(_db.downloadFiles)
+            ..where((f) => f.chapterId.isIn(chapterIds) & f.done.equals(false))
+            ..orderBy([
+              (f) => OrderingTerm.asc(f.chapterId),
+              (f) => OrderingTerm.asc(f.position),
+            ]))
+          .get();
 
   /// A chapter whose download is done.
   Future<DownloadChapter?> doneChapter(String chapterId) =>

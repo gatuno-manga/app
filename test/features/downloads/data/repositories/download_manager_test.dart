@@ -4,20 +4,17 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
-import 'package:gatuno/core/covers/cover_store.dart';
 import 'package:gatuno/core/network/exceptions.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
 import 'package:gatuno/features/books/domain/entities/chapter_page_options.dart';
-import 'package:gatuno/features/books/domain/repositories/books_repository.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_cover.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_records.dart';
-import 'package:gatuno/features/downloads/data/data_sources/download_remote_data_source.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
 import 'package:gatuno/features/downloads/data/data_sources/transfer_queue.dart';
 import 'package:gatuno/features/downloads/data/database/downloads_database.dart';
@@ -28,130 +25,11 @@ import 'package:gatuno/features/downloads/domain/entities/download_network.dart'
 import 'package:gatuno/features/downloads/domain/entities/download_scope.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_state.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_totals.dart';
-import 'package:gatuno/features/downloads/domain/repositories/download_network_policy.dart';
 import 'package:gatuno/features/downloads/exceptions/download_exceptions.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockRemote extends Mock implements DownloadRemoteDataSource {}
-
-class MockBooksRepository extends Mock implements BooksRepository {}
-
-class MockCoverStore extends Mock implements CoverStore {}
-
-class FakeConnectivity implements ConnectivityService {
-  @override
-  ConnectivityStatus status = ConnectivityStatus.online;
-  final StreamController<void> reconnected = StreamController<void>.broadcast();
-
-  @override
-  Stream<void> get onReconnected => reconnected.stream;
-
-  @override
-  Stream<ConnectivityStatus> get statusStream => Stream.value(status);
-
-  @override
-  Future<void> checkNow() async {}
-
-  @override
-  void reportReachable() {}
-
-  @override
-  void reportUnreachable() {}
-
-  Future<void> close() => reconnected.close();
-}
-
-class FakePolicy implements DownloadNetworkPolicy {
-  final Map<BookType, DownloadNetwork> rules = {};
-  final StreamController<void> changed = StreamController<void>.broadcast();
-
-  @override
-  Future<DownloadNetwork> requirementFor(BookType type) async =>
-      rules[type] ?? DownloadNetwork.any;
-
-  @override
-  Stream<void> get changes => changed.stream;
-
-  Future<void> close() => changed.close();
-}
-
-class FakeTransferQueue implements TransferQueue {
-  final StreamController<TransferEvent> controller =
-      StreamController<TransferEvent>.broadcast();
-  final List<FileTransfer> enqueued = [];
-  final List<String> cancelled = [];
-  final Set<String> active = {};
-  int permissionRequests = 0;
-
-  @override
-  Stream<TransferEvent> get events => controller.stream;
-
-  @override
-  Future<void> start() async {}
-
-  @override
-  Future<void> enqueue(List<FileTransfer> transfers) async {
-    enqueued.addAll(transfers);
-    active.addAll(transfers.map((t) => t.taskId));
-  }
-
-  @override
-  Future<void> cancel(Iterable<String> taskIds) async {
-    cancelled.addAll(taskIds);
-    active.removeAll(taskIds);
-  }
-
-  @override
-  Future<void> cancelAll() => cancel([...active]);
-
-  @override
-  Future<Set<String>> activeTaskIds() async => {...active};
-
-  @override
-  Future<void> requestNotificationPermission() async => permissionRequests++;
-
-  /// The transfers of [chapterId] still queued natively.
-  Future<void> close() => controller.close();
-
-  List<FileTransfer> queuedFor(String chapterId) => enqueued
-      .where((t) => t.group == chapterId && active.contains(t.taskId))
-      .toList();
-}
-
-const _book = BookId('book-1');
-
-Map<String, dynamic> imageManifest(String id, {int pages = 2}) => {
-  'id': id,
-  'originalUrl': 'https://origin/$id',
-  'index': 1,
-  'contentType': 'image',
-  'retries': 0,
-  'isFinal': false,
-  'bookId': _book.value,
-  'bookTitle': 'Book',
-  'totalChapters': 3,
-  'pages': [
-    // Out of order on purpose: files follow the page index.
-    for (var i = pages; i >= 1; i--)
-      {'id': 'p$i', 'path': '/s3/$id/$i.webp', 'index': i},
-  ],
-  'comments': <dynamic>[],
-};
-
-Map<String, dynamic> textManifest(String id) => {
-  ...imageManifest(id, pages: 0),
-  'contentType': 'text',
-  'content': '# Hello',
-  'contentFormat': 'markdown',
-};
-
-Map<String, dynamic> documentManifest(String id) => {
-  ...imageManifest(id, pages: 0),
-  'contentType': 'document',
-  'documentPath': '/s3/$id/book.pdf',
-  'documentFormat': 'pdf',
-};
+import '../../helpers/download_test_doubles.dart';
 
 void main() {
   late DownloadsDatabase db;
@@ -241,7 +119,7 @@ void main() {
     when(() => remote.fileHeaders).thenReturn({'Referer': 'r'});
     when(() => books.getBook(any())).thenAnswer(
       (_) async => const Book(
-        id: _book,
+        id: testBook,
         title: BookTitle('Book'),
         type: TypeBook.manga,
         cover: BookCover('https://srv/cover.webp'),
@@ -282,7 +160,7 @@ void main() {
       () async {
         manifest('c1', imageManifest('c1'));
 
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 2, reason: 'enqueue');
 
         final c = await chapter('c1');
@@ -319,7 +197,7 @@ void main() {
       () async {
         manifest('c1', imageManifest('c1'));
 
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
 
         verify(
           () => covers.pin('book-1', DownloadManager.coverPinOwner),
@@ -334,7 +212,7 @@ void main() {
     test('a text chapter is done once its manifest is stored', () async {
       manifest('t1', textManifest('t1'));
 
-      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
 
       await untilState('t1', DownloadState.done);
       expect(transfers.enqueued, isEmpty);
@@ -344,7 +222,7 @@ void main() {
     test('a document chapter downloads one document file', () async {
       manifest('d1', documentManifest('d1'));
 
-      await manager.enqueueChapters(_book, const [ChapterId('d1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('d1')]);
       await until(() => transfers.enqueued.isNotEmpty, reason: 'enqueue');
 
       expect(transfers.enqueued.single.filename, 'document.pdf');
@@ -358,7 +236,7 @@ void main() {
         return imageManifest('c1');
       });
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(
         () async => (await chapter('c1')) != null,
         reason: 'the chapter row',
@@ -375,7 +253,7 @@ void main() {
     test('a 401 fails the chapter with signInRequired', () async {
       when(() => remote.fetchManifest('c1')).thenThrow(UnauthorizedException());
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
 
       await untilState('c1', DownloadState.failed);
       expect((await chapter('c1'))!.error, DownloadErrors.signInRequired);
@@ -389,7 +267,7 @@ void main() {
         ).thenThrow(ChapterUnavailableException('gone'));
         manifest('empty', imageManifest('empty', pages: 0));
 
-        await manager.enqueueChapters(_book, const [
+        await manager.enqueueChapters(testBook, const [
           ChapterId('gone'),
           ChapterId('empty'),
         ]);
@@ -402,7 +280,7 @@ void main() {
     );
 
     test('enqueueBook pages through every chapter', () async {
-      when(() => books.getBookChapters(_book, any())).thenAnswer((i) async {
+      when(() => books.getBookChapters(testBook, any())).thenAnswer((i) async {
         final options = i.positionalArguments[1] as ChapterPageOptions;
         return options.cursor == null
             ? const ChapterList(
@@ -418,7 +296,7 @@ void main() {
       manifest('t1', textManifest('t1'));
       manifest('t2', textManifest('t2'));
 
-      await manager.enqueueBook(_book);
+      await manager.enqueueBook(testBook);
 
       await untilState('t1', DownloadState.done);
       await untilState('t2', DownloadState.done);
@@ -428,7 +306,7 @@ void main() {
   group('native events', () {
     setUp(() async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2, reason: 'enqueue');
     });
 
@@ -494,7 +372,7 @@ void main() {
     test('pause cancels native tasks; resume queues them again', () async {
       final firstAttempt = [...transfers.enqueued];
 
-      await manager.pause(const DownloadScope.book(_book));
+      await manager.pause(const DownloadScope.book(testBook));
 
       expect((await chapter('c1'))!.state, DownloadState.paused);
       expect(transfers.cancelled, firstAttempt.map((t) => t.taskId));
@@ -557,7 +435,7 @@ void main() {
       () async {
         manifest('c1', imageManifest('c1'));
         manifest('t1', textManifest('t1'));
-        await manager.enqueueChapters(_book, const [
+        await manager.enqueueChapters(testBook, const [
           ChapterId('c1'),
           ChapterId('t1'),
         ]);
@@ -578,9 +456,9 @@ void main() {
         );
         verifyNever(() => covers.unpin(any(), any()));
 
-        await manager.delete(const DownloadScope.book(_book));
+        await manager.delete(const DownloadScope.book(testBook));
 
-        expect(await manager.watchBook(_book).first, isNull);
+        expect(await manager.watchBook(testBook).first, isNull);
         expect(Directory('${dir.path}/downloads/book-1').existsSync(), isFalse);
         verify(
           () => covers.unpin('book-1', DownloadManager.coverPinOwner),
@@ -591,7 +469,7 @@ void main() {
 
     test('clearAll wipes every download, file and native task', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
 
       await manager.clearAll();
@@ -607,7 +485,7 @@ void main() {
     test('a manifest arriving after a delete is dropped', () async {
       final gate = Completer<Map<String, dynamic>>();
       when(() => remote.fetchManifest('c1')).thenAnswer((_) => gate.future);
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
 
       await manager.delete(const DownloadScope.all());
       gate.complete(imageManifest('c1'));
@@ -629,7 +507,7 @@ void main() {
         when(
           () => remote.fetchManifest('c1'),
         ).thenThrow(ChapterUnavailableException('c1'));
-        await manager.enqueueChapters(_book, const [
+        await manager.enqueueChapters(testBook, const [
           ChapterId('t1'),
           ChapterId('c1'),
         ]);
@@ -637,7 +515,7 @@ void main() {
         await untilState('c1', DownloadState.failed);
 
         manifest('c1', imageManifest('c1'));
-        await manager.enqueueChapters(_book, const [
+        await manager.enqueueChapters(testBook, const [
           ChapterId('t1'),
           ChapterId('c1'),
         ]);
@@ -654,7 +532,7 @@ void main() {
       'files finished while closed are done; lost tasks are queued again',
       () async {
         manifest('c1', imageManifest('c1', pages: 3));
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 3);
         final [first, second, third] = transfers.enqueued;
 
@@ -682,7 +560,7 @@ void main() {
 
     test('a planned chapter whose files all landed is done on start', () async {
       manifest('c1', imageManifest('c1', pages: 1));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 1);
       final only = transfers.enqueued.single;
 
@@ -701,7 +579,7 @@ void main() {
     test('chapters left unplanned are planned on start', () async {
       connectivity.status = ConnectivityStatus.offline;
       manifest('t1', textManifest('t1'));
-      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect((await chapter('t1'))!.state, DownloadState.queued);
 
@@ -719,7 +597,7 @@ void main() {
       await setRule(BookType.manga, DownloadNetwork.unmetered);
       manifest('c1', imageManifest('c1'));
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
 
       expect(transfers.enqueued.every((t) => t.requiresWiFi), isTrue);
@@ -730,11 +608,11 @@ void main() {
       () async {
         await setRule(BookType.manga, DownloadNetwork.unmetered);
         manifest('c1', imageManifest('c1'));
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 2);
 
         final reasons = manager
-            .watchBook(_book)
+            .watchBook(testBook)
             .map((b) => b!.chapters.single.reason)
             .distinct();
         final seen = <DownloadWaitReason>[];
@@ -752,7 +630,7 @@ void main() {
       'a rule change queues pending files again under the new rule',
       () async {
         manifest('c1', imageManifest('c1'));
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 2);
         final firstAttempt = [...transfers.enqueued];
 
@@ -769,7 +647,7 @@ void main() {
   test('watchAll groups chapters by book in enqueue order', () async {
     manifest('t1', textManifest('t1'));
     manifest('t2', textManifest('t2'));
-    await manager.enqueueChapters(_book, const [
+    await manager.enqueueChapters(testBook, const [
       ChapterId('t2'),
       ChapterId('t1'),
     ]);
@@ -777,11 +655,60 @@ void main() {
     await untilState('t2', DownloadState.done);
 
     final List<BookDownload> all = await manager.watchAll().first;
-    expect(all.single.bookId, _book);
+    expect(all.single.bookId, testBook);
     expect(all.single.chapters.map((c) => c.chapterId.value), ['t2', 't1']);
   });
 
   group('resilience', () {
+    test('a timeout counts once the probe finds the server up', () async {
+      // As the connectivity interceptor does: a timeout flips the status
+      // offline until the confirming probe answers.
+      var calls = 0;
+      when(() => remote.fetchManifest('slow')).thenAnswer((_) async {
+        calls++;
+        connectivity.status = ConnectivityStatus.offline;
+        throw NetworkException();
+      });
+      connectivity.onCheck = () =>
+          connectivity.status = ConnectivityStatus.online;
+
+      await manager.enqueueChapters(testBook, const [ChapterId('slow')]);
+
+      await untilState('slow', DownloadState.failed);
+      expect(calls, DownloadManager.maxTransientAttempts);
+    });
+
+    test('a resync queues files whose native task vanished', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      final lost = transfers.enqueued.first;
+      transfers.active.remove(lost.taskId);
+
+      transfers.controller.add(const TransfersResynced());
+
+      await until(() => transfers.enqueued.length == 3, reason: 'requeue');
+      expect(transfers.enqueued.last.filename, lost.filename);
+      expect(transfers.enqueued.last.taskId, isNot(lost.taskId));
+    });
+
+    test('ids left on a paused chapter are cancelled on start', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      final first = [for (final t in transfers.enqueued) t.taskId];
+      // Killed between the pause and its cancel.
+      await manager.dispose();
+      await DownloadRecords(db).setState('c1', DownloadState.paused, null);
+
+      manager = build();
+      await manager.start();
+      expect(transfers.cancelled, unorderedEquals(first));
+
+      await manager.resume(const DownloadScope.all());
+      await until(() => transfers.queuedFor('c1').length == 2);
+    });
+
     test('a manifest that keeps timing out fails after 3 tries', () async {
       var calls = 0;
       when(() => remote.fetchManifest('slow')).thenAnswer((_) async {
@@ -790,7 +717,7 @@ void main() {
       });
       manifest('t1', textManifest('t1'));
 
-      await manager.enqueueChapters(_book, const [
+      await manager.enqueueChapters(testBook, const [
         ChapterId('slow'),
         ChapterId('t1'),
       ]);
@@ -805,7 +732,7 @@ void main() {
       connectivity.status = ConnectivityStatus.offline;
       when(() => remote.fetchManifest('c1')).thenThrow(NetworkException());
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await Future<void>.delayed(const Duration(milliseconds: 150));
 
       expect((await chapter('c1'))!.state, DownloadState.queued);
@@ -813,11 +740,11 @@ void main() {
 
     test('clearAll wipes even when the native cancel throws', () async {
       await manager.dispose();
-      transfers = _ThrowingCancelQueue();
+      transfers = ThrowingCancelQueue();
       manager = build();
       await manager.start();
       manifest('t1', textManifest('t1'));
-      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
       await untilState('t1', DownloadState.done);
 
       await manager.clearAll();
@@ -828,7 +755,7 @@ void main() {
 
     test('a failed re-plan does not keep counting the old manifest', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
       transfers.controller.add(
         TransferFailed(
@@ -854,7 +781,7 @@ void main() {
 
     test('start deletes chapter directories no download owns', () async {
       manifest('t1', textManifest('t1'));
-      await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
       await untilState('t1', DownloadState.done);
       await manager.dispose();
       final stray = Directory('${dir.path}/downloads/book-1/gone/pages')
@@ -875,7 +802,7 @@ void main() {
 
     test('retry after notFound downloads every page again', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
       final [first, second] = transfers.enqueued;
       await land(first);
@@ -913,18 +840,20 @@ void main() {
       when(() => books.getBook(any())).thenAnswer((_) => details.future);
       manifest('t1', textManifest('t1'));
 
-      final enqueued = manager.enqueueChapters(_book, const [ChapterId('t1')]);
-      await manager.delete(const DownloadScope.book(_book));
-      details.complete(const Book(id: _book, title: BookTitle('Book')));
+      final enqueued = manager.enqueueChapters(testBook, const [
+        ChapterId('t1'),
+      ]);
+      await manager.delete(const DownloadScope.book(testBook));
+      details.complete(const Book(id: testBook, title: BookTitle('Book')));
       await enqueued;
 
-      expect(await manager.watchBook(_book).first, isNull);
+      expect(await manager.watchBook(testBook).first, isNull);
       verifyNever(() => covers.pin(any(), any()));
     });
 
     test('native task ids differ across app sessions', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
       final firstSession = transfers.enqueued.map((t) => t.taskId).toSet();
 
@@ -945,7 +874,7 @@ void main() {
         return imageManifest('c1');
       });
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
 
       await until(() => transfers.enqueued.length == 2, reason: 'retry');
       expect(calls, 2);
@@ -958,7 +887,7 @@ void main() {
         return imageManifest('c1');
       });
 
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
 
       await until(() => transfers.enqueued.length == 2, reason: 'retry');
       expect((await chapter('c1'))!.state, isNot(DownloadState.failed));
@@ -969,7 +898,7 @@ void main() {
       when(() => remote.fetchManifest('c1')).thenAnswer((_) => slow.future);
       manifest('c2', imageManifest('c2', pages: 1));
 
-      await manager.enqueueChapters(_book, const [
+      await manager.enqueueChapters(testBook, const [
         ChapterId('c1'),
         ChapterId('c2'),
       ]);
@@ -983,7 +912,7 @@ void main() {
 
     test('retry after notFound fetches the manifest again', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
       transfers.controller.add(
         TransferFailed(transfers.enqueued.last.taskId, DownloadErrors.notFound),
@@ -1003,7 +932,7 @@ void main() {
 
     test('a rule change leaves other book types alone', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
       await until(() => transfers.enqueued.length == 2);
 
       await setRule(BookType.book, DownloadNetwork.unmetered);
@@ -1017,18 +946,18 @@ void main() {
       () async {
         when(() => books.getBook(any())).thenThrow(OfflineException());
         manifest('t1', textManifest('t1'));
-        await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
         await untilState('t1', DownloadState.done);
 
         when(() => books.getBook(any())).thenAnswer(
           (_) async => const Book(
-            id: _book,
+            id: testBook,
             title: BookTitle('Book'),
             type: TypeBook.manga,
           ),
         );
         manifest('c1', imageManifest('c1'));
-        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 2);
 
         await setRule(BookType.manga, DownloadNetwork.unmetered);
@@ -1041,13 +970,15 @@ void main() {
     test('commands wait for start to apply the native state', () async {
       await manager.dispose();
       final gate = Completer<void>();
-      final slowQueue = _GatedTransferQueue(gate.future);
+      final slowQueue = GatedTransferQueue(gate.future);
       transfers = slowQueue;
       manager = build();
       manifest('t1', textManifest('t1'));
 
       final started = manager.start();
-      final enqueued = manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      final enqueued = manager.enqueueChapters(testBook, const [
+        ChapterId('t1'),
+      ]);
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(await DownloadRecords(db).chapter('t1'), isNull);
 
@@ -1057,20 +988,4 @@ void main() {
       await untilState('t1', DownloadState.done);
     });
   });
-}
-
-/// A transfer queue whose start waits for [gate].
-class _GatedTransferQueue extends FakeTransferQueue {
-  final Future<void> gate;
-
-  _GatedTransferQueue(this.gate);
-
-  @override
-  Future<void> start() => gate;
-}
-
-/// A transfer queue whose cancelAll fails, as with the plugin unavailable.
-class _ThrowingCancelQueue extends FakeTransferQueue {
-  @override
-  Future<void> cancelAll() => Future.error(StateError('no plugin'));
 }

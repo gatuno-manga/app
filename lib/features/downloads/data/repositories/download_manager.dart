@@ -230,11 +230,13 @@ class DownloadManager implements DownloadService {
 
   @override
   Future<void> pause(DownloadScope scope) => _serial(() async {
+    final paused = <String>[];
     for (final row in await _records.chaptersIn(scope)) {
       if (await _transition(row, DownloadEvent.pause)) {
-        await _cancelFiles(row.chapterId);
+        paused.add(row.chapterId);
       }
     }
+    await _cancelFiles(paused);
   });
 
   @override
@@ -266,9 +268,7 @@ class DownloadManager implements DownloadService {
     }
     final rows = await _records.chaptersIn(scope);
     if (rows.isEmpty) return;
-    for (final row in rows) {
-      await _cancelFiles(row.chapterId);
-    }
+    await _cancelFiles([for (final r in rows) r.chapterId]);
     await _records.deleteChapters([for (final r in rows) r.chapterId]);
     for (final row in rows) {
       await _storage.deleteChapter(row.bookId, row.chapterId);
@@ -377,6 +377,12 @@ class DownloadManager implements DownloadService {
           final batch = await _records.unplanned(planConcurrency);
           if (batch.isEmpty) break;
           final outcomes = await Future.wait(batch.map(_fetchPlan));
+          // A timeout flips the status offline until the confirming probe
+          // answers: wait for it, so a slow chapter counts against itself
+          // and a real outage does not.
+          if (outcomes.any((o) => o is _Unreachable)) {
+            await _confirmReachability();
+          }
           // In FIFO order, so files reach the native queue in enqueue order.
           await _serial(() async {
             for (final outcome in outcomes) {
@@ -394,6 +400,14 @@ class DownloadManager implements DownloadService {
       _schedulePlanRetry();
     } finally {
       _planning = false;
+    }
+  }
+
+  Future<void> _confirmReachability() async {
+    try {
+      await _connectivity.checkNow();
+    } catch (e, stackTrace) {
+      AppLogger.e('Reachability probe failed', e, stackTrace, _logTag);
     }
   }
 
@@ -484,13 +498,21 @@ class DownloadManager implements DownloadService {
   // Native events, reconciliation and rules (inside _serial)
 
   Future<void> _onTransfer(TransferEvent event) async {
-    final file = await _records.fileForTask(event.taskId);
+    final TaskTransferEvent taskEvent;
+    switch (event) {
+      case TransfersResynced():
+        await _resync(await _transfers.activeTaskIds());
+        return;
+      case TaskTransferEvent():
+        taskEvent = event;
+    }
+    final file = await _records.fileForTask(taskEvent.taskId);
     // An earlier attempt, cancelled or replaced.
     if (file == null) return;
     final chapter = await _records.chapter(file.chapterId);
     if (chapter == null) return;
 
-    switch (event) {
+    switch (taskEvent) {
       case TransferStarted():
         await _transition(chapter, DownloadEvent.fileStarted);
       case TransferCompleted():
@@ -512,7 +534,7 @@ class DownloadManager implements DownloadService {
         // from the notification. Treat it as a pause, so nothing is lost.
         await _records.setTask(file.fileId, null);
         if (await _transition(chapter, DownloadEvent.pause)) {
-          await _cancelFiles(chapter.chapterId);
+          await _cancelFiles([chapter.chapterId]);
         }
     }
   }
@@ -525,10 +547,19 @@ class DownloadManager implements DownloadService {
     final active = await _transfers.activeTaskIds();
     // Native tasks no record points at: their pause, delete or rule change
     // was recorded but the cancel never reached the plugin.
+    // An app killed between a pause and its cancel leaves ids on paused
+    // chapters: clear them, so their tasks count as orphans below.
+    await _records.clearInactiveTasks();
     final orphans = active.difference(await _records.recordedTaskIds());
     if (orphans.isNotEmpty) await _transfers.cancel(orphans);
     // Files a cancelled task moved in after its chapter was deleted.
     await _storage.sweep(await _records.chapterKeys());
+    await _resync(active);
+  }
+
+  /// Files of active chapters whose task is no longer in [active] are queued
+  /// again; [_continue] also marks those already on disk done.
+  Future<void> _resync(Set<String> active) async {
     for (final chapter in await _records.activePlanned()) {
       for (final file in await _records.pendingFiles(chapter.chapterId)) {
         final taskId = file.nativeTaskId;
@@ -555,7 +586,7 @@ class DownloadManager implements DownloadService {
     for (final chapter in await _records.activePlanned()) {
       final type = await _records.bookType(chapter.bookId);
       if (!changed.contains(type)) continue;
-      await _cancelFiles(chapter.chapterId);
+      await _cancelFiles([chapter.chapterId]);
       await _continue(chapter.chapterId);
     }
   });
@@ -655,15 +686,16 @@ class DownloadManager implements DownloadService {
     final chapter = await _records.chapter(chapterId);
     if (chapter == null) return;
     if (await _transition(chapter, DownloadEvent.fail, error: error)) {
-      await _cancelFiles(chapterId);
+      await _cancelFiles([chapterId]);
     }
   }
 
-  /// Cancels the native tasks of the chapter's pending files. Their ids are
+  /// Cancels the native tasks of the chapters' pending files, in one call. Their ids are
   /// cleared first, so the cancel events that follow are recognized as ours.
-  Future<void> _cancelFiles(String chapterId) async {
+  Future<void> _cancelFiles(List<String> chapterIds) async {
+    if (chapterIds.isEmpty) return;
     final queued = [
-      for (final file in await _records.pendingFiles(chapterId))
+      for (final file in await _records.pendingFilesOf(chapterIds))
         if (file.nativeTaskId != null) file,
     ];
     if (queued.isEmpty) return;

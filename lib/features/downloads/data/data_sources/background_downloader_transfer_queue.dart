@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/foundation.dart';
@@ -33,11 +34,6 @@ class DownloadNotificationTexts {
 /// WorkManager and iOS background URLSession, so files keep downloading when
 /// the app is closed.
 class BackgroundDownloaderTransferQueue implements TransferQueue {
-  /// Android cuts plain WorkManager tasks at 9 minutes, and a retry starts
-  /// over: files larger than this (documents, mostly) run as a foreground
-  /// service, under the running notification.
-  static const int foregroundAboveMegabytes = 10;
-
   /// A file fails once this little would be left on the device.
   static const int minFreeMegabytes = 200;
 
@@ -47,8 +43,21 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   static const String _notificationGroup = 'downloads';
   static const String _logTag = 'TransferQueue';
 
+  /// How long to let paused updates settle before a resume sweep: the
+  /// plugin records a paused task without waiting for the write.
+  static const Duration resumeSettle = Duration(milliseconds: 500);
+
   final FileDownloader _downloader;
   final DownloadNotificationTexts Function() _texts;
+
+  /// iOS: a task the system cancelled with resume data (a force-quit
+  /// mid-file) is reported paused and waits for a resume from Dart. Android:
+  /// tasks allow pause only so the plugin can pause and resume them natively
+  /// across WorkManager's 9-minute limit; nothing must resume them again.
+  final bool _resumesPausedTasks;
+
+  Future<void> _sweeps = Future<void>.value();
+  Timer? _sweepTimer;
 
   final StreamController<TransferEvent> _events =
       StreamController<TransferEvent>.broadcast();
@@ -58,8 +67,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   BackgroundDownloaderTransferQueue({
     FileDownloader? downloader,
     required DownloadNotificationTexts Function() texts,
+    bool? resumesPausedTasks,
   }) : _downloader = downloader ?? FileDownloader(),
-       _texts = texts;
+       _texts = texts,
+       _resumesPausedTasks = resumesPausedTasks ?? Platform.isIOS;
 
   @override
   Stream<TransferEvent> get events => _events.stream;
@@ -76,10 +87,7 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
         (Config.holdingQueue, false),
         (Config.checkAvailableSpace, minFreeMegabytes),
       ],
-      androidConfig: [
-        (Config.useCacheDir, Config.never),
-        (Config.runInForegroundIfFileLargerThan, foregroundAboveMegabytes),
-      ],
+      androidConfig: [(Config.useCacheDir, Config.never)],
       iOSConfig: [
         (Config.excludeFromCloudBackup, Config.always),
         (Config.localize, {'Cancel': _texts().cancel}),
@@ -87,11 +95,8 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     );
     _configureNotifications();
     await _downloader.resumeFromBackground();
-    // iOS reports a task the system cancelled with resume data (a force-quit
-    // mid-file, for example) as paused, and the plugin keeps it as a paused
-    // task that still counts as active. Nothing in the app pauses natively,
-    // so resume them all.
-    await _downloader.resumeAll();
+    // Awaited, so the caller's reconciliation sees a stable native queue.
+    if (_resumesPausedTasks) await _sweep();
   }
 
   void _configureNotifications() {
@@ -108,40 +113,36 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   }
 
   void _onUpdate(TaskUpdate update) {
-    if (update is TaskStatusUpdate &&
-        update.status == TaskStatus.paused &&
-        update.task is DownloadTask) {
-      unawaited(_resumeOrFail(update.task as DownloadTask));
+    if (update is TaskStatusUpdate && update.status == TaskStatus.paused) {
+      if (_resumesPausedTasks) {
+        _sweepTimer?.cancel();
+        _sweepTimer = Timer(resumeSettle, () => unawaited(_sweep()));
+      }
       return;
     }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
   }
 
-  /// A paused task would sit in the plugin forever: resume it, or report it
-  /// failed so the chapter can be retried.
-  Future<void> _resumeOrFail(DownloadTask task) async {
-    var resumed = false;
-    try {
-      resumed = await _downloader.resume(task);
-    } catch (e, stackTrace) {
-      AppLogger.e('Could not resume a paused file', e, stackTrace, _logTag);
-    }
-    if (resumed) return;
-    try {
-      await _downloader.cancelTasksWithIds([task.taskId]);
-    } catch (e, stackTrace) {
-      AppLogger.e('Could not cancel a paused file', e, stackTrace, _logTag);
-    }
-    if (!_events.isClosed) {
-      _events.add(TransferFailed(task.taskId, DownloadErrors.unknown));
-    }
+  /// Resumes every paused task, one sweep at a time: the plugin removes a
+  /// task from its paused list before resuming it, so serial sweeps never
+  /// resume a task twice. A task without resume data is dropped by the
+  /// plugin; the resync lets the owner queue it again.
+  Future<void> _sweep() {
+    return _sweeps = _sweeps.then((_) async {
+      try {
+        await _downloader.resumeAll();
+      } catch (e, stackTrace) {
+        AppLogger.e('Could not resume paused files', e, stackTrace, _logTag);
+      }
+      if (!_events.isClosed) _events.add(const TransfersResynced());
+    });
   }
 
   /// The [TransferEvent] for a native update; `null` for progress and for
-  /// intermediate states. A pause is handled before this (resumed).
+  /// intermediate states. A pause is handled before this.
   @visibleForTesting
-  static TransferEvent? eventOf(TaskUpdate update) {
+  static TaskTransferEvent? eventOf(TaskUpdate update) {
     if (update is! TaskStatusUpdate) return null;
     final taskId = update.task.taskId;
     return switch (update.status) {
@@ -184,6 +185,9 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
             group: t.group,
             requiresWiFi: t.requiresWiFi,
             retries: retries,
+            // Android: lets the plugin pause at WorkManager's 9-minute limit
+            // and resume natively, instead of failing and starting over.
+            allowPause: !_resumesPausedTasks,
             updates: Updates.status,
           ),
       ]);
@@ -249,6 +253,7 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   }
 
   Future<void> dispose() async {
+    _sweepTimer?.cancel();
     await _updates?.cancel();
     await _events.close();
   }

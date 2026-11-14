@@ -19,29 +19,30 @@ const _texts = DownloadNotificationTexts(
   cancel: 'x',
 );
 
+const _transfer = FileTransfer(
+  taskId: 'c1/1@s.1',
+  url: 'https://srv/s3/1.jpg',
+  directory: 'downloads/b/c1/pages',
+  filename: '0001.jpg',
+  group: 'c1',
+);
+
 void main() {
   late MockFileDownloader downloader;
   late StreamController<TaskUpdate> updates;
-  late BackgroundDownloaderTransferQueue queue;
   late List<TransferEvent> events;
-  late StreamSubscription<TransferEvent> sub;
-
-  const transfer = FileTransfer(
-    taskId: 'c1/1@s.1',
-    url: 'https://srv/s3/1.jpg',
-    directory: 'downloads/b/c1/pages',
-    filename: '0001.jpg',
-    group: 'c1',
-  );
+  BackgroundDownloaderTransferQueue? queue;
+  StreamSubscription<TransferEvent>? sub;
 
   setUpAll(() {
     registerFallbackValue(DownloadTask(url: 'https://x'));
     registerFallbackValue(<Task>[]);
   });
 
-  setUp(() async {
+  setUp(() {
     downloader = MockFileDownloader();
     updates = StreamController<TaskUpdate>.broadcast();
+    events = [];
     when(() => downloader.updates).thenAnswer((_) => updates.stream);
     when(
       () => downloader.configure(
@@ -61,52 +62,41 @@ void main() {
     ).thenReturn(downloader);
     when(() => downloader.resumeFromBackground()).thenAnswer((_) async {});
     when(() => downloader.resumeAll()).thenAnswer((_) async => []);
-    when(
-      () => downloader.cancelTasksWithIds(any()),
-    ).thenAnswer((_) async => true);
-    queue = BackgroundDownloaderTransferQueue(
-      downloader: downloader,
-      texts: () => _texts,
-    );
-    events = [];
-    sub = queue.events.listen(events.add);
-    await queue.start();
+    when(() => downloader.enqueueAll(any())).thenAnswer((_) async => [true]);
   });
 
+  Future<BackgroundDownloaderTransferQueue> start({required bool ios}) async {
+    final q = queue = BackgroundDownloaderTransferQueue(
+      downloader: downloader,
+      texts: () => _texts,
+      resumesPausedTasks: ios,
+    );
+    sub = q.events.listen(events.add);
+    await q.start();
+    // Broadcast events reach listeners a microtask later.
+    await Future<void>.delayed(Duration.zero);
+    return q;
+  }
+
   tearDown(() async {
-    await sub.cancel();
-    await queue.dispose();
+    await sub?.cancel();
+    await queue?.dispose();
     await updates.close();
   });
 
-  test('large files run in the foreground on Android', () {
-    final android =
-        verify(
-              () => downloader.configure(
-                globalConfig: any<dynamic>(named: 'globalConfig'),
-                androidConfig: captureAny<dynamic>(named: 'androidConfig'),
-                iOSConfig: any<dynamic>(named: 'iOSConfig'),
-              ),
-            ).captured.single
-            as List<Object?>;
-    expect(
-      android,
-      contains((
-        Config.runInForegroundIfFileLargerThan,
-        BackgroundDownloaderTransferQueue.foregroundAboveMegabytes,
-      )),
-    );
-  });
+  Task enqueuedTask() =>
+      (verify(() => downloader.enqueueAll(captureAny())).captured.single
+              as List<Task>)
+          .single;
 
-  test('only this queue\'s tasks count as active', () async {
-    when(
-      () => downloader.allTaskIds(allGroups: true),
-    ).thenAnswer((_) async => ['c1/1@s1.2', 'someone-else', 'x@y']);
+  TaskStatusUpdate paused() => TaskStatusUpdate(
+    DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+    TaskStatus.paused,
+  );
 
-    expect(await queue.activeTaskIds(), {'c1/1@s1.2'});
-  });
+  test('start disables the holding queue', () async {
+    await start(ios: false);
 
-  test('start disables the holding queue and resumes paused tasks', () {
     final config =
         verify(
               () => downloader.configure(
@@ -117,62 +107,102 @@ void main() {
             ).captured.single
             as List<Object?>;
     expect(config, contains((Config.holdingQueue, false)));
-    verify(() => downloader.resumeAll()).called(1);
   });
 
-  test('a paused task is resumed', () async {
-    final task = DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg');
-    when(() => downloader.resume(any())).thenAnswer((_) async => true);
+  group('Android', () {
+    test('tasks allow pause, so the plugin spans the 9-minute limit', () async {
+      final q = await start(ios: false);
 
-    updates.add(TaskStatusUpdate(task, TaskStatus.paused));
-    await Future<void>.delayed(Duration.zero);
+      await q.enqueue(const [_transfer]);
 
-    verify(() => downloader.resume(any())).called(1);
-    expect(events, isEmpty);
+      expect((enqueuedTask() as DownloadTask).allowPause, isTrue);
+    });
+
+    test('paused tasks are left to the plugin', () async {
+      await start(ios: false);
+
+      updates.add(paused());
+      await Future<void>.delayed(
+        BackgroundDownloaderTransferQueue.resumeSettle * 2,
+      );
+
+      verifyNever(() => downloader.resumeAll());
+      expect(events, isEmpty);
+    });
   });
 
-  test('a paused task that cannot resume fails', () async {
-    final task = DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg');
-    when(() => downloader.resume(any())).thenAnswer((_) async => false);
+  group('iOS', () {
+    test('start resumes paused tasks once, then resyncs', () async {
+      await start(ios: true);
 
-    updates.add(TaskStatusUpdate(task, TaskStatus.paused));
-    await Future<void>.delayed(const Duration(milliseconds: 10));
+      verify(() => downloader.resumeAll()).called(1);
+      expect(events, [const TransfersResynced()]);
+    });
 
-    verify(() => downloader.cancelTasksWithIds(['c1/1@s.1'])).called(1);
-    expect(events, [const TransferFailed('c1/1@s.1', DownloadErrors.unknown)]);
+    test('paused updates settle into one resume sweep', () async {
+      await start(ios: true);
+      clearInteractions(downloader);
+      events.clear();
+
+      updates
+        ..add(paused())
+        ..add(paused());
+      await Future<void>.delayed(
+        BackgroundDownloaderTransferQueue.resumeSettle * 2,
+      );
+
+      verify(() => downloader.resumeAll()).called(1);
+      expect(events, [const TransfersResynced()]);
+    });
+
+    test('tasks do not allow pause', () async {
+      final q = await start(ios: true);
+
+      await q.enqueue(const [_transfer]);
+
+      expect((enqueuedTask() as DownloadTask).allowPause, isFalse);
+    });
   });
 
   test('a native enqueue that throws fails every file', () async {
+    final q = await start(ios: false);
     when(() => downloader.enqueueAll(any())).thenThrow(Exception('boom'));
 
-    await queue.enqueue(const [transfer]);
+    await q.enqueue(const [_transfer]);
     await Future<void>.delayed(Duration.zero);
 
     expect(events, [const TransferFailed('c1/1@s.1', DownloadErrors.unknown)]);
   });
 
   test('a refused enqueue fails that file', () async {
+    final q = await start(ios: false);
     when(() => downloader.enqueueAll(any())).thenAnswer((_) async => [false]);
 
-    await queue.enqueue(const [transfer]);
+    await q.enqueue(const [_transfer]);
     await Future<void>.delayed(Duration.zero);
 
     expect(events, [const TransferFailed('c1/1@s.1', DownloadErrors.unknown)]);
   });
 
   test('enqueue builds app-support download tasks', () async {
-    when(() => downloader.enqueueAll(any())).thenAnswer((_) async => [true]);
+    final q = await start(ios: false);
 
-    await queue.enqueue(const [transfer]);
+    await q.enqueue(const [_transfer]);
 
-    final task =
-        (verify(() => downloader.enqueueAll(captureAny())).captured.single
-                as List<Task>)
-            .single;
+    final task = enqueuedTask();
     expect(task.taskId, 'c1/1@s.1');
     expect(task.baseDirectory, BaseDirectory.applicationSupport);
     expect(task.directory, 'downloads/b/c1/pages');
     expect(task.filename, '0001.jpg');
     expect(task.retries, BackgroundDownloaderTransferQueue.retries);
+  });
+
+  test('only this queue\'s tasks count as active', () async {
+    final q = await start(ios: false);
+    when(
+      () => downloader.allTaskIds(allGroups: true),
+    ).thenAnswer((_) async => ['c1/1@s1.2', 'someone-else', 'x@y']);
+
+    expect(await q.activeTaskIds(), {'c1/1@s1.2'});
   });
 }

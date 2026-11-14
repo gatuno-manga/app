@@ -37,26 +37,40 @@ class FileTransfer extends Equatable {
   ];
 }
 
-/// What happened to a native transfer.
+/// What happened in the native queue.
 sealed class TransferEvent extends Equatable {
+  const TransferEvent();
+}
+
+/// What happened to one native transfer.
+sealed class TaskTransferEvent extends TransferEvent {
   final String taskId;
 
-  const TransferEvent(this.taskId);
+  const TaskTransferEvent(this.taskId);
 
   @override
   List<Object?> get props => [taskId];
 }
 
-class TransferStarted extends TransferEvent {
+/// Tasks may have left the native queue without an event of their own (a
+/// paused task that could not resume): check which ones are still there.
+class TransfersResynced extends TransferEvent {
+  const TransfersResynced();
+
+  @override
+  List<Object?> get props => const [];
+}
+
+class TransferStarted extends TaskTransferEvent {
   const TransferStarted(super.taskId);
 }
 
-class TransferCompleted extends TransferEvent {
+class TransferCompleted extends TaskTransferEvent {
   const TransferCompleted(super.taskId);
 }
 
 /// Failed for good, after the native retries.
-class TransferFailed extends TransferEvent {
+class TransferFailed extends TaskTransferEvent {
   /// A `DownloadErrors` code.
   final String error;
 
@@ -67,7 +81,7 @@ class TransferFailed extends TransferEvent {
 }
 
 /// Cancelled, by the app or from the notification.
-class TransferCancelled extends TransferEvent {
+class TransferCancelled extends TaskTransferEvent {
   const TransferCancelled(super.taskId);
 }
 
