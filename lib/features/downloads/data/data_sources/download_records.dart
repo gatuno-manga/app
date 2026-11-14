@@ -274,6 +274,14 @@ class DownloadRecords {
         .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
   }
 
+  /// Clears these native task ids from the files that hold them.
+  Future<void> clearTaskIds(Set<String> taskIds) async {
+    if (taskIds.isEmpty) return;
+    await (_db.update(_db.downloadFiles)
+          ..where((f) => f.nativeTaskId.isIn(taskIds)))
+        .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
+  }
+
   /// Pending files of several chapters, in chapter and page order.
   Future<List<DownloadFile>> pendingFilesOf(List<String> chapterIds) =>
       (_db.select(_db.downloadFiles)

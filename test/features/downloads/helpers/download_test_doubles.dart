@@ -98,7 +98,7 @@ class FakeTransferQueue implements TransferQueue {
   Future<void> close() => controller.close();
 
   List<FileTransfer> queuedFor(String chapterId) => enqueued
-      .where((t) => t.group == chapterId && active.contains(t.taskId))
+      .where((t) => chapterOf(t) == chapterId && active.contains(t.taskId))
       .toList();
 }
 
@@ -151,3 +151,6 @@ class ThrowingCancelQueue extends FakeTransferQueue {
   @override
   Future<void> cancelAll() => Future.error(StateError('no plugin'));
 }
+
+/// The chapter of a transfer: task ids start with `<chapterId>/`.
+String chapterOf(FileTransfer transfer) => transfer.taskId.split('/').first;

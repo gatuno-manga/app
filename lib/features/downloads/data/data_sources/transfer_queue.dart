@@ -11,8 +11,6 @@ class FileTransfer extends Equatable {
   final String directory;
   final String filename;
 
-  /// The chapter the file belongs to.
-  final String group;
   final bool requiresWiFi;
 
   const FileTransfer({
@@ -21,7 +19,6 @@ class FileTransfer extends Equatable {
     this.headers = const {},
     required this.directory,
     required this.filename,
-    required this.group,
     this.requiresWiFi = false,
   });
 
@@ -32,7 +29,6 @@ class FileTransfer extends Equatable {
     headers,
     directory,
     filename,
-    group,
     requiresWiFi,
   ];
 }
@@ -92,11 +88,6 @@ class TransferCancelled extends TaskTransferEvent {
 abstract final class TransferIds {
   static String forAttempt(String fileId, String session, int attempt) =>
       '$fileId@$session.$attempt';
-
-  static final RegExp _format = RegExp(r'^.+/\d+@[0-9a-z]+\.\d+$');
-
-  /// Whether [taskId] has the format of [forAttempt].
-  static bool isDownloadTask(String taskId) => _format.hasMatch(taskId);
 }
 
 /// The native background downloader. Transfers keep running when the app is

@@ -24,7 +24,6 @@ const _transfer = FileTransfer(
   url: 'https://srv/s3/1.jpg',
   directory: 'downloads/b/c1/pages',
   filename: '0001.jpg',
-  group: 'c1',
 );
 
 void main() {
@@ -61,7 +60,13 @@ void main() {
       ),
     ).thenReturn(downloader);
     when(() => downloader.resumeFromBackground()).thenAnswer((_) async {});
-    when(() => downloader.resumeAll()).thenAnswer((_) async => []);
+    when(
+      () => downloader.resumeAll(group: any(named: 'group')),
+    ).thenAnswer((_) async => []);
+    when(
+      () => downloader.allTaskIds(group: any(named: 'group')),
+    ).thenAnswer((_) async => []);
+    when(() => downloader.resume(any())).thenAnswer((_) async => false);
     when(() => downloader.enqueueAll(any())).thenAnswer((_) async => [true]);
   });
 
@@ -118,7 +123,7 @@ void main() {
       expect((enqueuedTask() as DownloadTask).allowPause, isTrue);
     });
 
-    test('paused tasks are left to the plugin', () async {
+    test('a timeout pause only clears the plugin\'s paused entry', () async {
       await start(ios: false);
 
       updates.add(paused());
@@ -126,16 +131,28 @@ void main() {
         BackgroundDownloaderTransferQueue.resumeSettle * 2,
       );
 
-      verifyNever(() => downloader.resumeAll());
+      // resume() drops the stale entry, so a later cancel reaches
+      // WorkManager; with no resume data it enqueues nothing.
+      verify(() => downloader.resume(any())).called(1);
+      verifyNever(() => downloader.resumeAll(group: any(named: 'group')));
       expect(events, isEmpty);
     });
   });
 
   group('iOS', () {
-    test('start resumes paused tasks once, then resyncs', () async {
+    test('start opens the session, then resumes paused tasks once', () async {
       await start(ios: true);
 
-      verify(() => downloader.resumeAll()).called(1);
+      verifyInOrder([
+        () => downloader.resumeFromBackground(),
+        () => downloader.allTaskIds(
+          group: BackgroundDownloaderTransferQueue.group,
+        ),
+        () => downloader.resumeAll(
+          group: BackgroundDownloaderTransferQueue.group,
+        ),
+      ]);
+      verifyNever(() => downloader.resume(any()));
       expect(events, [const TransfersResynced()]);
     });
 
@@ -151,7 +168,7 @@ void main() {
         BackgroundDownloaderTransferQueue.resumeSettle * 2,
       );
 
-      verify(() => downloader.resumeAll()).called(1);
+      verify(() => downloader.resumeAll(group: any(named: 'group'))).called(1);
       expect(events, [const TransfersResynced()]);
     });
 
@@ -197,12 +214,16 @@ void main() {
     expect(task.retries, BackgroundDownloaderTransferQueue.retries);
   });
 
-  test('only this queue\'s tasks count as active', () async {
+  test('tasks live in one plugin group, listed by that group', () async {
     final q = await start(ios: false);
     when(
-      () => downloader.allTaskIds(allGroups: true),
-    ).thenAnswer((_) async => ['c1/1@s1.2', 'someone-else', 'x@y']);
+      () =>
+          downloader.allTaskIds(group: BackgroundDownloaderTransferQueue.group),
+    ).thenAnswer((_) async => ['c1/1@s1.2']);
 
+    await q.enqueue(const [_transfer]);
+
+    expect(enqueuedTask().group, BackgroundDownloaderTransferQueue.group);
     expect(await q.activeTaskIds(), {'c1/1@s1.2'});
   });
 }

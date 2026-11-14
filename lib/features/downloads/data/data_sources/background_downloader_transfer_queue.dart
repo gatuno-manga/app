@@ -41,6 +41,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   static const int retries = 2;
 
   static const String _notificationGroup = 'downloads';
+
+  /// Plugin group of every download task: what this queue lists, cancels
+  /// and resumes, leaving any other use of the plugin alone.
+  static const String group = 'gatuno.downloads';
   static const String _logTag = 'TransferQueue';
 
   /// How long to let paused updates settle before a resume sweep: the
@@ -95,8 +99,16 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     );
     _configureNotifications();
     await _downloader.resumeFromBackground();
-    // Awaited, so the caller's reconciliation sees a stable native queue.
-    if (_resumesPausedTasks) await _sweep();
+    if (_resumesPausedTasks) {
+      // iOS creates the background session lazily, and only then delivers
+      // the tasks the system cancelled with resume data (as paused). Open it
+      // and let those callbacks land before the sweep; awaited, so the
+      // caller's reconciliation sees the resumed tasks as active.
+      await _downloader.allTaskIds(group: group);
+      await Future<void>.delayed(resumeSettle);
+      _sweepTimer?.cancel();
+      await _sweep();
+    }
   }
 
   void _configureNotifications() {
@@ -117,11 +129,26 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
       if (_resumesPausedTasks) {
         _sweepTimer?.cancel();
         _sweepTimer = Timer(resumeSettle, () => unawaited(_sweep()));
+      } else {
+        unawaited(_forgetTimeoutPause(update.task));
       }
       return;
     }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
+  }
+
+  /// Android: a pause is the plugin crossing WorkManager's 9-minute limit; it
+  /// has already re-enqueued the task natively. The plugin still lists it as
+  /// paused on the Dart side, and a cancel of a listed task never reaches
+  /// WorkManager. `resume` drops that entry and, with no Dart-side resume
+  /// data on this path, enqueues nothing. A workaround for the plugin.
+  Future<void> _forgetTimeoutPause(Task task) async {
+    try {
+      await _downloader.resume(task as DownloadTask);
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not clear a timeout pause', e, stackTrace, _logTag);
+    }
   }
 
   /// Resumes every paused task, one sweep at a time: the plugin removes a
@@ -131,7 +158,7 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   Future<void> _sweep() {
     return _sweeps = _sweeps.then((_) async {
       try {
-        await _downloader.resumeAll();
+        await _downloader.resumeAll(group: group);
       } catch (e, stackTrace) {
         AppLogger.e('Could not resume paused files', e, stackTrace, _logTag);
       }
@@ -182,7 +209,7 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
             baseDirectory: BaseDirectory.applicationSupport,
             directory: t.directory,
             filename: t.filename,
-            group: t.group,
+            group: group,
             requiresWiFi: t.requiresWiFi,
             retries: retries,
             // Android: lets the plugin pause at WorkManager's 9-minute limit
@@ -224,13 +251,9 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     await cancel(await activeTaskIds());
   }
 
-  /// Only download tasks of this queue (by id format): another use of the
-  /// plugin in the app must not be cancelled as an orphan.
   @override
-  Future<Set<String>> activeTaskIds() async {
-    final ids = await _downloader.allTaskIds(allGroups: true);
-    return ids.where(TransferIds.isDownloadTask).toSet();
-  }
+  Future<Set<String>> activeTaskIds() async =>
+      (await _downloader.allTaskIds(group: group)).toSet();
 
   @override
   Future<void> requestNotificationPermission() async {

@@ -63,7 +63,8 @@ void main() {
             DownloadFilesCompanion.insert(
               fileId: 'c1/$i',
               chapterId: 'c1',
-              position: i,
+              // As ChapterFilePlan numbers them: pages from 1, document 0.
+              position: path.startsWith('pages/') ? i + 1 : 0,
               url: 'https://srv/$path',
               relativePath: path,
             ),

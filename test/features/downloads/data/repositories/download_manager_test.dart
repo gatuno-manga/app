@@ -182,7 +182,7 @@ void main() {
             ),
           ],
         );
-        expect(transfers.enqueued.first.group, 'c1');
+        expect(chapterOf(transfers.enqueued.first), 'c1');
         expect(transfers.enqueued.first.requiresWiFi, isFalse);
         expect(transfers.enqueued.first.headers, {'Referer': 'r'});
         expect(
@@ -660,6 +660,41 @@ void main() {
   });
 
   group('resilience', () {
+    test('a resync cancels native tasks no record points at', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      // A late duplicate, such as a task iOS resumed under an old id.
+      transfers.active.add('c1/1@old.1');
+
+      transfers.controller.add(const TransfersResynced());
+
+      await until(() => transfers.cancelled.contains('c1/1@old.1'));
+      expect(transfers.enqueued, hasLength(2), reason: 'nothing requeued');
+    });
+
+    test('a book type known only later reapplies the network rule', () async {
+      await setRule(BookType.manga, DownloadNetwork.unmetered);
+      when(() => books.getBook(any())).thenThrow(OfflineException());
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      expect(transfers.enqueued.any((t) => t.requiresWiFi), isFalse);
+
+      when(() => books.getBook(any())).thenAnswer(
+        (_) async => const Book(
+          id: testBook,
+          title: BookTitle('Book'),
+          type: TypeBook.manga,
+        ),
+      );
+      manifest('t1', textManifest('t1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
+
+      await until(() => transfers.queuedFor('c1').every((t) => t.requiresWiFi));
+      expect(transfers.queuedFor('c1'), hasLength(2));
+    });
+
     test('a timeout counts once the probe finds the server up', () async {
       // As the connectivity interceptor does: a timeout flips the status
       // offline until the confirming probe answers.
@@ -907,7 +942,7 @@ void main() {
       slow.complete(imageManifest('c1', pages: 1));
 
       await until(() => transfers.enqueued.length == 2);
-      expect(transfers.enqueued.map((t) => t.group), ['c1', 'c2']);
+      expect(transfers.enqueued.map(chapterOf), ['c1', 'c2']);
     });
 
     test('retry after notFound fetches the manifest again', () async {

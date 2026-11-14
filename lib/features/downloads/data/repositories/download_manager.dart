@@ -71,9 +71,7 @@ class DownloadManager implements DownloadService {
   static const String _logTag = 'DownloadManager';
 
   /// Distinguishes this app session's native task ids from earlier ones.
-  final String _session = DateTime.now().microsecondsSinceEpoch.toRadixString(
-    36,
-  );
+  late final String _session = _now().microsecondsSinceEpoch.toRadixString(36);
   int _attempt = 0;
 
   Future<void> _tail = Future<void>.value();
@@ -184,6 +182,7 @@ class DownloadManager implements DownloadService {
       final now = _now();
       // Only database writes in the transaction: requeueing talks to the
       // native queue and the file system, which a rollback cannot undo.
+      final typeBefore = await _records.bookType(bookId.value);
       final existing = await _records.transaction(() async {
         await _records.upsertBook(bookId.value, book?.type.asBookType, now);
         final existing = <DownloadChapter>[];
@@ -197,6 +196,15 @@ class DownloadManager implements DownloadService {
         }
         return existing;
       });
+      // A type known only now may change the network rule of files queued
+      // under the old one.
+      final type = book?.type.asBookType;
+      if (type != null && _rules.value[type] != _rules.value[typeBefore]) {
+        await _requeueUnderRules([
+          for (final c in await _records.activePlanned())
+            if (c.bookId == bookId.value) c.chapterId,
+        ]);
+      }
       for (final row in existing) {
         await _requeue(
           row,
@@ -497,15 +505,14 @@ class DownloadManager implements DownloadService {
   // ---------------------------------------------------------------------------
   // Native events, reconciliation and rules (inside _serial)
 
-  Future<void> _onTransfer(TransferEvent event) async {
-    final TaskTransferEvent taskEvent;
-    switch (event) {
-      case TransfersResynced():
-        await _resync(await _transfers.activeTaskIds());
-        return;
-      case TaskTransferEvent():
-        taskEvent = event;
-    }
+  Future<void> _onTransfer(TransferEvent event) => switch (event) {
+    TransfersResynced() => _resyncNow(),
+    TaskTransferEvent() => _onTaskEvent(event),
+  };
+
+  Future<void> _resyncNow() async => _resync(await _transfers.activeTaskIds());
+
+  Future<void> _onTaskEvent(TaskTransferEvent taskEvent) async {
     final file = await _records.fileForTask(taskEvent.taskId);
     // An earlier attempt, cancelled or replaced.
     if (file == null) return;
@@ -545,28 +552,24 @@ class DownloadManager implements DownloadService {
   /// its stored failure arrives after this, under the old, now stale, id.
   Future<void> _reconcile() async {
     final active = await _transfers.activeTaskIds();
-    // Native tasks no record points at: their pause, delete or rule change
-    // was recorded but the cancel never reached the plugin.
     // An app killed between a pause and its cancel leaves ids on paused
-    // chapters: clear them, so their tasks count as orphans below.
+    // chapters: clear them, so [_resync] cancels their tasks as orphans.
     await _records.clearInactiveTasks();
-    final orphans = active.difference(await _records.recordedTaskIds());
-    if (orphans.isNotEmpty) await _transfers.cancel(orphans);
+    await _resync(active);
     // Files a cancelled task moved in after its chapter was deleted.
     await _storage.sweep(await _records.chapterKeys());
-    await _resync(active);
   }
 
   /// Files of active chapters whose task is no longer in [active] are queued
   /// again; [_continue] also marks those already on disk done.
   Future<void> _resync(Set<String> active) async {
+    final recorded = await _records.recordedTaskIds();
+    // Native tasks no active chapter points at: a cancel that never reached
+    // the plugin, or a late duplicate. They must not run.
+    final orphans = active.difference(recorded);
+    if (orphans.isNotEmpty) await _transfers.cancel(orphans);
+    await _records.clearTaskIds(recorded.difference(active));
     for (final chapter in await _records.activePlanned()) {
-      for (final file in await _records.pendingFiles(chapter.chapterId)) {
-        final taskId = file.nativeTaskId;
-        if (taskId != null && !active.contains(taskId)) {
-          await _records.setTask(file.fileId, null);
-        }
-      }
       await _continue(chapter.chapterId);
     }
   }
@@ -583,13 +586,20 @@ class DownloadManager implements DownloadService {
     if (!_rules.isClosed) _rules.add(rules);
     if (changed.isEmpty) return;
     // Queue the pending files of those types again under the new rule.
-    for (final chapter in await _records.activePlanned()) {
-      final type = await _records.bookType(chapter.bookId);
-      if (!changed.contains(type)) continue;
-      await _cancelFiles([chapter.chapterId]);
-      await _continue(chapter.chapterId);
-    }
+    final affected = [
+      for (final chapter in await _records.activePlanned())
+        if (changed.contains(await _records.bookType(chapter.bookId)))
+          chapter.chapterId,
+    ];
+    await _requeueUnderRules(affected);
   });
+
+  Future<void> _requeueUnderRules(List<String> chapterIds) async {
+    await _cancelFiles(chapterIds);
+    for (final chapterId in chapterIds) {
+      await _continue(chapterId);
+    }
+  }
 
   Future<Map<BookType, DownloadNetwork>> _loadRules() async {
     final rules = <BookType, DownloadNetwork>{};
@@ -671,7 +681,6 @@ class DownloadManager implements DownloadService {
           headers: headers,
           directory: target.directory,
           filename: target.filename,
-          group: chapterId,
           requiresWiFi: wifi,
         ),
       );

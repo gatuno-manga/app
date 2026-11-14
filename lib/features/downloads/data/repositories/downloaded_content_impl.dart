@@ -6,7 +6,6 @@ import '../../../reading/data/models/reading_chapter_model.dart';
 import '../../domain/entities/downloaded_chapter.dart';
 import '../../domain/repositories/downloaded_content.dart';
 import '../data_sources/download_storage.dart';
-import '../../domain/use_cases/chapter_file_plan.dart';
 import '../data_sources/download_records.dart';
 
 /// [DownloadedContent] read from the download records and storage.
@@ -40,7 +39,8 @@ class DownloadedContentImpl implements DownloadedContent {
         AppLogger.w('A downloaded file is missing', _logTag);
         return null;
       }
-      if (file.relativePath.startsWith('${ChapterFilePlan.pagesDirectory}/')) {
+      // Pages count from 1; the document is position 0 (see PlannedFile).
+      if (file.position > 0) {
         pages.add(local);
       } else {
         document = local;
