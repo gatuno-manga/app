@@ -13,7 +13,6 @@ import 'horizontal_book_list.dart';
 /// not loading, so an empty list never leaves a bare header behind.
 class HomeSections extends StatelessWidget {
   final List<Book> featuredBooks;
-  final bool isLoadingFeatured;
 
   final List<Book> continueReadingBooks;
   final bool isLoadingContinueReading;
@@ -36,7 +35,6 @@ class HomeSections extends StatelessWidget {
   const HomeSections({
     super.key,
     required this.featuredBooks,
-    required this.isLoadingFeatured,
     required this.continueReadingBooks,
     required this.isLoadingContinueReading,
     required this.latestUpdatedBooks,
@@ -59,8 +57,9 @@ class HomeSections extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (isLoadingFeatured || featuredBooks.isNotEmpty)
-            FeaturedCarousel(books: featuredBooks),
+          // Mounted only once it has books: the carousel starts its
+          // auto-advance timer in initState.
+          if (featuredBooks.isNotEmpty) FeaturedCarousel(books: featuredBooks),
           _BookRow(
             title: l10n.homeContinueReadingTitle,
             books: continueReadingBooks,

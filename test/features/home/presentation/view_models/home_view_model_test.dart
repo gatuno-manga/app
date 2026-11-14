@@ -46,8 +46,13 @@ class FakeConnectivityService implements ConnectivityService {
   @override
   ConnectivityStatus get status => _status;
 
+  /// Emits the current status on listen, then every change, as the
+  /// contract says.
   @override
-  Stream<ConnectivityStatus> get statusStream => _statuses.stream;
+  Stream<ConnectivityStatus> get statusStream async* {
+    yield _status;
+    yield* _statuses.stream;
+  }
 
   @override
   Stream<void> get onReconnected => _reconnected.stream;
@@ -346,6 +351,40 @@ void main() {
       expect(viewModel.state.latestUpdated.books.single.id.value, 'old');
     });
 
+    test('an offline refresh over shown books keeps them', () async {
+      stubList('updatedAt', () async => listOf([book('old')]));
+      viewModel = buildViewModel();
+      await settle();
+
+      stubList('updatedAt', () async => throw OfflineException());
+      await viewModel.reload();
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'old');
+      expect(viewModel.state.showOfflineEmpty, isFalse);
+    });
+
+    test('continue reading keeps its books when every one fails', () async {
+      when(() => mockAuthService.authenticated).thenReturn(true);
+      when(
+        () => mockReadingCoordinator.getContinueReadingBooks(
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer((_) async => const [BookId('1')]);
+      when(
+        () => mockBooksRepository.getBook(const BookId('1')),
+      ).thenAnswer((_) async => book('1'));
+      viewModel = buildViewModel();
+      await settle();
+      expect(viewModel.state.continueReadingBooks, hasLength(1));
+
+      when(
+        () => mockBooksRepository.getBook(const BookId('1')),
+      ).thenThrow(ServerException());
+      await viewModel.reload();
+
+      expect(viewModel.state.continueReadingBooks, hasLength(1));
+    });
+
     test('a reconnect after everything missed shows skeletons', () async {
       connectivity = FakeConnectivityService(
         status: ConnectivityStatus.offline,
@@ -449,6 +488,29 @@ void main() {
 
         verifyNever(() => mockBooksRepository.getBooks(any()));
       });
+    });
+
+    test('a reload asked online after an offline one fetches again', () async {
+      connectivity = FakeConnectivityService(
+        status: ConnectivityStatus.offline,
+      );
+      addTearDown(connectivity.close);
+      final cacheRead = Completer<BookList>();
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) => cacheRead.future);
+      viewModel = buildViewModel();
+
+      connectivity.setStatus(ConnectivityStatus.online);
+      when(
+        () => mockBooksRepository.getBooks(any()),
+      ).thenAnswer((_) async => listOf([book('fresh')]));
+      final again = viewModel.reload();
+      cacheRead.completeError(OfflineException());
+      await again;
+
+      expect(viewModel.state.latestUpdated.books.single.id.value, 'fresh');
+      expect(viewModel.state.showOfflineEmpty, isFalse);
     });
 
     test('a reload requested while one runs joins it', () async {

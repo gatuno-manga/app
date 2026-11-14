@@ -32,8 +32,7 @@ class HomeBookSection extends Equatable {
   const HomeBookSection.loading() : this(isLoading: true);
 
   /// Settled with nothing to show because nothing is saved offline.
-  bool get isMissingOffline =>
-      unavailableOffline && books.isEmpty && !isLoading;
+  bool get isMissingOffline => unavailableOffline && books.isEmpty;
 
   HomeBookSection copyWith({
     List<Book>? books,
@@ -157,12 +156,15 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
 
   // Three guards keep the home from fetching the same thing twice:
   // - [_reloading]: a reload requested while one runs (a reconnect during
-  //   the first load) joins it.
+  //   the first load) joins it. One that started offline only read the
+  //   cache, so a request made once online queues a fresh reload after it
+  //   instead ([_reloadingOffline]).
   // - [_reloadedSinceOnline]: the retry reloads as soon as its probe
   //   succeeds, and `onReconnected` fires a debounce later, usually after
   //   that reload finished; the flag drops that event.
   // - `state.isRetrying`: a second tap on retry while one runs is ignored.
   Future<void>? _reloading;
+  bool _reloadingOffline = false;
   bool _reloadedSinceOnline = false;
 
   static const String _logTag = 'HomeViewModel';
@@ -203,9 +205,15 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
   /// Reloads every section, keeping what is on screen until fresh data
   /// arrives. Joins the reload already in flight, if any.
   Future<void> reload() {
+    final offline = _connectivity.isOffline;
     final inFlight = _reloading;
-    if (inFlight != null) return inFlight;
-    if (!_connectivity.isOffline) _reloadedSinceOnline = true;
+    if (inFlight != null) {
+      return _reloadingOffline && !offline
+          ? inFlight.then((_) => reload())
+          : inFlight;
+    }
+    _reloadingOffline = offline;
+    if (!offline) _reloadedSinceOnline = true;
     return _reloading = Future.wait([
       _loadSection(
         _latestUpdatedOptions,
@@ -273,9 +281,9 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     );
     try {
       final res = await _booksRepository.getBooks(options);
-      update((s) => s.copyWith(books: res.data));
+      update((s) => s.copyWith(books: res.data, isLoading: false));
     } on OfflineException {
-      update((s) => s.copyWith(unavailableOffline: true));
+      update((s) => s.copyWith(unavailableOffline: true, isLoading: false));
     } catch (e, stackTrace) {
       AppLogger.e(
         'Error loading books (${options.orderBy})',
@@ -283,7 +291,6 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
         stackTrace,
         _logTag,
       );
-    } finally {
       update((s) => s.copyWith(isLoading: false));
     }
   }
@@ -306,10 +313,14 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
       );
       // Each book on its own: one that is not saved offline (or fails) is
       // left out instead of hiding the whole section.
-      final books = await Future.wait(bookIds.map(_bookOrNull));
-      emit(
-        state.copyWith(continueReadingBooks: books.whereType<Book>().toList()),
-      );
+      final books = (await Future.wait(
+        bookIds.map(_bookOrNull),
+      )).whereType<Book>().toList();
+      // Every book failing is a failed refresh, not an empty history: keep
+      // what is shown.
+      if (books.isNotEmpty || bookIds.isEmpty) {
+        emit(state.copyWith(continueReadingBooks: books));
+      }
     } catch (e, stackTrace) {
       AppLogger.e(
         'Error loading continue reading books',
@@ -326,6 +337,10 @@ class HomeViewModel extends BaseStreamViewModel<HomeState> {
     try {
       return await _booksRepository.getBook(id);
     } on OfflineException {
+      AppLogger.i(
+        'Continue reading book ${id.value} is not saved offline',
+        _logTag,
+      );
       return null;
     } catch (e, stackTrace) {
       AppLogger.e(

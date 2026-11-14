@@ -45,7 +45,6 @@ class HomePage extends StatelessWidget {
                 )
               : HomeSections(
                   featuredBooks: state.featuredBooks,
-                  isLoadingFeatured: state.latestUpdated.isLoading,
                   continueReadingBooks: state.continueReadingBooks,
                   isLoadingContinueReading: state.isLoadingContinueReading,
                   latestUpdatedBooks: state.latestUpdated.books,
