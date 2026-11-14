@@ -33,10 +33,6 @@ class DownloadNotificationTexts {
 /// WorkManager and iOS background URLSession, so files keep downloading when
 /// the app is closed.
 class BackgroundDownloaderTransferQueue implements TransferQueue {
-  /// Up to 3 chapters at once, 4 files each.
-  static const int maxConcurrent = 12;
-  static const int maxConcurrentPerChapter = 4;
-
   /// A file fails once this little would be left on the device.
   static const int minFreeMegabytes = 200;
 
@@ -67,8 +63,12 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   Future<void> start() async {
     _updates ??= _downloader.updates.listen(_onUpdate);
     await _downloader.configure(
+      // No holding queue: it lives in the app process, so files waiting in
+      // it are lost when the app is killed. WorkManager and URLSession
+      // persist every task and pick their own concurrency. Set explicitly,
+      // since the plugin persists configuration across launches.
       globalConfig: [
-        (Config.holdingQueue, (maxConcurrent, null, maxConcurrentPerChapter)),
+        (Config.holdingQueue, false),
         (Config.checkAvailableSpace, minFreeMegabytes),
       ],
       androidConfig: [(Config.useCacheDir, Config.never)],
@@ -161,6 +161,11 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     final ids = taskIds.toList();
     if (ids.isEmpty) return;
     await _downloader.cancelTasksWithIds(ids);
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    await cancel(await activeTaskIds());
   }
 
   @override

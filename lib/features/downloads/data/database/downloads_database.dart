@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../domain/entities/download_state.dart';
+
 part 'downloads_database.g.dart';
 
 /// A book with at least one chapter download.
@@ -23,8 +25,7 @@ class DownloadChapters extends Table {
   TextColumn get chapterId => text()();
   TextColumn get bookId => text()();
 
-  /// `DownloadState.name`.
-  TextColumn get state => text()();
+  TextColumn get state => textEnum<DownloadState>()();
 
   /// A `DownloadErrors` code while failed.
   TextColumn get error => text().nullable()();

@@ -59,4 +59,15 @@ void main() {
     await storage.deleteAll();
     expect(Directory('${dir.path}/downloads').existsSync(), isFalse);
   });
+
+  test('transferTarget splits a file into directory and name', () {
+    expect(DownloadStorage.transferTarget('b1', 'c1', 'pages/0001.jpg'), (
+      directory: 'downloads/b1/c1/pages',
+      filename: '0001.jpg',
+    ));
+    expect(DownloadStorage.transferTarget('b1', 'c1', 'document.pdf'), (
+      directory: 'downloads/b1/c1',
+      filename: 'document.pdf',
+    ));
+  });
 }

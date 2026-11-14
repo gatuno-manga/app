@@ -26,7 +26,7 @@ class DownloadedContentImpl implements DownloadedContent {
         await (_db.select(_db.downloadChapters)..where(
               (c) =>
                   c.chapterId.equals(chapterId.value) &
-                  c.state.equals(DownloadState.done.name),
+                  c.state.equalsValue(DownloadState.done),
             ))
             .getSingleOrNull();
     if (row == null) return null;

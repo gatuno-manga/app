@@ -6,3 +6,9 @@ class ChapterUnavailableException extends AppExceptions {
   ChapterUnavailableException(String chapterId)
     : super('Chapter $chapterId has nothing to download', statusCode: 404);
 }
+
+/// The server asked to try again later (rate limit, gateway error).
+class TransientServerException extends AppExceptions {
+  TransientServerException(int statusCode)
+    : super('Server busy (HTTP $statusCode)', statusCode: statusCode);
+}

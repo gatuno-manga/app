@@ -9,6 +9,7 @@ import '../../core/network/dio_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../books/domain/repositories/books_repository.dart';
 import 'data/data_sources/background_downloader_transfer_queue.dart';
+import 'data/data_sources/download_records.dart';
 import 'data/data_sources/download_remote_data_source.dart';
 import 'data/data_sources/download_storage.dart';
 import 'data/data_sources/transfer_queue.dart';
@@ -28,6 +29,9 @@ void initDownloadsInjection(GetIt sl) {
   sl.registerLazySingleton<DownloadsDatabase>(
     () => DownloadsDatabase(),
     dispose: (db) => db.close(),
+  );
+  sl.registerLazySingleton<DownloadRecords>(
+    () => DownloadRecords(sl<DownloadsDatabase>()),
   );
   sl.registerLazySingleton<DownloadStorage>(
     () => DownloadStorage(getApplicationSupportDirectory),
@@ -52,7 +56,7 @@ void initDownloadsInjection(GetIt sl) {
   );
   sl.registerLazySingleton<DownloadManager>(
     () => DownloadManager(
-      db: sl<DownloadsDatabase>(),
+      records: sl<DownloadRecords>(),
       storage: sl<DownloadStorage>(),
       transfers: sl<TransferQueue>(),
       remote: sl<DownloadRemoteDataSource>(),
@@ -77,6 +81,10 @@ Future<void> startDownloads(GetIt sl) async {
   await sl<UnmeteredNetworkMonitor>().start();
   await sl<DownloadManager>().start();
 }
+
+/// Deletes every download, for a server change: they belong to the old
+/// server.
+Future<void> clearDownloads(GetIt sl) => sl<DownloadManager>().clearAll();
 
 /// Notification texts in the device language: notifications show outside
 /// any widget tree.

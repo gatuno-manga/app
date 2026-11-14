@@ -11,7 +11,7 @@ class FileTransfer extends Equatable {
   final String directory;
   final String filename;
 
-  /// Groups the files of one chapter, to cap how many run at once.
+  /// The chapter the file belongs to.
   final String group;
   final bool requiresWiFi;
 
@@ -71,11 +71,13 @@ class TransferCancelled extends TransferEvent {
   const TransferCancelled(super.taskId);
 }
 
-/// Native task ids are `<fileId>@<attempt>`: a file enqueued again (after a
-/// pause, or a network rule change) gets a new id, so a late event from the
-/// cancelled attempt cannot be mistaken for the new one.
+/// Native task ids are `<fileId>@<session>.<attempt>`: a file enqueued
+/// again (after a pause, a network rule change, or in a later app session)
+/// gets a new id, so a late event from an earlier attempt cannot be
+/// mistaken for the current one.
 abstract final class TransferIds {
-  static String forAttempt(String fileId, int attempt) => '$fileId@$attempt';
+  static String forAttempt(String fileId, String session, int attempt) =>
+      '$fileId@$session.$attempt';
 }
 
 /// The native background downloader. Transfers keep running when the app is
@@ -92,6 +94,9 @@ abstract class TransferQueue {
   Future<void> enqueue(List<FileTransfer> transfers);
 
   Future<void> cancel(Iterable<String> taskIds);
+
+  /// Cancels every download task, recorded or not.
+  Future<void> cancelAll();
 
   /// Ids of transfers still queued or running natively.
   Future<Set<String>> activeTaskIds();

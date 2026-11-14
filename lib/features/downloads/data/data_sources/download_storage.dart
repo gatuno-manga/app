@@ -28,6 +28,24 @@ class DownloadStorage {
   static String chapterPath(String bookId, String chapterId) =>
       '$rootName/${_safe(bookId)}/${_safe(chapterId)}';
 
+  /// Where the native downloader puts [relativePath] of a chapter: a
+  /// directory relative to the application support directory, and a file
+  /// name.
+  static ({String directory, String filename}) transferTarget(
+    String bookId,
+    String chapterId,
+    String relativePath,
+  ) {
+    final slash = relativePath.lastIndexOf('/');
+    final chapter = chapterPath(bookId, chapterId);
+    return (
+      directory: slash == -1
+          ? chapter
+          : '$chapter/${relativePath.substring(0, slash)}',
+      filename: relativePath.substring(slash + 1),
+    );
+  }
+
   Future<Directory> root() async =>
       Directory('${(await _supportDirectory()).path}/$rootName');
 

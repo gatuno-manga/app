@@ -29,7 +29,6 @@ import '../../features/users/domain/use_cases/user_service.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
-import '../../features/downloads/data/repositories/download_manager.dart';
 import '../../features/downloads/downloads_injection.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
@@ -121,7 +120,7 @@ Future<void> initDI() async {
         try {
           // Downloads belong to the old server too. A failure here must not
           // keep the cache of the old library.
-          await sl<DownloadManager>().clearAll().catchError(
+          await clearDownloads(sl).catchError(
             (Object e, StackTrace stackTrace) => AppLogger.e(
               'Could not delete downloads on a server change',
               e,

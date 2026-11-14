@@ -50,7 +50,7 @@ void main() {
           DownloadChaptersCompanion.insert(
             chapterId: 'c1',
             bookId: 'b1',
-            state: state.name,
+            state: state,
             enqueuedAt: DateTime(2026),
           ),
         );

@@ -15,11 +15,23 @@ class DownloadRemoteDataSource {
 
   DownloadRemoteDataSource(this._dioClient);
 
+  /// A long chapter's manifest can take longer than the client's default
+  /// receive timeout; a timeout here would read as "server unreachable".
+  static const Duration manifestReceiveTimeout = Duration(seconds: 30);
+
+  /// Statuses that say "try again later", not "this chapter is broken".
+  static const Set<int> transientStatuses = {429, 502, 503, 504};
+
   /// The raw `GET /chapters/:id` response, stored as the chapter's manifest.
+  ///
+  /// Throws [ChapterUnavailableException] on 404, [TransientServerException]
+  /// on a status in [transientStatuses], and the usual [AppExceptions]
+  /// otherwise ([NetworkException] when unreachable).
   Future<Map<String, dynamic>> fetchManifest(String chapterId) async {
     try {
       final response = await _dioClient.dio.get<Map<String, dynamic>>(
         '${ApiConstants.chapters}/$chapterId',
+        options: Options(receiveTimeout: manifestReceiveTimeout),
       );
       final data = response.data;
       if (data == null) {
@@ -33,17 +45,23 @@ class DownloadRemoteDataSource {
       AppLogger.e('Could not fetch chapter manifest', e, e.stackTrace, _logTag);
       // ApiExceptionHandler maps 404 to an AuthException; downloads need to
       // tell a missing chapter apart.
-      if (e.response?.statusCode == 404) {
-        throw ChapterUnavailableException(chapterId);
+      final status = e.response?.statusCode;
+      if (status == 404) throw ChapterUnavailableException(chapterId);
+      if (transientStatuses.contains(status)) {
+        throw TransientServerException(status!);
       }
       throw ApiExceptionHandler.handle(e);
     }
   }
 
-  /// [path] as an absolute URL: page and document paths are often relative
-  /// to the server.
-  String resolve(String path) =>
-      Uri.parse(_dioClient.dio.options.baseUrl).resolve(path).toString();
+  /// [path] as the absolute URL Dio would request: page and document paths
+  /// are often relative to the server. Dio appends the path to the base URL
+  /// (keeping a base path such as `/api`), where `Uri.resolve` would replace
+  /// it; the readers load the same paths through Dio.
+  String resolve(String path) => RequestOptions(
+    baseUrl: _dioClient.dio.options.baseUrl,
+    path: path,
+  ).uri.toString();
 
   /// Headers every file request carries. Files live under `/s3/`, which needs
   /// no auth, so there is no token to refresh.

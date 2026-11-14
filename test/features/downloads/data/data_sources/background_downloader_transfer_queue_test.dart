@@ -59,6 +59,6 @@ void main() {
   });
 
   test('task ids carry the file id and the attempt', () {
-    expect(TransferIds.forAttempt('c1/3', 7), 'c1/3@7');
+    expect(TransferIds.forAttempt('c1/3', 's1', 7), 'c1/3@s1.7');
   });
 }

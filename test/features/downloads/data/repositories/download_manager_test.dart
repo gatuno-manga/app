@@ -16,6 +16,7 @@ import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_index.dart';
+import 'package:gatuno/features/downloads/data/data_sources/download_records.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_remote_data_source.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
 import 'package:gatuno/features/downloads/data/data_sources/transfer_queue.dart';
@@ -102,6 +103,9 @@ class FakeTransferQueue implements TransferQueue {
   }
 
   @override
+  Future<void> cancelAll() => cancel([...active]);
+
+  @override
   Future<Set<String>> activeTaskIds() async => {...active};
 
   @override
@@ -163,7 +167,7 @@ void main() {
   late DownloadManager manager;
 
   DownloadManager build() => DownloadManager(
-    db: db,
+    records: DownloadRecords(db),
     storage: storage,
     transfers: transfers,
     remote: remote,
@@ -172,6 +176,7 @@ void main() {
     policy: policy,
     connectivity: connectivity,
     unmetered: unmetered.stream,
+    planRetryDelay: const Duration(milliseconds: 30),
   );
 
   /// Waits until [condition] holds: planning and events run asynchronously,
@@ -259,6 +264,14 @@ void main() {
     await db.close();
     dir.deleteSync(recursive: true);
   });
+
+  /// Changes a rule as a settings screen would: through the policy's
+  /// change stream.
+  Future<void> setRule(BookType type, DownloadNetwork network) async {
+    policy.rules[type] = network;
+    policy.changed.add(null);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+  }
 
   void manifest(String id, Map<String, dynamic> json) =>
       when(() => remote.fetchManifest(id)).thenAnswer((_) async => json);
@@ -703,7 +716,7 @@ void main() {
 
   group('network rule', () {
     test('files of an unmetered-only type require Wi-Fi', () async {
-      policy.rules[BookType.manga] = DownloadNetwork.unmetered;
+      await setRule(BookType.manga, DownloadNetwork.unmetered);
       manifest('c1', imageManifest('c1'));
 
       await manager.enqueueChapters(_book, const [ChapterId('c1')]);
@@ -715,7 +728,7 @@ void main() {
     test(
       'a pending chapter on mobile data is waiting for the network',
       () async {
-        policy.rules[BookType.manga] = DownloadNetwork.unmetered;
+        await setRule(BookType.manga, DownloadNetwork.unmetered);
         manifest('c1', imageManifest('c1'));
         await manager.enqueueChapters(_book, const [ChapterId('c1')]);
         await until(() => transfers.enqueued.length == 2);
@@ -767,4 +780,151 @@ void main() {
     expect(all.single.bookId, _book);
     expect(all.single.chapters.map((c) => c.chapterId.value), ['t2', 't1']);
   });
+
+  group('review round 1', () {
+    test('native task ids differ across app sessions', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      final firstSession = transfers.enqueued.map((t) => t.taskId).toSet();
+
+      await manager.dispose();
+      transfers.active.clear();
+      manager = build();
+      await manager.start();
+
+      final secondSession = transfers.queuedFor('c1').map((t) => t.taskId);
+      expect(secondSession, hasLength(2));
+      expect(secondSession.toSet().intersection(firstSession), isEmpty);
+    });
+
+    test('planning retries a slow request even without a reconnect', () async {
+      var calls = 0;
+      when(() => remote.fetchManifest('c1')).thenAnswer((_) async {
+        if (++calls == 1) throw NetworkException();
+        return imageManifest('c1');
+      });
+
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+
+      await until(() => transfers.enqueued.length == 2, reason: 'retry');
+      expect(calls, 2);
+    });
+
+    test('a busy server leaves the chapter queued, then plans it', () async {
+      var calls = 0;
+      when(() => remote.fetchManifest('c1')).thenAnswer((_) async {
+        if (++calls == 1) throw TransientServerException(503);
+        return imageManifest('c1');
+      });
+
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+
+      await until(() => transfers.enqueued.length == 2, reason: 'retry');
+      expect((await chapter('c1'))!.state, isNot(DownloadState.failed));
+    });
+
+    test('files reach the native queue in enqueue order', () async {
+      final slow = Completer<Map<String, dynamic>>();
+      when(() => remote.fetchManifest('c1')).thenAnswer((_) => slow.future);
+      manifest('c2', imageManifest('c2', pages: 1));
+
+      await manager.enqueueChapters(_book, const [
+        ChapterId('c1'),
+        ChapterId('c2'),
+      ]);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(transfers.enqueued, isEmpty, reason: 'c2 waits for c1');
+      slow.complete(imageManifest('c1', pages: 1));
+
+      await until(() => transfers.enqueued.length == 2);
+      expect(transfers.enqueued.map((t) => t.group), ['c1', 'c2']);
+    });
+
+    test('retry after notFound fetches the manifest again', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      transfers.controller.add(
+        TransferFailed(transfers.enqueued.last.taskId, DownloadErrors.notFound),
+      );
+      await untilState('c1', DownloadState.failed);
+
+      // Re-scraped on the server: now a single page.
+      manifest('c1', imageManifest('c1', pages: 1));
+      await manager.retry(const DownloadScope.chapters([ChapterId('c1')]));
+
+      await until(
+        () async => (await chapter('c1'))!.filesTotal == 1,
+        reason: 'replan',
+      );
+      verify(() => remote.fetchManifest('c1')).called(2);
+    });
+
+    test('a rule change leaves other book types alone', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+
+      await setRule(BookType.book, DownloadNetwork.unmetered);
+
+      expect(transfers.cancelled, isEmpty);
+      expect(transfers.enqueued, hasLength(2));
+    });
+
+    test(
+      'a book type unknown at first is recorded on a later enqueue',
+      () async {
+        when(() => books.getBook(any())).thenThrow(OfflineException());
+        manifest('t1', textManifest('t1'));
+        await manager.enqueueChapters(_book, const [ChapterId('t1')]);
+        await untilState('t1', DownloadState.done);
+
+        when(() => books.getBook(any())).thenAnswer(
+          (_) async => const Book(
+            id: _book,
+            title: BookTitle('Book'),
+            type: TypeBook.manga,
+          ),
+        );
+        manifest('c1', imageManifest('c1'));
+        await manager.enqueueChapters(_book, const [ChapterId('c1')]);
+        await until(() => transfers.enqueued.length == 2);
+
+        await setRule(BookType.manga, DownloadNetwork.unmetered);
+
+        await until(() => transfers.queuedFor('c1').length == 2);
+        expect(transfers.queuedFor('c1').every((t) => t.requiresWiFi), isTrue);
+      },
+    );
+
+    test('commands wait for start to apply the native state', () async {
+      await manager.dispose();
+      final gate = Completer<void>();
+      final slowQueue = _GatedTransferQueue(gate.future);
+      transfers = slowQueue;
+      manager = build();
+      manifest('t1', textManifest('t1'));
+
+      final started = manager.start();
+      final enqueued = manager.enqueueChapters(_book, const [ChapterId('t1')]);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(await DownloadRecords(db).chapter('t1'), isNull);
+
+      gate.complete();
+      await started;
+      await enqueued;
+      await untilState('t1', DownloadState.done);
+    });
+  });
+}
+
+/// A transfer queue whose start waits for [gate].
+class _GatedTransferQueue extends FakeTransferQueue {
+  final Future<void> gate;
+
+  _GatedTransferQueue(this.gate);
+
+  @override
+  Future<void> start() => gate;
 }

@@ -300,15 +300,15 @@ class $DownloadChaptersTable extends DownloadChapters
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _stateMeta = const VerificationMeta('state');
   @override
-  late final GeneratedColumn<String> state = GeneratedColumn<String>(
-    'state',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<DownloadState, String> state =
+      GeneratedColumn<String>(
+        'state',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DownloadState>($DownloadChaptersTable.$converterstate);
   static const VerificationMeta _errorMeta = const VerificationMeta('error');
   @override
   late final GeneratedColumn<String> error = GeneratedColumn<String>(
@@ -394,14 +394,6 @@ class $DownloadChaptersTable extends DownloadChapters
     } else if (isInserting) {
       context.missing(_bookIdMeta);
     }
-    if (data.containsKey('state')) {
-      context.handle(
-        _stateMeta,
-        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_stateMeta);
-    }
     if (data.containsKey('error')) {
       context.handle(
         _errorMeta,
@@ -448,10 +440,12 @@ class $DownloadChaptersTable extends DownloadChapters
         DriftSqlType.string,
         data['${effectivePrefix}book_id'],
       )!,
-      state: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}state'],
-      )!,
+      state: $DownloadChaptersTable.$converterstate.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}state'],
+        )!,
+      ),
       error: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}error'],
@@ -475,14 +469,15 @@ class $DownloadChaptersTable extends DownloadChapters
   $DownloadChaptersTable createAlias(String alias) {
     return $DownloadChaptersTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<DownloadState, String, String> $converterstate =
+      const EnumNameConverter<DownloadState>(DownloadState.values);
 }
 
 class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
   final String chapterId;
   final String bookId;
-
-  /// `DownloadState.name`.
-  final String state;
+  final DownloadState state;
 
   /// A `DownloadErrors` code while failed.
   final String? error;
@@ -509,7 +504,11 @@ class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
     final map = <String, Expression>{};
     map['chapter_id'] = Variable<String>(chapterId);
     map['book_id'] = Variable<String>(bookId);
-    map['state'] = Variable<String>(state);
+    {
+      map['state'] = Variable<String>(
+        $DownloadChaptersTable.$converterstate.toSql(state),
+      );
+    }
     if (!nullToAbsent || error != null) {
       map['error'] = Variable<String>(error);
     }
@@ -541,7 +540,9 @@ class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
     return DownloadChapter(
       chapterId: serializer.fromJson<String>(json['chapterId']),
       bookId: serializer.fromJson<String>(json['bookId']),
-      state: serializer.fromJson<String>(json['state']),
+      state: $DownloadChaptersTable.$converterstate.fromJson(
+        serializer.fromJson<String>(json['state']),
+      ),
       error: serializer.fromJson<String?>(json['error']),
       planned: serializer.fromJson<bool>(json['planned']),
       manifestBytes: serializer.fromJson<int>(json['manifestBytes']),
@@ -554,7 +555,9 @@ class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
     return <String, dynamic>{
       'chapterId': serializer.toJson<String>(chapterId),
       'bookId': serializer.toJson<String>(bookId),
-      'state': serializer.toJson<String>(state),
+      'state': serializer.toJson<String>(
+        $DownloadChaptersTable.$converterstate.toJson(state),
+      ),
       'error': serializer.toJson<String?>(error),
       'planned': serializer.toJson<bool>(planned),
       'manifestBytes': serializer.toJson<int>(manifestBytes),
@@ -565,7 +568,7 @@ class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
   DownloadChapter copyWith({
     String? chapterId,
     String? bookId,
-    String? state,
+    DownloadState? state,
     Value<String?> error = const Value.absent(),
     bool? planned,
     int? manifestBytes,
@@ -635,7 +638,7 @@ class DownloadChapter extends DataClass implements Insertable<DownloadChapter> {
 class DownloadChaptersCompanion extends UpdateCompanion<DownloadChapter> {
   final Value<String> chapterId;
   final Value<String> bookId;
-  final Value<String> state;
+  final Value<DownloadState> state;
   final Value<String?> error;
   final Value<bool> planned;
   final Value<int> manifestBytes;
@@ -654,7 +657,7 @@ class DownloadChaptersCompanion extends UpdateCompanion<DownloadChapter> {
   DownloadChaptersCompanion.insert({
     required String chapterId,
     required String bookId,
-    required String state,
+    required DownloadState state,
     this.error = const Value.absent(),
     this.planned = const Value.absent(),
     this.manifestBytes = const Value.absent(),
@@ -689,7 +692,7 @@ class DownloadChaptersCompanion extends UpdateCompanion<DownloadChapter> {
   DownloadChaptersCompanion copyWith({
     Value<String>? chapterId,
     Value<String>? bookId,
-    Value<String>? state,
+    Value<DownloadState>? state,
     Value<String?>? error,
     Value<bool>? planned,
     Value<int>? manifestBytes,
@@ -718,7 +721,9 @@ class DownloadChaptersCompanion extends UpdateCompanion<DownloadChapter> {
       map['book_id'] = Variable<String>(bookId.value);
     }
     if (state.present) {
-      map['state'] = Variable<String>(state.value);
+      map['state'] = Variable<String>(
+        $DownloadChaptersTable.$converterstate.toSql(state.value),
+      );
     }
     if (error.present) {
       map['error'] = Variable<String>(error.value);
@@ -1496,7 +1501,7 @@ typedef $$DownloadChaptersTableCreateCompanionBuilder =
     DownloadChaptersCompanion Function({
       required String chapterId,
       required String bookId,
-      required String state,
+      required DownloadState state,
       Value<String?> error,
       Value<bool> planned,
       Value<int> manifestBytes,
@@ -1507,7 +1512,7 @@ typedef $$DownloadChaptersTableUpdateCompanionBuilder =
     DownloadChaptersCompanion Function({
       Value<String> chapterId,
       Value<String> bookId,
-      Value<String> state,
+      Value<DownloadState> state,
       Value<String?> error,
       Value<bool> planned,
       Value<int> manifestBytes,
@@ -1534,9 +1539,10 @@ class $$DownloadChaptersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get state => $composableBuilder(
+  ColumnWithTypeConverterFilters<DownloadState, DownloadState, String>
+  get state => $composableBuilder(
     column: $table.state,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<String> get error => $composableBuilder(
@@ -1620,7 +1626,7 @@ class $$DownloadChaptersTableAnnotationComposer
   GeneratedColumn<String> get bookId =>
       $composableBuilder(column: $table.bookId, builder: (column) => column);
 
-  GeneratedColumn<String> get state =>
+  GeneratedColumnWithTypeConverter<DownloadState, String> get state =>
       $composableBuilder(column: $table.state, builder: (column) => column);
 
   GeneratedColumn<String> get error =>
@@ -1679,7 +1685,7 @@ class $$DownloadChaptersTableTableManager
               ({
                 Value<String> chapterId = const Value.absent(),
                 Value<String> bookId = const Value.absent(),
-                Value<String> state = const Value.absent(),
+                Value<DownloadState> state = const Value.absent(),
                 Value<String?> error = const Value.absent(),
                 Value<bool> planned = const Value.absent(),
                 Value<int> manifestBytes = const Value.absent(),
@@ -1699,7 +1705,7 @@ class $$DownloadChaptersTableTableManager
               ({
                 required String chapterId,
                 required String bookId,
-                required String state,
+                required DownloadState state,
                 Value<String?> error = const Value.absent(),
                 Value<bool> planned = const Value.absent(),
                 Value<int> manifestBytes = const Value.absent(),
