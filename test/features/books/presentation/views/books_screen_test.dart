@@ -376,6 +376,39 @@ void main() {
       expect(find.textContaining('Pull to refresh'), findsOneWidget);
     });
 
+    testWidgets('the paused hint offers the refresh to screen readers', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      stubState(
+        BooksState.initial().copyWith(
+          bookList: () => listOf(1, totalPages: 3),
+          source: () => BooksListSource.server,
+          isOffline: true,
+          preferences: pages,
+        ),
+      );
+
+      await tester.pumpApp(createWidgetUnderTest());
+      final hint = find.textContaining('Pull to refresh');
+      expect(
+        tester.getSemantics(hint),
+        matchesSemantics(
+          label: 'Pull to refresh to see the books saved on this device.',
+          isLiveRegion: true,
+          hasTapAction: true,
+          onTapHint: 'show the books saved on this device',
+        ),
+      );
+      tester.semantics.tap(
+        find.semantics.byLabel(
+          'Pull to refresh to see the books saved on this device.',
+        ),
+      );
+      verify(() => mockViewModel.refresh()).called(1);
+      semantics.dispose();
+    });
+
     testWidgets('the end of an infinite cache list says so', (tester) async {
       stubState(
         BooksState.initial().copyWith(

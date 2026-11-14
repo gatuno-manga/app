@@ -846,6 +846,70 @@ void main() {
       },
     );
 
+    test(
+      'a page change answered by the cache restarts it from page 1',
+      () async {
+        inPagesMode();
+        stubPages(totalPages: 5);
+        await viewModel.fetchBooks();
+        final answer = stubPages;
+        when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
+          // The request for page 3 drops; the cache answers from now on.
+          connectivity.reportUnreachable();
+          answer(totalPages: 5);
+          final o = inv.positionalArguments.first as BookPageOptions;
+          return page(number: o.page.value, totalPages: 5, ids: ['cache-x']);
+        });
+        clearInteractions(mockRepository);
+
+        viewModel.setPage(3);
+        await flush();
+        await flush();
+
+        expect(requestedPages(), [3, 1]);
+        expect(viewModel.options.page.value, 1);
+        expect(viewModel.bookList!.data.single.id.value, 'cache-1');
+        expect(viewModel.state.source, BooksListSource.cache);
+      },
+    );
+
+    test('an offline miss while appending keeps the list', () async {
+      stubPages();
+      await viewModel.fetchBooks();
+      when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
+        connectivity.reportUnreachable();
+        throw OfflineException();
+      });
+
+      await viewModel.loadMore();
+
+      expect(viewModel.bookList!.data.single.id.value, 'server-1');
+      expect(viewModel.isOfflineMiss, isFalse);
+      expect(viewModel.options.page.value, 1);
+      expect(viewModel.isPagingPaused, isTrue);
+    });
+
+    test(
+      'switching navigation mode forgets the source with the list',
+      () async {
+        stubPages();
+        connectivity.goOffline();
+        await flush();
+        await viewModel.fetchBooks();
+        final states = <BooksState>[];
+        final sub = viewModel.stateStream.listen(states.add);
+
+        viewModel.setNavigationMode(BooksNavigationMode.pages);
+        await flush();
+        await sub.cancel();
+
+        expect(
+          states.any((s) => s.bookList == null && s.source == null),
+          isTrue,
+        );
+      },
+    );
+
     test('the picker reset runs even when a fetch saw offline first', () async {
       when(() => mockRepository.getTags()).thenAnswer(
         (_) async => [const Tag(id: TagId('t'), name: TagName('T'))],

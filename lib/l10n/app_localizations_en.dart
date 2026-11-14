@@ -199,7 +199,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get booksOfflinePagingPaused =>
-      'You\'re offline. Pull to refresh to see the books saved on this device.';
+      'Pull to refresh to see the books saved on this device.';
+
+  @override
+  String get booksOfflineRefreshAction => 'show the books saved on this device';
 
   @override
   String get booksOfflineNoMatch =>

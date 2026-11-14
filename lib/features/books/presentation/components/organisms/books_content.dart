@@ -37,12 +37,7 @@ class BooksContent extends StatelessWidget {
         Expanded(child: _body(context)),
         if (!_infinite && _hasBooks)
           viewModel.isPagingPaused
-              ? BooksListNote(
-                  message: AppLocalizations.of(
-                    context,
-                  )!.booksOfflinePagingPaused,
-                  announce: true,
-                )
+              ? _pausedNote(AppLocalizations.of(context)!, announce: true)
               : Pagination(
                   currentPage: viewModel.options.page.value,
                   totalPages: viewModel.bookList?.totalPages.value ?? 1,
@@ -107,15 +102,23 @@ class BooksContent extends StatelessWidget {
     );
   }
 
+  /// Pull to refresh has no accessibility action, so the note offers the
+  /// refresh itself to screen readers.
+  Widget _pausedNote(AppLocalizations l10n, {required bool announce}) {
+    return BooksListNote(
+      message: l10n.booksOfflinePagingPaused,
+      announce: announce,
+      onAction: viewModel.refresh,
+      actionHint: l10n.booksOfflineRefreshAction,
+    );
+  }
+
   Widget? _footer(AppLocalizations l10n) {
     if (viewModel.isLoadingMore) return const AppLoadMoreFooter();
     if (!_infinite) return null;
-    if (viewModel.isPagingPaused) {
-      return BooksListNote(
-        message: l10n.booksOfflinePagingPaused,
-        announce: true,
-      );
-    }
+    // Reached by scrolling, so it is read in order; announcing it again
+    // each time it is rebuilt would only repeat the shell's banner.
+    if (viewModel.isPagingPaused) return _pausedNote(l10n, announce: false);
     if (viewModel.isCacheList && !viewModel.hasMore) {
       return BooksListNote(message: l10n.booksOfflineEndOfList);
     }

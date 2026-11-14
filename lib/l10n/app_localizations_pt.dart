@@ -197,7 +197,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get booksOfflinePagingPaused =>
-      'Você está offline. Puxe para atualizar e ver os livros salvos neste aparelho.';
+      'Puxe para atualizar e ver os livros salvos neste aparelho.';
+
+  @override
+  String get booksOfflineRefreshAction =>
+      'mostrar os livros salvos neste aparelho';
 
   @override
   String get booksOfflineNoMatch =>

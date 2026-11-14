@@ -294,8 +294,27 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         _logTag,
       );
 
-      if (append && state.source != null && source != state.source) {
-        return await _onSourceChangedWhileAppending(source, requestedPage);
+      if (state.source != null && source != state.source) {
+        if (append) {
+          return await _onSourceChangedWhileAppending(source, requestedPage);
+        }
+        // Pages mode: a page number picked on one source means nothing on
+        // the other, so start that source's list from its first page.
+        if (requestedPage.value > 1) {
+          AppLogger.i(
+            'Page $requestedPage came from the ${source.name}; '
+            'restarting from page 1',
+            _logTag,
+          );
+          emit(
+            state.copyWith(
+              isLoading: false,
+              isOffline: offline,
+              options: state.options.copyWith(page: const PositiveInt(1)),
+            ),
+          );
+          return await _fetch(append: false);
+        }
       }
 
       final previous = state.bookList;
@@ -321,6 +340,18 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     } on OfflineException catch (e) {
       AppLogger.w('No saved books for this request: $e', _logTag);
       if (_takeQueued()) return await _fetch(append: false);
+      if (append) {
+        // Going offline never takes away the list being read.
+        emit(
+          state.copyWith(
+            isLoading: false,
+            isLoadingMore: false,
+            isOffline: true,
+            options: _undoPageBump(requestedPage),
+          ),
+        );
+        return;
+      }
       emit(
         state.copyWith(
           isLoading: false,
@@ -336,11 +367,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       AppLogger.e('Error fetching books', e, stackTrace, _logTag);
       if (_takeQueued()) return await _fetch(append: false);
 
-      // Only undo the bump this append made; a sort or filter change that
-      // happened meanwhile already moved the page elsewhere.
-      final rolledBack = append && state.options.page == requestedPage
-          ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
-          : state.options;
+      final rolledBack = append ? _undoPageBump(requestedPage) : state.options;
       emit(
         state.copyWith(
           isLoading: false,
@@ -368,20 +395,25 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       'screen came from the ${state.source?.name}',
       _logTag,
     );
-    final rolledBack = state.options.page == requestedPage
-        ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
-        : state.options;
     emit(
       state.copyWith(
         isLoading: false,
         isLoadingMore: false,
         isOffline: offline,
-        options: rolledBack,
+        options: _undoPageBump(requestedPage),
       ),
     );
     if (offline) return Future.value();
     return _fetch(append: false);
   }
+
+  /// The options with the page bump of an append to [requestedPage] undone,
+  /// so the next attempt retries it. Only that bump: a sort or filter change
+  /// made meanwhile already moved the page elsewhere.
+  BookPageOptions _undoPageBump(PositiveInt requestedPage) =>
+      state.options.page == requestedPage
+      ? state.options.copyWith(page: PositiveInt(requestedPage.value - 1))
+      : state.options;
 
   /// Whether a follow-up fetch was requested meanwhile; clears the flag.
   bool _takeQueued() {
@@ -459,6 +491,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
       state.copyWith(
         preferences: preferences,
         bookList: () => null,
+        source: () => null,
         options: state.options.copyWith(page: const PositiveInt(1)),
       ),
     );

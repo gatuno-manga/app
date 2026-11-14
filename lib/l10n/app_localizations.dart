@@ -467,8 +467,14 @@ abstract class AppLocalizations {
   /// No description provided for @booksOfflinePagingPaused.
   ///
   /// In en, this message translates to:
-  /// **'You\'re offline. Pull to refresh to see the books saved on this device.'**
+  /// **'Pull to refresh to see the books saved on this device.'**
   String get booksOfflinePagingPaused;
+
+  /// No description provided for @booksOfflineRefreshAction.
+  ///
+  /// In en, this message translates to:
+  /// **'show the books saved on this device'**
+  String get booksOfflineRefreshAction;
 
   /// No description provided for @booksOfflineNoMatch.
   ///
