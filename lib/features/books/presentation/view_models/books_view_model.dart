@@ -194,10 +194,17 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   /// User-initiated reload (pull to refresh, the offline retry). Offline, the
   /// repository skips the network, so the server is probed first; then the
   /// list restarts from page 1, from whichever source answers.
-  Future<void> refresh() async {
-    if (state.isRefreshing) return;
+  Future<void> refresh() {
     if (!_connectivity.isOffline) return fetchBooks();
+    // A second request joins the running one, so its spinner lasts as long.
+    return _refreshing ??= _refreshOffline().whenComplete(
+      () => _refreshing = null,
+    );
+  }
 
+  Future<void>? _refreshing;
+
+  Future<void> _refreshOffline() async {
     emit(state.copyWith(isRefreshing: true));
     try {
       await _connectivity.checkNow();
@@ -326,17 +333,10 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     } on OfflineException catch (e) {
       AppLogger.w('No saved books for this request: $e', _logTag);
       if (_takeQueued()) return await _fetch(append: false);
-      if (append && state.source == BooksListSource.server) {
-        // Going offline never takes away the server list being read.
-        emit(
-          state.copyWith(
-            isLoading: false,
-            isLoadingMore: false,
-            isOffline: true,
-            options: _undoPageBump(requestedPage),
-          ),
-        );
-        return;
+      // Nothing saved at all: like a cache answer, it never takes away the
+      // server list being read.
+      if (state.source == BooksListSource.server && requestedPage.value > 1) {
+        return await _onSourceChanged(BooksListSource.cache);
       }
       emit(
         state.copyWith(

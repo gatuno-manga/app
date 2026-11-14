@@ -22,7 +22,10 @@ class BooksListNote extends StatelessWidget {
     this.announce = false,
     this.onAction,
     this.actionHint,
-  });
+  }) : assert(
+         actionHint == null || onAction != null,
+         'actionHint describes onAction',
+       );
 
   @override
   Widget build(BuildContext context) {

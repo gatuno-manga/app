@@ -893,17 +893,43 @@ void main() {
       },
     );
 
-    test('a refresh while one is running is ignored', () async {
+    test(
+      'an empty cache on a page change keeps the server page, paused',
+      () async {
+        inPagesMode();
+        stubPages(totalPages: 5);
+        await viewModel.fetchBooks();
+        viewModel.setPage(2);
+        await flush();
+        when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
+          connectivity.reportUnreachable();
+          throw OfflineException();
+        });
+
+        viewModel.setPage(3);
+        await flush();
+        await flush();
+
+        expect(viewModel.bookList!.data.single.id.value, 'server-2');
+        expect(viewModel.options.page.value, 2);
+        expect(viewModel.isOfflineMiss, isFalse);
+        expect(viewModel.isPagingPaused, isTrue);
+      },
+    );
+
+    test('a refresh while one is running joins it', () async {
       stubPages();
       connectivity.goOffline();
       await flush();
       await viewModel.fetchBooks();
 
       final first = viewModel.refresh();
-      await viewModel.refresh();
-      await first;
+      final second = viewModel.refresh();
+      expect(identical(first, second), isTrue);
+      await second;
 
       expect(connectivity.checks, 1);
+      expect(viewModel.isRefreshing, isFalse);
     });
 
     test('an offline miss while appending keeps a server list', () async {
