@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// A short centered line at the end of the book list, such as the end of the
@@ -28,8 +29,12 @@ class BooksListNote extends StatelessWidget {
     final theme = Theme.of(context);
     return Semantics(
       liveRegion: announce,
+      button: onAction != null,
       onTap: onAction,
+      // TalkBack reads onTapHint; iOS ignores it, so VoiceOver gets the
+      // same text as a hint instead (not both, or TalkBack reads it twice).
       onTapHint: actionHint,
+      hint: defaultTargetPlatform == TargetPlatform.iOS ? actionHint : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Center(

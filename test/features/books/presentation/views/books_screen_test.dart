@@ -396,6 +396,7 @@ void main() {
         matchesSemantics(
           label: 'Pull to refresh to see the books saved on this device.',
           isLiveRegion: true,
+          isButton: true,
           hasTapAction: true,
           onTapHint: 'show the books saved on this device',
         ),

@@ -195,6 +195,7 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
   /// repository skips the network, so the server is probed first; then the
   /// list restarts from page 1, from whichever source answers.
   Future<void> refresh() async {
+    if (state.isRefreshing) return;
     if (!_connectivity.isOffline) return fetchBooks();
 
     emit(state.copyWith(isRefreshing: true));
@@ -294,27 +295,12 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
         _logTag,
       );
 
-      if (state.source != null && source != state.source) {
-        if (append) {
-          return await _onSourceChangedWhileAppending(source, requestedPage);
-        }
-        // Pages mode: a page number picked on one source means nothing on
-        // the other, so start that source's list from its first page.
-        if (requestedPage.value > 1) {
-          AppLogger.i(
-            'Page $requestedPage came from the ${source.name}; '
-            'restarting from page 1',
-            _logTag,
-          );
-          emit(
-            state.copyWith(
-              isLoading: false,
-              isOffline: offline,
-              options: state.options.copyWith(page: const PositiveInt(1)),
-            ),
-          );
-          return await _fetch(append: false);
-        }
+      // A page past the first, in either mode, sits at an offset of the
+      // list on screen; on the other source that offset means nothing.
+      if (state.source != null &&
+          source != state.source &&
+          requestedPage.value > 1) {
+        return await _onSourceChanged(source);
       }
 
       final previous = state.bookList;
@@ -340,8 +326,8 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     } on OfflineException catch (e) {
       AppLogger.w('No saved books for this request: $e', _logTag);
       if (_takeQueued()) return await _fetch(append: false);
-      if (append) {
-        // Going offline never takes away the list being read.
+      if (append && state.source == BooksListSource.server) {
+        // Going offline never takes away the server list being read.
         emit(
           state.copyWith(
             isLoading: false,
@@ -380,30 +366,35 @@ class BooksViewModel extends BaseStreamViewModel<BooksState> {
     }
   }
 
-  /// The next page came from the other source than the list on screen, and
-  /// the two sources' offsets don't line up, so it is never appended. Back
-  /// online under a cache list, the server list replaces it from page 1. A
-  /// server list that went offline mid-load is kept, with paging paused
-  /// until the user refreshes.
-  Future<void> _onSourceChangedWhileAppending(
-    BooksListSource source,
-    PositiveInt requestedPage,
-  ) {
-    final offline = source == BooksListSource.cache;
+  /// The requested page came from the other source than the list on screen,
+  /// so it is discarded. A server list that went offline mid-request stays,
+  /// on the page it shows, with paging paused until the user refreshes.
+  /// Back online under a cache list, the server list replaces it from
+  /// page 1.
+  Future<void> _onSourceChanged(BooksListSource source) {
     AppLogger.i(
-      'Discarding an appended page from the ${source.name}: the list on '
-      'screen came from the ${state.source?.name}',
+      'Discarding a page from the ${source.name}: the list on screen came '
+      'from the ${state.source?.name}',
       _logTag,
     );
+    if (source == BooksListSource.cache) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isLoadingMore: false,
+          isOffline: true,
+          options: state.options.copyWith(
+            page: state.bookList?.page ?? const PositiveInt(1),
+          ),
+        ),
+      );
+      return Future.value();
+    }
     emit(
       state.copyWith(
-        isLoading: false,
-        isLoadingMore: false,
-        isOffline: offline,
-        options: _undoPageBump(requestedPage),
+        options: state.options.copyWith(page: const PositiveInt(1)),
       ),
     );
-    if (offline) return Future.value();
     return _fetch(append: false);
   }
 

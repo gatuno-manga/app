@@ -847,18 +847,18 @@ void main() {
     );
 
     test(
-      'a page change answered by the cache restarts it from page 1',
+      'a page change answered by the cache keeps the server page, paused',
       () async {
         inPagesMode();
         stubPages(totalPages: 5);
         await viewModel.fetchBooks();
-        final answer = stubPages;
+        viewModel.setPage(2);
+        await flush();
         when(() => mockRepository.getBooks(any())).thenAnswer((inv) async {
-          // The request for page 3 drops; the cache answers from now on.
+          // The request for page 3 drops and the cache answers it.
           connectivity.reportUnreachable();
-          answer(totalPages: 5);
           final o = inv.positionalArguments.first as BookPageOptions;
-          return page(number: o.page.value, totalPages: 5, ids: ['cache-x']);
+          return page(number: o.page.value, totalPages: 1, ids: ['cache-x']);
         });
         clearInteractions(mockRepository);
 
@@ -866,14 +866,47 @@ void main() {
         await flush();
         await flush();
 
-        expect(requestedPages(), [3, 1]);
-        expect(viewModel.options.page.value, 1);
-        expect(viewModel.bookList!.data.single.id.value, 'cache-1');
-        expect(viewModel.state.source, BooksListSource.cache);
+        expect(requestedPages(), [3]);
+        expect(viewModel.options.page.value, 2);
+        expect(viewModel.bookList!.data.single.id.value, 'server-2');
+        expect(viewModel.state.source, BooksListSource.server);
+        expect(viewModel.isPagingPaused, isTrue);
+        expect(viewModel.isLoading, isFalse);
       },
     );
 
-    test('an offline miss while appending keeps the list', () async {
+    test(
+      'an offline miss while appending to a cache list shows the miss',
+      () async {
+        stubPages();
+        connectivity.goOffline();
+        await flush();
+        await viewModel.fetchBooks();
+        when(
+          () => mockRepository.getBooks(any()),
+        ).thenThrow(OfflineException());
+
+        await viewModel.loadMore();
+
+        expect(viewModel.isOfflineMiss, isTrue);
+        expect(viewModel.bookList, isNull);
+      },
+    );
+
+    test('a refresh while one is running is ignored', () async {
+      stubPages();
+      connectivity.goOffline();
+      await flush();
+      await viewModel.fetchBooks();
+
+      final first = viewModel.refresh();
+      await viewModel.refresh();
+      await first;
+
+      expect(connectivity.checks, 1);
+    });
+
+    test('an offline miss while appending keeps a server list', () async {
       stubPages();
       await viewModel.fetchBooks();
       when(() => mockRepository.getBooks(any())).thenAnswer((_) async {
