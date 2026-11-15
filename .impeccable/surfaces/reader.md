@@ -61,7 +61,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Image reader settings (issue #70)
 
-Frames live in the Figma section `Leitor · Imagem · Ajustes (#70)` (id `979:3184`, inside "2 · Livro e Leitor"), built from the same sheet pattern as `874:694` / `882:959`. Light token mode, like the accessibility sheet.
+Frames live in the Figma section `Leitor · Imagem · Ajustes (#70)` (id `979:3184`, inside "Leitor — leitura contínua, fim de capítulo"), built from the same sheet pattern as `874:694` / `882:959`. Light token mode, like the accessibility sheet.
 - `979:3185` Leitor · Imagem · Ajustes (padrão): theme Padrão, gap 0 dp (minus disabled), indicator on, keep screen on off
 - `979:3326` Leitor · Imagem · Ajustes (extremos: espaço máximo): theme Sépia, gap 16 dp (plus disabled), indicator off, keep screen on on
 - `979:3467` Leitor · Imagem · Ajustes (Creme, espaço 8): theme Creme, gap 8 dp (both steppers enabled)
@@ -79,7 +79,7 @@ Accessibility for the implementation: the stepper buttons (32 dp) and switches i
 
 ## Document reader settings (issue #72)
 
-Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#72)` (id `983:3725`, inside "2 · Livro e Leitor"), built from the same sheet pattern as `874:694` / `882:959` (as #70). The sheet is one pattern with sections per format; the reader theme is applied through the `Gatuno / Leitura (temas)` mode of each frame.
+Frames live in the Figma section `Leitor · Documento (PDF e EPUB) · Ajustes (#72)` (id `983:3725`, inside "Leitor — leitura contínua, fim de capítulo"), built from the same sheet pattern as `874:694` / `882:959` (as #70). The sheet is one pattern with sections per format; the reader theme is applied through the `Gatuno / Leitura (temas)` mode of each frame.
 - `983:3726` Leitor · PDF · Ajustes (padrão): theme Padrão, layout Contínuo, direction Vertical, zoom fit Largura
 - `983:3920` Leitor · PDF · Ajustes (Sépia, página única, zoom 125%): zoom row visible because fit is Personalizado
 - `983:4138` Leitor · PDF · Ajustes (Alto contraste, zoom mínimo 50%): minus disabled

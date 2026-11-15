@@ -3,8 +3,8 @@
 Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: /user (mobile section `859:38`, "5 · Configurações")
-- Code: `/settings` (`lib/features/settings`), certificates under `/settings/certificates`, download network rules planned under `/settings/download` (issue #95, not yet in code)
+- Figma: /user (mobile section `859:38`, "Configurações — /user")
+- Code: `/settings` (`lib/features/settings`), certificates under `/settings/certificates`, download network rules under `/settings/download` (issue #95, `download_settings_screen.dart`)
 
 ## Figma frames
 - `997:5052` /settings — mobile (profile card, general, downloads, API, certificates, diagnostics; replaced `954:2732` in issue #162 and grows to show every tile)
@@ -59,7 +59,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Interface/Legenda`
 
 ## States in Figma
-- /settings: default only. /settings/download: default, the other choice (Livro on "Wi-Fi e dados") and a failed save; the disabled control (initial load) exists only as a component variant. Copy follows `lib/l10n/app_pt.arb` (`settingsTitle`, `settingsGeneralSection`, `settingsApiSection`, `settingsDiagnosticsSection`); the download-screen copy is new and #95 adds its keys (including `settingsDownloadOtherHint`).
+- /settings: default only. /settings/download: default, the other choice (Livro on "Wi-Fi e dados") and a failed save; the disabled control (initial load) exists only as a component variant. Copy follows `lib/l10n/app_pt.arb` (`settingsTitle`, `settingsGeneralSection`, `settingsApiSection`, `settingsDiagnosticsSection`), plus the `settingsDownload*` keys for the download screen.
 - No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
@@ -68,8 +68,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - /settings/download: `Seletor segmentado` segments are 48 dp high (meets the target); color/text on the selected `color/primary-40` fill is 6.3-8.2:1 across the five themes; the `color/border` outline and divider are 1.2-1.6:1 (see `figma-contrast`).
 
 ## Gaps (Figma vs code)
-- Figma `997:5052` has no Leitura section; code has Leitura after Geral, so #95 places Downloads after Leitura (Geral, Leitura, Downloads, API, Certificados, Diagnósticos).
-- `Seletor segmentado` is not yet the code's look: see `segmented-button-differs` in DESIGN.md (issue #95 adds the `segmentedButtonTheme`).
+- Figma `997:5052` has no Leitura section; code orders Geral, Leitura, Downloads, API, Certificados, Diagnósticos.
 - The API field shows only a placeholder (`http://sua-api.com/api`) and no save action, although the server URL is always set at first launch; the stored-value and save states are not drawn.
 - Signed-out state is not drawn: code shows the profile card as `commonGuest` ("Visitante") with no email, and tapping it opens `/auth/signin` (`settings_screen.dart`).
 - The page header has no subtitle, unlike library and profile; code does not show one either.

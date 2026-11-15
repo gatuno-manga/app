@@ -3,7 +3,7 @@
 Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: /auth/login, /auth/register (mobile section `859:37`, "4 · Autenticação")
+- Figma: /auth/login, /auth/register (mobile section `859:37`, "Autenticação — login, cadastro")
 - Code: `/auth/signin`, `/auth/signup` (`lib/features/authentication`); also `/welcome` (API URL setup, no frame)
 
 ## Figma frames
