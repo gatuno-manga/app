@@ -67,5 +67,37 @@ void main() {
       expect(size.width, lessThan(88)); // Not Material's 64dp+ minimum box.
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     });
+
+    testWidgets('an icon leads the label in the tone color', (tester) async {
+      var taps = 0;
+      await pump(
+        tester,
+        AppTextButton(
+          text: 'Select',
+          icon: Icons.check_circle_outline,
+          tone: AppTextButtonTone.primary,
+          onPressed: () => taps++,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final icon = find.byIcon(Icons.check_circle_outline);
+      expect(icon, findsOneWidget);
+      expect(
+        tester.getCenter(icon).dx,
+        lessThan(tester.getCenter(find.text('Select')).dx),
+      );
+      expect(
+        IconTheme.of(tester.element(icon)).color,
+        AppTheme.lightTheme.colorScheme.primary,
+      );
+      expect(
+        tester.getSize(find.byType(AppTextButton)).height,
+        greaterThanOrEqualTo(48),
+      );
+
+      await tester.tap(find.text('Select'));
+      expect(taps, 1);
+    });
   });
 }
