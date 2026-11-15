@@ -47,6 +47,8 @@ class DownloadChapters extends Table {
 /// One file of a planned chapter: a page image or the document.
 @TableIndex(name: 'idx_download_files_chapter', columns: {#chapterId})
 @TableIndex(name: 'idx_download_files_task', columns: {#nativeTaskId})
+// The readers look a page or document up by its URL.
+@TableIndex(name: 'idx_download_files_url', columns: {#url})
 class DownloadFiles extends Table {
   /// `<chapterId>/<position>`.
   TextColumn get fileId => text()();
@@ -84,7 +86,15 @@ class DownloadsDatabase extends _$DownloadsDatabase {
     : super(executor ?? driftDatabase(name: 'downloads'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Each step stands alone, so steps added later stack on it.
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) await m.createIndex(idxDownloadFilesUrl);
+    },
+  );
 
   Future<void> clearAll() => transaction(() async {
     for (final table in allTables) {

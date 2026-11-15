@@ -13,9 +13,31 @@ class DownloadedContentImpl implements DownloadedContent {
   final DownloadRecords _records;
   final DownloadStorage _storage;
 
+  /// Turns a URL as the chapter gives it into the absolute one the records
+  /// keep (see `DownloadRemoteDataSource.resolve`).
+  final String Function(String url) _resolveUrl;
+
   static const String _logTag = 'DownloadedContent';
 
-  DownloadedContentImpl(this._records, this._storage);
+  DownloadedContentImpl(
+    this._records,
+    this._storage, {
+    required String Function(String url) resolveUrl,
+  }) : _resolveUrl = resolveUrl;
+
+  @override
+  Future<File?> localFile(String url) async {
+    final stored = await _records.doneFileForUrl(_resolveUrl(url));
+    if (stored == null) return null;
+    final local = await _storage.file(
+      stored.bookId,
+      stored.chapterId,
+      stored.relativePath,
+    );
+    if (await local.exists()) return local;
+    AppLogger.w('A downloaded file is missing', _logTag);
+    return null;
+  }
 
   @override
   Future<DownloadedChapter?> chapter(ChapterId chapterId) async {

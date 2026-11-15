@@ -2,12 +2,26 @@ import 'package:flutter/material.dart';
 import '../../../../../features/books/domain/entities/chapter.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reading_chapter.dart';
+import '../atoms/reading_offline_retry_note.dart';
+import '../../../../../shared/components/atoms/app_icon_button.dart';
 import '../../../../../shared/components/molecules/app_error_view.dart';
+import '../../../../../shared/components/molecules/app_offline_empty_view.dart';
 
 class ReadingTemplate extends StatelessWidget {
   final bool isLoading;
   final String? error;
   final ReadingChapter? chapter;
+
+  /// Offline, and the chapter is not downloaded.
+  final bool isOfflineMiss;
+  final bool isRetrying;
+
+  /// Offline retries that failed, said under the offline view.
+  final int offlineRetryFailures;
+
+  /// The offline view's retry: probe the server, then reload. A plain
+  /// reload would only miss again, since offline the network is skipped.
+  final VoidCallback onOfflineRetry;
   final VoidCallback onRetry;
   final VoidCallback onGoBack;
   final Widget Function(ReadingChapter) readerBuilder;
@@ -17,6 +31,10 @@ class ReadingTemplate extends StatelessWidget {
     required this.isLoading,
     this.error,
     this.chapter,
+    this.isOfflineMiss = false,
+    this.isRetrying = false,
+    this.offlineRetryFailures = 0,
+    required this.onOfflineRetry,
     required this.onRetry,
     required this.onGoBack,
     required this.readerBuilder,
@@ -30,13 +48,35 @@ class ReadingTemplate extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    if (isOfflineMiss) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: AppIconButton(
+            icon: Icons.arrow_back,
+            tooltip: l10n.errorBack,
+            onPressed: onGoBack,
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: AppOfflineEmptyView(
+                onRetry: onOfflineRetry,
+                isRetrying: isRetrying,
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: ReadingOfflineRetryNote(failures: offlineRetryFailures),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (error != null) {
       return Scaffold(
-        body: AppErrorView(
-          error: error!,
-          onRetry: onRetry,
-          onGoBack: onGoBack,
-        ),
+        body: AppErrorView(error: error!, onRetry: onRetry, onGoBack: onGoBack),
       );
     }
 

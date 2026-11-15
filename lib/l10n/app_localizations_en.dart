@@ -529,6 +529,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get readingPreviousChapter => 'Previous Chapter';
 
   @override
+  String get readingPreviousChapterNotDownloaded =>
+      'Previous Chapter (not downloaded)';
+
+  @override
+  String get readingNextChapterNotDownloaded => 'Next Chapter (not downloaded)';
+
+  @override
+  String get readingStillOffline => 'Still offline.';
+
+  @override
   String get readingFinished => 'You\'ve reached the end of this chapter.';
 
   @override

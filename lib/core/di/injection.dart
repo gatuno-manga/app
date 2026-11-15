@@ -30,6 +30,8 @@ import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
 import '../../features/downloads/downloads_injection.dart';
+import '../../features/downloads/data/data_sources/downloaded_file_image_loading_strategy.dart';
+import '../../features/downloads/domain/repositories/downloaded_content.dart';
 import '../../features/book_requests/book_requests_injection.dart';
 import '../../features/reading/reading_injection.dart';
 import '../../features/reading/domain/use_cases/reader_preferences_service.dart';
@@ -95,12 +97,16 @@ Future<void> initDI() async {
       epoch: sl<CacheEpoch>(),
     ),
   );
-  // Every AppImage checks the cover store first; URLs that are not a cached
-  // book's cover go straight to the network.
+  // Every AppImage checks the downloaded chapters first, then the cover
+  // store; anything else goes to the network. Downloads are registered later
+  // (lazily resolved here).
   sl.registerLazySingleton<ImageLoadingStrategy>(
-    () => CoverImageLoadingStrategy(
-      sl<CoverStore>(),
-      DioImageLoadingStrategy(sl<DioClient>()),
+    () => DownloadedFileImageLoadingStrategy(
+      sl<DownloadedContent>(),
+      CoverImageLoadingStrategy(
+        sl<CoverStore>(),
+        DioImageLoadingStrategy(sl<DioClient>()),
+      ),
     ),
   );
   sl.registerLazySingleton<OfflineCacheMaintenance>(

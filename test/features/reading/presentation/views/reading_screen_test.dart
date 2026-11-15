@@ -68,6 +68,7 @@ void main() {
         initialPage: any(named: 'initialPage'),
       ),
     ).thenAnswer((_) async {});
+    when(() => mockViewModel.retry()).thenAnswer((_) async {});
     final mockState = ReadingState.initial();
     stateController = StreamController<ReadingState>.broadcast();
     stateController.add(mockState);
@@ -101,6 +102,26 @@ void main() {
       expect(find.byType(ReadingTemplate), findsOneWidget);
     });
 
+    testWidgets('the offline view retries offline and says when it failed', (
+      tester,
+    ) async {
+      final st = ReadingState.initial().copyWith(
+        isOfflineMiss: true,
+        offlineRetryFailures: 1,
+      );
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
+      when(() => mockViewModel.retryOffline()).thenAnswer((_) async {});
+
+      await tester.pumpApp(
+        const ReadingScreen(chapterId: '123', initialPage: 0),
+      );
+      expect(find.text('Still offline.'), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      verify(() => mockViewModel.retryOffline()).called(1);
+    });
+
     testWidgets('renders loading state', (tester) async {
       final st = ReadingState.initial().copyWith(isLoading: true);
       stateController.add(st);
@@ -125,13 +146,7 @@ void main() {
       expect(find.text('Error'), findsOneWidget);
 
       await tester.tap(find.text('Retry'));
-      // 1st call in initState, 2nd call on retry
-      verify(
-        () => mockViewModel.loadChapter(
-          '123',
-          initialPage: any(named: 'initialPage'),
-        ),
-      ).called(2);
+      verify(() => mockViewModel.retry()).called(1);
     });
 
     testWidgets('renders correct reader for image content', (tester) async {

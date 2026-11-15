@@ -197,6 +197,7 @@ class ReadingChapterModel extends ReadingChapter {
     required super.retries,
     @JsonKey(defaultValue: false) required super.isFinal,
     super.deletedAt,
+    super.updatedAt,
     super.previous,
     super.next,
     required super.bookId,

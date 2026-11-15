@@ -65,6 +65,10 @@ class ReadingChapter {
   final PositiveInt retries;
   final bool isFinal;
   final Timestamp? deletedAt;
+
+  /// When the server last changed the chapter; a downloaded copy keeps the
+  /// value from download time.
+  final Timestamp? updatedAt;
   final ChapterId? previous;
   final ChapterId? next;
   final BookId bookId;
@@ -87,6 +91,7 @@ class ReadingChapter {
     required this.retries,
     required this.isFinal,
     this.deletedAt,
+    this.updatedAt,
     this.previous,
     this.next,
     required this.bookId,
@@ -95,6 +100,35 @@ class ReadingChapter {
     required this.pages,
     required this.comments,
   });
+
+  /// This chapter with the server's current [previous] and [next], for a
+  /// downloaded copy whose neighbours changed after it was saved. A new field
+  /// must be copied here too (covered by `withNeighbours keeps every other
+  /// field` in the entity tests).
+  ReadingChapter withNeighbours({ChapterId? previous, ChapterId? next}) =>
+      ReadingChapter(
+        id: id,
+        title: title,
+        originalUrl: originalUrl,
+        index: index,
+        contentType: contentType,
+        content: content,
+        contentFormat: contentFormat,
+        documentPath: documentPath,
+        documentFormat: documentFormat,
+        scrapingStatus: scrapingStatus,
+        retries: retries,
+        isFinal: isFinal,
+        deletedAt: deletedAt,
+        updatedAt: updatedAt,
+        previous: previous,
+        next: next,
+        bookId: bookId,
+        bookTitle: bookTitle,
+        totalChapters: totalChapters,
+        pages: pages,
+        comments: comments,
+      );
 
   /// Whether a navigable previous chapter exists (null/blank ids do not count).
   bool get hasPrevious => _isNavigable(previous);

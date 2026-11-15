@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../data/database/reading_database.dart';
 import '../../data/repositories/reading_progress_local_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
+import '../../../../core/connectivity/connectivity_service.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../features/books/domain/value_objects/book_id.dart';
 import '../../../../features/books/domain/value_objects/chapter_id.dart';
@@ -13,6 +14,7 @@ class ReadingProgressCoordinator {
   final ReadingProgressLocalService _localService;
   final AppSyncCoordinator _syncCoordinator;
   final AuthService _authService;
+  final ConnectivityService _connectivity;
   static const String _logTag = 'ReadingProgressCoordinator';
 
   StreamSubscription<AuthState>? _authSubscription;
@@ -21,6 +23,7 @@ class ReadingProgressCoordinator {
     this._localService,
     this._syncCoordinator,
     this._authService,
+    this._connectivity,
   ) {
     _init();
   }
@@ -96,8 +99,9 @@ class ReadingProgressCoordinator {
     );
     await _localService.saveProgress(companion);
 
-    // 3. Trigger Sync
-    if (!user.isGuest) {
+    // 3. Trigger Sync. Offline it could only fail: the reconnect trigger
+    // pushes what was saved meanwhile.
+    if (!user.isGuest && !_connectivity.isOffline) {
       _syncCoordinator.sync(); // Fire and forget
     }
   }
@@ -119,7 +123,7 @@ class ReadingProgressCoordinator {
   Future<List<BookId>> getContinueReadingBooks({int limit = 10}) async {
     final user = _authService.currentUser;
     if (user.isGuest) return [];
-    
+
     AppLogger.d(
       'Coordinator: Getting continue reading books for user: ${user.id.value}',
       _logTag,
@@ -131,4 +135,3 @@ class ReadingProgressCoordinator {
     _authSubscription?.cancel();
   }
 }
-

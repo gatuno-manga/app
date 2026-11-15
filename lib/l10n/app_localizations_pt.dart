@@ -530,6 +530,17 @@ class AppLocalizationsPt extends AppLocalizations {
   String get readingPreviousChapter => 'Capítulo Anterior';
 
   @override
+  String get readingPreviousChapterNotDownloaded =>
+      'Capítulo Anterior (não baixado)';
+
+  @override
+  String get readingNextChapterNotDownloaded =>
+      'Próximo Capítulo (não baixado)';
+
+  @override
+  String get readingStillOffline => 'Ainda offline.';
+
+  @override
   String get readingFinished => 'Você chegou ao fim deste capítulo.';
 
   @override
