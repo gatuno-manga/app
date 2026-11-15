@@ -49,6 +49,9 @@ class DownloadManager implements DownloadService {
   /// Owner of the cover pins this manager holds in [CoverStore].
   static const String coverPinOwner = 'download';
 
+  /// How long [dispose] waits for the serial work in flight.
+  static const Duration disposeGrace = Duration(seconds: 2);
+
   /// Manifests fetched at once.
   static const int planConcurrency = 4;
 
@@ -90,6 +93,7 @@ class DownloadManager implements DownloadService {
   /// fails after [maxTransientAttempts] instead of blocking the queue head.
   final Map<String, int> _transientFailures = {};
   bool _planning = false;
+  bool _disposed = false;
   bool _planAgain = false;
   Timer? _planRetry;
 
@@ -162,11 +166,17 @@ class DownloadManager implements DownloadService {
   }
 
   Future<void> dispose() async {
+    _disposed = true;
     _planRetry?.cancel();
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
+    // Let the serial work in flight finish before the owner closes the
+    // database and storage under it. Bounded: a native call that never
+    // answers (no plugin) must not hold the teardown; plans that land later
+    // are dropped by [_disposed].
+    await _tail.timeout(disposeGrace, onTimeout: () {});
     await _rules.close();
   }
 
@@ -247,7 +257,7 @@ class DownloadManager implements DownloadService {
     final cancelled = <String>[];
     await _records.transaction(() async {
       for (final row in await _records.chaptersIn(scope)) {
-        await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
+        cancelled.addAll(await _applyEvent(row, DownloadEvent.pause) ?? []);
       }
     });
     await _cancelTasks(cancelled);
@@ -381,7 +391,7 @@ class DownloadManager implements DownloadService {
   Future<void> _plan() async {
     // Backing off from an unreachable or busy server: only the retry timer
     // or a reconnect plans again, not every new command.
-    if (_planRetry != null) return;
+    if (_planRetry != null || _disposed) return;
     if (_planning) {
       _planAgain = true;
       return;
@@ -390,7 +400,7 @@ class DownloadManager implements DownloadService {
     try {
       do {
         _planAgain = false;
-        while (!_connectivity.isOffline) {
+        while (!_connectivity.isOffline && !_disposed) {
           final batch = await _records.unplanned(planConcurrency);
           if (batch.isEmpty) break;
           final outcomes = await Future.wait(batch.map(_fetchPlan));
@@ -402,6 +412,7 @@ class DownloadManager implements DownloadService {
           }
           // In FIFO order, so files reach the native queue in enqueue order.
           await _serial(() async {
+            if (_disposed) return;
             for (final outcome in outcomes) {
               await _applyPlan(outcome);
             }
@@ -518,38 +529,44 @@ class DownloadManager implements DownloadService {
   Future<void> _onTransfer(TransferEvent event) => switch (event) {
     TransfersResynced() => _resyncNow(),
     TransferCancelled(:final taskId) => _onUserCancel({taskId}),
-    TaskTransferEvent() => _onTaskEvent(event),
+    TransferStarted(:final taskId) => _onFileEvent(
+      taskId,
+      (chapter, _) => _transition(chapter, DownloadEvent.fileStarted),
+    ),
+    TransferCompleted(:final taskId) => _onFileEvent(taskId, _onFileDone),
+    TransferFailed(:final taskId, :final error) => _onFileEvent(
+      taskId,
+      (chapter, _) => _fail(chapter.chapterId, error),
+    ),
   };
 
   Future<void> _resyncNow() async => _resync(await _transfers.activeTaskIds());
 
-  Future<void> _onTaskEvent(TaskTransferEvent taskEvent) async {
-    final file = await _records.fileForTask(taskEvent.taskId);
-    // An earlier attempt, cancelled or replaced.
+  /// Runs [handle] for the file of the current attempt [taskId]; events of
+  /// an earlier attempt, cancelled or replaced, are ignored.
+  Future<void> _onFileEvent(
+    String taskId,
+    Future<void> Function(DownloadChapter chapter, DownloadFile file) handle,
+  ) async {
+    final file = await _records.fileForTask(taskId);
     if (file == null) return;
     final chapter = await _records.chapter(file.chapterId);
     if (chapter == null) return;
+    await handle(chapter, file);
+  }
 
-    switch (taskEvent) {
-      case TransferStarted():
-        await _transition(chapter, DownloadEvent.fileStarted);
-      case TransferCompleted():
-        final size = await _storage.sizeOf(
-          chapter.bookId,
-          chapter.chapterId,
-          file.relativePath,
-        );
-        if (size == null) {
-          await _fail(chapter.chapterId, DownloadErrors.unknown);
-          return;
-        }
-        await _records.markDone(file.fileId, size);
-        await _continue(chapter.chapterId);
-      case TransferFailed(:final error):
-        await _fail(chapter.chapterId, error);
-      case TransferCancelled():
-        break; // Dispatched in _onTransfer.
+  Future<void> _onFileDone(DownloadChapter chapter, DownloadFile file) async {
+    final size = await _storage.sizeOf(
+      chapter.bookId,
+      chapter.chapterId,
+      file.relativePath,
+    );
+    if (size == null) {
+      await _fail(chapter.chapterId, DownloadErrors.unknown);
+      return;
     }
+    await _records.markDone(file.fileId, size);
+    await _continue(chapter.chapterId);
   }
 
   /// A cancel the app did not ask for (it unbinds ids before cancelling)
@@ -577,29 +594,26 @@ class DownloadManager implements DownloadService {
   /// device carries the records, not the files) are planned again: the
   /// manifest is fetched anew and every file downloaded. A done one becomes
   /// paused, so it no longer passes for downloaded and a resume fetches it;
-  /// an active one is planned again right away. A restore drops every file,
-  /// so the manifest and one done file are enough to tell.
+  /// an active one is planned again right away. A restore drops every
+  /// downloaded file, so one file (the last done one, else the manifest) is
+  /// enough to tell.
   Future<void> _healLostChapters() async {
     for (final planned in await _records.plannedChapterSamples()) {
-      if (!await _isLost(planned)) continue;
+      final probe = planned.sample ?? DownloadStorage.manifestName;
+      if (await _storage.sizeOf(planned.bookId, planned.chapterId, probe) !=
+          null) {
+        continue;
+      }
       final chapter = await _records.chapter(planned.chapterId);
       if (chapter == null) continue;
+      // Directory first: if the app dies before the reset, the chapter is
+      // still planned with its manifest gone, and the next start heals it.
+      await _storage.deleteChapter(planned.bookId, planned.chapterId);
       await _transition(chapter, DownloadEvent.lost);
       // Unbinds the files' tasks by deleting their rows: _resync then
       // cancels them as orphans.
       await _records.resetPlan(planned.chapterId);
-      await _storage.deleteChapter(planned.bookId, planned.chapterId);
     }
-  }
-
-  Future<bool> _isLost(PlannedChapterSample planned) async {
-    for (final path in [DownloadStorage.manifestName, ?planned.sample]) {
-      if (await _storage.sizeOf(planned.bookId, planned.chapterId, path) ==
-          null) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /// Files of active chapters whose task is no longer in [active] are queued
@@ -748,28 +762,33 @@ class DownloadManager implements DownloadService {
   /// Applies [event] through [DownloadStateMachine]; `false` when it does not
   /// apply to the chapter's state. Leaving the active states clears the
   /// chapter's native task ids in the same write, so an inactive chapter
-  /// never holds one; the tasks are then cancelled, or their ids added to
-  /// [cancelInto] for one batched cancel.
+  /// never holds one; the unbound tasks are then cancelled.
   Future<bool> _transition(
     DownloadChapter chapter,
     DownloadEvent event, {
     String? error,
-    List<String>? cancelInto,
+  }) async {
+    final cleared = await _applyEvent(chapter, event, error: error);
+    if (cleared == null) return false;
+    await _cancelTasks(cleared);
+    return true;
+  }
+
+  /// [_transition] without the cancel: returns the task ids it unbound, for
+  /// the caller to cancel in a batch, or `null` when [event] does not apply.
+  Future<List<String>?> _applyEvent(
+    DownloadChapter chapter,
+    DownloadEvent event, {
+    String? error,
   }) async {
     final next = DownloadStateMachine.next(chapter.state, event);
-    if (next == null) return false;
-    final cleared = await _records.setState(
+    if (next == null) return null;
+    return _records.setState(
       chapter.chapterId,
       next,
       next == DownloadState.failed ? error : null,
       clearTasks: !DownloadStateMachine.isActive(next),
     );
-    if (cancelInto != null) {
-      cancelInto.addAll(cleared);
-    } else {
-      await _cancelTasks(cleared);
-    }
-    return true;
   }
 
   /// Keeps the cover, and the cached book row, while the book has downloads.

@@ -21,6 +21,7 @@ void main() {
     (p, DownloadEvent.resume): q,
     (f, DownloadEvent.retry): q,
     (d, DownloadEvent.lost): p,
+    (r, DownloadEvent.lost): q,
   };
 
   for (final state in DownloadState.values) {

@@ -89,8 +89,10 @@ class TransferCancelled extends TaskTransferEvent {
 ///
 /// - Each file is written to [FileTransfer.directory] (relative to the
 ///   application support directory) under [FileTransfer.filename]; a file
-///   on disk is complete. Downloaded files are kept out of device backups
-///   (the consumer heals records restored without their files).
+///   on disk is complete. Where the platform needs it per file (iOS), the
+///   queue keeps the files it writes out of device backups; elsewhere the
+///   app's backup rules do (Android). The consumer heals records restored
+///   without their files.
 /// - [start] runs first. Outcomes that happened while the app was not
 ///   running are not replayed as [events]: a finished file is on disk, a
 ///   failed or system-cancelled one is no longer in [activeTaskIds], and the

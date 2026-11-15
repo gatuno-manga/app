@@ -20,7 +20,7 @@ enum DownloadEvent {
   /// Its manifest and every file are on disk.
   complete,
 
-  /// A done chapter's files are gone (records restored without them).
+  /// A planned chapter's files are gone (records restored without them).
   lost,
 }
 
@@ -32,6 +32,7 @@ enum DownloadEvent {
 /// paused  -> queued (resume)
 /// failed  -> queued (retry)
 /// done    -> paused (lost)
+/// running -> queued (lost)
 /// ```
 abstract final class DownloadStateMachine {
   /// The state after [event], or `null` when [event] does not apply to
@@ -49,6 +50,8 @@ abstract final class DownloadStateMachine {
       (DownloadState.paused, DownloadEvent.resume) => DownloadState.queued,
       (DownloadState.failed, DownloadEvent.retry) => DownloadState.queued,
       (DownloadState.done, DownloadEvent.lost) => DownloadState.paused,
+      // Its files are gone and it is planned again: nothing runs until then.
+      (DownloadState.running, DownloadEvent.lost) => DownloadState.queued,
       _ => null,
     };
   }

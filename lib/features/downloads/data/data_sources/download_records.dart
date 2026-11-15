@@ -150,20 +150,16 @@ class DownloadRecords {
   }
 
   Future<List<DownloadChapter>> _chaptersWithIds(List<String> ids) async {
-    final rows = <DownloadChapter>[];
-    for (final chunk in _chunks(ids)) {
-      rows.addAll(
-        await (_db.select(_db.downloadChapters)
-              ..where((c) => c.chapterId.isIn(chunk))
-              ..orderBy(_fifo))
-            .get(),
-      );
+    final query = _db.select(_db.downloadChapters)..orderBy(_fifo);
+    if (ids.length <= _chunkSize) {
+      return (query..where((c) => c.chapterId.isIn(ids))).get();
     }
-    // Chunks are each in FIFO order; restore it across them.
-    if (rows.length > _chunkSize) {
-      rows.sort((a, b) => a.enqueuedAt.compareTo(b.enqueuedAt));
-    }
-    return rows;
+    // Past one statement's variables: read in FIFO order, filter here.
+    final wanted = ids.toSet();
+    return [
+      for (final row in await query.get())
+        if (wanted.contains(row.chapterId)) row,
+    ];
   }
 
   /// Planned chapters that still want files.
@@ -173,13 +169,11 @@ class DownloadRecords {
             ..orderBy(_fifo))
           .get();
 
-  /// The oldest queued chapters without a manifest yet.
+  /// The oldest active chapters without a manifest yet.
   Future<List<DownloadChapter>> unplanned(int limit) =>
       (_db.select(_db.downloadChapters)
             ..where(
-              (c) =>
-                  c.state.equalsValue(DownloadState.queued) &
-                  c.planned.equals(false),
+              (c) => c.state.isInValues(_active) & c.planned.equals(false),
             )
             ..orderBy(_fifo)
             ..limit(limit))

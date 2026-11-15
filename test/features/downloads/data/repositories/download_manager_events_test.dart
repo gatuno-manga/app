@@ -148,6 +148,30 @@ void main() {
   });
 
   group('restart', () {
+    test('restored while running: planned again, not stuck', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      transfers.controller.add(
+        TransferStarted(transfers.enqueued.first.taskId),
+      );
+      await untilState('c1', DownloadState.running);
+
+      // Backed up mid-download, restored onto another phone.
+      await manager.dispose();
+      Directory('${dir.path}/downloads').deleteSync(recursive: true);
+      transfers.active.clear();
+      final before = transfers.enqueued.length;
+      manager = build();
+      await manager.start();
+
+      await until(
+        () => transfers.enqueued.length == before + 2,
+        reason: 'planned again',
+      );
+      expect((await chapter('c1'))!.state, DownloadState.queued);
+    });
+
     test('restored with the manifest but not the pages (iOS)', () async {
       manifest('c1', imageManifest('c1', pages: 1));
       await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
