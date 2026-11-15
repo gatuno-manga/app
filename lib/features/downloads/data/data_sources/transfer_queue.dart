@@ -48,8 +48,8 @@ sealed class TaskTransferEvent extends TransferEvent {
   List<Object?> get props => [taskId];
 }
 
-/// Tasks may have left the native queue without an event of their own (a
-/// paused task that could not resume): check which ones are still there.
+/// Tasks may have left the native queue without an event of their own:
+/// check which ones are still there.
 class TransfersResynced extends TransferEvent {
   const TransfersResynced();
 
@@ -92,6 +92,14 @@ abstract final class TransferIds {
 
 /// The native background downloader. Transfers keep running when the app is
 /// closed; their events are delivered when it runs again.
+///
+/// Implemented today by an adapter over a third-party plugin, to be replaced
+/// by the app's own plugin. An implementation must: write each file to the
+/// given directory under the application support directory; report each
+/// task's outcome under its id (events may come after a restart); list in
+/// [activeTaskIds] only its own queued or running tasks, stable once [start]
+/// returns; and emit [TransfersResynced] when tasks may have left the queue
+/// silently.
 abstract class TransferQueue {
   /// Every event, including those that happened while the app was closed
   /// (delivered after [start]).

@@ -37,11 +37,11 @@ import '../database/downloads_database.dart';
 ///
 /// Planning a chapter fetches its manifest (`GET /chapters/:id`, through
 /// `DioClient`), stores it, and records one row per file; that needs the app
-/// running. Every file then goes straight to WorkManager or URLSession, which
-/// keep downloading with the app closed; their outcome is applied when
-/// events arrive or, on the next [start], from what is on disk. A file that
-/// fails while the app is closed waits for the next launch for its retries:
-/// the plugin schedules them from Dart.
+/// running. Every file then goes straight to the native queue, which keeps
+/// downloading with the app closed; the outcome is applied when events
+/// arrive or, on the next [start], from what is on disk. What the native
+/// side guarantees with the app closed (retries, resumes) is up to the
+/// [TransferQueue] implementation.
 ///
 /// Every change to the records runs through [_serial], so a native event, a
 /// user command and a finished plan never interleave.
@@ -561,7 +561,7 @@ class DownloadManager implements DownloadService {
   Future<void> _resync(Set<String> active) async {
     final recorded = await _records.recordedTaskIds();
     // Native tasks no active chapter points at: a cancel that never reached
-    // the plugin, or a late duplicate. They must not run.
+    // the native queue, or a late duplicate. They must not run.
     final orphans = active.difference(recorded);
     if (orphans.isNotEmpty) await _transfers.cancel(orphans);
     await _records.clearTaskIds(recorded.difference(active));

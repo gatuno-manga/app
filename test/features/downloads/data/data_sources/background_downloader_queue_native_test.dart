@@ -115,15 +115,18 @@ void main() {
   });
 
   group('Android', () {
-    test('tasks allow pause, so the plugin spans the 9-minute limit', () async {
-      final q = await start(ios: false);
+    test(
+      'tasks do not allow pause (interim: no resume across 9 min)',
+      () async {
+        final q = await start(ios: false);
 
-      await q.enqueue(const [_transfer]);
+        await q.enqueue(const [_transfer]);
 
-      expect((enqueuedTask() as DownloadTask).allowPause, isTrue);
-    });
+        expect((enqueuedTask() as DownloadTask).allowPause, isFalse);
+      },
+    );
 
-    test('a timeout pause only clears the plugin\'s paused entry', () async {
+    test('a paused update is ignored', () async {
       await start(ios: false);
 
       updates.add(paused());
@@ -131,9 +134,7 @@ void main() {
         BackgroundDownloaderTransferQueue.resumeSettle * 2,
       );
 
-      // resume() drops the stale entry, so a later cancel reaches
-      // WorkManager; with no resume data it enqueues nothing.
-      verify(() => downloader.resume(any())).called(1);
+      verifyNever(() => downloader.resume(any()));
       verifyNever(() => downloader.resumeAll(group: any(named: 'group')));
       expect(events, isEmpty);
     });

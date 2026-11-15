@@ -33,6 +33,10 @@ class DownloadNotificationTexts {
 /// [TransferQueue] on the `background_downloader` package: Android
 /// WorkManager and iOS background URLSession, so files keep downloading when
 /// the app is closed.
+///
+/// Temporary: the app's own downloader plugin will implement [TransferQueue]
+/// and replace this adapter. Keep every plugin detail in this file and in
+/// the injection.
 class BackgroundDownloaderTransferQueue implements TransferQueue {
   /// A file fails once this little would be left on the device.
   static const int minFreeMegabytes = 200;
@@ -55,9 +59,11 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   final DownloadNotificationTexts Function() _texts;
 
   /// iOS: a task the system cancelled with resume data (a force-quit
-  /// mid-file) is reported paused and waits for a resume from Dart. Android:
-  /// tasks allow pause only so the plugin can pause and resume them natively
-  /// across WorkManager's 9-minute limit; nothing must resume them again.
+  /// mid-file) is reported paused and waits for a resume from Dart. Android
+  /// tasks never pause (no `allowPause`): a file still running at
+  /// WorkManager's 9-minute limit fails and is retried from scratch. An
+  /// interim limit of this adapter, until the app's own downloader plugin
+  /// replaces it.
   final bool _resumesPausedTasks;
 
   Future<void> _sweeps = Future<void>.value();
@@ -130,26 +136,11 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
       if (_resumesPausedTasks) {
         _sweepTimer?.cancel();
         _sweepTimer = Timer(resumeSettle, () => unawaited(_sweep()));
-      } else {
-        unawaited(_forgetTimeoutPause(update.task));
       }
       return;
     }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
-  }
-
-  /// Android: a pause is the plugin crossing WorkManager's 9-minute limit; it
-  /// has already re-enqueued the task natively. The plugin still lists it as
-  /// paused on the Dart side, and a cancel of a listed task never reaches
-  /// WorkManager. `resume` drops that entry and, with no Dart-side resume
-  /// data on this path, enqueues nothing. A workaround for the plugin.
-  Future<void> _forgetTimeoutPause(Task task) async {
-    try {
-      await _downloader.resume(task as DownloadTask);
-    } catch (e, stackTrace) {
-      AppLogger.e('Could not clear a timeout pause', e, stackTrace, _logTag);
-    }
   }
 
   /// Resumes every paused task, one sweep at a time: the plugin removes a
@@ -216,9 +207,6 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
             group: group,
             requiresWiFi: t.requiresWiFi,
             retries: retries,
-            // Android: lets the plugin pause at WorkManager's 9-minute limit
-            // and resume natively, instead of failing and starting over.
-            allowPause: !_resumesPausedTasks,
             updates: Updates.status,
           ),
       ]);
