@@ -20,8 +20,28 @@ class DownloadBooks extends Table {
   /// is off. A row with it set outlives its last chapter.
   DateTimeColumn get autoDownloadSince => dateTime().nullable()();
 
+  /// The [autoDownloadSince] whose chapters [AutoDownloadSeen] holds as the
+  /// baseline; a different value (or `null`) means the next check records a
+  /// new baseline instead of queueing.
+  DateTimeColumn get autoDownloadBaselineFor => dateTime().nullable()();
+
+  /// When the new-chapter check last read this book; the least recent go
+  /// first.
+  DateTimeColumn get autoDownloadCheckedAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {bookId};
+}
+
+/// A chapter the new-chapter check has seen for a book with automatic
+/// download on: one that existed when it was turned on, or one queued (or
+/// found downloaded) since. Never queued again.
+class AutoDownloadSeen extends Table {
+  TextColumn get bookId => text()();
+  TextColumn get chapterId => text()();
+
+  @override
+  Set<Column> get primaryKey => {bookId, chapterId};
 }
 
 /// The download of one chapter.
@@ -85,13 +105,15 @@ class DownloadFiles extends Table {
 
 /// Download records. User data with its own lifecycle, apart from the
 /// rebuildable offline cache; wiped only when the server changes.
-@DriftDatabase(tables: [DownloadBooks, DownloadChapters, DownloadFiles])
+@DriftDatabase(
+  tables: [DownloadBooks, DownloadChapters, DownloadFiles, AutoDownloadSeen],
+)
 class DownloadsDatabase extends _$DownloadsDatabase {
   DownloadsDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'downloads'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Each step stands alone, so steps added later stack on it.
   @override
@@ -100,6 +122,11 @@ class DownloadsDatabase extends _$DownloadsDatabase {
       if (from < 2) await m.createIndex(idxDownloadFilesUrl);
       if (from < 3) {
         await m.addColumn(downloadBooks, downloadBooks.autoDownloadSince);
+      }
+      if (from < 4) {
+        await m.addColumn(downloadBooks, downloadBooks.autoDownloadBaselineFor);
+        await m.addColumn(downloadBooks, downloadBooks.autoDownloadCheckedAt);
+        await m.createTable(autoDownloadSeen);
       }
     },
   );

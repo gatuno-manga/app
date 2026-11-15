@@ -50,10 +50,74 @@ import '../../features/app_lock/domain/use_cases/app_lock_service.dart';
 import '../image/image_loading_strategy.dart';
 import '../image/dio_image_loading_strategy.dart';
 import '../network/app_mqtt_service.dart';
+import '../../features/downloads/data/data_sources/workmanager_check_scheduler.dart';
+import '../../features/downloads/domain/repositories/new_chapter_check_scheduler.dart';
+import 'background_injection.dart';
 
 final GetIt sl = GetIt.instance;
 
 Future<void> initDI() async {
+  await initCoreDI();
+
+  initAppLockInjection(sl);
+  await sl<AppLockService>().init();
+
+  // Features
+  initAuthenticationInjection(sl);
+  sl.registerLazySingleton<AppMqttService>(() => AppMqttService(sl(), sl()));
+  initUsersInjection(sl);
+  initHomeInjection(sl);
+  await initBooksInjection(sl);
+  initSyncDI(
+    sl,
+  ); // Must be before reading since reading depends on sync coordinator
+  initReadingDI(sl);
+  await sl<ReaderPreferencesService>().init();
+  initBookRequestsInjection(sl);
+  // Needs books (book type, chapter list) and the cover store.
+  _registerNewChapterCheckScheduler();
+  initDownloadsInjection(sl);
+  sl.registerFactory<DownloadSettingsViewModel>(
+    () => DownloadSettingsViewModel(rules: sl<DownloadNetworkRules>()),
+  );
+
+  await setupInterceptors();
+
+  // Needs the interceptors: probes go through DioClient. Not awaited, so a
+  // slow server does not hold the first frame.
+  sl<ConnectivityTriggers>().start();
+  unawaited(sl<ServerConnectivityService>().start());
+  sl<ReconnectSyncTrigger>().start();
+  unawaited(sl<OfflineCacheMaintenance>().evictStale());
+  // Plans chapters through DioClient, so after the interceptors. Not
+  // awaited: replaying what finished in the background must not hold the
+  // first frame.
+  unawaited(
+    startDownloads(sl).catchError(
+      (Object e, StackTrace stackTrace) =>
+          AppLogger.e('Downloads did not start', e, stackTrace, 'initDI'),
+    ),
+  );
+  // Queues through the engine, whose start runs first.
+  startNewChapterChecks(sl);
+
+  // Last: refreshes the profile on sign-in, so it needs the interceptors
+  // above and must be listening before any screen appears.
+  sl<UserService>().init();
+}
+
+/// The background new-chapter check runs in its own engine, started by the
+/// platform scheduler with [newChapterCheckDispatcher].
+void _registerNewChapterCheckScheduler() {
+  sl.registerLazySingleton<NewChapterCheckScheduler>(
+    () => WorkmanagerCheckScheduler(newChapterCheckDispatcher),
+  );
+}
+
+/// What every engine needs, the app's and the background check's: logging,
+/// certificates, Dio, connectivity, the offline cache, covers and settings
+/// (which sets the server URL).
+Future<void> initCoreDI() async {
   // Logger
   await AppLogger.init();
 
@@ -149,29 +213,11 @@ Future<void> initDI() async {
 
   // Initialize settings (including base URL)
   await sl<SettingsService>().init();
+}
 
-  initAppLockInjection(sl);
-  await sl<AppLockService>().init();
-
-  // Features
-  initAuthenticationInjection(sl);
-  sl.registerLazySingleton<AppMqttService>(() => AppMqttService(sl(), sl()));
-  initUsersInjection(sl);
-  initHomeInjection(sl);
-  await initBooksInjection(sl);
-  initSyncDI(
-    sl,
-  ); // Must be before reading since reading depends on sync coordinator
-  initReadingDI(sl);
-  await sl<ReaderPreferencesService>().init();
-  initBookRequestsInjection(sl);
-  // Needs books (book type, chapter list) and the cover store.
-  initDownloadsInjection(sl);
-  sl.registerFactory<DownloadSettingsViewModel>(
-    () => DownloadSettingsViewModel(rules: sl<DownloadNetworkRules>()),
-  );
-
-  // Set up interceptors (AuthService is registered in initAuthenticationInjection)
+/// Dio interceptors, once AuthService (initAuthenticationInjection) and
+/// ConnectivityService are registered.
+Future<void> setupInterceptors() async {
   setupCookieInterceptor(sl<DioClient>());
   await setupCacheInterceptor(sl<DioClient>());
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
@@ -180,24 +226,4 @@ Future<void> initDI() async {
   // First in the chain. HTTP cache hits still reach it (the cache resolves
   // them with callFollowingResponseInterceptor); it filters them itself.
   setupConnectivityInterceptor(sl<DioClient>(), sl<ConnectivityService>());
-
-  // Needs the interceptors: probes go through DioClient. Not awaited, so a
-  // slow server does not hold the first frame.
-  sl<ConnectivityTriggers>().start();
-  unawaited(sl<ServerConnectivityService>().start());
-  sl<ReconnectSyncTrigger>().start();
-  unawaited(sl<OfflineCacheMaintenance>().evictStale());
-  // Plans chapters through DioClient, so after the interceptors. Not
-  // awaited: replaying what finished in the background must not hold the
-  // first frame.
-  unawaited(
-    startDownloads(sl).catchError(
-      (Object e, StackTrace stackTrace) =>
-          AppLogger.e('Downloads did not start', e, stackTrace, 'initDI'),
-    ),
-  );
-
-  // Last: refreshes the profile on sign-in, so it needs the interceptors
-  // above and must be listening before any screen appears.
-  sl<UserService>().init();
 }

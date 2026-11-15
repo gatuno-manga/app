@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import UserNotifications
+import workmanager_apple
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -11,6 +12,16 @@ import UserNotifications
     // Download notifications (background_downloader) are delivered through
     // this delegate; FlutterAppDelegate implements it.
     UNUserNotificationCenter.current().delegate = self
+    // The background new-chapter check (#94) runs in its own engine, which
+    // needs the plugins too. Its BGAppRefreshTask handler must be registered
+    // before launch finishes; the identifier matches Info.plist and
+    // WorkmanagerCheckScheduler.taskId, the delay its 6-hour interval.
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "com.gatuno.app.newChapterCheck",
+      earliestBeginInSeconds: NSNumber(value: 6 * 60 * 60))
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

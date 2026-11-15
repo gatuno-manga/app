@@ -1,7 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/di/background_injection.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/core/network/app_mqtt_service.dart';
+import 'package:gatuno/features/downloads/data/data_sources/workmanager_check_scheduler.dart';
+import 'package:gatuno/features/downloads/data/repositories/checking_auto_download_preferences.dart';
+import 'package:gatuno/features/downloads/domain/repositories/auto_download_preferences.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
+import 'package:gatuno/features/downloads/domain/repositories/new_chapter_check_scheduler.dart';
+import 'package:gatuno/features/downloads/domain/use_cases/new_chapter_check.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
@@ -50,6 +58,27 @@ void main() {
       // The engine obeys the rules the settings screen edits.
       expect(sl<DownloadNetworkPolicy>(), same(sl<DownloadNetworkRules>()));
       expect(sl.isRegistered<DownloadSettingsViewModel>(), true);
+      // Automatic download: the setting checks and schedules, through the
+      // workmanager adapter.
+      expect(
+        sl<AutoDownloadPreferences>(),
+        isA<CheckingAutoDownloadPreferences>(),
+      );
+      expect(sl<NewChapterCheckScheduler>(), isA<WorkmanagerCheckScheduler>());
+      expect(sl.isRegistered<NewChapterCheck>(), true);
+    });
+
+    test('initBackgroundDI registers only what the check needs', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
+
+      await initBackgroundDI();
+
+      expect(sl<NewChapterCheck>(), isNotNull);
+      expect(sl.isRegistered<DownloadService>(), true);
+      expect(sl.isRegistered<AuthService>(), true);
+      expect(sl.isRegistered<AppMqttService>(), false);
+      expect(sl.isRegistered<UserService>(), false);
     });
   });
 }

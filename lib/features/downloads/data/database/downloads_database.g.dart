@@ -50,12 +50,36 @@ class $DownloadBooksTable extends DownloadBooks
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _autoDownloadBaselineForMeta =
+      const VerificationMeta('autoDownloadBaselineFor');
+  @override
+  late final GeneratedColumn<DateTime> autoDownloadBaselineFor =
+      GeneratedColumn<DateTime>(
+        'auto_download_baseline_for',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _autoDownloadCheckedAtMeta =
+      const VerificationMeta('autoDownloadCheckedAt');
+  @override
+  late final GeneratedColumn<DateTime> autoDownloadCheckedAt =
+      GeneratedColumn<DateTime>(
+        'auto_download_checked_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     bookId,
     bookType,
     enqueuedAt,
     autoDownloadSince,
+    autoDownloadBaselineFor,
+    autoDownloadCheckedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -94,6 +118,24 @@ class $DownloadBooksTable extends DownloadBooks
         ),
       );
     }
+    if (data.containsKey('auto_download_baseline_for')) {
+      context.handle(
+        _autoDownloadBaselineForMeta,
+        autoDownloadBaselineFor.isAcceptableOrUnknown(
+          data['auto_download_baseline_for']!,
+          _autoDownloadBaselineForMeta,
+        ),
+      );
+    }
+    if (data.containsKey('auto_download_checked_at')) {
+      context.handle(
+        _autoDownloadCheckedAtMeta,
+        autoDownloadCheckedAt.isAcceptableOrUnknown(
+          data['auto_download_checked_at']!,
+          _autoDownloadCheckedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -121,6 +163,14 @@ class $DownloadBooksTable extends DownloadBooks
         DriftSqlType.dateTime,
         data['${effectivePrefix}auto_download_since'],
       ),
+      autoDownloadBaselineFor: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}auto_download_baseline_for'],
+      ),
+      autoDownloadCheckedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}auto_download_checked_at'],
+      ),
     );
   }
 
@@ -143,11 +193,22 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
   /// When automatic download of new chapters was turned on; `null` while it
   /// is off. A row with it set outlives its last chapter.
   final DateTime? autoDownloadSince;
+
+  /// The [autoDownloadSince] whose chapters [AutoDownloadSeen] holds as the
+  /// baseline; a different value (or `null`) means the next check records a
+  /// new baseline instead of queueing.
+  final DateTime? autoDownloadBaselineFor;
+
+  /// When the new-chapter check last read this book; the least recent go
+  /// first.
+  final DateTime? autoDownloadCheckedAt;
   const DownloadBook({
     required this.bookId,
     required this.bookType,
     required this.enqueuedAt,
     this.autoDownloadSince,
+    this.autoDownloadBaselineFor,
+    this.autoDownloadCheckedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -162,6 +223,16 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     if (!nullToAbsent || autoDownloadSince != null) {
       map['auto_download_since'] = Variable<DateTime>(autoDownloadSince);
     }
+    if (!nullToAbsent || autoDownloadBaselineFor != null) {
+      map['auto_download_baseline_for'] = Variable<DateTime>(
+        autoDownloadBaselineFor,
+      );
+    }
+    if (!nullToAbsent || autoDownloadCheckedAt != null) {
+      map['auto_download_checked_at'] = Variable<DateTime>(
+        autoDownloadCheckedAt,
+      );
+    }
     return map;
   }
 
@@ -173,6 +244,12 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       autoDownloadSince: autoDownloadSince == null && nullToAbsent
           ? const Value.absent()
           : Value(autoDownloadSince),
+      autoDownloadBaselineFor: autoDownloadBaselineFor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(autoDownloadBaselineFor),
+      autoDownloadCheckedAt: autoDownloadCheckedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(autoDownloadCheckedAt),
     );
   }
 
@@ -190,6 +267,12 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       autoDownloadSince: serializer.fromJson<DateTime?>(
         json['autoDownloadSince'],
       ),
+      autoDownloadBaselineFor: serializer.fromJson<DateTime?>(
+        json['autoDownloadBaselineFor'],
+      ),
+      autoDownloadCheckedAt: serializer.fromJson<DateTime?>(
+        json['autoDownloadCheckedAt'],
+      ),
     );
   }
   @override
@@ -202,6 +285,12 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       ),
       'enqueuedAt': serializer.toJson<DateTime>(enqueuedAt),
       'autoDownloadSince': serializer.toJson<DateTime?>(autoDownloadSince),
+      'autoDownloadBaselineFor': serializer.toJson<DateTime?>(
+        autoDownloadBaselineFor,
+      ),
+      'autoDownloadCheckedAt': serializer.toJson<DateTime?>(
+        autoDownloadCheckedAt,
+      ),
     };
   }
 
@@ -210,6 +299,8 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     BookType? bookType,
     DateTime? enqueuedAt,
     Value<DateTime?> autoDownloadSince = const Value.absent(),
+    Value<DateTime?> autoDownloadBaselineFor = const Value.absent(),
+    Value<DateTime?> autoDownloadCheckedAt = const Value.absent(),
   }) => DownloadBook(
     bookId: bookId ?? this.bookId,
     bookType: bookType ?? this.bookType,
@@ -217,6 +308,12 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     autoDownloadSince: autoDownloadSince.present
         ? autoDownloadSince.value
         : this.autoDownloadSince,
+    autoDownloadBaselineFor: autoDownloadBaselineFor.present
+        ? autoDownloadBaselineFor.value
+        : this.autoDownloadBaselineFor,
+    autoDownloadCheckedAt: autoDownloadCheckedAt.present
+        ? autoDownloadCheckedAt.value
+        : this.autoDownloadCheckedAt,
   );
   DownloadBook copyWithCompanion(DownloadBooksCompanion data) {
     return DownloadBook(
@@ -228,6 +325,12 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       autoDownloadSince: data.autoDownloadSince.present
           ? data.autoDownloadSince.value
           : this.autoDownloadSince,
+      autoDownloadBaselineFor: data.autoDownloadBaselineFor.present
+          ? data.autoDownloadBaselineFor.value
+          : this.autoDownloadBaselineFor,
+      autoDownloadCheckedAt: data.autoDownloadCheckedAt.present
+          ? data.autoDownloadCheckedAt.value
+          : this.autoDownloadCheckedAt,
     );
   }
 
@@ -237,14 +340,22 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
           ..write('bookId: $bookId, ')
           ..write('bookType: $bookType, ')
           ..write('enqueuedAt: $enqueuedAt, ')
-          ..write('autoDownloadSince: $autoDownloadSince')
+          ..write('autoDownloadSince: $autoDownloadSince, ')
+          ..write('autoDownloadBaselineFor: $autoDownloadBaselineFor, ')
+          ..write('autoDownloadCheckedAt: $autoDownloadCheckedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(bookId, bookType, enqueuedAt, autoDownloadSince);
+  int get hashCode => Object.hash(
+    bookId,
+    bookType,
+    enqueuedAt,
+    autoDownloadSince,
+    autoDownloadBaselineFor,
+    autoDownloadCheckedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -252,7 +363,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
           other.bookId == this.bookId &&
           other.bookType == this.bookType &&
           other.enqueuedAt == this.enqueuedAt &&
-          other.autoDownloadSince == this.autoDownloadSince);
+          other.autoDownloadSince == this.autoDownloadSince &&
+          other.autoDownloadBaselineFor == this.autoDownloadBaselineFor &&
+          other.autoDownloadCheckedAt == this.autoDownloadCheckedAt);
 }
 
 class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
@@ -260,12 +373,16 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
   final Value<BookType> bookType;
   final Value<DateTime> enqueuedAt;
   final Value<DateTime?> autoDownloadSince;
+  final Value<DateTime?> autoDownloadBaselineFor;
+  final Value<DateTime?> autoDownloadCheckedAt;
   final Value<int> rowid;
   const DownloadBooksCompanion({
     this.bookId = const Value.absent(),
     this.bookType = const Value.absent(),
     this.enqueuedAt = const Value.absent(),
     this.autoDownloadSince = const Value.absent(),
+    this.autoDownloadBaselineFor = const Value.absent(),
+    this.autoDownloadCheckedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DownloadBooksCompanion.insert({
@@ -273,6 +390,8 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     required BookType bookType,
     required DateTime enqueuedAt,
     this.autoDownloadSince = const Value.absent(),
+    this.autoDownloadBaselineFor = const Value.absent(),
+    this.autoDownloadCheckedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : bookId = Value(bookId),
        bookType = Value(bookType),
@@ -282,6 +401,8 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     Expression<String>? bookType,
     Expression<DateTime>? enqueuedAt,
     Expression<DateTime>? autoDownloadSince,
+    Expression<DateTime>? autoDownloadBaselineFor,
+    Expression<DateTime>? autoDownloadCheckedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -289,6 +410,10 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
       if (bookType != null) 'book_type': bookType,
       if (enqueuedAt != null) 'enqueued_at': enqueuedAt,
       if (autoDownloadSince != null) 'auto_download_since': autoDownloadSince,
+      if (autoDownloadBaselineFor != null)
+        'auto_download_baseline_for': autoDownloadBaselineFor,
+      if (autoDownloadCheckedAt != null)
+        'auto_download_checked_at': autoDownloadCheckedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -298,6 +423,8 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     Value<BookType>? bookType,
     Value<DateTime>? enqueuedAt,
     Value<DateTime?>? autoDownloadSince,
+    Value<DateTime?>? autoDownloadBaselineFor,
+    Value<DateTime?>? autoDownloadCheckedAt,
     Value<int>? rowid,
   }) {
     return DownloadBooksCompanion(
@@ -305,6 +432,10 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
       bookType: bookType ?? this.bookType,
       enqueuedAt: enqueuedAt ?? this.enqueuedAt,
       autoDownloadSince: autoDownloadSince ?? this.autoDownloadSince,
+      autoDownloadBaselineFor:
+          autoDownloadBaselineFor ?? this.autoDownloadBaselineFor,
+      autoDownloadCheckedAt:
+          autoDownloadCheckedAt ?? this.autoDownloadCheckedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -326,6 +457,16 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     if (autoDownloadSince.present) {
       map['auto_download_since'] = Variable<DateTime>(autoDownloadSince.value);
     }
+    if (autoDownloadBaselineFor.present) {
+      map['auto_download_baseline_for'] = Variable<DateTime>(
+        autoDownloadBaselineFor.value,
+      );
+    }
+    if (autoDownloadCheckedAt.present) {
+      map['auto_download_checked_at'] = Variable<DateTime>(
+        autoDownloadCheckedAt.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -339,6 +480,8 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
           ..write('bookType: $bookType, ')
           ..write('enqueuedAt: $enqueuedAt, ')
           ..write('autoDownloadSince: $autoDownloadSince, ')
+          ..write('autoDownloadBaselineFor: $autoDownloadBaselineFor, ')
+          ..write('autoDownloadCheckedAt: $autoDownloadCheckedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1416,6 +1559,223 @@ class DownloadFilesCompanion extends UpdateCompanion<DownloadFile> {
   }
 }
 
+class $AutoDownloadSeenTable extends AutoDownloadSeen
+    with TableInfo<$AutoDownloadSeenTable, AutoDownloadSeenData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AutoDownloadSeenTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _bookIdMeta = const VerificationMeta('bookId');
+  @override
+  late final GeneratedColumn<String> bookId = GeneratedColumn<String>(
+    'book_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chapterIdMeta = const VerificationMeta(
+    'chapterId',
+  );
+  @override
+  late final GeneratedColumn<String> chapterId = GeneratedColumn<String>(
+    'chapter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [bookId, chapterId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'auto_download_seen';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AutoDownloadSeenData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('book_id')) {
+      context.handle(
+        _bookIdMeta,
+        bookId.isAcceptableOrUnknown(data['book_id']!, _bookIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bookIdMeta);
+    }
+    if (data.containsKey('chapter_id')) {
+      context.handle(
+        _chapterIdMeta,
+        chapterId.isAcceptableOrUnknown(data['chapter_id']!, _chapterIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_chapterIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {bookId, chapterId};
+  @override
+  AutoDownloadSeenData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AutoDownloadSeenData(
+      bookId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}book_id'],
+      )!,
+      chapterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chapter_id'],
+      )!,
+    );
+  }
+
+  @override
+  $AutoDownloadSeenTable createAlias(String alias) {
+    return $AutoDownloadSeenTable(attachedDatabase, alias);
+  }
+}
+
+class AutoDownloadSeenData extends DataClass
+    implements Insertable<AutoDownloadSeenData> {
+  final String bookId;
+  final String chapterId;
+  const AutoDownloadSeenData({required this.bookId, required this.chapterId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['book_id'] = Variable<String>(bookId);
+    map['chapter_id'] = Variable<String>(chapterId);
+    return map;
+  }
+
+  AutoDownloadSeenCompanion toCompanion(bool nullToAbsent) {
+    return AutoDownloadSeenCompanion(
+      bookId: Value(bookId),
+      chapterId: Value(chapterId),
+    );
+  }
+
+  factory AutoDownloadSeenData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AutoDownloadSeenData(
+      bookId: serializer.fromJson<String>(json['bookId']),
+      chapterId: serializer.fromJson<String>(json['chapterId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'bookId': serializer.toJson<String>(bookId),
+      'chapterId': serializer.toJson<String>(chapterId),
+    };
+  }
+
+  AutoDownloadSeenData copyWith({String? bookId, String? chapterId}) =>
+      AutoDownloadSeenData(
+        bookId: bookId ?? this.bookId,
+        chapterId: chapterId ?? this.chapterId,
+      );
+  AutoDownloadSeenData copyWithCompanion(AutoDownloadSeenCompanion data) {
+    return AutoDownloadSeenData(
+      bookId: data.bookId.present ? data.bookId.value : this.bookId,
+      chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AutoDownloadSeenData(')
+          ..write('bookId: $bookId, ')
+          ..write('chapterId: $chapterId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(bookId, chapterId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AutoDownloadSeenData &&
+          other.bookId == this.bookId &&
+          other.chapterId == this.chapterId);
+}
+
+class AutoDownloadSeenCompanion extends UpdateCompanion<AutoDownloadSeenData> {
+  final Value<String> bookId;
+  final Value<String> chapterId;
+  final Value<int> rowid;
+  const AutoDownloadSeenCompanion({
+    this.bookId = const Value.absent(),
+    this.chapterId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AutoDownloadSeenCompanion.insert({
+    required String bookId,
+    required String chapterId,
+    this.rowid = const Value.absent(),
+  }) : bookId = Value(bookId),
+       chapterId = Value(chapterId);
+  static Insertable<AutoDownloadSeenData> custom({
+    Expression<String>? bookId,
+    Expression<String>? chapterId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (bookId != null) 'book_id': bookId,
+      if (chapterId != null) 'chapter_id': chapterId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AutoDownloadSeenCompanion copyWith({
+    Value<String>? bookId,
+    Value<String>? chapterId,
+    Value<int>? rowid,
+  }) {
+    return AutoDownloadSeenCompanion(
+      bookId: bookId ?? this.bookId,
+      chapterId: chapterId ?? this.chapterId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (bookId.present) {
+      map['book_id'] = Variable<String>(bookId.value);
+    }
+    if (chapterId.present) {
+      map['chapter_id'] = Variable<String>(chapterId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AutoDownloadSeenCompanion(')
+          ..write('bookId: $bookId, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$DownloadsDatabase extends GeneratedDatabase {
   _$DownloadsDatabase(QueryExecutor e) : super(e);
   $DownloadsDatabaseManager get managers => $DownloadsDatabaseManager(this);
@@ -1424,6 +1784,9 @@ abstract class _$DownloadsDatabase extends GeneratedDatabase {
     this,
   );
   late final $DownloadFilesTable downloadFiles = $DownloadFilesTable(this);
+  late final $AutoDownloadSeenTable autoDownloadSeen = $AutoDownloadSeenTable(
+    this,
+  );
   late final Index idxDownloadChaptersBook = Index(
     'idx_download_chapters_book',
     'CREATE INDEX idx_download_chapters_book ON download_chapters (book_id)',
@@ -1452,6 +1815,7 @@ abstract class _$DownloadsDatabase extends GeneratedDatabase {
     downloadBooks,
     downloadChapters,
     downloadFiles,
+    autoDownloadSeen,
     idxDownloadChaptersBook,
     idxDownloadChaptersState,
     idxDownloadFilesChapter,
@@ -1466,6 +1830,8 @@ typedef $$DownloadBooksTableCreateCompanionBuilder =
       required BookType bookType,
       required DateTime enqueuedAt,
       Value<DateTime?> autoDownloadSince,
+      Value<DateTime?> autoDownloadBaselineFor,
+      Value<DateTime?> autoDownloadCheckedAt,
       Value<int> rowid,
     });
 typedef $$DownloadBooksTableUpdateCompanionBuilder =
@@ -1474,6 +1840,8 @@ typedef $$DownloadBooksTableUpdateCompanionBuilder =
       Value<BookType> bookType,
       Value<DateTime> enqueuedAt,
       Value<DateTime?> autoDownloadSince,
+      Value<DateTime?> autoDownloadBaselineFor,
+      Value<DateTime?> autoDownloadCheckedAt,
       Value<int> rowid,
     });
 
@@ -1506,6 +1874,16 @@ class $$DownloadBooksTableFilterComposer
     column: $table.autoDownloadSince,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get autoDownloadBaselineFor => $composableBuilder(
+    column: $table.autoDownloadBaselineFor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get autoDownloadCheckedAt => $composableBuilder(
+    column: $table.autoDownloadCheckedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$DownloadBooksTableOrderingComposer
@@ -1536,6 +1914,16 @@ class $$DownloadBooksTableOrderingComposer
     column: $table.autoDownloadSince,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get autoDownloadBaselineFor => $composableBuilder(
+    column: $table.autoDownloadBaselineFor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get autoDownloadCheckedAt => $composableBuilder(
+    column: $table.autoDownloadCheckedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DownloadBooksTableAnnotationComposer
@@ -1560,6 +1948,16 @@ class $$DownloadBooksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get autoDownloadSince => $composableBuilder(
     column: $table.autoDownloadSince,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get autoDownloadBaselineFor => $composableBuilder(
+    column: $table.autoDownloadBaselineFor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get autoDownloadCheckedAt => $composableBuilder(
+    column: $table.autoDownloadCheckedAt,
     builder: (column) => column,
   );
 }
@@ -1605,12 +2003,16 @@ class $$DownloadBooksTableTableManager
                 Value<BookType> bookType = const Value.absent(),
                 Value<DateTime> enqueuedAt = const Value.absent(),
                 Value<DateTime?> autoDownloadSince = const Value.absent(),
+                Value<DateTime?> autoDownloadBaselineFor = const Value.absent(),
+                Value<DateTime?> autoDownloadCheckedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion(
                 bookId: bookId,
                 bookType: bookType,
                 enqueuedAt: enqueuedAt,
                 autoDownloadSince: autoDownloadSince,
+                autoDownloadBaselineFor: autoDownloadBaselineFor,
+                autoDownloadCheckedAt: autoDownloadCheckedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1619,12 +2021,16 @@ class $$DownloadBooksTableTableManager
                 required BookType bookType,
                 required DateTime enqueuedAt,
                 Value<DateTime?> autoDownloadSince = const Value.absent(),
+                Value<DateTime?> autoDownloadBaselineFor = const Value.absent(),
+                Value<DateTime?> autoDownloadCheckedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion.insert(
                 bookId: bookId,
                 bookType: bookType,
                 enqueuedAt: enqueuedAt,
                 autoDownloadSince: autoDownloadSince,
+                autoDownloadBaselineFor: autoDownloadBaselineFor,
+                autoDownloadCheckedAt: autoDownloadCheckedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2193,6 +2599,159 @@ typedef $$DownloadFilesTableProcessedTableManager =
       DownloadFile,
       PrefetchHooks Function()
     >;
+typedef $$AutoDownloadSeenTableCreateCompanionBuilder =
+    AutoDownloadSeenCompanion Function({
+      required String bookId,
+      required String chapterId,
+      Value<int> rowid,
+    });
+typedef $$AutoDownloadSeenTableUpdateCompanionBuilder =
+    AutoDownloadSeenCompanion Function({
+      Value<String> bookId,
+      Value<String> chapterId,
+      Value<int> rowid,
+    });
+
+class $$AutoDownloadSeenTableFilterComposer
+    extends Composer<_$DownloadsDatabase, $AutoDownloadSeenTable> {
+  $$AutoDownloadSeenTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chapterId => $composableBuilder(
+    column: $table.chapterId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AutoDownloadSeenTableOrderingComposer
+    extends Composer<_$DownloadsDatabase, $AutoDownloadSeenTable> {
+  $$AutoDownloadSeenTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get bookId => $composableBuilder(
+    column: $table.bookId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chapterId => $composableBuilder(
+    column: $table.chapterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AutoDownloadSeenTableAnnotationComposer
+    extends Composer<_$DownloadsDatabase, $AutoDownloadSeenTable> {
+  $$AutoDownloadSeenTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get bookId =>
+      $composableBuilder(column: $table.bookId, builder: (column) => column);
+
+  GeneratedColumn<String> get chapterId =>
+      $composableBuilder(column: $table.chapterId, builder: (column) => column);
+}
+
+class $$AutoDownloadSeenTableTableManager
+    extends
+        RootTableManager<
+          _$DownloadsDatabase,
+          $AutoDownloadSeenTable,
+          AutoDownloadSeenData,
+          $$AutoDownloadSeenTableFilterComposer,
+          $$AutoDownloadSeenTableOrderingComposer,
+          $$AutoDownloadSeenTableAnnotationComposer,
+          $$AutoDownloadSeenTableCreateCompanionBuilder,
+          $$AutoDownloadSeenTableUpdateCompanionBuilder,
+          (
+            AutoDownloadSeenData,
+            BaseReferences<
+              _$DownloadsDatabase,
+              $AutoDownloadSeenTable,
+              AutoDownloadSeenData
+            >,
+          ),
+          AutoDownloadSeenData,
+          PrefetchHooks Function()
+        > {
+  $$AutoDownloadSeenTableTableManager(
+    _$DownloadsDatabase db,
+    $AutoDownloadSeenTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AutoDownloadSeenTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AutoDownloadSeenTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AutoDownloadSeenTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> bookId = const Value.absent(),
+                Value<String> chapterId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AutoDownloadSeenCompanion(
+                bookId: bookId,
+                chapterId: chapterId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String bookId,
+                required String chapterId,
+                Value<int> rowid = const Value.absent(),
+              }) => AutoDownloadSeenCompanion.insert(
+                bookId: bookId,
+                chapterId: chapterId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AutoDownloadSeenTableProcessedTableManager =
+    ProcessedTableManager<
+      _$DownloadsDatabase,
+      $AutoDownloadSeenTable,
+      AutoDownloadSeenData,
+      $$AutoDownloadSeenTableFilterComposer,
+      $$AutoDownloadSeenTableOrderingComposer,
+      $$AutoDownloadSeenTableAnnotationComposer,
+      $$AutoDownloadSeenTableCreateCompanionBuilder,
+      $$AutoDownloadSeenTableUpdateCompanionBuilder,
+      (
+        AutoDownloadSeenData,
+        BaseReferences<
+          _$DownloadsDatabase,
+          $AutoDownloadSeenTable,
+          AutoDownloadSeenData
+        >,
+      ),
+      AutoDownloadSeenData,
+      PrefetchHooks Function()
+    >;
 
 class $DownloadsDatabaseManager {
   final _$DownloadsDatabase _db;
@@ -2203,4 +2762,6 @@ class $DownloadsDatabaseManager {
       $$DownloadChaptersTableTableManager(_db, _db.downloadChapters);
   $$DownloadFilesTableTableManager get downloadFiles =>
       $$DownloadFilesTableTableManager(_db, _db.downloadFiles);
+  $$AutoDownloadSeenTableTableManager get autoDownloadSeen =>
+      $$AutoDownloadSeenTableTableManager(_db, _db.autoDownloadSeen);
 }

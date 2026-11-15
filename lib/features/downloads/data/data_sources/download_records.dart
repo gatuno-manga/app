@@ -157,11 +157,21 @@ class DownloadRecords {
         ),
       );
 
-  /// Turns automatic download of [bookId] off; a row left with no chapter
-  /// goes.
+  /// Turns automatic download of [bookId] off, forgetting the chapters the
+  /// new-chapter check saw; a row left with no chapter goes.
   Future<void> disableAutoDownload(String bookId) => _db.transaction(() async {
-    await (_db.update(_db.downloadBooks)..where((b) => b.bookId.equals(bookId)))
-        .write(const DownloadBooksCompanion(autoDownloadSince: Value(null)));
+    await (_db.update(
+      _db.downloadBooks,
+    )..where((b) => b.bookId.equals(bookId))).write(
+      const DownloadBooksCompanion(
+        autoDownloadSince: Value(null),
+        autoDownloadBaselineFor: Value(null),
+        autoDownloadCheckedAt: Value(null),
+      ),
+    );
+    await (_db.delete(
+      _db.autoDownloadSeen,
+    )..where((s) => s.bookId.equals(bookId))).go();
     if (!await _hasChapters(bookId)) {
       await (_db.delete(
         _db.downloadBooks,
@@ -191,6 +201,80 @@ class DownloadRecords {
       for (final row in rows)
         (bookId: row.bookId, since: row.autoDownloadSince!),
     ];
+  }
+
+  /// Books with automatic download on, as the new-chapter check needs them:
+  /// never checked first, then the least recently checked.
+  Future<List<DownloadBook>> autoDownloadChecks() {
+    final b = _db.downloadBooks;
+    return (_db.select(b)
+          ..where((t) => t.autoDownloadSince.isNotNull())
+          ..orderBy([
+            (t) => OrderingTerm(
+              expression: t.autoDownloadCheckedAt,
+              nulls: NullsOrder.first,
+            ),
+            (t) => OrderingTerm.asc(t.autoDownloadSince),
+          ]))
+        .get();
+  }
+
+  /// Chapters the new-chapter check has seen for [bookId].
+  Future<Set<String>> seenChapters(String bookId) async => {
+    for (final row in await (_db.select(
+      _db.autoDownloadSeen,
+    )..where((s) => s.bookId.equals(bookId))).get())
+      row.chapterId,
+  };
+
+  /// Records a check of [bookId]: [chapters] join its seen set (replace it
+  /// when [baseline]) and the check time becomes [at]. Only while automatic
+  /// download is still on from [since]: `false`, writing nothing, when it was
+  /// turned off or on again meanwhile, or the downloads were wiped.
+  Future<bool> recordAutoDownloadCheck(
+    String bookId, {
+    required DateTime since,
+    required Set<String> chapters,
+    required bool baseline,
+    required DateTime at,
+  }) => _db.transaction(() async {
+    final updated =
+        await (_db.update(_db.downloadBooks)..where(
+              (b) =>
+                  b.bookId.equals(bookId) & b.autoDownloadSince.equals(since),
+            ))
+            .write(
+              DownloadBooksCompanion(
+                autoDownloadCheckedAt: Value(at),
+                autoDownloadBaselineFor: baseline
+                    ? Value(since)
+                    : const Value.absent(),
+              ),
+            );
+    if (updated == 0) return false;
+    if (baseline) {
+      await (_db.delete(
+        _db.autoDownloadSeen,
+      )..where((s) => s.bookId.equals(bookId))).go();
+    }
+    await _db.batch((batch) {
+      batch.insertAll(_db.autoDownloadSeen, [
+        for (final chapterId in chapters)
+          AutoDownloadSeenCompanion.insert(
+            bookId: bookId,
+            chapterId: chapterId,
+          ),
+      ], mode: InsertMode.insertOrIgnore);
+    });
+    return true;
+  });
+
+  /// When the new-chapter check last read any book, or `null` if never.
+  Future<DateTime?> lastAutoDownloadCheck() {
+    final checkedAt = _db.downloadBooks.autoDownloadCheckedAt.max();
+    return (_db.selectOnly(
+      _db.downloadBooks,
+    )..addColumns([checkedAt])).map((row) => row.read(checkedAt)).getSingle();
   }
 
   // Chapters
