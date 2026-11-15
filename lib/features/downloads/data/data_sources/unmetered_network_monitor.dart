@@ -32,8 +32,7 @@ class UnmeteredNetworkMonitor {
 
   void _update(List<ConnectivityResult> results) {
     if (_unmetered.isClosed) return;
-    // Wi-Fi only, matching FileTransfer.requiresWiFi (Android's Wi-Fi
-    // constraint does not accept Ethernet).
+    // Wi-Fi only, as DownloadNetwork.unmetered means.
     _unmetered.add(results.contains(ConnectivityResult.wifi));
   }
 

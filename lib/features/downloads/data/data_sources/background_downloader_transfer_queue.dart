@@ -34,6 +34,11 @@ class DownloadNotificationTexts {
 /// WorkManager and iOS background URLSession, so files keep downloading when
 /// the app is closed.
 ///
+/// `requiresWiFi` maps to the plugin's Wi-Fi requirement, which follows the
+/// platform: the Wi-Fi transport on Android 9+, any unmetered network on
+/// older Android, and no cellular on iOS (wired networks allowed). The
+/// "waiting for network" label assumes Wi-Fi, so it can be off on those.
+///
 /// Temporary: the app's own downloader plugin will implement [TransferQueue]
 /// and replace this adapter. Keep every plugin detail in this file and in
 /// the injection.

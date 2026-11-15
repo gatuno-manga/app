@@ -3,6 +3,6 @@ enum DownloadNetwork {
   /// Any network, mobile data included.
   any,
 
-  /// Wi-Fi (or another unmetered network) only.
+  /// Wi-Fi only.
   unmetered,
 }

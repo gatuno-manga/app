@@ -21,12 +21,61 @@ import 'package:gatuno/features/downloads/exceptions/download_exceptions.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:mocktail/mocktail.dart';
 import '../../helpers/download_test_doubles.dart';
+import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
 import '../../helpers/download_manager_harness.dart';
 
 void main() {
   setUpDownloadManager();
 
   group('resilience', () {
+    test(
+      'a notFound retry whose files cannot be deleted stays failed',
+      () async {
+        await manager.dispose();
+        storage = _UndeletableStorage(() async => dir);
+        manager = build();
+        await manager.start();
+        manifest('c1', imageManifest('c1'));
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+        await until(() => transfers.enqueued.length == 2);
+        transfers.controller.add(
+          TransferFailed(
+            transfers.enqueued.first.taskId,
+            DownloadErrors.notFound,
+          ),
+        );
+        await untilState('c1', DownloadState.failed);
+
+        await manager.retry(const DownloadScope.chapters([ChapterId('c1')]));
+
+        final c = (await chapter('c1'))!;
+        expect(c.state, DownloadState.failed, reason: 'retry again later');
+        expect(c.error, DownloadErrors.notFound);
+        expect(c.filesTotal, 2, reason: 'plan kept');
+      },
+    );
+
+    test(
+      'a native queue that cannot be listed at start is resynced later',
+      () async {
+        manifest('c1', imageManifest('c1'));
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+        await until(() => transfers.enqueued.length == 2);
+        await manager.dispose();
+        final flaky = _FlakyListingQueue()..enqueued.addAll(transfers.enqueued);
+        transfers = flaky;
+        final before = flaky.enqueued.length;
+        manager = build();
+        await manager.start();
+        expect(flaky.enqueued.length, before, reason: 'listing failed');
+
+        await until(
+          () => flaky.enqueued.length == before + 2,
+          reason: 'the resync retry requeues the lost files',
+        );
+      },
+    );
+
     test('new commands do not cut the backoff short', () async {
       await manager.dispose();
       manager = DownloadManager(
@@ -410,4 +459,26 @@ void main() {
       await untilState('t1', DownloadState.done);
     });
   });
+}
+
+/// Storage whose chapter directories cannot be deleted.
+class _UndeletableStorage extends DownloadStorage {
+  _UndeletableStorage(super.supportDirectory);
+
+  @override
+  Future<bool> deleteChapter(String bookId, String chapterId) async => false;
+}
+
+/// A queue whose task list cannot be read the first time.
+class _FlakyListingQueue extends FakeTransferQueue {
+  bool _failed = false;
+
+  @override
+  Future<Set<String>> activeTaskIds() async {
+    if (!_failed) {
+      _failed = true;
+      throw StateError('method channel error');
+    }
+    return super.activeTaskIds();
+  }
 }

@@ -11,8 +11,7 @@ class FileTransfer extends Equatable {
   final String directory;
   final String filename;
 
-  /// Only over Wi-Fi (the Wi-Fi transport; Ethernet does not count, as
-  /// Android's Wi-Fi constraint does not accept it).
+  /// Only over Wi-Fi (`DownloadNetwork.unmetered`).
   final bool requiresWiFi;
 
   const FileTransfer({
