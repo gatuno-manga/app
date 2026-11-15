@@ -89,21 +89,24 @@ class TransferCancelled extends TaskTransferEvent {
 ///
 /// - Each file is written to [FileTransfer.directory] (relative to the
 ///   application support directory) under [FileTransfer.filename]; a file
-///   on disk is complete. Downloaded files are kept out of device backups.
+///   on disk is complete. Downloaded files are kept out of device backups
+///   (the consumer heals records restored without their files).
 /// - [start] runs first. Outcomes that happened while the app was not
 ///   running are not replayed as [events]: a finished file is on disk, a
 ///   failed or system-cancelled one is no longer in [activeTaskIds], and the
 ///   transfers the user cancelled are returned by [start]. Once [start]
-///   returns, [activeTaskIds] is stable and the consumer reconciles from it
-///   and the disk. A failing [start] still leaves [events] working.
+///   returns, [activeTaskIds] is complete and the consumer reconciles from
+///   it and the disk. [start] does not fail for a stored update it cannot
+///   read; [events] work after it either way.
 /// - [activeTaskIds] lists every task of this queue that may still produce
 ///   its file or an outcome: queued, running, waiting to retry, or paused
 ///   for a later resume. A task left out may be enqueued again.
 /// - After [start], [events] reports outcomes as they happen. A file is
 ///   tried 3 times (with backoff) before [TransferFailed]; its error is a
 ///   `DownloadErrors` code: `notFound` (HTTP 404), `storageFull` (less than
-///   200 MB would remain), `timedOut` (the platform cut one try short),
-///   `server` (other HTTP or connection errors) or `unknown`.
+///   200 MB would remain), `timedOut` (the platform's per-try time limit,
+///   Android's 9 minutes), `server` (other HTTP or connection errors,
+///   network timeouts, the system stopping the task) or `unknown`.
 /// - [enqueue] never throws: a refused or failed enqueue is reported as
 ///   [TransferFailed] for each file.
 /// - [cancel] of an unknown or finished id does nothing. Cancels the
@@ -127,10 +130,11 @@ abstract class TransferQueue {
 
   Future<void> cancel(Iterable<String> taskIds);
 
-  /// Cancels every download task of this queue, recorded or not.
+  /// Cancels every download task of this queue.
   Future<void> cancelAll();
 
-  /// Ids of transfers still queued or running natively.
+  /// Every task of this queue that may still produce its file or an
+  /// outcome: queued, running, waiting to retry, or paused for a resume.
   Future<Set<String>> activeTaskIds();
 
   /// Asks for permission to show download notifications, once.

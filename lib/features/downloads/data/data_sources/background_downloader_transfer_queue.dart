@@ -66,6 +66,12 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   /// replaces it.
   final bool _resumesPausedTasks;
 
+  /// Android: a cancel the app did not make, even one stored while the app
+  /// was closed, came from the notification. iOS: cancels stored while the
+  /// app was closed are the system's (a force-quit), and the grouped
+  /// notification's Cancel never reaches the app.
+  final bool _storedCancelsAreUsers;
+
   Future<void> _sweeps = Future<void>.value();
   Timer? _sweepTimer;
 
@@ -81,10 +87,11 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   BackgroundDownloaderTransferQueue({
     FileDownloader? downloader,
     required DownloadNotificationTexts Function() texts,
-    bool? resumesPausedTasks,
+    bool? isIOS,
   }) : _downloader = downloader ?? FileDownloader(),
        _texts = texts,
-       _resumesPausedTasks = resumesPausedTasks ?? Platform.isIOS;
+       _resumesPausedTasks = isIOS ?? Platform.isIOS,
+       _storedCancelsAreUsers = !(isIOS ?? Platform.isIOS);
 
   @override
   Stream<TransferEvent> get events => _events.stream;
@@ -95,11 +102,16 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     _updates ??= _downloader.updates.listen(_onUpdate);
     try {
       await _settleStoredUpdates();
-      return userCancels;
+    } catch (e, stackTrace) {
+      // What was collected is still the user's, and paused iOS tasks still
+      // need their resume: carry on rather than fail the whole start.
+      AppLogger.e('Could not settle stored updates', e, stackTrace, _logTag);
+      if (_resumesPausedTasks) await _sweep(notify: false);
     } finally {
-      // Even if start fails, later updates must reach the consumer.
+      // Later updates must reach the consumer.
       _replayedUserCancels = null;
     }
+    return userCancels;
   }
 
   Future<void> _settleStoredUpdates() async {
@@ -166,7 +178,7 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
       // app does not make come from the notification. iOS: cancels during
       // start are the system's (a force-quit), and those files are queued
       // again.
-      if (!_resumesPausedTasks && status == TaskStatus.canceled) {
+      if (_storedCancelsAreUsers && status == TaskStatus.canceled) {
         replayed.add(update.task.taskId);
       }
       return;
@@ -223,6 +235,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
           when description == 'Task timed out' =>
         DownloadErrors.timedOut,
       TaskHttpException() || TaskConnectionException() => DownloadErrors.server,
+      // WorkManager stopped the task (a lost network constraint, say).
+      TaskException(:final description)
+          when description.toLowerCase().contains('stopped by the system') =>
+        DownloadErrors.server,
       _ => DownloadErrors.unknown,
     };
   }

@@ -328,23 +328,64 @@ class DownloadRecords {
 
   /// Those of [taskIds] that a file is still bound to.
   Future<Set<String>> boundTaskIdsAmong(Set<String> taskIds) async {
-    if (taskIds.isEmpty) return const {};
-    final query = _db.selectOnly(_db.downloadFiles)
-      ..addColumns([_db.downloadFiles.nativeTaskId])
-      ..where(_db.downloadFiles.nativeTaskId.isIn(taskIds));
-    return {
-      for (final row in await query.get())
-        row.read(_db.downloadFiles.nativeTaskId)!,
-    };
+    final bound = <String>{};
+    for (final chunk in _chunks(taskIds)) {
+      final query = _db.selectOnly(_db.downloadFiles)
+        ..addColumns([_db.downloadFiles.nativeTaskId])
+        ..where(_db.downloadFiles.nativeTaskId.isIn(chunk));
+      for (final row in await query.get()) {
+        bound.add(row.read(_db.downloadFiles.nativeTaskId)!);
+      }
+    }
+    return bound;
   }
 
   /// Unbinds these native task ids from the files that hold them.
   Future<void> releaseTaskIds(Set<String> taskIds) async {
     if (taskIds.isEmpty) return;
-    await (_db.update(_db.downloadFiles)
-          ..where((f) => f.nativeTaskId.isIn(taskIds)))
-        .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
+    await _db.transaction(() async {
+      for (final chunk in _chunks(taskIds)) {
+        await (_db.update(_db.downloadFiles)
+              ..where((f) => f.nativeTaskId.isIn(chunk)))
+            .write(const DownloadFilesCompanion(nativeTaskId: Value(null)));
+      }
+    });
   }
+
+  /// SQLite caps the variables of one statement (32766); a big queue can
+  /// hold more ids than that.
+  static const int _chunkSize = 500;
+
+  static Iterable<List<String>> _chunks(Iterable<String> ids) sync* {
+    final list = ids.toList();
+    for (var i = 0; i < list.length; i += _chunkSize) {
+      yield list.sublist(i, (i + _chunkSize).clamp(0, list.length));
+    }
+  }
+
+  /// Every done chapter, for checking its files are still on disk.
+  Future<List<DownloadChapter>> doneChapters() => (_db.select(
+    _db.downloadChapters,
+  )..where((c) => c.state.equalsValue(DownloadState.done))).get();
+
+  /// Turns a done chapter whose files are gone (a restored backup holds the
+  /// records but not the files) back into a paused, unplanned one: a resume
+  /// downloads it again.
+  Future<void> forgetLostChapter(String chapterId) => _db.transaction(() async {
+    await (_db.delete(
+      _db.downloadFiles,
+    )..where((f) => f.chapterId.equals(chapterId))).go();
+    await (_db.update(
+      _db.downloadChapters,
+    )..where((c) => c.chapterId.equals(chapterId))).write(
+      const DownloadChaptersCompanion(
+        state: Value(DownloadState.paused),
+        error: Value(null),
+        planned: Value(false),
+        manifestBytes: Value(0),
+      ),
+    );
+  });
 
   /// A chapter whose download is done.
   Future<DownloadChapter?> doneChapter(String chapterId) =>

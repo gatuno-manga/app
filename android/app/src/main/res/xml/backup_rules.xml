@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto Backup up to Android 11. Downloaded chapters are re-downloadable
+     and large: keep them out of the backup (and its 25 MB quota). -->
+<full-backup-content>
+    <exclude domain="file" path="downloads/" />
+</full-backup-content>

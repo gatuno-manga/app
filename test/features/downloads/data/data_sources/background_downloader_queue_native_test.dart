@@ -74,7 +74,7 @@ void main() {
     final q = queue = BackgroundDownloaderTransferQueue(
       downloader: downloader,
       texts: () => _texts,
-      resumesPausedTasks: ios,
+      isIOS: ios,
     );
     sub = q.events.listen(events.add);
     await q.start();
@@ -139,27 +139,34 @@ void main() {
       expect(events, isEmpty);
     });
 
-    test('a failing start still forwards later events', () async {
-      when(
-        () => downloader.resumeFromBackground(),
-      ).thenThrow(StateError('undecodable stored update'));
+    test('a failing start keeps collected cancels and later events', () async {
+      when(() => downloader.resumeFromBackground()).thenAnswer((_) async {
+        updates.add(
+          TaskStatusUpdate(
+            DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+            TaskStatus.canceled,
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        throw StateError('undecodable stored update');
+      });
       final q = queue = BackgroundDownloaderTransferQueue(
         downloader: downloader,
         texts: () => _texts,
-        resumesPausedTasks: false,
+        isIOS: false,
       );
       sub = q.events.listen(events.add);
-      await expectLater(q.start(), throwsStateError);
+
+      expect(await q.start(), {'c1/1@s.1'});
 
       updates.add(
         TaskStatusUpdate(
-          DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+          DownloadTask(taskId: 'c1/2@s.1', url: 'https://srv/2.jpg'),
           TaskStatus.complete,
         ),
       );
       await Future<void>.delayed(Duration.zero);
-
-      expect(events, [const TransferCompleted('c1/1@s.1')]);
+      expect(events, [const TransferCompleted('c1/2@s.1')]);
     });
 
     test('cancels replayed during start are the user\'s, not events', () async {
@@ -180,7 +187,7 @@ void main() {
       final q = queue = BackgroundDownloaderTransferQueue(
         downloader: downloader,
         texts: () => _texts,
-        resumesPausedTasks: false,
+        isIOS: false,
       );
       sub = q.events.listen(events.add);
 
@@ -236,7 +243,7 @@ void main() {
       final q = queue = BackgroundDownloaderTransferQueue(
         downloader: downloader,
         texts: () => _texts,
-        resumesPausedTasks: true,
+        isIOS: true,
       );
       sub = q.events.listen(events.add);
 

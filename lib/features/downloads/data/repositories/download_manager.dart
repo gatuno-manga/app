@@ -239,13 +239,19 @@ class DownloadManager implements DownloadService {
   }
 
   @override
-  Future<void> pause(DownloadScope scope) => _serial(() async {
+  Future<void> pause(DownloadScope scope) => _serial(() => _pauseIn(scope));
+
+  /// Pauses the active chapters in [scope] in one transaction, then cancels
+  /// their native tasks in one call.
+  Future<void> _pauseIn(DownloadScope scope) async {
     final cancelled = <String>[];
-    for (final row in await _records.chaptersIn(scope)) {
-      await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
-    }
+    await _records.transaction(() async {
+      for (final row in await _records.chaptersIn(scope)) {
+        await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
+      }
+    });
     await _cancelTasks(cancelled);
-  });
+  }
 
   @override
   Future<void> resume(DownloadScope scope) =>
@@ -517,6 +523,9 @@ class DownloadManager implements DownloadService {
   Future<void> _resyncNow() async => _resync(await _transfers.activeTaskIds());
 
   Future<void> _onTaskEvent(TaskTransferEvent taskEvent) async {
+    if (taskEvent is TransferCancelled) {
+      return _onUserCancel({taskEvent.taskId});
+    }
     final file = await _records.fileForTask(taskEvent.taskId);
     // An earlier attempt, cancelled or replaced.
     if (file == null) return;
@@ -540,8 +549,8 @@ class DownloadManager implements DownloadService {
         await _continue(chapter.chapterId);
       case TransferFailed(:final error):
         await _fail(chapter.chapterId, error);
-      case TransferCancelled(:final taskId):
-        await _onUserCancel({taskId});
+      case TransferCancelled():
+        break; // Handled above.
     }
   }
 
@@ -550,14 +559,8 @@ class DownloadManager implements DownloadService {
   /// downloads: pause every active chapter, in one batch. What is on disk is
   /// kept and a resume continues it. Ids of earlier attempts are ignored.
   Future<void> _onUserCancel(Set<String> taskIds) async {
-    final current = await _records.boundTaskIdsAmong(taskIds);
-    if (current.isEmpty) return;
-    await _records.releaseTaskIds(current);
-    final cancelled = <String>[];
-    for (final row in await _records.chaptersIn(const DownloadScope.all())) {
-      await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
-    }
-    await _cancelTasks(cancelled);
+    if ((await _records.boundTaskIdsAmong(taskIds)).isEmpty) return;
+    await _pauseIn(const DownloadScope.all());
   }
 
   /// Applies what happened while the app was not running (user cancels are
@@ -565,10 +568,26 @@ class DownloadManager implements DownloadService {
   /// and [_continue] marks those on disk done. A file that failed while the
   /// app was closed is queued again, so it gets one more try.
   Future<void> _reconcile() async {
+    await _healLostChapters();
     final active = await _transfers.activeTaskIds();
     await _resync(active);
     // Files a cancelled task moved in after its chapter was deleted.
     await _storage.sweep(await _records.chapterKeys());
+  }
+
+  /// Done chapters whose manifest is gone (a backup restored onto another
+  /// device carries the records, not the files) become paused and
+  /// unplanned, so they do not pass for downloaded and a resume fetches
+  /// them again.
+  Future<void> _healLostChapters() async {
+    for (final chapter in await _records.doneChapters()) {
+      final manifest = await _storage.sizeOf(
+        chapter.bookId,
+        chapter.chapterId,
+        DownloadStorage.manifestName,
+      );
+      if (manifest == null) await _records.forgetLostChapter(chapter.chapterId);
+    }
   }
 
   /// Files of active chapters whose task is no longer in [active] are queued

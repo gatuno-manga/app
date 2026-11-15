@@ -130,10 +130,8 @@ void main() {
 
       await untilState('c1', DownloadState.paused);
       await untilState('c2', DownloadState.paused);
-      expect(
-        transfers.cancelled,
-        unorderedEquals([second.taskId, third.taskId]),
-      );
+      // Cancelling the already cancelled first task again is a no-op.
+      expect(transfers.cancelled, containsAll([second.taskId, third.taskId]));
     });
 
     test('events of a replaced attempt are ignored', () async {
@@ -150,6 +148,25 @@ void main() {
   });
 
   group('restart', () {
+    test('a done chapter whose files are gone is paused, unplanned', () async {
+      manifest('t1', textManifest('t1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
+      await untilState('t1', DownloadState.done);
+
+      // A backup restored onto another device: records without files.
+      await manager.dispose();
+      Directory('${dir.path}/downloads').deleteSync(recursive: true);
+      manager = build();
+      await manager.start();
+
+      final lost = (await chapter('t1'))!;
+      expect(lost.state, DownloadState.paused);
+      expect(lost.bytes, 0);
+
+      await manager.resume(const DownloadScope.all());
+      await untilState('t1', DownloadState.done);
+    });
+
     test('a notification cancel while closed pauses every download', () async {
       manifest('c1', imageManifest('c1'));
       manifest('c2', imageManifest('c2', pages: 1));
