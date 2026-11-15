@@ -19,8 +19,12 @@ class FakeConnectivityService implements ConnectivityService {
   @override
   ConnectivityStatus get status => _status;
 
+  /// Like the real service: the current status on listen, then changes.
   @override
-  Stream<ConnectivityStatus> get statusStream => _statuses.stream;
+  Stream<ConnectivityStatus> get statusStream async* {
+    yield _status;
+    yield* _statuses.stream;
+  }
 
   @override
   Stream<void> get onReconnected => _reconnects.stream;

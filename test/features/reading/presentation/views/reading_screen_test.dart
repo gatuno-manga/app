@@ -107,7 +107,7 @@ void main() {
     ) async {
       final st = ReadingState.initial().copyWith(
         isOfflineMiss: true,
-        stillOffline: true,
+        offlineRetryFailures: 1,
       );
       stateController.add(st);
       when(() => mockViewModel.state).thenReturn(st);

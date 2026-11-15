@@ -198,11 +198,24 @@ void main() {
       connectivity.probeResult = ConnectivityStatus.online;
 
       await viewModel.retryOffline();
-      expect(viewModel.state.stillOffline, isFalse);
+      expect(viewModel.state.offlineRetryFailures, 0);
 
       expect(connectivity.checks, 1);
       expect(viewModel.state.isRetrying, isFalse);
       expect(viewModel.chapter, isNotNull);
+    });
+
+    test('each failed retry counts, so each is announced', () async {
+      when(() => repository.openChapter(id)).thenThrow(OfflineException());
+      connectivity.goOffline();
+      await viewModel.loadChapter(chapterId);
+
+      await viewModel.retryOffline();
+      // The server answers, yet the chapter still cannot open.
+      connectivity.probeResult = ConnectivityStatus.online;
+      await viewModel.retryOffline();
+
+      expect(viewModel.state.offlineRetryFailures, 2);
     });
 
     test('retry while still offline keeps the offline view', () async {
@@ -213,7 +226,7 @@ void main() {
       await viewModel.retryOffline();
 
       expect(viewModel.state.isOfflineMiss, isTrue);
-      expect(viewModel.state.stillOffline, isTrue);
+      expect(viewModel.state.offlineRetryFailures, 1);
       expect(viewModel.state.isRetrying, isFalse);
       verify(() => repository.openChapter(id)).called(1);
     });
@@ -228,7 +241,7 @@ void main() {
 
         await viewModel.retryOffline();
         expect(viewModel.state.isOfflineMiss, isTrue);
-        expect(viewModel.state.stillOffline, isTrue);
+        expect(viewModel.state.offlineRetryFailures, 1);
       },
     );
 
@@ -241,12 +254,12 @@ void main() {
       connectivity.goOffline();
       await viewModel.loadChapter(chapterId);
       await viewModel.retryOffline();
-      expect(viewModel.state.stillOffline, isTrue);
+      expect(viewModel.state.offlineRetryFailures, 1);
 
       connectivity.reconnect();
       await _settle();
 
-      expect(viewModel.state.stillOffline, isFalse);
+      expect(viewModel.state.offlineRetryFailures, 0);
       expect(viewModel.chapter, isNotNull);
     });
 

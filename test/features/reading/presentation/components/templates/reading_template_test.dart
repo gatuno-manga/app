@@ -99,7 +99,7 @@ void main() {
         ReadingTemplate(
           isLoading: false,
           isOfflineMiss: true,
-          stillOffline: true,
+          offlineRetryFailures: 1,
           onOfflineRetry: () {},
           onRetry: () {},
           onGoBack: () {},

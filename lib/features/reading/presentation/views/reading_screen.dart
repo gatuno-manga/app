@@ -82,7 +82,7 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           chapter: state.chapter,
           isOfflineMiss: state.isOfflineMiss,
           isRetrying: state.isRetrying,
-          stillOffline: state.stillOffline,
+          offlineRetryFailures: state.offlineRetryFailures,
           onOfflineRetry: viewModel.retryOffline,
           onRetry: viewModel.retry,
           onGoBack: () {

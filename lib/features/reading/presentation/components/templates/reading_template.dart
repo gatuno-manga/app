@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../features/books/domain/entities/chapter.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reading_chapter.dart';
+import '../atoms/reading_offline_retry_note.dart';
 import '../../../../../shared/components/atoms/app_icon_button.dart';
 import '../../../../../shared/components/molecules/app_error_view.dart';
 import '../../../../../shared/components/molecules/app_offline_empty_view.dart';
@@ -15,8 +16,8 @@ class ReadingTemplate extends StatelessWidget {
   final bool isOfflineMiss;
   final bool isRetrying;
 
-  /// The last offline retry failed: say so under the offline view.
-  final bool stillOffline;
+  /// Offline retries that failed, said under the offline view.
+  final int offlineRetryFailures;
 
   /// The offline view's retry: probe the server, then reload. A plain
   /// reload would only miss again, since offline the network is skipped.
@@ -32,7 +33,7 @@ class ReadingTemplate extends StatelessWidget {
     this.chapter,
     this.isOfflineMiss = false,
     this.isRetrying = false,
-    this.stillOffline = false,
+    this.offlineRetryFailures = 0,
     required this.onOfflineRetry,
     required this.onRetry,
     required this.onGoBack,
@@ -64,22 +65,10 @@ class ReadingTemplate extends StatelessWidget {
                 isRetrying: isRetrying,
               ),
             ),
-            if (stillOffline)
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  // Announced by screen readers when it appears.
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      l10n.readingStillOffline,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
+            SafeArea(
+              top: false,
+              child: ReadingOfflineRetryNote(failures: offlineRetryFailures),
+            ),
           ],
         ),
       );

@@ -28,8 +28,9 @@ class ReadingState extends Equatable {
   /// The offline retry is probing the server.
   final bool isRetrying;
 
-  /// The last offline retry could not open the chapter either.
-  final bool stillOffline;
+  /// Offline retries in a row that could not open the chapter either; 0
+  /// until one fails. A count, not a flag, so each failure is announced.
+  final int offlineRetryFailures;
 
   /// Whether the previous and next chapters are downloaded, so they open
   /// while offline. `null` until checked, which happens only offline, and
@@ -45,7 +46,7 @@ class ReadingState extends Equatable {
     this.isOffline = false,
     this.isOfflineMiss = false,
     this.isRetrying = false,
-    this.stillOffline = false,
+    this.offlineRetryFailures = 0,
     this.previousDownloaded,
     this.nextDownloaded,
   });
@@ -73,7 +74,7 @@ class ReadingState extends Equatable {
     bool? isOffline,
     bool? isOfflineMiss,
     bool? isRetrying,
-    bool? stillOffline,
+    int? offlineRetryFailures,
     bool? Function()? previousDownloaded,
     bool? Function()? nextDownloaded,
   }) {
@@ -85,7 +86,7 @@ class ReadingState extends Equatable {
       isOffline: isOffline ?? this.isOffline,
       isOfflineMiss: isOfflineMiss ?? this.isOfflineMiss,
       isRetrying: isRetrying ?? this.isRetrying,
-      stillOffline: stillOffline ?? this.stillOffline,
+      offlineRetryFailures: offlineRetryFailures ?? this.offlineRetryFailures,
       previousDownloaded: previousDownloaded != null
           ? previousDownloaded()
           : this.previousDownloaded,
@@ -104,7 +105,7 @@ class ReadingState extends Equatable {
     isOffline,
     isOfflineMiss,
     isRetrying,
-    stillOffline,
+    offlineRetryFailures,
     previousDownloaded,
     nextDownloaded,
   ];
@@ -165,7 +166,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
         isLoading: true,
         error: () => null,
         isOfflineMiss: false,
-        stillOffline: false,
+        offlineRetryFailures: 0,
         currentPageIndex: initialPage ?? 0,
       ),
     );
@@ -218,13 +219,14 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
 
   /// The offline view's retry. Offline, the repository skips the network, so
   /// the server is probed first; the chapter opens only if it answers. When
-  /// it still cannot open, [ReadingState.stillOffline] says so and the
+  /// it still cannot open, [ReadingState.offlineRetryFailures] counts it and the
   /// offline view stays as it is. A tap while a retry runs is ignored.
   Future<void> retryOffline() async {
     final chapterId = _requestedId;
     if (chapterId == null || state.isRetrying) return;
-    // Cleared first, so a second failure is announced again.
-    emit(state.copyWith(isRetrying: true, stillOffline: false));
+    // A load in between resets the count: keep it to add this failure.
+    final failures = state.offlineRetryFailures;
+    emit(state.copyWith(isRetrying: true));
     try {
       await _connectivity.checkNow();
     } catch (e, stackTrace) {
@@ -234,7 +236,9 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     if (!_connectivity.isOffline) {
       await loadChapter(chapterId, initialPage: _requestedPage);
     }
-    if (state.isOfflineMiss) emit(state.copyWith(stillOffline: true));
+    if (state.isOfflineMiss) {
+      emit(state.copyWith(offlineRetryFailures: failures + 1));
+    }
   }
 
   /// Going offline is when neighbours start to matter: check them afresh
