@@ -52,6 +52,9 @@ class BookDownloadsState extends Equatable {
   final bool offline;
   final bool authenticated;
 
+  /// Selection mode is on; it may have nothing picked yet.
+  final bool selecting;
+
   /// Chapters picked in selection mode; empty outside it.
   final Set<ChapterId> selection;
 
@@ -62,6 +65,7 @@ class BookDownloadsState extends Equatable {
     required this.autoDownload,
     required this.offline,
     required this.authenticated,
+    required this.selecting,
     required this.selection,
     required this.notice,
   });
@@ -74,6 +78,7 @@ class BookDownloadsState extends Equatable {
     autoDownload: null,
     offline: offline,
     authenticated: authenticated,
+    selecting: false,
     selection: const {},
     notice: null,
   );
@@ -83,6 +88,7 @@ class BookDownloadsState extends Equatable {
     AutoDownload? Function()? autoDownload,
     bool? offline,
     bool? authenticated,
+    bool? selecting,
     Set<ChapterId>? selection,
     BookDownloadsNotice? Function()? notice,
   }) => BookDownloadsState(
@@ -90,11 +96,11 @@ class BookDownloadsState extends Equatable {
     autoDownload: autoDownload != null ? autoDownload() : this.autoDownload,
     offline: offline ?? this.offline,
     authenticated: authenticated ?? this.authenticated,
+    selecting: selecting ?? this.selecting,
     selection: selection ?? this.selection,
     notice: notice != null ? notice() : this.notice,
   );
 
-  bool get selecting => selection.isNotEmpty;
   bool get autoDownloadOn => autoDownload != null;
 
   /// Download all pages the chapter list from the server, so it needs it.
@@ -162,6 +168,7 @@ class BookDownloadsState extends Equatable {
     autoDownload,
     offline,
     authenticated,
+    selecting,
     selection,
     notice,
   ];
@@ -310,11 +317,12 @@ class BookDownloadsViewModel extends BaseStreamViewModel<BookDownloadsState> {
 
   // Selection mode
 
-  /// Enters selection mode with [chapterId] picked (long-press).
-  void startSelection(ChapterId chapterId) =>
-      emit(state.copyWith(selection: {chapterId}));
+  /// Enters selection mode, with [chapterId] picked on a long-press or
+  /// nothing picked from the Select button.
+  void startSelection([ChapterId? chapterId]) =>
+      emit(state.copyWith(selecting: true, selection: {?chapterId}));
 
-  /// Picks or unpicks [chapterId]; unpicking the last one leaves the mode.
+  /// Picks or unpicks [chapterId]. The mode stays on with nothing picked.
   void toggleSelection(ChapterId chapterId) {
     final next = {...state.selection};
     if (!next.remove(chapterId)) next.add(chapterId);
@@ -325,7 +333,9 @@ class BookDownloadsViewModel extends BaseStreamViewModel<BookDownloadsState> {
   void selectAll(Iterable<ChapterId> loaded) =>
       emit(state.copyWith(selection: {...state.selection, ...loaded}));
 
-  void clearSelection() => emit(state.copyWith(selection: const {}));
+  /// Leaves selection mode (Back or clear).
+  void clearSelection() =>
+      emit(state.copyWith(selecting: false, selection: const {}));
 
   Future<void> downloadSelection() => _onSelection(download);
   Future<void> pauseSelection() => _onSelection(pause);
@@ -333,7 +343,8 @@ class BookDownloadsViewModel extends BaseStreamViewModel<BookDownloadsState> {
   Future<void> retrySelection() => _onSelection(retry);
   Future<void> deleteSelection() => _onSelection(delete);
 
-  /// Applies [action] to the selection and leaves selection mode.
+  /// Applies [action] to the selection and leaves selection mode. With
+  /// nothing picked, it does nothing and the mode stays.
   Future<void> _onSelection(
     Future<void> Function(List<ChapterId>) action,
   ) async {

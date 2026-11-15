@@ -351,17 +351,28 @@ void main() {
   });
 
   group('selection', () {
-    test('long-press enters, toggling the last one leaves', () {
+    test('long-press enters with the chapter picked', () {
       vm.startSelection(c1);
       expect(vm.state.selecting, isTrue);
       expect(vm.state.selection, {c1});
 
       vm.toggleSelection(c2);
       expect(vm.state.selection, {c1, c2});
+    });
 
+    test('the Select button enters with nothing picked', () {
+      vm.startSelection();
+
+      expect(vm.state.selecting, isTrue);
+      expect(vm.state.selection, isEmpty);
+    });
+
+    test('unpicking every chapter keeps the mode', () {
+      vm.startSelection(c1);
       vm.toggleSelection(c1);
-      vm.toggleSelection(c2);
-      expect(vm.state.selecting, isFalse);
+
+      expect(vm.state.selecting, isTrue);
+      expect(vm.state.selection, isEmpty);
     });
 
     test('select all adds every loaded chapter; clear leaves', () {
@@ -413,10 +424,13 @@ void main() {
       verify(() => downloads.retry(const DownloadScope.chapters([c1])));
     });
 
-    test('an empty selection does nothing', () async {
+    test('an empty selection does nothing and keeps the mode', () async {
+      vm.startSelection();
+
       await vm.downloadSelection();
 
       verifyNever(() => downloads.enqueueChapters(any(), any()));
+      expect(vm.state.selecting, isTrue);
     });
   });
 
