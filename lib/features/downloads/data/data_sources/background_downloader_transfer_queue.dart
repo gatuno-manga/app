@@ -296,9 +296,13 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     await cancel(await activeTaskIds());
   }
 
+  /// Waits for a running resume sweep: a task being resumed is briefly in
+  /// neither of the plugin's lists.
   @override
-  Future<Set<String>> activeTaskIds() async =>
-      (await _downloader.allTaskIds(group: group)).toSet();
+  Future<Set<String>> activeTaskIds() async {
+    await _sweeps;
+    return (await _downloader.allTaskIds(group: group)).toSet();
+  }
 
   @override
   Future<void> requestNotificationPermission() async {

@@ -20,6 +20,7 @@ void main() {
     (r, DownloadEvent.complete): d,
     (p, DownloadEvent.resume): q,
     (f, DownloadEvent.retry): q,
+    (d, DownloadEvent.lost): p,
   };
 
   for (final state in DownloadState.values) {
@@ -38,9 +39,12 @@ void main() {
     expect(DownloadState.values.where(DownloadStateMachine.isActive), [q, r]);
   });
 
-  test('done is final', () {
+  test('done only leaves when its files are lost', () {
     for (final event in DownloadEvent.values) {
-      expect(DownloadStateMachine.next(d, event), isNull);
+      expect(
+        DownloadStateMachine.next(d, event),
+        event == DownloadEvent.lost ? p : isNull,
+      );
     }
   });
 }

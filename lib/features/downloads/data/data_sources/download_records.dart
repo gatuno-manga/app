@@ -30,6 +30,21 @@ class ChapterDownloadRow {
   });
 }
 
+/// A planned chapter and one of its done files, to spot lost downloads.
+class PlannedChapterSample {
+  final String chapterId;
+  final String bookId;
+
+  /// Relative path of the done file at the highest position, if any.
+  final String? sample;
+
+  const PlannedChapterSample({
+    required this.chapterId,
+    required this.bookId,
+    required this.sample,
+  });
+}
+
 /// Reads and writes of the downloads database. No decisions: the caller
 /// applies the state machine and keeps writes serialized.
 class DownloadRecords {
@@ -125,15 +140,30 @@ class DownloadRecords {
     final query = _db.select(_db.downloadChapters);
     switch (scope) {
       case ChaptersScope(:final chapterIds):
-        query.where(
-          (c) => c.chapterId.isIn([for (final id in chapterIds) id.value]),
-        );
+        return _chaptersWithIds([for (final id in chapterIds) id.value]);
       case BookScope(:final bookId):
         query.where((c) => c.bookId.equals(bookId.value));
       case AllScope():
         break;
     }
     return (query..orderBy(_fifo)).get();
+  }
+
+  Future<List<DownloadChapter>> _chaptersWithIds(List<String> ids) async {
+    final rows = <DownloadChapter>[];
+    for (final chunk in _chunks(ids)) {
+      rows.addAll(
+        await (_db.select(_db.downloadChapters)
+              ..where((c) => c.chapterId.isIn(chunk))
+              ..orderBy(_fifo))
+            .get(),
+      );
+    }
+    // Chunks are each in FIFO order; restore it across them.
+    if (rows.length > _chunkSize) {
+      rows.sort((a, b) => a.enqueuedAt.compareTo(b.enqueuedAt));
+    }
+    return rows;
   }
 
   /// Planned chapters that still want files.
@@ -178,14 +208,17 @@ class DownloadRecords {
       _db.transaction(() => _releaseTasksOf(chapterIds));
 
   Future<List<String>> _releaseTasksOf(List<String> chapterIds) async {
-    if (chapterIds.isEmpty) return const [];
-    final bound =
-        await (_db.select(_db.downloadFiles)..where(
-              (f) => f.chapterId.isIn(chapterIds) & f.nativeTaskId.isNotNull(),
-            ))
-            .get();
-    await releaseTaskIds({for (final f in bound) f.nativeTaskId!});
-    return [for (final f in bound) f.nativeTaskId!];
+    final taskIds = <String>[];
+    for (final chunk in _chunks(chapterIds)) {
+      final bound =
+          await (_db.select(_db.downloadFiles)..where(
+                (f) => f.chapterId.isIn(chunk) & f.nativeTaskId.isNotNull(),
+              ))
+              .get();
+      taskIds.addAll([for (final f in bound) f.nativeTaskId!]);
+    }
+    await releaseTaskIds(taskIds.toSet());
+    return taskIds;
   }
 
   /// Stores a planned chapter's files; [files] URLs must be absolute.
@@ -235,12 +268,14 @@ class DownloadRecords {
 
   Future<void> deleteChapters(List<String> chapterIds) =>
       _db.transaction(() async {
-        await (_db.delete(
-          _db.downloadFiles,
-        )..where((f) => f.chapterId.isIn(chapterIds))).go();
-        await (_db.delete(
-          _db.downloadChapters,
-        )..where((c) => c.chapterId.isIn(chapterIds))).go();
+        for (final chunk in _chunks(chapterIds)) {
+          await (_db.delete(
+            _db.downloadFiles,
+          )..where((f) => f.chapterId.isIn(chunk))).go();
+          await (_db.delete(
+            _db.downloadChapters,
+          )..where((c) => c.chapterId.isIn(chunk))).go();
+        }
       });
 
   // Files
@@ -363,29 +398,28 @@ class DownloadRecords {
     }
   }
 
-  /// Every done chapter, for checking its files are still on disk.
-  Future<List<DownloadChapter>> doneChapters() => (_db.select(
-    _db.downloadChapters,
-  )..where((c) => c.state.equalsValue(DownloadState.done))).get();
-
-  /// Turns a done chapter whose files are gone (a restored backup holds the
-  /// records but not the files) back into a paused, unplanned one: a resume
-  /// downloads it again.
-  Future<void> forgetLostChapter(String chapterId) => _db.transaction(() async {
-    await (_db.delete(
-      _db.downloadFiles,
-    )..where((f) => f.chapterId.equals(chapterId))).go();
-    await (_db.update(
-      _db.downloadChapters,
-    )..where((c) => c.chapterId.equals(chapterId))).write(
-      const DownloadChaptersCompanion(
-        state: Value(DownloadState.paused),
-        error: Value(null),
-        planned: Value(false),
-        manifestBytes: Value(0),
-      ),
-    );
-  });
+  /// Every planned chapter with one sample of its files on disk: the done
+  /// file at the highest position, or `null` when none is done yet.
+  Future<List<PlannedChapterSample>> plannedChapterSamples() async {
+    final rows = await _db
+        .customSelect(
+          'SELECT c.chapter_id, c.book_id, '
+          '(SELECT f.relative_path FROM download_files f '
+          'WHERE f.chapter_id = c.chapter_id AND f.done = 1 '
+          'ORDER BY f.position DESC LIMIT 1) AS sample '
+          'FROM download_chapters c WHERE c.planned = 1',
+          readsFrom: {_db.downloadChapters, _db.downloadFiles},
+        )
+        .get();
+    return [
+      for (final r in rows)
+        PlannedChapterSample(
+          chapterId: r.read<String>('chapter_id'),
+          bookId: r.read<String>('book_id'),
+          sample: r.readNullable<String>('sample'),
+        ),
+    ];
+  }
 
   /// A chapter whose download is done.
   Future<DownloadChapter?> doneChapter(String chapterId) =>

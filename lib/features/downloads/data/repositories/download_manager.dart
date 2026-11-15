@@ -517,15 +517,13 @@ class DownloadManager implements DownloadService {
 
   Future<void> _onTransfer(TransferEvent event) => switch (event) {
     TransfersResynced() => _resyncNow(),
+    TransferCancelled(:final taskId) => _onUserCancel({taskId}),
     TaskTransferEvent() => _onTaskEvent(event),
   };
 
   Future<void> _resyncNow() async => _resync(await _transfers.activeTaskIds());
 
   Future<void> _onTaskEvent(TaskTransferEvent taskEvent) async {
-    if (taskEvent is TransferCancelled) {
-      return _onUserCancel({taskEvent.taskId});
-    }
     final file = await _records.fileForTask(taskEvent.taskId);
     // An earlier attempt, cancelled or replaced.
     if (file == null) return;
@@ -550,7 +548,7 @@ class DownloadManager implements DownloadService {
       case TransferFailed(:final error):
         await _fail(chapter.chapterId, error);
       case TransferCancelled():
-        break; // Handled above.
+        break; // Dispatched in _onTransfer.
     }
   }
 
@@ -575,19 +573,33 @@ class DownloadManager implements DownloadService {
     await _storage.sweep(await _records.chapterKeys());
   }
 
-  /// Done chapters whose manifest is gone (a backup restored onto another
-  /// device carries the records, not the files) become paused and
-  /// unplanned, so they do not pass for downloaded and a resume fetches
-  /// them again.
+  /// Planned chapters whose files are gone (a backup restored onto another
+  /// device carries the records, not the files) are planned again: the
+  /// manifest is fetched anew and every file downloaded. A done one becomes
+  /// paused, so it no longer passes for downloaded and a resume fetches it;
+  /// an active one is planned again right away. A restore drops every file,
+  /// so the manifest and one done file are enough to tell.
   Future<void> _healLostChapters() async {
-    for (final chapter in await _records.doneChapters()) {
-      final manifest = await _storage.sizeOf(
-        chapter.bookId,
-        chapter.chapterId,
-        DownloadStorage.manifestName,
-      );
-      if (manifest == null) await _records.forgetLostChapter(chapter.chapterId);
+    for (final planned in await _records.plannedChapterSamples()) {
+      if (!await _isLost(planned)) continue;
+      final chapter = await _records.chapter(planned.chapterId);
+      if (chapter == null) continue;
+      await _transition(chapter, DownloadEvent.lost);
+      // Unbinds the files' tasks by deleting their rows: _resync then
+      // cancels them as orphans.
+      await _records.resetPlan(planned.chapterId);
+      await _storage.deleteChapter(planned.bookId, planned.chapterId);
     }
+  }
+
+  Future<bool> _isLost(PlannedChapterSample planned) async {
+    for (final path in [DownloadStorage.manifestName, ?planned.sample]) {
+      if (await _storage.sizeOf(planned.bookId, planned.chapterId, path) ==
+          null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Files of active chapters whose task is no longer in [active] are queued

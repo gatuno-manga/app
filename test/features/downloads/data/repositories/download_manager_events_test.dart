@@ -148,6 +148,51 @@ void main() {
   });
 
   group('restart', () {
+    test('restored with the manifest but not the pages (iOS)', () async {
+      manifest('c1', imageManifest('c1', pages: 1));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 1);
+      await land(transfers.enqueued.single);
+      await untilState('c1', DownloadState.done);
+
+      // The restore keeps chapter.json (backed up) and drops the page.
+      await manager.dispose();
+      Directory(
+        '${dir.path}/downloads/book-1/c1/pages',
+      ).deleteSync(recursive: true);
+      manager = build();
+      await manager.start();
+
+      final lost = (await chapter('c1'))!;
+      expect(lost.state, DownloadState.paused);
+      expect(lost.bytes, 0);
+      expect(lost.filesTotal, 0, reason: 'planned again on resume');
+    });
+
+    test('restored half-way: the chapter is planned again in full', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      await land(transfers.enqueued.first);
+      await until(() async => (await chapter('c1'))!.filesDone == 1);
+
+      // Android: the database is restored, files/downloads/ is not.
+      await manager.dispose();
+      Directory('${dir.path}/downloads').deleteSync(recursive: true);
+      transfers.active.clear();
+      final before = transfers.enqueued.length;
+      manager = build();
+      await manager.start();
+
+      await until(
+        () => transfers.enqueued.length == before + 2,
+        reason: 'both pages queued again',
+      );
+      final again = transfers.enqueued.skip(before).map((t) => t.filename);
+      expect(again, ['0001.webp', '0002.webp']);
+      expect((await chapter('c1'))!.filesDone, 0);
+    });
+
     test('a done chapter whose files are gone is paused, unplanned', () async {
       manifest('t1', textManifest('t1'));
       await manager.enqueueChapters(testBook, const [ChapterId('t1')]);

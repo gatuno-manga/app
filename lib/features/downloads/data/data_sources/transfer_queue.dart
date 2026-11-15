@@ -106,7 +106,8 @@ class TransferCancelled extends TaskTransferEvent {
 ///   `DownloadErrors` code: `notFound` (HTTP 404), `storageFull` (less than
 ///   200 MB would remain), `timedOut` (the platform's per-try time limit,
 ///   Android's 9 minutes), `server` (other HTTP or connection errors,
-///   network timeouts, the system stopping the task) or `unknown`.
+///   network timeouts, the system stopping the task) or `unknown` (anything
+///   else, including connection failures the platform does not classify).
 /// - [enqueue] never throws: a refused or failed enqueue is reported as
 ///   [TransferFailed] for each file.
 /// - [cancel] of an unknown or finished id does nothing. Cancels the
