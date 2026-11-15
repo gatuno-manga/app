@@ -364,6 +364,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsApiUrlError => 'Error updating API URL';
 
   @override
+  String get settingsServerChangeTitle => 'Change server?';
+
+  @override
+  String settingsServerChangeBody(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $count chapters in your downloads ($size) will be deleted, and the offline library saved on this device will be cleared.',
+      one:
+          'The 1 chapter in your downloads ($size) will be deleted, and the offline library saved on this device will be cleared.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsServerChangeBodyUnknown =>
+      'The downloads and the offline library saved on this device will be deleted.';
+
+  @override
+  String get settingsServerChangeConfirm => 'Switch and delete';
+
+  @override
   String get settingsAllowedUrlsSection => 'Allowed Bad Certificates';
 
   @override

@@ -364,6 +364,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsApiUrlError => 'Erro ao atualizar a URL da API';
 
   @override
+  String get settingsServerChangeTitle => 'Trocar de servidor?';
+
+  @override
+  String settingsServerChangeBody(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Os $count capítulos dos seus downloads ($size) serão apagados, e a biblioteca offline salva neste aparelho será limpa.',
+      one:
+          'O capítulo dos seus downloads ($size) será apagado, e a biblioteca offline salva neste aparelho será limpa.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settingsServerChangeBodyUnknown =>
+      'Os downloads e a biblioteca offline salvos neste aparelho serão apagados.';
+
+  @override
+  String get settingsServerChangeConfirm => 'Trocar e apagar';
+
+  @override
   String get settingsAllowedUrlsSection => 'Certificados Inválidos Permitidos';
 
   @override

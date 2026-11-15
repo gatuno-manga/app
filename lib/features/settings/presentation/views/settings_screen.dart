@@ -11,6 +11,8 @@ import '../../../reading/domain/use_cases/reader_preferences_service.dart';
 import '../../../reading/presentation/components/organisms/reader_preferences_controls.dart';
 import '../../../reading/presentation/components/organisms/text_reader_settings_section.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../../shared/components/organisms/app_confirm_dialog.dart';
+import '../../../../shared/utils/format_bytes.dart';
 import '../../../app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
 import '../components/molecules/settings_caption.dart';
 import '../components/molecules/settings_profile_card.dart';
@@ -28,10 +30,20 @@ class SettingsPage extends StatelessWidget {
     String url,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    // Part 2 of #147 shows the confirmation dialog here.
     final result = await viewModel.updateApiUrl(
       url,
-      confirmServerChange: (_) async => true,
+      confirmServerChange: (totals) => AppConfirmDialog.show(
+        context,
+        title: l10n.settingsServerChangeTitle,
+        body: totals == null
+            ? l10n.settingsServerChangeBodyUnknown
+            : l10n.settingsServerChangeBody(
+                totals.chapters,
+                formatBytes(totals.bytes, l10n.localeName),
+              ),
+        confirmLabel: l10n.settingsServerChangeConfirm,
+        destructive: true,
+      ),
     );
 
     if (!context.mounted || result == ApiUrlUpdateResult.cancelled) return;
