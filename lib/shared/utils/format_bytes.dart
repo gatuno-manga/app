@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-const List<String> _units = ['B', 'KB', 'MB', 'GB'];
+const List<String> _units = ['B', 'KB', 'MB', 'GB', 'TB'];
 
 /// Formats a storage size in binary units (base 1024), with the number
 /// written for [locale] and joined to its unit by a no-break space:

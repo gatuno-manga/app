@@ -62,6 +62,8 @@ class AppConfirmDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
+      // Large text or a short window must not hide what is being confirmed.
+      scrollable: true,
       backgroundColor: palette.contextMenuBackground,
       surfaceTintColor: Colors.transparent,
       elevation: 8,

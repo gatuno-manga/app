@@ -15,6 +15,7 @@ void main() {
     bool destructive = false,
     String? cancelLabel,
     Locale? locale,
+    String body = 'It cannot be undone.',
   }) async {
     result = null;
     await tester.pumpApp(
@@ -27,7 +28,7 @@ void main() {
                 result = await AppConfirmDialog.show(
                   context,
                   title: 'Delete it?',
-                  body: 'It cannot be undone.',
+                  body: body,
                   confirmLabel: 'Delete',
                   cancelLabel: cancelLabel,
                   destructive: destructive,
@@ -120,6 +121,30 @@ void main() {
       await open(tester, locale: const Locale('pt'));
 
       expect(find.text('Cancelar'), findsOneWidget);
+    });
+
+    testWidgets('scrolls a long body at large text in a short window', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await open(
+        tester,
+        body: List.filled(12, 'It cannot be undone.').join(' '),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(SingleChildScrollView),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('uses the context menu surface with a hairline border', (

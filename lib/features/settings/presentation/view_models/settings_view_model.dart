@@ -176,8 +176,14 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
       if (_settingsService.isDifferentServer(formattedUrl)) {
         final totals = await _downloadTotals();
         final needsConfirmation = totals == null || totals.chapters > 0;
-        if (needsConfirmation && !await confirmServerChange(totals)) {
-          return ApiUrlUpdateResult.cancelled;
+        if (needsConfirmation) {
+          // Not loading while the user decides: the form behind the dialog
+          // should not claim work is running.
+          emit(state.copyWith(isLoading: false));
+          if (!await confirmServerChange(totals)) {
+            return ApiUrlUpdateResult.cancelled;
+          }
+          emit(state.copyWith(isLoading: true));
         }
       }
       await _settingsService.setApiUrl(formattedUrl);

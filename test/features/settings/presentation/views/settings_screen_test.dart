@@ -180,17 +180,12 @@ void main() {
       await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
       await tester.enterText(find.byType(TextField).first, 'https://other.com');
       await tester.tap(find.text('Connect'));
-      // The form's spinner runs while the dialog is open, so pumpAndSettle
-      // would never settle: pump past the checks and the dialog transition.
-      await tester.pump();
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
     }
 
     Future<void> tapAndClose(WidgetTester tester, String label) async {
       await tester.tap(find.text(label));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
     }
 
     testWidgets('asks with the chapter count and size', (tester) async {
@@ -209,6 +204,16 @@ void main() {
       );
       expect(find.text('Switch and delete'), findsOneWidget);
       verifyNever(() => mockSettingsService.setApiUrl(any()));
+    });
+
+    testWidgets('formats a large chapter count for the locale', (tester) async {
+      when(() => mockDownloadService.totals()).thenAnswer(
+        (_) async => const DownloadTotals(chapters: 1234, bytes: 1024),
+      );
+
+      await saveOtherServer(tester);
+
+      expect(find.textContaining('The 1,234 chapters'), findsOneWidget);
     });
 
     testWidgets('cancel keeps the server and shows no message', (tester) async {

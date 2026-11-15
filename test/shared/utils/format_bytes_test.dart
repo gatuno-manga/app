@@ -24,8 +24,12 @@ void main() {
       );
     });
 
-    test('gigabytes are the largest unit', () {
-      expect(formatBytes(2048 * 1024 * 1024 * 1024, 'en'), '2048.0\u00A0GB');
+    test('terabytes are the largest unit', () {
+      expect(formatBytes(2 * 1024 * 1024 * 1024 * 1024, 'en'), '2.0\u00A0TB');
+      expect(
+        formatBytes(2048 * 1024 * 1024 * 1024 * 1024, 'en'),
+        '2048.0\u00A0TB',
+      );
     });
 
     test('a value that rounds to 1024 moves up a unit', () {

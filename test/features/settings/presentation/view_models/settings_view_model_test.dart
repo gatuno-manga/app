@@ -161,6 +161,24 @@ void main() {
         expect(viewModel.state.isLoading, isFalse);
       });
 
+      test('is not loading while the user decides', () async {
+        when(
+          () => mockDownloadService.totals(),
+        ).thenAnswer((_) async => const DownloadTotals(chapters: 1, bytes: 1));
+        bool? loadingWhileAsked;
+
+        await viewModel.updateApiUrl(
+          'http://other.com',
+          confirmServerChange: (_) async {
+            loadingWhileAsked = viewModel.state.isLoading;
+            return true;
+          },
+        );
+
+        expect(loadingWhileAsked, isFalse);
+        expect(viewModel.state.isLoading, isFalse);
+      });
+
       test('a confirm with downloads switches the server', () async {
         const totals = DownloadTotals(chapters: 1, bytes: 10);
         when(

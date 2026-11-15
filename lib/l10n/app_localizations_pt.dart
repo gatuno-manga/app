@@ -368,11 +368,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String settingsServerChangeBody(int count, String size) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
       other:
-          'Os $count capítulos dos seus downloads ($size) serão apagados, e a biblioteca offline salva neste aparelho será limpa.',
+          'Os $countString capítulos dos seus downloads ($size) serão apagados, e a biblioteca offline salva neste aparelho será limpa.',
       one:
           'O capítulo dos seus downloads ($size) será apagado, e a biblioteca offline salva neste aparelho será limpa.',
     );

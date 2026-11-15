@@ -123,7 +123,7 @@
   "settingsApiUrlError": "Error updating API URL",
   "settingsServerChangeTitle": "Change server?",
   "settingsServerChangeBody": "{count, plural, =1{The 1 chapter in your downloads ({size}) will be deleted, and the offline library saved on this device will be cleared.} other{The {count} chapters in your downloads ({size}) will be deleted, and the offline library saved on this device will be cleared.}}",
-  "@settingsServerChangeBody": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "@settingsServerChangeBody": {"placeholders": {"count": {"type": "int", "format": "decimalPattern"}, "size": {"type": "String"}}},
   "settingsServerChangeBodyUnknown": "The downloads and the offline library saved on this device will be deleted.",
   "settingsServerChangeConfirm": "Switch and delete",
   "settingsAllowedUrlsSection": "Allowed Bad Certificates",

@@ -32,18 +32,21 @@ class SettingsPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final result = await viewModel.updateApiUrl(
       url,
-      confirmServerChange: (totals) => AppConfirmDialog.show(
-        context,
-        title: l10n.settingsServerChangeTitle,
-        body: totals == null
-            ? l10n.settingsServerChangeBodyUnknown
-            : l10n.settingsServerChangeBody(
-                totals.chapters,
-                formatBytes(totals.bytes, l10n.localeName),
-              ),
-        confirmLabel: l10n.settingsServerChangeConfirm,
-        destructive: true,
-      ),
+      // The page may have left while the URL was checked.
+      confirmServerChange: (totals) async =>
+          context.mounted &&
+          await AppConfirmDialog.show(
+            context,
+            title: l10n.settingsServerChangeTitle,
+            body: totals == null
+                ? l10n.settingsServerChangeBodyUnknown
+                : l10n.settingsServerChangeBody(
+                    totals.chapters,
+                    formatBytes(totals.bytes, l10n.localeName),
+                  ),
+            confirmLabel: l10n.settingsServerChangeConfirm,
+            destructive: true,
+          ),
     );
 
     if (!context.mounted || result == ApiUrlUpdateResult.cancelled) return;
