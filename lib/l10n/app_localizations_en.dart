@@ -383,6 +383,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Manage trusted and ignored certificates';
 
   @override
+  String get settingsDownloadsSection => 'Downloads';
+
+  @override
+  String get settingsDownloadNetwork => 'Download network';
+
+  @override
+  String get settingsDownloadNetworkDesc =>
+      'Choose when to download each book type';
+
+  @override
+  String get settingsDownloadTitle => 'Downloads';
+
+  @override
+  String get settingsDownloadWifiOnly => 'Wi-Fi only';
+
+  @override
+  String get settingsDownloadWifiAndMobile => 'Wi-Fi and data';
+
+  @override
+  String get settingsDownloadOtherHint => 'Includes books with no type';
+
+  @override
+  String get settingsDownloadNetworkNotice =>
+      'When you switch to Wi-Fi only, downloads in progress on mobile data pause until there is Wi-Fi, and files that were halfway start over. Changes apply right away.';
+
+  @override
+  String get settingsDownloadSaveError =>
+      'Could not save. The previous rule was kept.';
+
+  @override
   String get settingsDiagnosticsSection => 'Diagnostics';
 
   @override

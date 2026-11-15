@@ -118,7 +118,6 @@ class _BooksOptionFilterState extends State<BooksOptionFilter> {
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: SegmentedButton<String>(
-              showSelectedIcon: false,
               segments: [
                 ButtonSegment(
                   value: FilterLogic.and,

@@ -167,6 +167,30 @@ class AppTheme {
         thumbColor: WidgetStateProperty.all(palette.primary),
         trackColor: WidgetStateProperty.all(palette.secondary),
       ),
+      // Figma `Seletor segmentado`: 48 dp, radius/md, color/border outline
+      // (Material's default outline is colorScheme.outline), selected
+      // segment filled with color/primary-40 and labelled in color/text.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size(0, 48)),
+          textStyle: const WidgetStatePropertyAll(AppTypography.button),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (states) =>
+                states.contains(WidgetState.selected) &&
+                    !states.contains(WidgetState.disabled)
+                ? palette.primary40
+                : null,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (states) => states.contains(WidgetState.disabled)
+                ? palette.text.withValues(alpha: 0.38)
+                : palette.text,
+          ),
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: palette.lilac,
         contentTextStyle: AppTypography.bodySmall.copyWith(

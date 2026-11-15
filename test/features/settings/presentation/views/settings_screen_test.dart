@@ -97,6 +97,19 @@ void main() {
     expect(find.text('App lock'), findsOneWidget);
   });
 
+  testWidgets('the Downloads entry opens /settings/download', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+
+    expect(find.text('Downloads'), findsOneWidget);
+    await tester.tap(find.text('Download network'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Download Settings Page'), findsOneWidget);
+  });
+
   testWidgets('SettingsPage renders correctly for guest', (tester) async {
     tester.view.physicalSize = const Size(800, 3000);
     tester.view.devicePixelRatio = 1;

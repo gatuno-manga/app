@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../connectivity/connectivity_service.dart';
 import '../connectivity/connectivity_triggers.dart';
 import '../connectivity/dio_server_probe.dart';
@@ -29,6 +30,7 @@ import '../../features/users/domain/use_cases/user_service.dart';
 import '../../features/users/users_injection.dart';
 import '../../features/home/home_injection.dart';
 import '../../features/books/books_injection.dart';
+import '../../features/downloads/domain/repositories/download_network_rules.dart';
 import '../../features/downloads/downloads_injection.dart';
 import '../../features/downloads/data/data_sources/downloaded_file_image_loading_strategy.dart';
 import '../../features/downloads/domain/repositories/downloaded_content.dart';
@@ -40,6 +42,7 @@ import '../../features/sync/sync_injection.dart';
 import '../../features/settings/data/data_sources/settings_local_data_source.dart';
 import '../../features/settings/data/data_sources/settings_migration.dart';
 import '../../features/settings/domain/use_cases/settings_service.dart';
+import '../../features/settings/presentation/view_models/download_settings_view_model.dart';
 import '../../features/certificates/certificates_injection.dart';
 import '../../features/certificates/domain/use_cases/certificates_service.dart';
 import '../../features/app_lock/app_lock_injection.dart';
@@ -164,6 +167,9 @@ Future<void> initDI() async {
   initBookRequestsInjection(sl);
   // Needs books (book type, chapter list) and the cover store.
   initDownloadsInjection(sl);
+  sl.registerFactory<DownloadSettingsViewModel>(
+    () => DownloadSettingsViewModel(rules: sl<DownloadNetworkRules>()),
+  );
 
   // Set up interceptors (AuthService is registered in initAuthenticationInjection)
   setupCookieInterceptor(sl<DioClient>());

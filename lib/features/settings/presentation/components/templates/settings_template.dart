@@ -9,6 +9,8 @@ class SettingsTemplate extends StatelessWidget {
   final Widget appLockTile;
   final Widget readingSectionHeader;
   final Widget readingControls;
+  final Widget downloadsSectionHeader;
+  final Widget downloadNetworkTile;
   final Widget apiSectionHeader;
   final Widget apiForm;
   final Widget? securityTile;
@@ -28,6 +30,8 @@ class SettingsTemplate extends StatelessWidget {
     required this.appLockTile,
     required this.readingSectionHeader,
     required this.readingControls,
+    required this.downloadsSectionHeader,
+    required this.downloadNetworkTile,
     required this.apiSectionHeader,
     required this.apiForm,
     this.securityTile,
@@ -56,6 +60,10 @@ class SettingsTemplate extends StatelessWidget {
           const Divider(height: 32),
           readingSectionHeader,
           readingControls,
+          const Divider(height: 32),
+          downloadsSectionHeader,
+          const SizedBox(height: 8),
+          downloadNetworkTile,
           const Divider(height: 32),
           apiSectionHeader,
           const SizedBox(height: 8),
