@@ -79,7 +79,12 @@ void main() {
     db = DownloadsDatabase(NativeDatabase.memory());
     dir = Directory.systemTemp.createTempSync('gatuno-downloaded');
     storage = DownloadStorage(() async => dir);
-    content = DownloadedContentImpl(DownloadRecords(db), storage);
+    content = DownloadedContentImpl(
+      DownloadRecords(db),
+      storage,
+      // As DownloadRemoteDataSource.resolve does against the server URL.
+      resolveUrl: (url) => url.startsWith('/') ? 'https://srv$url' : url,
+    );
   });
 
   tearDown(() async {
@@ -132,5 +137,54 @@ void main() {
     (await storage.file('b1', 'c1', 'pages/0002.jpg')).deleteSync();
 
     expect(await content.chapter(const ChapterId('c1')), isNull);
+  });
+
+  group('localFile', () {
+    test('finds a page of a done chapter by its URL', () async {
+      await store('image', files: ['pages/0001.jpg', 'pages/0002.jpg']);
+
+      final file = await content.localFile('https://srv/pages/0002.jpg');
+
+      expect(file!.path, endsWith('/b1/c1/pages/0002.jpg'));
+    });
+
+    test('resolves a URL relative to the server first', () async {
+      await store('image', files: ['pages/0001.jpg']);
+
+      final file = await content.localFile('/pages/0001.jpg');
+
+      expect(file!.path, endsWith('/b1/c1/pages/0001.jpg'));
+    });
+
+    test('finds the document of a done chapter', () async {
+      await store('document', files: ['document.pdf']);
+
+      final file = await content.localFile('https://srv/document.pdf');
+
+      expect(file!.path, endsWith('/b1/c1/document.pdf'));
+    });
+
+    test('nothing until the chapter is done', () async {
+      await store(
+        'image',
+        state: DownloadState.running,
+        files: ['pages/0001.jpg'],
+      );
+
+      expect(await content.localFile('https://srv/pages/0001.jpg'), isNull);
+    });
+
+    test('nothing for an unknown URL', () async {
+      await store('image', files: ['pages/0001.jpg']);
+
+      expect(await content.localFile('https://srv/pages/9999.jpg'), isNull);
+    });
+
+    test('nothing when the file was deleted behind the app', () async {
+      await store('image', files: ['pages/0001.jpg']);
+      (await storage.file('b1', 'c1', 'pages/0001.jpg')).deleteSync();
+
+      expect(await content.localFile('https://srv/pages/0001.jpg'), isNull);
+    });
   });
 }

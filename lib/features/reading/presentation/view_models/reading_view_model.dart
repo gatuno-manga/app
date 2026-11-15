@@ -1,12 +1,17 @@
+import 'dart:async';
+
+import 'package:equatable/equatable.dart';
+
 import '../../../../core/base/base_stream_view_model.dart';
+import '../../../../core/connectivity/connectivity_service.dart';
 import '../../../../core/logging/logger.dart';
+import '../../../../core/network/exceptions.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
 import '../../domain/repositories/reading_repository.dart';
 import '../../domain/use_cases/reading_progress_coordinator.dart';
 import '../../../../features/books/domain/value_objects/chapter_id.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
-import 'package:equatable/equatable.dart';
 
 class ReadingState extends Equatable {
   final ReadingChapter? chapter;
@@ -14,11 +19,34 @@ class ReadingState extends Equatable {
   final String? error;
   final int currentPageIndex;
 
+  /// The chapter is read from the device's downloads.
+  final bool isDownloaded;
+
+  /// The server cannot be reached.
+  final bool isOffline;
+
+  /// Offline, and the chapter is not downloaded: nothing to show yet.
+  final bool isOfflineMiss;
+
+  /// The offline retry is probing the server.
+  final bool isRetrying;
+
+  /// Whether the previous and next chapters are downloaded, so they open
+  /// while offline.
+  final bool previousDownloaded;
+  final bool nextDownloaded;
+
   const ReadingState({
     this.chapter,
     required this.isLoading,
     this.error,
     required this.currentPageIndex,
+    this.isDownloaded = false,
+    this.isOffline = false,
+    this.isOfflineMiss = false,
+    this.isRetrying = false,
+    this.previousDownloaded = false,
+    this.nextDownloaded = false,
   });
 
   factory ReadingState.initial() {
@@ -30,60 +58,215 @@ class ReadingState extends Equatable {
     );
   }
 
+  /// Offline, the previous chapter is not downloaded, so it cannot open.
+  bool get previousUnavailable => isOffline && !previousDownloaded;
+
+  /// Offline, the next chapter is not downloaded, so it cannot open.
+  bool get nextUnavailable => isOffline && !nextDownloaded;
+
   ReadingState copyWith({
     ReadingChapter? Function()? chapter,
     bool? isLoading,
     String? Function()? error,
     int? currentPageIndex,
+    bool? isDownloaded,
+    bool? isOffline,
+    bool? isOfflineMiss,
+    bool? isRetrying,
+    bool? previousDownloaded,
+    bool? nextDownloaded,
   }) {
     return ReadingState(
       chapter: chapter != null ? chapter() : this.chapter,
       isLoading: isLoading ?? this.isLoading,
       error: error != null ? error() : this.error,
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
+      isDownloaded: isDownloaded ?? this.isDownloaded,
+      isOffline: isOffline ?? this.isOffline,
+      isOfflineMiss: isOfflineMiss ?? this.isOfflineMiss,
+      isRetrying: isRetrying ?? this.isRetrying,
+      previousDownloaded: previousDownloaded ?? this.previousDownloaded,
+      nextDownloaded: nextDownloaded ?? this.nextDownloaded,
     );
   }
 
   @override
-  List<Object?> get props => [chapter, isLoading, error, currentPageIndex];
+  List<Object?> get props => [
+    chapter,
+    isLoading,
+    error,
+    currentPageIndex,
+    isDownloaded,
+    isOffline,
+    isOfflineMiss,
+    isRetrying,
+    previousDownloaded,
+    nextDownloaded,
+  ];
 }
 
 class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   final ReadingRepository _repository;
   final ReadingProgressCoordinator _progressCoordinator;
+  final ConnectivityService _connectivity;
+  late final StreamSubscription<ConnectivityStatus> _statusSubscription;
+  late final StreamSubscription<void> _reconnectSubscription;
   static const String _logTag = 'ReadingViewModel';
 
-  ReadingViewModel(this._repository, this._progressCoordinator)
-      : super(ReadingState.initial());
+  /// The last chapter asked for, so a reconnect can open it again.
+  String? _requestedId;
+  int? _requestedPage;
+
+  ReadingViewModel(
+    this._repository,
+    this._progressCoordinator,
+    this._connectivity,
+  ) : super(
+        ReadingState.initial().copyWith(isOffline: _connectivity.isOffline),
+      ) {
+    _statusSubscription = _connectivity.statusStream.listen(
+      (status) =>
+          emit(state.copyWith(isOffline: status == ConnectivityStatus.offline)),
+    );
+    _reconnectSubscription = _connectivity.onReconnected.listen(
+      (_) => _onReconnected(),
+    );
+  }
 
   ReadingChapter? get chapter => state.chapter;
   bool get isLoading => state.isLoading;
   String? get error => state.error;
   int get currentPageIndex => state.currentPageIndex;
 
+  @override
+  void dispose() {
+    _statusSubscription.cancel();
+    _reconnectSubscription.cancel();
+    super.dispose();
+  }
+
   Future<void> loadChapter(String chapterId, {int? initialPage}) async {
     if (state.isLoading) return;
+    _requestedId = chapterId;
+    _requestedPage = initialPage;
     AppLogger.i(
       'Loading chapter: $chapterId, initialPage: $initialPage',
       _logTag,
     );
-    emit(state.copyWith(
-      isLoading: true,
-      error: () => null,
-      currentPageIndex: initialPage ?? 0,
-    ));
+    emit(
+      state.copyWith(
+        isLoading: true,
+        error: () => null,
+        isOfflineMiss: false,
+        currentPageIndex: initialPage ?? 0,
+      ),
+    );
 
     try {
-      final fetchedChapter = await _repository.getChapter(ChapterId(chapterId));
-      AppLogger.i('Chapter loaded successfully: ${fetchedChapter.title?.value}', _logTag);
+      final opened = await _repository.openChapter(ChapterId(chapterId));
+      final fetchedChapter = opened.chapter;
+      AppLogger.i(
+        'Chapter loaded successfully: ${fetchedChapter.title?.value}',
+        _logTag,
+      );
       final isTextChapter = fetchedChapter.contentType == ContentType.text;
-      
-      emit(state.copyWith(isLoading: false, chapter: () => fetchedChapter));
+
+      emit(
+        state.copyWith(
+          isLoading: false,
+          chapter: () => fetchedChapter,
+          isDownloaded: opened.isDownloaded,
+          previousDownloaded: false,
+          nextDownloaded: false,
+        ),
+      );
       saveProgress(completed: isTextChapter);
+      unawaited(_checkNeighbours(fetchedChapter));
+      if (opened.isDownloaded && !_connectivity.isOffline) {
+        unawaited(_refreshNavigation(fetchedChapter));
+      }
+    } on OfflineException {
+      AppLogger.i('Chapter $chapterId is not downloaded (offline)', _logTag);
+      emit(
+        state.copyWith(
+          isLoading: false,
+          isOfflineMiss: true,
+          chapter: () => null,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error loading chapter', e, stackTrace, _logTag);
       emit(state.copyWith(isLoading: false, error: () => e.toString()));
     }
+  }
+
+  /// The offline view's retry. Offline, the repository skips the network, so
+  /// the server is probed first.
+  Future<void> retryOffline() async {
+    final chapterId = _requestedId;
+    if (chapterId == null || state.isRetrying) return;
+    emit(state.copyWith(isRetrying: true));
+    try {
+      await _connectivity.checkNow();
+    } catch (e, stackTrace) {
+      AppLogger.e('Connectivity probe failed', e, stackTrace, _logTag);
+    } finally {
+      emit(state.copyWith(isRetrying: false));
+    }
+    await loadChapter(chapterId, initialPage: _requestedPage);
+  }
+
+  void _onReconnected() {
+    final chapterId = _requestedId;
+    if (chapterId == null) return;
+    if (state.isOfflineMiss) {
+      AppLogger.i('Reconnected: opening chapter $chapterId', _logTag);
+      loadChapter(chapterId, initialPage: _requestedPage);
+      return;
+    }
+    final current = state.chapter;
+    if (current != null && state.isDownloaded) {
+      unawaited(_refreshNavigation(current));
+    }
+  }
+
+  /// Which neighbours open offline. Checked once per chapter: a neighbour
+  /// downloaded while this one is open is picked up on the next chapter.
+  Future<void> _checkNeighbours(ReadingChapter chapter) async {
+    final previous = chapter.hasPrevious
+        ? await _repository.isDownloaded(chapter.previous!)
+        : false;
+    final next = chapter.hasNext
+        ? await _repository.isDownloaded(chapter.next!)
+        : false;
+    if (state.chapter?.id != chapter.id) return;
+    emit(state.copyWith(previousDownloaded: previous, nextDownloaded: next));
+  }
+
+  /// A downloaded copy keeps the neighbours it had when it was saved: ask
+  /// the server for the current ones, so later chapters stay reachable.
+  Future<void> _refreshNavigation(ReadingChapter chapter) async {
+    final ReadingChapter refreshed;
+    try {
+      refreshed = await _repository.refreshNavigation(chapter);
+    } catch (e, stackTrace) {
+      // The saved neighbours still work; nothing to tell the reader.
+      AppLogger.e(
+        'Could not refresh the chapter navigation',
+        e,
+        stackTrace,
+        _logTag,
+      );
+      return;
+    }
+    final current = state.chapter;
+    if (current == null || current.id != chapter.id) return;
+    if (current.previous == refreshed.previous &&
+        current.next == refreshed.next) {
+      return;
+    }
+    emit(state.copyWith(chapter: () => refreshed));
+    await _checkNeighbours(refreshed);
   }
 
   void setCurrentPage(int index, {bool isAutoSave = true}) {

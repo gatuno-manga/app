@@ -220,5 +220,71 @@ void main() {
       await tester.tap(find.byIcon(Icons.settings_outlined));
       expect(taps, 1);
     });
+
+    group('offline', () {
+      const offline = ReadingState(
+        isLoading: false,
+        currentPageIndex: 0,
+        isOffline: true,
+        nextDownloaded: true,
+      );
+
+      Future<void> pumpOffline(WidgetTester tester) async {
+        when(() => mockViewModel.state).thenReturn(offline);
+        when(
+          () => mockViewModel.stateStream,
+        ).thenAnswer((_) => Stream.value(offline));
+        await tester.pumpApp(
+          Provider<ReadingViewModel>.value(
+            value: mockViewModel,
+            child: Scaffold(
+              body: ReadingBottomBar(
+                chapter: _chapter(
+                  previous: const ChapterId('prev-id'),
+                  next: const ChapterId('next-id'),
+                ),
+                bottomPadding: 0.0,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+      }
+
+      testWidgets('a neighbour that is not downloaded is disabled and says '
+          'why', (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pumpOffline(tester);
+
+        final previous = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.skip_previous),
+        );
+        expect(previous.onPressed, isNull);
+        expect(previous.tooltip, 'Previous chapter, not downloaded');
+        // What a screen reader announces for the disabled button.
+        expect(
+          tester.getSemantics(
+            find.widgetWithIcon(IconButton, Icons.skip_previous),
+          ),
+          isSemantics(
+            tooltip: 'Previous chapter, not downloaded',
+            isButton: true,
+            hasEnabledState: true,
+            isEnabled: false,
+          ),
+        );
+        semantics.dispose();
+      });
+
+      testWidgets('a downloaded neighbour stays enabled', (tester) async {
+        await pumpOffline(tester);
+
+        final next = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.skip_next),
+        );
+        expect(next.onPressed, isNotNull);
+        expect(next.tooltip, 'Next Chapter');
+      });
+    });
   });
 }

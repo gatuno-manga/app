@@ -29,6 +29,7 @@ class ReadingScreen extends StatelessWidget {
           create: (context) =>
               sl<ReadingViewModel>()
                 ..loadChapter(chapterId, initialPage: initialPage),
+          dispose: (_, viewModel) => viewModel.dispose(),
         ),
         Provider<ReaderPreferencesService>.value(
           value: sl<ReaderPreferencesService>(),
@@ -79,6 +80,9 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           isLoading: state.isLoading,
           error: state.error,
           chapter: state.chapter,
+          isOfflineMiss: state.isOfflineMiss,
+          isRetrying: state.isRetrying,
+          onOfflineRetry: viewModel.retryOffline,
           onRetry: () => viewModel.loadChapter(widget.chapterId),
           onGoBack: () {
             if (context.canPop()) {

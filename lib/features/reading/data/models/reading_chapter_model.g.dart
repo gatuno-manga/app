@@ -84,6 +84,9 @@ ReadingChapterModel _$ReadingChapterModelFromJson(
   deletedAt: json['deletedAt'] == null
       ? null
       : Timestamp.fromJson(json['deletedAt']),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : Timestamp.fromJson(json['updatedAt']),
   previous: json['previous'] == null
       ? null
       : ChapterId.fromJson(const StringConverter().fromJson(json['previous'])),
@@ -125,6 +128,7 @@ Map<String, dynamic> _$ReadingChapterModelToJson(
   'retries': instance.retries,
   'isFinal': instance.isFinal,
   'deletedAt': instance.deletedAt,
+  'updatedAt': instance.updatedAt,
   'previous': instance.previous,
   'next': instance.next,
   'bookId': instance.bookId,

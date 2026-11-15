@@ -4,6 +4,7 @@ import 'data/data_sources/reader_preferences_storage.dart';
 import 'data/repositories/reading_progress_local_service.dart';
 import 'data/repositories/reading_repository_impl.dart';
 import 'domain/repositories/reading_repository.dart';
+import 'domain/use_cases/document_source.dart';
 import 'domain/use_cases/reader_preferences_service.dart';
 import 'domain/use_cases/reading_progress_coordinator.dart';
 import 'presentation/view_models/reading_view_model.dart';
@@ -12,6 +13,9 @@ import 'domain/entities/reading_progress.dart';
 import 'data/repositories/reading_progress_sync_provider_impl.dart';
 import 'data/repositories/reading_progress_mqtt_handler.dart';
 
+/// Registers reading. The repository and [DocumentSource] read downloads
+/// (`DownloadedContent`, registered later by `initDownloadsInjection`); every
+/// registration here is lazy, so the order does not matter.
 void initReadingDI(GetIt sl) {
   // Database
   sl.registerLazySingleton<ReadingDatabase>(() => ReadingDatabase());
@@ -38,14 +42,16 @@ void initReadingDI(GetIt sl) {
 
   // Coordinator
   sl.registerLazySingleton<ReadingProgressCoordinator>(
-    () => ReadingProgressCoordinator(sl(), sl(), sl()),
+    () => ReadingProgressCoordinator(sl(), sl(), sl(), sl()),
   );
 
   // Repositories
   sl.registerLazySingleton<ReadingRepository>(
-    () => ReadingRepositoryImpl(sl()),
+    () => ReadingRepositoryImpl(sl(), sl(), sl()),
   );
+  // Read by the document reader once it exists.
+  sl.registerLazySingleton<DocumentSource>(() => DocumentSource(sl()));
 
   // ViewModels
-  sl.registerFactory(() => ReadingViewModel(sl(), sl()));
+  sl.registerFactory(() => ReadingViewModel(sl(), sl(), sl()));
 }

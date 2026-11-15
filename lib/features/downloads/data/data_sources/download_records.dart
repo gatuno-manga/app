@@ -45,6 +45,21 @@ class PlannedChapterSample {
   });
 }
 
+/// Where a file of a done chapter lives.
+class DoneFile {
+  final String bookId;
+  final String chapterId;
+
+  /// Path relative to the chapter's directory.
+  final String relativePath;
+
+  const DoneFile({
+    required this.bookId,
+    required this.chapterId,
+    required this.relativePath,
+  });
+}
+
 /// Reads and writes of the downloads database. No decisions: the caller
 /// applies the state machine and keeps writes serialized.
 class DownloadRecords {
@@ -423,6 +438,32 @@ class DownloadRecords {
                 c.state.equalsValue(DownloadState.done),
           ))
           .getSingleOrNull();
+
+  /// The file stored from [url] in a chapter whose download is done.
+  Future<DoneFile?> doneFileForUrl(String url) async {
+    final query =
+        _db.select(_db.downloadFiles).join([
+            innerJoin(
+              _db.downloadChapters,
+              _db.downloadChapters.chapterId.equalsExp(
+                _db.downloadFiles.chapterId,
+              ),
+            ),
+          ])
+          ..where(
+            _db.downloadFiles.url.equals(url) &
+                _db.downloadChapters.state.equalsValue(DownloadState.done),
+          )
+          ..limit(1);
+    final row = await query.getSingleOrNull();
+    if (row == null) return null;
+    final chapter = row.readTable(_db.downloadChapters);
+    return DoneFile(
+      bookId: chapter.bookId,
+      chapterId: chapter.chapterId,
+      relativePath: row.readTable(_db.downloadFiles).relativePath,
+    );
+  }
 
   /// Every file of a chapter, in order.
   Future<List<DownloadFile>> files(String chapterId) =>

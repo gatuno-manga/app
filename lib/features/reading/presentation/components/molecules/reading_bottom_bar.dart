@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../../l10n/app_localizations.dart';
+import '../../../../../shared/components/atoms/app_icon_button.dart';
 import '../atoms/reader_settings_button.dart';
 import '../../../domain/entities/reading_chapter.dart';
 import '../../view_models/reading_view_model.dart';
@@ -60,32 +61,32 @@ class ReadingBottomBar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.skip_previous,
-                      color: theme.colorScheme.onSurface,
-                    ),
+                  AppIconButton(
+                    icon: Icons.skip_previous,
+                    color: theme.colorScheme.onSurface,
                     // `!` is safe: hasPrevious/hasNext imply a non-null id.
-                    onPressed: chapter.hasPrevious
+                    onPressed: chapter.hasPrevious && !state.previousUnavailable
                         ? () => context.pushReplacement(
                             '/chapters/${chapter.previous!.value}',
                           )
                         : null,
-                    tooltip: l10n.readingPreviousChapter,
+                    tooltip: chapter.hasPrevious && state.previousUnavailable
+                        ? l10n.readingPreviousChapterNotDownloaded
+                        : l10n.readingPreviousChapter,
                   ),
                   if (onSettingsPressed != null)
                     ReaderSettingsButton(onPressed: onSettingsPressed),
-                  IconButton(
-                    icon: Icon(
-                      Icons.skip_next,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    onPressed: chapter.hasNext
+                  AppIconButton(
+                    icon: Icons.skip_next,
+                    color: theme.colorScheme.onSurface,
+                    onPressed: chapter.hasNext && !state.nextUnavailable
                         ? () => context.pushReplacement(
                             '/chapters/${chapter.next!.value}',
                           )
                         : null,
-                    tooltip: l10n.readingNextChapter,
+                    tooltip: chapter.hasNext && state.nextUnavailable
+                        ? l10n.readingNextChapterNotDownloaded
+                        : l10n.readingNextChapter,
                   ),
                 ],
               ),

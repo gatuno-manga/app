@@ -1374,6 +1374,10 @@ abstract class _$DownloadsDatabase extends GeneratedDatabase {
     'idx_download_files_task',
     'CREATE INDEX idx_download_files_task ON download_files (native_task_id)',
   );
+  late final Index idxDownloadFilesUrl = Index(
+    'idx_download_files_url',
+    'CREATE INDEX idx_download_files_url ON download_files (url)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1386,6 +1390,7 @@ abstract class _$DownloadsDatabase extends GeneratedDatabase {
     idxDownloadChaptersState,
     idxDownloadFilesChapter,
     idxDownloadFilesTask,
+    idxDownloadFilesUrl,
   ];
 }
 

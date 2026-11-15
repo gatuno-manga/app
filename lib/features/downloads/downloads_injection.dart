@@ -70,7 +70,11 @@ void initDownloadsInjection(GetIt sl) {
   );
   sl.registerLazySingleton<DownloadService>(() => sl<DownloadManager>());
   sl.registerLazySingleton<DownloadedContent>(
-    () => DownloadedContentImpl(sl<DownloadRecords>(), sl<DownloadStorage>()),
+    () => DownloadedContentImpl(
+      sl<DownloadRecords>(),
+      sl<DownloadStorage>(),
+      resolveUrl: sl<DownloadRemoteDataSource>().resolve,
+    ),
   );
 }
 

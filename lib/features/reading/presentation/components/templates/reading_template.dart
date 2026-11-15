@@ -2,12 +2,21 @@ import 'package:flutter/material.dart';
 import '../../../../../features/books/domain/entities/chapter.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reading_chapter.dart';
+import '../../../../../shared/components/atoms/app_icon_button.dart';
 import '../../../../../shared/components/molecules/app_error_view.dart';
+import '../../../../../shared/components/molecules/app_offline_empty_view.dart';
 
 class ReadingTemplate extends StatelessWidget {
   final bool isLoading;
   final String? error;
   final ReadingChapter? chapter;
+
+  /// Offline, and the chapter is not downloaded.
+  final bool isOfflineMiss;
+  final bool isRetrying;
+
+  /// The offline view's retry: probe the server, then reload.
+  final VoidCallback? onOfflineRetry;
   final VoidCallback onRetry;
   final VoidCallback onGoBack;
   final Widget Function(ReadingChapter) readerBuilder;
@@ -17,6 +26,9 @@ class ReadingTemplate extends StatelessWidget {
     required this.isLoading,
     this.error,
     this.chapter,
+    this.isOfflineMiss = false,
+    this.isRetrying = false,
+    this.onOfflineRetry,
     required this.onRetry,
     required this.onGoBack,
     required this.readerBuilder,
@@ -30,13 +42,25 @@ class ReadingTemplate extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    if (isOfflineMiss) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: AppIconButton(
+            icon: Icons.arrow_back,
+            tooltip: l10n.errorBack,
+            onPressed: onGoBack,
+          ),
+        ),
+        body: AppOfflineEmptyView(
+          onRetry: onOfflineRetry ?? onRetry,
+          isRetrying: isRetrying,
+        ),
+      );
+    }
+
     if (error != null) {
       return Scaffold(
-        body: AppErrorView(
-          error: error!,
-          onRetry: onRetry,
-          onGoBack: onGoBack,
-        ),
+        body: AppErrorView(error: error!, onRetry: onRetry, onGoBack: onGoBack),
       );
     }
 
