@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/semantic_colors.dart';
 import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_downloads_summary.dart';
@@ -55,7 +54,19 @@ void main() {
       tester
           .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator))
           .color,
-      darkPalette.textSecondary,
+      theme.legible(theme.mutedColor),
+    );
+  });
+
+  testWidgets('a regular status is legible text-secondary', (tester) async {
+    await pump(
+      tester,
+      const BookDownloadsSummary(countLabel: 'count', statusLabel: 'Paused'),
+    );
+
+    expect(
+      tester.widget<Text>(find.text('Paused')).style?.color,
+      theme.legible(theme.mutedColor),
     );
   });
 

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/core/theme/theme.dart';
 
 class BookDetailsTemplate extends StatelessWidget {
+  /// Drawn over the top of the body, so swapping the transparent app bar
+  /// for the opaque selection bar does not move the list.
   final Widget? appBar;
-
-  /// Draws the body under [appBar]; off for an opaque bar, such as the
-  /// selection bar, that would otherwise hide the top of the page.
-  final bool appBarOverlaysBody;
   final Widget cover;
   final Widget header;
   final Widget actionButtons;
@@ -27,7 +25,6 @@ class BookDetailsTemplate extends StatelessWidget {
   const BookDetailsTemplate({
     super.key,
     this.appBar,
-    this.appBarOverlaysBody = true,
     required this.cover,
     required this.header,
     required this.actionButtons,
@@ -48,7 +45,7 @@ class BookDetailsTemplate extends StatelessWidget {
     final chapterControls = this.chapterControls;
 
     return Scaffold(
-      extendBodyBehindAppBar: appBarOverlaysBody,
+      extendBodyBehindAppBar: true,
       // The selection bar floats over the list, which pads its end for it.
       extendBody: true,
       appBar: appBar == null
@@ -67,7 +64,6 @@ class BookDetailsTemplate extends StatelessWidget {
           slivers: [
             SliverToBoxAdapter(
               child: SafeArea(
-                top: appBarOverlaysBody,
                 bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),

@@ -132,9 +132,14 @@ void main() {
       await pumpPage(tester);
 
       expect(find.textContaining('chapters downloaded'), findsNothing);
-      expect(find.bySemanticsLabel('Download chapter'), findsNWidgets(3));
+      expect(
+        find.bySemanticsLabel('Not downloaded. Tap to download'),
+        findsNWidgets(3),
+      );
 
-      await tester.tap(find.bySemanticsLabel('Download chapter').first);
+      await tester.tap(
+        find.bySemanticsLabel('Not downloaded. Tap to download').first,
+      );
       await tester.pumpAndSettle();
 
       verify(() => fixture.downloads.enqueueChapters(fixtureBook, [c1]));
@@ -338,9 +343,13 @@ void main() {
         reason: 'indicators stay visible',
       );
       expect(
-        tester.getSize(find.byType(ChapterSelectionActions)).height,
-        ChapterSelectionActions.height,
-        reason: 'the bar does not grow over the list',
+        tester
+            .widgetList<ChapterDownloadIndicator>(
+              find.byType(ChapterDownloadIndicator),
+            )
+            .map((i) => i.semanticLabel),
+        everyElement('Not downloaded'),
+        reason: 'display-only indicators drop the tap hint',
       );
 
       await tester.tap(find.text('Chapter 2'));
@@ -479,6 +488,75 @@ void main() {
     });
   });
 
+  testWidgets('the last chapter clears the selection bar', (tester) async {
+    await pumpPage(tester);
+    await tester.longPress(find.text('Chapter 1'));
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -4000));
+    await tester.pumpAndSettle();
+
+    final bar = tester.getRect(find.byType(ChapterSelectionActions));
+    expect(bar.height, lessThan(120), reason: 'the bar keeps its height');
+    expect(
+      tester.getRect(find.byType(ListTile).last).bottom,
+      lessThanOrEqualTo(bar.top),
+    );
+  });
+
+  testWidgets('chapters still being scraped cannot be selected', (
+    tester,
+  ) async {
+    final chapters = ChapterList(
+      data: const [
+        Chapter(id: c1, index: ChapterIndex(1)),
+        Chapter(
+          id: c2,
+          index: ChapterIndex(2),
+          scrapingStatus: ScrapingStatus.process,
+        ),
+      ],
+      nextCursor: null,
+      hasNextPage: false,
+    );
+    when(() => details.chapterList).thenReturn(chapters);
+    await pumpPage(tester);
+
+    expect(find.byType(ChapterDownloadIndicator), findsOneWidget);
+
+    await tester.tap(find.text('Select'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Chapter 2'));
+    await tester.pumpAndSettle();
+    expect(find.text('None selected'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Select loaded chapters'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 selected'), findsOneWidget);
+
+    await tester.tap(barAction('Download'));
+    await tester.pumpAndSettle();
+    verify(() => fixture.downloads.enqueueChapters(fixtureBook, [c1]));
+  });
+
+  testWidgets('Delete all of one download reads in the singular', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    await show(tester, [chapterDownload(c1, DownloadState.done, bytes: 1024)]);
+    await openOptions(tester);
+    await tester.tap(find.text('Delete all downloads'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'The chapter will be deleted from this device, freeing 1\u00A0KB. '
+        'You can download it again later.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   group('offline and guest', () {
     testWidgets('offline, an active chapter waits for connection', (
       tester,
@@ -500,7 +578,9 @@ void main() {
       fixture.authState.add(AuthState.unauthenticated);
       await pumpPage(tester);
 
-      await tester.tap(find.bySemanticsLabel('Download chapter').first);
+      await tester.tap(
+        find.bySemanticsLabel('Not downloaded. Tap to download').first,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Sign in to download chapters.'), findsOneWidget);
@@ -512,13 +592,30 @@ void main() {
       expect(find.text('Signin Page'), findsOneWidget);
     });
 
+    testWidgets('a guest turning automatic download on sees the prompt', (
+      tester,
+    ) async {
+      fixture.authState.add(AuthState.unauthenticated);
+      await pumpPage(tester);
+      await openOptions(tester);
+
+      await tester.tap(find.text('Download new chapters'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Book options'), findsNothing);
+      expect(find.text('Sign in to download chapters.'), findsOneWidget);
+      verifyNever(() => fixture.prefs.enable(any()));
+    });
+
     testWidgets('a failing command shows an error', (tester) async {
       when(
         () => fixture.downloads.enqueueChapters(any(), any()),
       ).thenThrow(Exception('boom'));
       await pumpPage(tester);
 
-      await tester.tap(find.bySemanticsLabel('Download chapter').first);
+      await tester.tap(
+        find.bySemanticsLabel('Not downloaded. Tap to download').first,
+      );
       await tester.pumpAndSettle();
 
       expect(

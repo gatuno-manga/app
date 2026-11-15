@@ -6,6 +6,7 @@ import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/semantic_colors.dart';
 import 'package:gatuno/core/theme/theme.dart';
 
+import '../../models/chapter_label.dart';
 import '../../models/download_display.dart';
 import '../atoms/chapter_download_indicator.dart';
 
@@ -14,9 +15,8 @@ class ChapterTile extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
-  /// The download indicator's state; null hides it.
-  final ChapterDownloadStatus? downloadStatus;
-  final double downloadProgress;
+  /// The download indicator; null hides it.
+  final ChapterDownloadDisplay? download;
 
   /// Null makes the indicator display-only.
   final VoidCallback? onDownloadTap;
@@ -29,8 +29,7 @@ class ChapterTile extends StatelessWidget {
     required this.chapter,
     this.onTap,
     this.onLongPress,
-    this.downloadStatus,
-    this.downloadProgress = 0,
+    this.download,
     this.onDownloadTap,
     this.selected,
   });
@@ -41,11 +40,7 @@ class ChapterTile extends StatelessWidget {
     final theme = Theme.of(context);
     final palette = theme.extension<GatunoColors>()?.palette ?? lightPalette;
     final selected = this.selected;
-    final downloadStatus = this.downloadStatus;
-
-    final formattedIndex = chapter.index.value == chapter.index.value.toInt()
-        ? chapter.index.value.toInt().toString()
-        : chapter.index.value.toString();
+    final download = this.download;
 
     return Semantics(
       selected: selected,
@@ -60,18 +55,18 @@ class ChapterTile extends StatelessWidget {
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
               )
             : null,
+        // The tile's `selected` flag carries the state for screen readers.
         leading: selected == null
             ? null
-            : Icon(
-                selected ? Icons.check : Icons.check_box_outline_blank,
-                color: selected
-                    ? theme.colorScheme.primary
-                    : theme.legible(theme.mutedColor),
-                semanticLabel: selected
-                    ? l10n.booksSelectionSelected
-                    : l10n.booksSelectionNotSelected,
+            : ExcludeSemantics(
+                child: Icon(
+                  selected ? Icons.check : Icons.check_box_outline_blank,
+                  color: selected
+                      ? theme.colorScheme.primary
+                      : theme.legible(theme.mutedColor),
+                ),
               ),
-        title: Text(l10n.booksChapterLabel(formattedIndex)),
+        title: Text(chapterLabel(l10n, chapter)),
         subtitle: chapter.title != null ? Text(chapter.title!.value) : null,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -87,11 +82,11 @@ class ChapterTile extends StatelessWidget {
                               : theme.mutedColor)),
               size: 20,
             ),
-            if (downloadStatus != null)
+            if (download != null)
               ChapterDownloadIndicator(
-                status: downloadStatus,
-                progress: downloadProgress,
-                semanticLabel: _downloadLabel(l10n, downloadStatus),
+                status: download.status,
+                progress: download.progress,
+                semanticLabel: _downloadLabel(l10n, download),
                 onTap: onDownloadTap,
               ),
             if (chapter.scrapingStatus != null) ...[
@@ -106,21 +101,47 @@ class ChapterTile extends StatelessWidget {
     );
   }
 
-  String _downloadLabel(AppLocalizations l10n, ChapterDownloadStatus status) =>
-      switch (status) {
-        ChapterDownloadStatus.none => l10n.booksDownloadStatusNone,
-        ChapterDownloadStatus.queued => l10n.booksDownloadStatusQueued,
-        ChapterDownloadStatus.running => l10n.booksDownloadStatusRunning(
-          (downloadProgress * 100).round(),
-        ),
-        ChapterDownloadStatus.waitingForNetwork =>
-          l10n.booksDownloadStatusWaitingWifi,
-        ChapterDownloadStatus.waitingForConnection =>
-          l10n.booksDownloadStatusWaitingConnection,
-        ChapterDownloadStatus.paused => l10n.booksDownloadStatusPaused,
-        ChapterDownloadStatus.failed => l10n.booksDownloadStatusFailed,
-        ChapterDownloadStatus.done => l10n.booksDownloadStatusDone,
-      };
+  /// The indicator's state, plus what a tap does when it is tappable.
+  String _downloadLabel(
+    AppLocalizations l10n,
+    ChapterDownloadDisplay download,
+  ) {
+    final (status, hint) = switch (download.status) {
+      ChapterDownloadStatus.none => (
+        l10n.booksDownloadStatusNone,
+        l10n.booksDownloadHintDownload,
+      ),
+      ChapterDownloadStatus.queued => (
+        l10n.booksDownloadStatusQueued,
+        l10n.booksDownloadHintPause,
+      ),
+      ChapterDownloadStatus.running => (
+        l10n.booksDownloadStatusRunning((download.progress * 100).round()),
+        l10n.booksDownloadHintPause,
+      ),
+      ChapterDownloadStatus.waitingForNetwork => (
+        l10n.booksDownloadStatusWaitingWifi,
+        l10n.booksDownloadHintPause,
+      ),
+      ChapterDownloadStatus.waitingForConnection => (
+        l10n.booksDownloadStatusWaitingConnection,
+        l10n.booksDownloadHintPause,
+      ),
+      ChapterDownloadStatus.paused => (
+        l10n.booksDownloadStatusPaused,
+        l10n.booksDownloadHintResume,
+      ),
+      ChapterDownloadStatus.failed => (
+        l10n.booksDownloadStatusFailed,
+        l10n.booksDownloadHintOptions,
+      ),
+      ChapterDownloadStatus.done => (
+        l10n.booksDownloadStatusDone,
+        l10n.booksDownloadHintOptions,
+      ),
+    };
+    return onDownloadTap == null ? status : '$status. $hint';
+  }
 
   Widget? _getStatusBadge(
     AppLocalizations l10n,

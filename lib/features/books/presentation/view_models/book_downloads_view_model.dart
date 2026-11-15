@@ -63,7 +63,11 @@ class BookDownloadsState extends Equatable {
 
   final BookDownloadsNotice? notice;
 
-  const BookDownloadsState({
+  /// [download]'s chapters by id, so per-chapter lookups stay O(1) while a
+  /// large book emits progress.
+  final Map<ChapterId, ChapterDownload> _byId;
+
+  BookDownloadsState({
     required this.download,
     required this.autoDownload,
     required this.offline,
@@ -71,7 +75,10 @@ class BookDownloadsState extends Equatable {
     required this.selecting,
     required this.selection,
     required this.notice,
-  });
+  }) : _byId = {
+         for (final c in download?.chapters ?? const <ChapterDownload>[])
+           c.chapterId: c,
+       };
 
   factory BookDownloadsState.initial({
     required bool offline,
@@ -110,20 +117,7 @@ class BookDownloadsState extends Equatable {
   bool get canDownloadAll => !offline;
 
   /// The download of [chapterId], or `null` when it has none.
-  ChapterDownload? chapter(ChapterId chapterId) {
-    for (final c in download?.chapters ?? const <ChapterDownload>[]) {
-      if (c.chapterId == chapterId) return c;
-    }
-    return null;
-  }
-
-  /// Queued or running while the server is unreachable: the engine plans it
-  /// on reconnect.
-  bool waitingForConnection(ChapterId chapterId) {
-    final state = chapter(chapterId)?.state;
-    return offline &&
-        (state == DownloadState.queued || state == DownloadState.running);
-  }
+  ChapterDownload? chapter(ChapterId chapterId) => _byId[chapterId];
 
   ChapterIndicatorAction indicatorAction(ChapterId chapterId) {
     switch (chapter(chapterId)?.state) {
@@ -223,20 +217,15 @@ class BookDownloadsState extends Equatable {
   /// Some selected chapter has a download, so Delete has something to do.
   bool get selectionHasDownload => selection.any((id) => chapter(id) != null);
 
-  /// The strip's action: pause while anything is active, then resume what is
-  /// paused, then retry what failed.
-  BookDownloadAction? get stripAction {
-    final d = download;
-    if (d == null) return null;
-    if (d.count(DownloadState.queued) + d.count(DownloadState.running) > 0) {
-      return BookDownloadAction.pauseAll;
-    }
-    if (d.count(DownloadState.paused) > 0) return BookDownloadAction.resumeAll;
-    if (d.count(DownloadState.failed) > 0) {
-      return BookDownloadAction.retryFailed;
-    }
-    return null;
-  }
+  /// The strip's action, following [phase]: pause while anything is
+  /// active, then resume what is paused, then retry what failed.
+  BookDownloadAction? get stripAction => switch (phase) {
+    BookDownloadPhase.active ||
+    BookDownloadPhase.waitingForConnection => BookDownloadAction.pauseAll,
+    BookDownloadPhase.paused => BookDownloadAction.resumeAll,
+    BookDownloadPhase.failed => BookDownloadAction.retryFailed,
+    BookDownloadPhase.done || null => null,
+  };
 
   @override
   List<Object?> get props => [

@@ -104,20 +104,6 @@ void main() {
       expect(vm.state.indicatorAction(c3), ChapterIndicatorAction.openDone);
     });
 
-    test('active chapters wait for connection only offline', () async {
-      await show([
-        chapter(c1, DownloadState.queued),
-        chapter(c2, DownloadState.done),
-      ]);
-      expect(vm.state.waitingForConnection(c1), isFalse);
-
-      connectivity.subject.add(ConnectivityStatus.offline);
-      await pumpEventQueue();
-
-      expect(vm.state.waitingForConnection(c1), isTrue);
-      expect(vm.state.waitingForConnection(c2), isFalse);
-    });
-
     test('strip action: pause, then resume, then retry, else none', () async {
       expect(vm.state.stripAction, isNull);
 

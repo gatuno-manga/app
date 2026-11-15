@@ -618,8 +618,6 @@
   "booksSelectionPause": "Pause",
   "booksSelectionResume": "Resume",
   "booksSelectionRetry": "Retry",
-  "booksSelectionSelected": "Selected",
-  "booksSelectionNotSelected": "Not selected",
   "booksOptionsTitle": "Book options",
   "booksOptionsDownloads": "Downloads",
   "booksDownloadAll": "Download all",
@@ -656,7 +654,7 @@
   "booksDownloadErrorTimedOut": "A file took too long to download.",
   "booksDownloadErrorServer": "The server couldn't send this chapter.",
   "booksDownloadErrorUnknown": "Something went wrong while downloading.",
-  "booksDeleteChaptersTitle": "Delete {count} chapters?",
+  "booksDeleteChaptersTitle": "{count, plural, =1{Delete 1 chapter?} other{Delete {count} chapters?}}",
   "@booksDeleteChaptersTitle": {
     "placeholders": {
       "count": {
@@ -664,7 +662,7 @@
       }
     }
   },
-  "booksDeleteChaptersBody": "The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.",
+  "booksDeleteChaptersBody": "{count, plural, =1{The chapter will be deleted from this device, freeing {size}. You can download it again later.} other{The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.}}",
   "@booksDeleteChaptersBody": {
     "placeholders": {
       "count": {
@@ -680,9 +678,9 @@
   "booksDownloadSignInRequired": "Sign in to download chapters.",
   "booksDownloadSignIn": "Sign in",
   "booksDownloadActionFailed": "Couldn't update the downloads. Try again.",
-  "booksDownloadStatusNone": "Download chapter",
-  "booksDownloadStatusQueued": "Queued. Tap to pause",
-  "booksDownloadStatusRunning": "Downloading, {percent}%. Tap to pause",
+  "booksDownloadStatusNone": "Not downloaded",
+  "booksDownloadStatusQueued": "Queued",
+  "booksDownloadStatusRunning": "Downloading, {percent}%",
   "@booksDownloadStatusRunning": {
     "placeholders": {
       "percent": {
@@ -690,9 +688,13 @@
       }
     }
   },
-  "booksDownloadStatusWaitingWifi": "Waiting for Wi-Fi. Tap to pause",
-  "booksDownloadStatusWaitingConnection": "Waiting for connection. Tap to pause",
-  "booksDownloadStatusPaused": "Paused. Tap to resume",
-  "booksDownloadStatusFailed": "Download failed. Tap for options",
-  "booksDownloadStatusDone": "Downloaded. Tap for options"
+  "booksDownloadStatusWaitingWifi": "Waiting for Wi-Fi",
+  "booksDownloadStatusWaitingConnection": "Waiting for connection",
+  "booksDownloadStatusPaused": "Paused",
+  "booksDownloadStatusFailed": "Download failed",
+  "booksDownloadStatusDone": "Downloaded",
+  "booksDownloadHintDownload": "Tap to download",
+  "booksDownloadHintPause": "Tap to pause",
+  "booksDownloadHintResume": "Tap to resume",
+  "booksDownloadHintOptions": "Tap for options"
 }

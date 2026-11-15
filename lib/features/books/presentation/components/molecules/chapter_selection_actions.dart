@@ -31,9 +31,6 @@ class ChapterSelectionActions extends StatelessWidget {
 
   const ChapterSelectionActions({super.key, required this.actions});
 
-  /// Height of the bar above the system inset; the list pads its end by it.
-  static const double height = 72;
-
   @override
   Widget build(BuildContext context) {
     final palette =

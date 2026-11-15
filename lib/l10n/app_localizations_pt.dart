@@ -1335,12 +1335,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksSelectionRetry => 'Tentar';
 
   @override
-  String get booksSelectionSelected => 'Selecionado';
-
-  @override
-  String get booksSelectionNotSelected => 'Não selecionado';
-
-  @override
   String get booksOptionsTitle => 'Opções do livro';
 
   @override
@@ -1416,12 +1410,26 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String booksDeleteChaptersTitle(int count) {
-    return 'Excluir $count capítulos?';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Excluir $count capítulos?',
+      one: 'Excluir 1 capítulo?',
+    );
+    return '$_temp0';
   }
 
   @override
   String booksDeleteChaptersBody(int count, String size) {
-    return 'Os $count capítulos serão excluídos deste aparelho e liberarão $size. Você pode baixá-los de novo depois.';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Os $count capítulos serão excluídos deste aparelho e liberarão $size. Você pode baixá-los de novo depois.',
+      one:
+          'O capítulo será excluído deste aparelho e liberará $size. Você pode baixá-lo de novo depois.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1441,31 +1449,40 @@ class AppLocalizationsPt extends AppLocalizations {
       'Não foi possível atualizar os downloads. Tente de novo.';
 
   @override
-  String get booksDownloadStatusNone => 'Baixar capítulo';
+  String get booksDownloadStatusNone => 'Não baixado';
 
   @override
-  String get booksDownloadStatusQueued => 'Na fila. Toque para pausar';
+  String get booksDownloadStatusQueued => 'Na fila';
 
   @override
   String booksDownloadStatusRunning(int percent) {
-    return 'Baixando, $percent%. Toque para pausar';
+    return 'Baixando, $percent%';
   }
 
   @override
-  String get booksDownloadStatusWaitingWifi =>
-      'Aguardando Wi-Fi. Toque para pausar';
+  String get booksDownloadStatusWaitingWifi => 'Aguardando Wi-Fi';
 
   @override
-  String get booksDownloadStatusWaitingConnection =>
-      'Aguardando conexão. Toque para pausar';
+  String get booksDownloadStatusWaitingConnection => 'Aguardando conexão';
 
   @override
-  String get booksDownloadStatusPaused => 'Pausado. Toque para retomar';
+  String get booksDownloadStatusPaused => 'Pausado';
 
   @override
-  String get booksDownloadStatusFailed =>
-      'O download falhou. Toque para ver opções';
+  String get booksDownloadStatusFailed => 'O download falhou';
 
   @override
-  String get booksDownloadStatusDone => 'Baixado. Toque para ver opções';
+  String get booksDownloadStatusDone => 'Baixado';
+
+  @override
+  String get booksDownloadHintDownload => 'Toque para baixar';
+
+  @override
+  String get booksDownloadHintPause => 'Toque para pausar';
+
+  @override
+  String get booksDownloadHintResume => 'Toque para retomar';
+
+  @override
+  String get booksDownloadHintOptions => 'Toque para ver opções';
 }

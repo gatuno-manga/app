@@ -24,6 +24,12 @@ class Chapter {
     this.lastPage = const PositiveInt(0),
   });
 
+  /// The server has its content: the reader can open it and it can be
+  /// downloaded. Chapters still being scraped, or whose scraping failed,
+  /// cannot.
+  bool get isReadable =>
+      scrapingStatus == null || scrapingStatus == ScrapingStatus.ready;
+
   Chapter copyWith({
     ChapterId? id,
     ChapterTitle? title,

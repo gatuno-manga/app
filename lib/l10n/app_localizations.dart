@@ -2354,18 +2354,6 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get booksSelectionRetry;
 
-  /// No description provided for @booksSelectionSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected'**
-  String get booksSelectionSelected;
-
-  /// No description provided for @booksSelectionNotSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Not selected'**
-  String get booksSelectionNotSelected;
-
   /// No description provided for @booksOptionsTitle.
   ///
   /// In en, this message translates to:
@@ -2483,13 +2471,13 @@ abstract class AppLocalizations {
   /// No description provided for @booksDeleteChaptersTitle.
   ///
   /// In en, this message translates to:
-  /// **'Delete {count} chapters?'**
+  /// **'{count, plural, =1{Delete 1 chapter?} other{Delete {count} chapters?}}'**
   String booksDeleteChaptersTitle(int count);
 
   /// No description provided for @booksDeleteChaptersBody.
   ///
   /// In en, this message translates to:
-  /// **'The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.'**
+  /// **'{count, plural, =1{The chapter will be deleted from this device, freeing {size}. You can download it again later.} other{The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.}}'**
   String booksDeleteChaptersBody(int count, String size);
 
   /// No description provided for @booksDeleteAllTitle.
@@ -2525,50 +2513,74 @@ abstract class AppLocalizations {
   /// No description provided for @booksDownloadStatusNone.
   ///
   /// In en, this message translates to:
-  /// **'Download chapter'**
+  /// **'Not downloaded'**
   String get booksDownloadStatusNone;
 
   /// No description provided for @booksDownloadStatusQueued.
   ///
   /// In en, this message translates to:
-  /// **'Queued. Tap to pause'**
+  /// **'Queued'**
   String get booksDownloadStatusQueued;
 
   /// No description provided for @booksDownloadStatusRunning.
   ///
   /// In en, this message translates to:
-  /// **'Downloading, {percent}%. Tap to pause'**
+  /// **'Downloading, {percent}%'**
   String booksDownloadStatusRunning(int percent);
 
   /// No description provided for @booksDownloadStatusWaitingWifi.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for Wi-Fi. Tap to pause'**
+  /// **'Waiting for Wi-Fi'**
   String get booksDownloadStatusWaitingWifi;
 
   /// No description provided for @booksDownloadStatusWaitingConnection.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for connection. Tap to pause'**
+  /// **'Waiting for connection'**
   String get booksDownloadStatusWaitingConnection;
 
   /// No description provided for @booksDownloadStatusPaused.
   ///
   /// In en, this message translates to:
-  /// **'Paused. Tap to resume'**
+  /// **'Paused'**
   String get booksDownloadStatusPaused;
 
   /// No description provided for @booksDownloadStatusFailed.
   ///
   /// In en, this message translates to:
-  /// **'Download failed. Tap for options'**
+  /// **'Download failed'**
   String get booksDownloadStatusFailed;
 
   /// No description provided for @booksDownloadStatusDone.
   ///
   /// In en, this message translates to:
-  /// **'Downloaded. Tap for options'**
+  /// **'Downloaded'**
   String get booksDownloadStatusDone;
+
+  /// No description provided for @booksDownloadHintDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to download'**
+  String get booksDownloadHintDownload;
+
+  /// No description provided for @booksDownloadHintPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to pause'**
+  String get booksDownloadHintPause;
+
+  /// No description provided for @booksDownloadHintResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to resume'**
+  String get booksDownloadHintResume;
+
+  /// No description provided for @booksDownloadHintOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap for options'**
+  String get booksDownloadHintOptions;
 }
 
 class _AppLocalizationsDelegate

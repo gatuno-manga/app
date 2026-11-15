@@ -42,8 +42,7 @@ class AppSwitchRow extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  // `color/hover`: text at 8%.
-                  color: scheme.onSurface.withValues(alpha: 0.08),
+                  color: palette.hover,
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                 ),
                 child: SizedBox.square(

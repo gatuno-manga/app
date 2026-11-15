@@ -2,75 +2,75 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../../shared/components/atoms/app_icon_button.dart';
-import '../../../../../shared/components/atoms/app_text_button.dart';
 import '../../../domain/entities/book.dart';
+import '../../models/download_display.dart';
 import '../../view_models/book_details_view_model.dart';
-import '../../view_models/book_downloads_view_model.dart';
-import '../../views/book_downloads_flows.dart';
 import '../atoms/book_cover_large.dart';
 import '../molecules/book_action_buttons.dart';
 import '../molecules/book_details_header.dart';
 import '../molecules/book_tags_list.dart';
 import '../molecules/book_description.dart';
-import '../molecules/chapter_selection_actions.dart';
-import '../molecules/chapter_selection_bar.dart';
 import '../templates/book_details_template.dart';
 import 'chapter_list.dart';
 
 class BookDetailsContent extends StatelessWidget {
   final BookDetailsViewModel viewModel;
-  final BookDownloadsViewModel downloadsViewModel;
-  final BookDownloadsState downloads;
   final Book book;
   final ScrollController scrollController;
+
+  /// Replaces the back button while selection mode is on.
+  final PreferredSizeWidget? selectionBar;
+
+  /// The download summary, between the description and the chapters.
+  final Widget? downloadSummary;
+
+  /// Controls above the chapter list (the Select button).
+  final Widget? chapterControls;
+
+  /// Fixed to the bottom (the selection actions).
+  final Widget? bottomBar;
+
+  /// Download indicators and selection mode of the chapter list.
+  final ChapterListDownloads? chapterDownloads;
+
+  /// Opens the book's ⋮ sheet.
+  final VoidCallback? onMenuPressed;
 
   const BookDetailsContent({
     super.key,
     required this.viewModel,
-    required this.downloadsViewModel,
-    required this.downloads,
     required this.book,
     required this.scrollController,
+    this.selectionBar,
+    this.downloadSummary,
+    this.chapterControls,
+    this.bottomBar,
+    this.chapterDownloads,
+    this.onMenuPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final flows = BookDownloadsFlows(downloadsViewModel);
-    final chapters = viewModel.chapterList?.data ?? [];
-    final selecting = downloads.selecting;
-    final allLoadedSelected =
-        chapters.isNotEmpty &&
-        chapters.every((c) => downloads.selection.contains(c.id));
 
     return BookDetailsTemplate(
       scrollController: scrollController,
-      appBarOverlaysBody: !selecting,
-      appBar: selecting
-          ? ChapterSelectionBar(
-              countLabel: l10n.booksSelectionCount(downloads.selection.length),
-              closeTooltip: l10n.booksSelectionClose,
-              selectLoadedTooltip: l10n.booksSelectionSelectLoaded,
-              onClose: downloadsViewModel.clearSelection,
-              onSelectLoaded: allLoadedSelected
-                  ? null
-                  : () =>
-                        downloadsViewModel.selectAll(chapters.map((c) => c.id)),
-            )
-          : AppBar(
-              backgroundColor: Colors.transparent,
-              leading: AppIconButton(
-                icon: Icons.arrow_back,
-                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/home');
-                  }
-                },
-              ),
+      appBar:
+          selectionBar ??
+          AppBar(
+            backgroundColor: Colors.transparent,
+            leading: AppIconButton(
+              icon: Icons.arrow_back,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/home');
+                }
+              },
             ),
+          ),
       cover: BookCoverLarge(coverUrl: book.cover?.value),
       header: BookDetailsHeader(
         title: book.title.value,
@@ -92,26 +92,15 @@ class BookDetailsContent extends StatelessWidget {
             await viewModel.refreshReadStatus();
           }
         },
-        onMenuPressed: () => flows.openBookOptions(context),
+        onMenuPressed: onMenuPressed,
         menuTooltip: l10n.booksMoreOptions,
       ),
       tags: BookTagsList(tags: book.tags),
       description: BookDescription(description: book.description?.value),
-      downloadSummary: BookDownloadsFlows.summary(
-        context,
-        downloads,
-        totalChapters: book.totalChapters?.value,
-        onAction: downloadsViewModel.runStripAction,
-      ),
-      chapterControls: selecting || chapters.isEmpty
-          ? null
-          : AppTextButton(
-              text: l10n.booksSelect,
-              icon: Icons.check_circle_outline,
-              onPressed: downloadsViewModel.startSelection,
-            ),
+      downloadSummary: downloadSummary,
+      chapterControls: chapterControls,
       chapterList: ChapterList(
-        chapters: chapters,
+        chapters: viewModel.chapterList?.data ?? [],
         isLoading: viewModel.isLoadingChapters,
         hasNextPage: viewModel.chapterList?.hasNextPage ?? false,
         onChapterTap: (chapter) async {
@@ -126,21 +115,9 @@ class BookDetailsContent extends StatelessWidget {
         },
         error: viewModel.chaptersError,
         onRetry: viewModel.fetchChapters,
-        downloadStatusOf: (chapter) => downloads.statusOf(chapter.id),
-        downloadProgressOf: (chapter) =>
-            downloads.chapter(chapter.id)?.progress ?? 0,
-        onDownloadTap: (chapter) => flows.tapIndicator(context, chapter),
-        selecting: selecting,
-        isSelected: (chapter) => downloads.selection.contains(chapter.id),
-        onToggleSelected: (chapter) =>
-            downloadsViewModel.toggleSelection(chapter.id),
-        onLongPress: (chapter) => downloadsViewModel.startSelection(chapter.id),
-        bottomPadding: selecting
-            ? ChapterSelectionActions.height +
-                  MediaQuery.paddingOf(context).bottom
-            : 0,
+        downloads: chapterDownloads,
       ),
-      bottomBar: selecting ? flows.selectionActions(context, downloads) : null,
+      bottomBar: bottomBar,
     );
   }
 }

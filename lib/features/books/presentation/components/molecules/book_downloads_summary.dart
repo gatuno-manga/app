@@ -62,25 +62,29 @@ class BookDownloadsSummary extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Semantics(
-                  liveRegion: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(countLabel, style: theme.textTheme.labelLarge),
-                      if (statusLabel != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(countLabel, style: theme.textTheme.labelLarge),
+                    if (statusLabel != null) ...[
+                      const SizedBox(height: 2),
+                      // Announced when the state changes, not on every
+                      // chapter the count goes up by.
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
                           statusLabel,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: statusIsError
-                                ? theme.legible(theme.colorScheme.error)
-                                : palette.textSecondary,
+                            color: theme.legible(
+                              statusIsError
+                                  ? theme.colorScheme.error
+                                  : theme.mutedColor,
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
               if (actionLabel != null) ...[
@@ -101,7 +105,7 @@ class BookDownloadsSummary extends StatelessWidget {
                 value: progress.clamp(0, 1),
                 minHeight: 4,
                 color: progressMuted
-                    ? palette.textSecondary
+                    ? theme.legible(theme.mutedColor)
                     : theme.colorScheme.primary,
                 backgroundColor: palette.text10,
               ),
