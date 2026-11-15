@@ -124,7 +124,6 @@ void main() {
 
       expect(viewModel.isLoading, isFalse);
       expect(viewModel.chapter, chapter);
-      expect(viewModel.state.isDownloaded, isFalse);
       expect(viewModel.error, isNull);
     });
 
@@ -217,6 +216,30 @@ void main() {
       verify(() => repository.openChapter(id)).called(1);
     });
 
+    test(
+      'retry when the server answers but the chapter still misses',
+      () async {
+        when(() => repository.openChapter(id)).thenThrow(OfflineException());
+        connectivity.goOffline();
+        await viewModel.loadChapter(chapterId);
+        connectivity.probeResult = ConnectivityStatus.online;
+
+        expect(await viewModel.retryOffline(), isFalse);
+        expect(viewModel.state.isOfflineMiss, isTrue);
+      },
+    );
+
+    test('the error retry opens the last chapter asked for', () async {
+      when(() => repository.openChapter(id)).thenThrow(Exception('boom'));
+      await viewModel.loadChapter(chapterId, initialPage: 3);
+      opens(_chapter());
+
+      await viewModel.retry();
+
+      expect(viewModel.chapter, isNotNull);
+      expect(viewModel.currentPageIndex, 3);
+    });
+
     test('follows the connectivity status', () async {
       connectivity.goOffline();
       await _settle();
@@ -280,6 +303,39 @@ void main() {
       },
     );
 
+    test('a missing neighbour is never unavailable', () async {
+      connectivity.goOffline();
+      opens(_chapter(next: const ChapterId('next')), downloaded: true);
+
+      await viewModel.loadChapter(chapterId);
+      await _settle();
+
+      expect(viewModel.state.previousDownloaded, isNull);
+      expect(viewModel.state.previousUnavailable, isFalse);
+    });
+
+    test('each time offline checks again', () async {
+      var downloaded = false;
+      when(
+        () => repository.isDownloaded(const ChapterId('prev')),
+      ).thenAnswer((_) async => downloaded);
+      opens(linked());
+      await viewModel.loadChapter(chapterId);
+
+      connectivity.goOffline();
+      await _settle();
+      expect(viewModel.state.previousUnavailable, isTrue);
+
+      // Downloaded while online, then offline again.
+      connectivity.reconnect();
+      await _settle();
+      expect(viewModel.state.previousDownloaded, isNull);
+      downloaded = true;
+      connectivity.goOffline();
+      await _settle();
+      expect(viewModel.state.previousUnavailable, isFalse);
+    });
+
     test('a check for neighbours the refresh replaced is dropped', () async {
       // Offline at open, so the saved neighbours are checked; the first
       // check is slow and lands after the refreshed neighbours'.
@@ -332,7 +388,6 @@ void main() {
       await viewModel.loadChapter(chapterId);
       await _settle();
 
-      expect(viewModel.state.isDownloaded, isTrue);
       expect(viewModel.chapter!.next, const ChapterId('new-next'));
     });
 

@@ -68,6 +68,7 @@ void main() {
         initialPage: any(named: 'initialPage'),
       ),
     ).thenAnswer((_) async {});
+    when(() => mockViewModel.retry()).thenAnswer((_) async {});
     final mockState = ReadingState.initial();
     stateController = StreamController<ReadingState>.broadcast();
     stateController.add(mockState);
@@ -105,10 +106,12 @@ void main() {
       await tester.pump();
 
       verify(() => mockViewModel.retryOffline()).called(1);
-      expect(
-        find.text('Still offline. The chapter opens once the server is back.'),
-        findsOneWidget,
-      );
+      expect(find.text('Still offline.'), findsOneWidget);
+
+      // A reconnect opened the chapter: the message no longer holds.
+      stateController.add(ReadingState.initial());
+      await tester.pumpAndSettle();
+      expect(find.text('Still offline.'), findsNothing);
     });
 
     testWidgets('initializes viewModel and loads chapter', (tester) async {
@@ -144,13 +147,7 @@ void main() {
       expect(find.text('Error'), findsOneWidget);
 
       await tester.tap(find.text('Retry'));
-      // 1st call in initState, 2nd call on retry
-      verify(
-        () => mockViewModel.loadChapter(
-          '123',
-          initialPage: any(named: 'initialPage'),
-        ),
-      ).called(2);
+      verify(() => mockViewModel.retry()).called(1);
     });
 
     testWidgets('renders correct reader for image content', (tester) async {

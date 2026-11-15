@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// No description provided for @readingStillOffline.
   ///
   /// In en, this message translates to:
-  /// **'Still offline. The chapter opens once the server is back.'**
+  /// **'Still offline.'**
   String get readingStillOffline;
 
   /// No description provided for @readingFinished.

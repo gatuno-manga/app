@@ -19,9 +19,6 @@ class ReadingState extends Equatable {
   final String? error;
   final int currentPageIndex;
 
-  /// The chapter is read from the device's downloads.
-  final bool isDownloaded;
-
   /// The server cannot be reached.
   final bool isOffline;
 
@@ -32,8 +29,8 @@ class ReadingState extends Equatable {
   final bool isRetrying;
 
   /// Whether the previous and next chapters are downloaded, so they open
-  /// while offline. `null` until checked, which happens only offline; an
-  /// unchecked neighbour stays available.
+  /// while offline. `null` until checked, which happens only offline, and
+  /// for a neighbour that does not exist; `null` never disables a button.
   final bool? previousDownloaded;
   final bool? nextDownloaded;
 
@@ -42,7 +39,6 @@ class ReadingState extends Equatable {
     required this.isLoading,
     this.error,
     required this.currentPageIndex,
-    this.isDownloaded = false,
     this.isOffline = false,
     this.isOfflineMiss = false,
     this.isRetrying = false,
@@ -70,7 +66,6 @@ class ReadingState extends Equatable {
     bool? isLoading,
     String? Function()? error,
     int? currentPageIndex,
-    bool? isDownloaded,
     bool? isOffline,
     bool? isOfflineMiss,
     bool? isRetrying,
@@ -82,7 +77,6 @@ class ReadingState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       error: error != null ? error() : this.error,
       currentPageIndex: currentPageIndex ?? this.currentPageIndex,
-      isDownloaded: isDownloaded ?? this.isDownloaded,
       isOffline: isOffline ?? this.isOffline,
       isOfflineMiss: isOfflineMiss ?? this.isOfflineMiss,
       isRetrying: isRetrying ?? this.isRetrying,
@@ -101,7 +95,6 @@ class ReadingState extends Equatable {
     isLoading,
     error,
     currentPageIndex,
-    isDownloaded,
     isOffline,
     isOfflineMiss,
     isRetrying,
@@ -118,9 +111,13 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   late final StreamSubscription<void> _reconnectSubscription;
   static const String _logTag = 'ReadingViewModel';
 
-  /// The last chapter asked for, so a reconnect can open it again.
+  /// The last chapter asked for, so a retry or a reconnect can open it
+  /// again.
   String? _requestedId;
   int? _requestedPage;
+
+  /// The open chapter came from the device's downloads.
+  bool _openedDownloaded = false;
 
   ReadingViewModel(
     this._repository,
@@ -167,6 +164,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     try {
       final opened = await _repository.openChapter(ChapterId(chapterId));
       final fetchedChapter = opened.chapter;
+      _openedDownloaded = opened.isDownloaded;
       AppLogger.i(
         'Chapter loaded successfully: ${fetchedChapter.title?.value}',
         _logTag,
@@ -177,7 +175,6 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
         state.copyWith(
           isLoading: false,
           chapter: () => fetchedChapter,
-          isDownloaded: opened.isDownloaded,
           previousDownloaded: () => null,
           nextDownloaded: () => null,
         ),
@@ -203,10 +200,18 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     }
   }
 
+  /// The error view's retry: opens the last chapter asked for again.
+  Future<void> retry() async {
+    final chapterId = _requestedId;
+    if (chapterId == null) return;
+    await loadChapter(chapterId, initialPage: _requestedPage);
+  }
+
   /// The offline view's retry. Offline, the repository skips the network, so
   /// the server is probed first; the chapter opens only if it answers.
-  /// Returns `false` when the server is still unreachable, so the screen can
-  /// say so (the offline view stays as it is).
+  /// Returns `false` when the chapter still cannot open offline, so the
+  /// screen can say so (the offline view stays as it is). A tap while a retry
+  /// runs is ignored and returns `true`: that retry reports for both.
   Future<bool> retryOffline() async {
     final chapterId = _requestedId;
     if (chapterId == null || state.isRetrying) return true;
@@ -222,15 +227,23 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     }
     emit(state.copyWith(isRetrying: false));
     await loadChapter(chapterId, initialPage: _requestedPage);
-    return true;
+    return !state.isOfflineMiss;
   }
 
   /// Going offline is when neighbours start to matter: check them then.
+  /// Online, the result is dropped, since a neighbour may get downloaded
+  /// before the next time offline.
   void _onStatus(ConnectivityStatus status) {
     final offline = status == ConnectivityStatus.offline;
-    emit(state.copyWith(isOffline: offline));
+    emit(
+      state.copyWith(
+        isOffline: offline,
+        previousDownloaded: offline ? null : () => null,
+        nextDownloaded: offline ? null : () => null,
+      ),
+    );
     final current = state.chapter;
-    if (offline && current != null && state.nextDownloaded == null) {
+    if (offline && current != null) {
       unawaited(_checkNeighbours(current));
     }
   }
@@ -244,7 +257,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
       return;
     }
     final current = state.chapter;
-    if (current != null && state.isDownloaded) {
+    if (current != null && _openedDownloaded) {
       unawaited(_refreshNavigation(current));
     }
   }
@@ -253,12 +266,13 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   /// neighbour downloaded while this one is open is picked up on the next
   /// chapter.
   Future<void> _checkNeighbours(ReadingChapter chapter) async {
+    // A missing neighbour stays null: there is nothing to be unavailable.
     final previous = chapter.hasPrevious
         ? await _repository.isDownloaded(chapter.previous!)
-        : false;
+        : null;
     final next = chapter.hasNext
         ? await _repository.isDownloaded(chapter.next!)
-        : false;
+        : null;
     // Only for the neighbours checked: a navigation refresh may have
     // replaced them meanwhile.
     final current = state.chapter;

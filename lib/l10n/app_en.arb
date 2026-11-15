@@ -204,7 +204,7 @@
   "readingPreviousChapter": "Previous Chapter",
   "readingPreviousChapterNotDownloaded": "Previous Chapter (not downloaded)",
   "readingNextChapterNotDownloaded": "Next Chapter (not downloaded)",
-  "readingStillOffline": "Still offline. The chapter opens once the server is back.",
+  "readingStillOffline": "Still offline.",
   "readingFinished": "You've reached the end of this chapter.",
   "readingSettingsTitle": "Reading settings",
   "readingSettingsAction": "Settings",

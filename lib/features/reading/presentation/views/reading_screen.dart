@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -58,6 +60,33 @@ class _ReadingScreenContent extends StatefulWidget {
 }
 
 class _ReadingScreenContentState extends State<_ReadingScreenContent> {
+  /// The "still offline" message, closed once the offline view goes away (a
+  /// reconnect opened the chapter, or the reader left).
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _stillOffline;
+  late final StreamSubscription<ReadingState> _stateSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _stateSubscription = context.read<ReadingViewModel>().stateStream.listen((
+      state,
+    ) {
+      if (!state.isOfflineMiss) _closeStillOffline();
+    });
+  }
+
+  @override
+  void dispose() {
+    _stateSubscription.cancel();
+    _closeStillOffline();
+    super.dispose();
+  }
+
+  void _closeStillOffline() {
+    _stillOffline?.close();
+    _stillOffline = null;
+  }
+
   @override
   void didUpdateWidget(_ReadingScreenContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -84,7 +113,7 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           isOfflineMiss: state.isOfflineMiss,
           isRetrying: state.isRetrying,
           onOfflineRetry: () => _retryOffline(viewModel),
-          onRetry: () => viewModel.loadChapter(widget.chapterId),
+          onRetry: viewModel.retry,
           onGoBack: () {
             if (context.canPop()) {
               context.pop();
@@ -104,9 +133,10 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
     final reachable = await viewModel.retryOffline();
     if (reachable || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(l10n.readingStillOffline)));
+    _closeStillOffline();
+    _stillOffline = ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.readingStillOffline)));
   }
 
   Widget _buildReader(ReadingChapter chapter) {
