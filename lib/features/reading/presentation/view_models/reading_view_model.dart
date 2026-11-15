@@ -32,9 +32,10 @@ class ReadingState extends Equatable {
   final bool isRetrying;
 
   /// Whether the previous and next chapters are downloaded, so they open
-  /// while offline.
-  final bool previousDownloaded;
-  final bool nextDownloaded;
+  /// while offline. `null` until checked, which happens only offline; an
+  /// unchecked neighbour stays available.
+  final bool? previousDownloaded;
+  final bool? nextDownloaded;
 
   const ReadingState({
     this.chapter,
@@ -45,8 +46,8 @@ class ReadingState extends Equatable {
     this.isOffline = false,
     this.isOfflineMiss = false,
     this.isRetrying = false,
-    this.previousDownloaded = false,
-    this.nextDownloaded = false,
+    this.previousDownloaded,
+    this.nextDownloaded,
   });
 
   factory ReadingState.initial() {
@@ -59,10 +60,10 @@ class ReadingState extends Equatable {
   }
 
   /// Offline, the previous chapter is not downloaded, so it cannot open.
-  bool get previousUnavailable => isOffline && !previousDownloaded;
+  bool get previousUnavailable => isOffline && previousDownloaded == false;
 
   /// Offline, the next chapter is not downloaded, so it cannot open.
-  bool get nextUnavailable => isOffline && !nextDownloaded;
+  bool get nextUnavailable => isOffline && nextDownloaded == false;
 
   ReadingState copyWith({
     ReadingChapter? Function()? chapter,
@@ -73,8 +74,8 @@ class ReadingState extends Equatable {
     bool? isOffline,
     bool? isOfflineMiss,
     bool? isRetrying,
-    bool? previousDownloaded,
-    bool? nextDownloaded,
+    bool? Function()? previousDownloaded,
+    bool? Function()? nextDownloaded,
   }) {
     return ReadingState(
       chapter: chapter != null ? chapter() : this.chapter,
@@ -85,8 +86,12 @@ class ReadingState extends Equatable {
       isOffline: isOffline ?? this.isOffline,
       isOfflineMiss: isOfflineMiss ?? this.isOfflineMiss,
       isRetrying: isRetrying ?? this.isRetrying,
-      previousDownloaded: previousDownloaded ?? this.previousDownloaded,
-      nextDownloaded: nextDownloaded ?? this.nextDownloaded,
+      previousDownloaded: previousDownloaded != null
+          ? previousDownloaded()
+          : this.previousDownloaded,
+      nextDownloaded: nextDownloaded != null
+          ? nextDownloaded()
+          : this.nextDownloaded,
     );
   }
 
@@ -124,10 +129,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   ) : super(
         ReadingState.initial().copyWith(isOffline: _connectivity.isOffline),
       ) {
-    _statusSubscription = _connectivity.statusStream.listen(
-      (status) =>
-          emit(state.copyWith(isOffline: status == ConnectivityStatus.offline)),
-    );
+    _statusSubscription = _connectivity.statusStream.listen(_onStatus);
     _reconnectSubscription = _connectivity.onReconnected.listen(
       (_) => _onReconnected(),
     );
@@ -176,13 +178,14 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
           isLoading: false,
           chapter: () => fetchedChapter,
           isDownloaded: opened.isDownloaded,
-          previousDownloaded: false,
-          nextDownloaded: false,
+          previousDownloaded: () => null,
+          nextDownloaded: () => null,
         ),
       );
       saveProgress(completed: isTextChapter);
-      unawaited(_checkNeighbours(fetchedChapter));
-      if (opened.isDownloaded && !_connectivity.isOffline) {
+      if (_connectivity.isOffline) {
+        unawaited(_checkNeighbours(fetchedChapter));
+      } else if (opened.isDownloaded) {
         unawaited(_refreshNavigation(fetchedChapter));
       }
     } on OfflineException {
@@ -201,19 +204,35 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   }
 
   /// The offline view's retry. Offline, the repository skips the network, so
-  /// the server is probed first.
-  Future<void> retryOffline() async {
+  /// the server is probed first; the chapter opens only if it answers.
+  /// Returns `false` when the server is still unreachable, so the screen can
+  /// say so (the offline view stays as it is).
+  Future<bool> retryOffline() async {
     final chapterId = _requestedId;
-    if (chapterId == null || state.isRetrying) return;
+    if (chapterId == null || state.isRetrying) return true;
     emit(state.copyWith(isRetrying: true));
     try {
       await _connectivity.checkNow();
     } catch (e, stackTrace) {
       AppLogger.e('Connectivity probe failed', e, stackTrace, _logTag);
-    } finally {
-      emit(state.copyWith(isRetrying: false));
     }
+    if (_connectivity.isOffline) {
+      emit(state.copyWith(isRetrying: false));
+      return false;
+    }
+    emit(state.copyWith(isRetrying: false));
     await loadChapter(chapterId, initialPage: _requestedPage);
+    return true;
+  }
+
+  /// Going offline is when neighbours start to matter: check them then.
+  void _onStatus(ConnectivityStatus status) {
+    final offline = status == ConnectivityStatus.offline;
+    emit(state.copyWith(isOffline: offline));
+    final current = state.chapter;
+    if (offline && current != null && state.nextDownloaded == null) {
+      unawaited(_checkNeighbours(current));
+    }
   }
 
   void _onReconnected() {
@@ -230,8 +249,9 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     }
   }
 
-  /// Which neighbours open offline. Checked once per chapter: a neighbour
-  /// downloaded while this one is open is picked up on the next chapter.
+  /// Which neighbours open offline. Checked once per chapter while offline: a
+  /// neighbour downloaded while this one is open is picked up on the next
+  /// chapter.
   Future<void> _checkNeighbours(ReadingChapter chapter) async {
     final previous = chapter.hasPrevious
         ? await _repository.isDownloaded(chapter.previous!)
@@ -239,8 +259,21 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     final next = chapter.hasNext
         ? await _repository.isDownloaded(chapter.next!)
         : false;
-    if (state.chapter?.id != chapter.id) return;
-    emit(state.copyWith(previousDownloaded: previous, nextDownloaded: next));
+    // Only for the neighbours checked: a navigation refresh may have
+    // replaced them meanwhile.
+    final current = state.chapter;
+    if (current == null ||
+        current.id != chapter.id ||
+        current.previous != chapter.previous ||
+        current.next != chapter.next) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        previousDownloaded: () => previous,
+        nextDownloaded: () => next,
+      ),
+    );
   }
 
   /// A downloaded copy keeps the neighbours it had when it was saved: ask
@@ -265,8 +298,14 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
         current.next == refreshed.next) {
       return;
     }
-    emit(state.copyWith(chapter: () => refreshed));
-    await _checkNeighbours(refreshed);
+    emit(
+      state.copyWith(
+        chapter: () => refreshed,
+        previousDownloaded: () => null,
+        nextDownloaded: () => null,
+      ),
+    );
+    if (_connectivity.isOffline) await _checkNeighbours(refreshed);
   }
 
   void setCurrentPage(int index, {bool isAutoSave = true}) {

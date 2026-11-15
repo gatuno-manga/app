@@ -531,10 +531,15 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get readingPreviousChapterNotDownloaded =>
-      'Capítulo anterior, não baixado';
+      'Capítulo Anterior (não baixado)';
 
   @override
-  String get readingNextChapterNotDownloaded => 'Próximo capítulo, não baixado';
+  String get readingNextChapterNotDownloaded =>
+      'Próximo Capítulo (não baixado)';
+
+  @override
+  String get readingStillOffline =>
+      'Ainda offline. O capítulo abre quando o servidor voltar.';
 
   @override
   String get readingFinished => 'Você chegou ao fim deste capítulo.';

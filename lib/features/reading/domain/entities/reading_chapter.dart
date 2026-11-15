@@ -102,7 +102,9 @@ class ReadingChapter {
   });
 
   /// This chapter with the server's current [previous] and [next], for a
-  /// downloaded copy whose neighbours changed after it was saved.
+  /// downloaded copy whose neighbours changed after it was saved. A new field
+  /// must be copied here too (covered by `withNeighbours keeps every other
+  /// field` in the entity tests).
   ReadingChapter withNeighbours({ChapterId? previous, ChapterId? next}) =>
       ReadingChapter(
         id: id,

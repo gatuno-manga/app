@@ -226,6 +226,7 @@ void main() {
         isLoading: false,
         currentPageIndex: 0,
         isOffline: true,
+        previousDownloaded: false,
         nextDownloaded: true,
       );
 
@@ -260,20 +261,50 @@ void main() {
           find.widgetWithIcon(IconButton, Icons.skip_previous),
         );
         expect(previous.onPressed, isNull);
-        expect(previous.tooltip, 'Previous chapter, not downloaded');
+        expect(previous.tooltip, 'Previous Chapter (not downloaded)');
         // What a screen reader announces for the disabled button.
         expect(
           tester.getSemantics(
             find.widgetWithIcon(IconButton, Icons.skip_previous),
           ),
           isSemantics(
-            tooltip: 'Previous chapter, not downloaded',
+            tooltip: 'Previous Chapter (not downloaded)',
             isButton: true,
             hasEnabledState: true,
             isEnabled: false,
           ),
         );
         semantics.dispose();
+      });
+
+      testWidgets('an unchecked neighbour stays enabled', (tester) async {
+        const unchecked = ReadingState(
+          isLoading: false,
+          currentPageIndex: 0,
+          isOffline: true,
+        );
+        when(() => mockViewModel.state).thenReturn(unchecked);
+        when(
+          () => mockViewModel.stateStream,
+        ).thenAnswer((_) => Stream.value(unchecked));
+        await tester.pumpApp(
+          Provider<ReadingViewModel>.value(
+            value: mockViewModel,
+            child: Scaffold(
+              body: ReadingBottomBar(
+                chapter: _chapter(previous: const ChapterId('prev-id')),
+                bottomPadding: 0.0,
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final previous = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.skip_previous),
+        );
+        expect(previous.onPressed, isNotNull);
+        expect(previous.tooltip, 'Previous Chapter');
       });
 
       testWidgets('a downloaded neighbour stays enabled', (tester) async {

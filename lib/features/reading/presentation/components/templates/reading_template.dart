@@ -15,8 +15,9 @@ class ReadingTemplate extends StatelessWidget {
   final bool isOfflineMiss;
   final bool isRetrying;
 
-  /// The offline view's retry: probe the server, then reload.
-  final VoidCallback? onOfflineRetry;
+  /// The offline view's retry: probe the server, then reload. A plain
+  /// reload would only miss again, since offline the network is skipped.
+  final VoidCallback onOfflineRetry;
   final VoidCallback onRetry;
   final VoidCallback onGoBack;
   final Widget Function(ReadingChapter) readerBuilder;
@@ -28,7 +29,7 @@ class ReadingTemplate extends StatelessWidget {
     this.chapter,
     this.isOfflineMiss = false,
     this.isRetrying = false,
-    this.onOfflineRetry,
+    required this.onOfflineRetry,
     required this.onRetry,
     required this.onGoBack,
     required this.readerBuilder,
@@ -52,7 +53,7 @@ class ReadingTemplate extends StatelessWidget {
           ),
         ),
         body: AppOfflineEmptyView(
-          onRetry: onOfflineRetry ?? onRetry,
+          onRetry: onOfflineRetry,
           isRetrying: isRetrying,
         ),
       );

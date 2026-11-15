@@ -92,6 +92,25 @@ void main() {
   });
 
   group('ReadingScreen', () {
+    testWidgets('a retry while still offline says so', (tester) async {
+      final st = ReadingState.initial().copyWith(isOfflineMiss: true);
+      stateController.add(st);
+      when(() => mockViewModel.state).thenReturn(st);
+      when(() => mockViewModel.retryOffline()).thenAnswer((_) async => false);
+
+      await tester.pumpApp(
+        const ReadingScreen(chapterId: '123', initialPage: 0),
+      );
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+
+      verify(() => mockViewModel.retryOffline()).called(1);
+      expect(
+        find.text('Still offline. The chapter opens once the server is back.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('initializes viewModel and loads chapter', (tester) async {
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),

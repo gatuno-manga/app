@@ -21,6 +21,7 @@ void main() {
       await tester.pumpApp(
         ReadingTemplate(
           isLoading: true,
+          onOfflineRetry: () {},
           onRetry: () {},
           onGoBack: () {},
           readerBuilder: (_) => const SizedBox(),
@@ -35,6 +36,7 @@ void main() {
         ReadingTemplate(
           isLoading: false,
           error: 'Something went wrong',
+          onOfflineRetry: () {},
           onRetry: () {},
           onGoBack: () {},
           readerBuilder: (_) => const SizedBox(),
@@ -53,6 +55,7 @@ void main() {
         ReadingTemplate(
           isLoading: false,
           chapter: chapter,
+          onOfflineRetry: () {},
           onRetry: () {},
           onGoBack: () {},
           readerBuilder: (chap) => const Text('Reader Content'),

@@ -1085,14 +1085,20 @@ abstract class AppLocalizations {
   /// No description provided for @readingPreviousChapterNotDownloaded.
   ///
   /// In en, this message translates to:
-  /// **'Previous chapter, not downloaded'**
+  /// **'Previous Chapter (not downloaded)'**
   String get readingPreviousChapterNotDownloaded;
 
   /// No description provided for @readingNextChapterNotDownloaded.
   ///
   /// In en, this message translates to:
-  /// **'Next chapter, not downloaded'**
+  /// **'Next Chapter (not downloaded)'**
   String get readingNextChapterNotDownloaded;
+
+  /// No description provided for @readingStillOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Still offline. The chapter opens once the server is back.'**
+  String get readingStillOffline;
 
   /// No description provided for @readingFinished.
   ///

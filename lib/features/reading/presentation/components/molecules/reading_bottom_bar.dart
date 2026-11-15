@@ -32,6 +32,10 @@ class ReadingBottomBar extends StatelessWidget {
       initialData: viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
+        // A neighbour that exists but cannot open offline.
+        final previousUnavailable =
+            chapter.hasPrevious && state.previousUnavailable;
+        final nextUnavailable = chapter.hasNext && state.nextUnavailable;
         final theme = Theme.of(context);
 
         return Container(
@@ -65,12 +69,12 @@ class ReadingBottomBar extends StatelessWidget {
                     icon: Icons.skip_previous,
                     color: theme.colorScheme.onSurface,
                     // `!` is safe: hasPrevious/hasNext imply a non-null id.
-                    onPressed: chapter.hasPrevious && !state.previousUnavailable
+                    onPressed: chapter.hasPrevious && !previousUnavailable
                         ? () => context.pushReplacement(
                             '/chapters/${chapter.previous!.value}',
                           )
                         : null,
-                    tooltip: chapter.hasPrevious && state.previousUnavailable
+                    tooltip: previousUnavailable
                         ? l10n.readingPreviousChapterNotDownloaded
                         : l10n.readingPreviousChapter,
                   ),
@@ -79,12 +83,12 @@ class ReadingBottomBar extends StatelessWidget {
                   AppIconButton(
                     icon: Icons.skip_next,
                     color: theme.colorScheme.onSurface,
-                    onPressed: chapter.hasNext && !state.nextUnavailable
+                    onPressed: chapter.hasNext && !nextUnavailable
                         ? () => context.pushReplacement(
                             '/chapters/${chapter.next!.value}',
                           )
                         : null,
-                    tooltip: chapter.hasNext && state.nextUnavailable
+                    tooltip: nextUnavailable
                         ? l10n.readingNextChapterNotDownloaded
                         : l10n.readingNextChapter,
                   ),

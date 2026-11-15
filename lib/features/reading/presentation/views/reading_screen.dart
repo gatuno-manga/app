@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../view_models/reading_view_model.dart';
 import '../../domain/use_cases/reader_preferences_service.dart';
 import '../../domain/entities/reading_chapter.dart';
@@ -82,7 +83,7 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           chapter: state.chapter,
           isOfflineMiss: state.isOfflineMiss,
           isRetrying: state.isRetrying,
-          onOfflineRetry: viewModel.retryOffline,
+          onOfflineRetry: () => _retryOffline(viewModel),
           onRetry: () => viewModel.loadChapter(widget.chapterId),
           onGoBack: () {
             if (context.canPop()) {
@@ -95,6 +96,17 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
         );
       },
     );
+  }
+
+  /// Says so when the server is still unreachable: the offline view itself
+  /// does not change, and a SnackBar is announced to screen readers.
+  Future<void> _retryOffline(ReadingViewModel viewModel) async {
+    final reachable = await viewModel.retryOffline();
+    if (reachable || !mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(l10n.readingStillOffline)));
   }
 
   Widget _buildReader(ReadingChapter chapter) {
