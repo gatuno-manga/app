@@ -204,18 +204,15 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
     final done = state.count(DownloadState.done);
     final size = BookDownloadsFlows.sizeOf(context, state.download!.bytes);
     final total = book.totalChapters?.value;
-    final active =
-        phase == BookDownloadPhase.active ||
-        phase == BookDownloadPhase.waitingForConnection;
     return BookDownloadsSummary(
       countLabel: total == null
           ? l10n.booksDownloadsSummary(done, size)
           : l10n.booksDownloadsSummaryOfTotal(done, total, size),
       statusLabel: switch (phase) {
-        BookDownloadPhase.active =>
-          state.allActiveWaitForWifi
-              ? l10n.booksDownloadsPhaseWaitingWifi
-              : l10n.booksDownloadsPhaseActive(state.activeCount),
+        BookDownloadPhase.active => l10n.booksDownloadsPhaseActive(
+          state.activeCount,
+        ),
+        BookDownloadPhase.waitingForWifi => l10n.booksDownloadsPhaseWaitingWifi,
         BookDownloadPhase.waitingForConnection =>
           l10n.booksDownloadsPhaseWaitingConnection,
         BookDownloadPhase.paused => l10n.booksDownloadsPhasePaused(
@@ -236,10 +233,10 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         null => null,
       },
       onAction: _downloads.runStripAction,
-      progress: active ? state.activeProgress : null,
+      progress: phase.hasActive ? state.activeProgress : null,
       progressMuted:
           phase == BookDownloadPhase.waitingForConnection ||
-          state.allActiveWaitForWifi,
+          phase == BookDownloadPhase.waitingForWifi,
     );
   }
 

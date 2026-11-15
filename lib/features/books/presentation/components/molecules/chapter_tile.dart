@@ -24,6 +24,10 @@ class ChapterTile extends StatelessWidget {
   /// Whether the tile is picked; null outside selection mode.
   final bool? selected;
 
+  /// Selection mode for a tile that cannot be picked: no checkbox, but its
+  /// room is kept so the titles stay aligned.
+  final bool reserveSelectionSlot;
+
   const ChapterTile({
     super.key,
     required this.chapter,
@@ -32,6 +36,7 @@ class ChapterTile extends StatelessWidget {
     this.download,
     this.onDownloadTap,
     this.selected,
+    this.reserveSelectionSlot = false,
   });
 
   @override
@@ -60,7 +65,7 @@ class ChapterTile extends StatelessWidget {
       ),
       // The tile's `selected` flag carries the state for screen readers.
       leading: selected == null
-          ? null
+          ? (reserveSelectionSlot ? const SizedBox(width: 24) : null)
           : ExcludeSemantics(
               child: Icon(
                 selected ? Icons.check : Icons.check_box_outline_blank,

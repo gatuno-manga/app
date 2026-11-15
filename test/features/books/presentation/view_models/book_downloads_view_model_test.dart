@@ -459,23 +459,28 @@ void main() {
       expect(vm.state.activeProgress, 0);
     });
 
-    test('waiting for Wi-Fi only when every active chapter does', () async {
+    test('waiting for Wi-Fi is its own phase, only when every active '
+        'chapter waits and the server answers', () async {
       const wifi = DownloadWaitReason.waitingForNetwork;
       await show([
         chapterDownload(c1, DownloadState.queued, reason: wifi),
         chapterDownload(c2, DownloadState.running, reason: wifi),
         chapterDownload(c3, DownloadState.done),
       ]);
-      expect(vm.state.allActiveWaitForWifi, isTrue);
+      expect(vm.state.phase, BookDownloadPhase.waitingForWifi);
+      expect(vm.state.stripAction, BookDownloadAction.pauseAll);
+
+      fixture.connectivity.subject.add(ConnectivityStatus.offline);
+      await pumpEventQueue();
+      expect(vm.state.phase, BookDownloadPhase.waitingForConnection);
+      fixture.connectivity.subject.add(ConnectivityStatus.online);
+      await pumpEventQueue();
 
       await show([
         chapterDownload(c1, DownloadState.queued, reason: wifi),
         chapterDownload(c2, DownloadState.running),
       ]);
-      expect(vm.state.allActiveWaitForWifi, isFalse);
-
-      await show([chapterDownload(c3, DownloadState.done)]);
-      expect(vm.state.allActiveWaitForWifi, isFalse);
+      expect(vm.state.phase, BookDownloadPhase.active);
     });
 
     test('selectionHasDownload', () async {

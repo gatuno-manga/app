@@ -18,7 +18,22 @@ enum ChapterDownloadStatus {
 }
 
 /// The line under the summary strip's count, by priority.
-enum BookDownloadPhase { active, waitingForConnection, paused, failed, done }
+enum BookDownloadPhase {
+  active,
+
+  /// Every active chapter waits for Wi-Fi.
+  waitingForWifi,
+
+  /// Active chapters while the server is unreachable.
+  waitingForConnection,
+  paused,
+  failed,
+  done;
+
+  /// Chapters are queued or running: the bar shows and Pause all applies.
+  bool get hasActive =>
+      this == active || this == waitingForWifi || this == waitingForConnection;
+}
 
 /// What a chapter tile shows of its download.
 class ChapterDownloadDisplay {

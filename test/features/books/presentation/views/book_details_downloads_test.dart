@@ -518,6 +518,29 @@ void main() {
     await show(tester, [chapterDownload(c1, DownloadState.queued)]);
 
     expect(find.text('The download failed'), findsNothing);
+    expect(find.byType(BottomSheet), findsNothing, reason: 'route closed');
+  });
+
+  testWidgets('a sheet closed by its own Retry slides away whole', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    await show(tester, [chapterDownload(c1, DownloadState.failed)]);
+    await tester.tap(find.bySemanticsLabel('Download failed. Tap for options'));
+    await tester.pumpAndSettle();
+    final height = tester.getSize(find.byType(BottomSheet)).height;
+
+    await tester.tap(find.text('Try again'));
+    await tester.pump();
+    // The new state arrives while the sheet is still animating out.
+    fixture.show([chapterDownload(c1, DownloadState.queued)]);
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(tester.getSize(find.byType(BottomSheet)).height, height);
+    expect(find.text('The download failed'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
   });
 
   testWidgets('waiting for Wi-Fi mutes the summary bar', (tester) async {
@@ -582,6 +605,11 @@ void main() {
       find.byIcon(Icons.check_box_outline_blank),
       findsOneWidget,
       reason: 'no checkbox on the chapter still being scraped',
+    );
+    expect(
+      tester.getTopLeft(find.text('Chapter 2')).dx,
+      tester.getTopLeft(find.text('Chapter 1')).dx,
+      reason: 'titles stay aligned',
     );
     await tester.tap(find.text('Chapter 2'));
     await tester.pumpAndSettle();

@@ -26,8 +26,8 @@ class BookDownloadsSummary extends StatelessWidget {
   /// The bar's value while chapters are active; null hides the bar.
   final double? progress;
 
-  /// Draws the bar in `color/text-secondary` (waiting for the server)
-  /// instead of `color/primary`.
+  /// Draws the bar in the legible muted colour (waiting for the server or
+  /// for Wi-Fi) instead of `color/primary`.
   final bool progressMuted;
 
   const BookDownloadsSummary({

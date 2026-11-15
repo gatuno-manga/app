@@ -129,6 +129,7 @@ class ChapterList extends StatelessWidget {
           selected: selecting && readable
               ? downloads.isSelected(chapter)
               : null,
+          reserveSelectionSlot: selecting && !readable,
           download: readable || display.status != ChapterDownloadStatus.none
               ? display
               : null,

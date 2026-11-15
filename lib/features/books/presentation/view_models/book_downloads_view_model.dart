@@ -183,18 +183,16 @@ class BookDownloadsState extends Equatable {
 
   int get activeCount => _active.length;
 
-  /// Every active chapter waits for Wi-Fi.
-  bool get allActiveWaitForWifi =>
-      _active.isNotEmpty &&
-      _active.every((c) => c.reason == DownloadWaitReason.waitingForNetwork);
-
-  /// The strip's status line: active > waiting for connection > paused >
-  /// failed > done. `null` when the book has no downloads.
+  /// The strip's status line: active (or all waiting for Wi-Fi) > waiting
+  /// for connection > paused > failed > done. `null` when the book has no downloads.
   BookDownloadPhase? get phase {
     if (_chapters.isEmpty) return null;
     if (_active.isNotEmpty) {
-      return offline
-          ? BookDownloadPhase.waitingForConnection
+      if (offline) return BookDownloadPhase.waitingForConnection;
+      return _active.every(
+            (c) => c.reason == DownloadWaitReason.waitingForNetwork,
+          )
+          ? BookDownloadPhase.waitingForWifi
           : BookDownloadPhase.active;
     }
     if (count(DownloadState.paused) > 0) return BookDownloadPhase.paused;
@@ -221,6 +219,7 @@ class BookDownloadsState extends Equatable {
   /// active, then resume what is paused, then retry what failed.
   BookDownloadAction? get stripAction => switch (phase) {
     BookDownloadPhase.active ||
+    BookDownloadPhase.waitingForWifi ||
     BookDownloadPhase.waitingForConnection => BookDownloadAction.pauseAll,
     BookDownloadPhase.paused => BookDownloadAction.resumeAll,
     BookDownloadPhase.failed => BookDownloadAction.retryFailed,

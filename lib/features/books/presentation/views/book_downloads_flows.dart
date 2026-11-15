@@ -112,15 +112,18 @@ class BookDownloadsFlows {
   /// A tap on [chapter]'s indicator: acts directly, or opens the sheet of
   /// a failed or downloaded chapter. The sheet follows the download and
   /// closes once the chapter leaves that state (a retry from the summary,
-  /// a delete).
+  /// a delete); while it closes it keeps showing the last matching
+  /// download, so it slides away whole.
   Future<void> tapIndicator(BuildContext context, Chapter chapter) async {
     final sheet = await viewModel.tapIndicator(chapter.id);
     if (sheet == null || !context.mounted) return;
-    final l10n = AppLocalizations.of(context)!;
-    final title = chapterHeading(l10n, chapter);
     final shownState = sheet == ChapterIndicatorAction.openFailed
         ? DownloadState.failed
         : DownloadState.done;
+    var shown = viewModel.state.chapter(chapter.id);
+    if (shown == null || shown.state != shownState) return;
+    final l10n = AppLocalizations.of(context)!;
+    final title = chapterHeading(l10n, chapter);
     await showAppModalBottomSheet<void>(
       context: context,
       glass: true,
@@ -130,8 +133,10 @@ class BookDownloadsFlows {
         builder: (sheetContext, snapshot) {
           final navigator = Navigator.of(sheetContext);
           void close() => navigator.pop();
-          final download = snapshot.data!.chapter(chapter.id);
-          if (download?.state != shownState) {
+          if (snapshot.data!.chapter(chapter.id) case final d?
+              when d.state == shownState) {
+            shown = d;
+          } else {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               // Gone already when its own button closed it.
               if (sheetContext.mounted &&
@@ -139,12 +144,12 @@ class BookDownloadsFlows {
                 close();
               }
             });
-            return const SizedBox.shrink();
           }
+          final download = shown!;
           return shownState == DownloadState.failed
               ? ChapterDownloadSheet.failed(
                   title: title,
-                  reason: failureReason(l10n, download!.error),
+                  reason: failureReason(l10n, download.error),
                   onRetry: () {
                     close();
                     viewModel.retry([chapter.id]);
@@ -156,7 +161,7 @@ class BookDownloadsFlows {
                 )
               : ChapterDownloadSheet.done(
                   title: title,
-                  size: sizeOf(sheetContext, download!.bytes),
+                  size: sizeOf(sheetContext, download.bytes),
                   onDelete: () {
                     close();
                     viewModel.delete([chapter.id]);
