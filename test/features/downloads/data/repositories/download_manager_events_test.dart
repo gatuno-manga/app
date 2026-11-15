@@ -148,6 +148,31 @@ void main() {
   });
 
   group('restart', () {
+    test(
+      'a half-failed delete (manifest gone, pages kept) is healed',
+      () async {
+        manifest('c1', imageManifest('c1', pages: 1));
+        await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+        await until(() => transfers.enqueued.length == 1);
+        await land(transfers.enqueued.single);
+        await untilState('c1', DownloadState.done);
+
+        await manager.dispose();
+        File('${dir.path}/downloads/book-1/c1/chapter.json').deleteSync();
+        manager = build();
+        await manager.start();
+
+        final lost = (await chapter('c1'))!;
+        expect(lost.state, DownloadState.paused);
+        expect(lost.filesTotal, 0);
+        expect(
+          Directory('${dir.path}/downloads/book-1/c1').existsSync(),
+          isFalse,
+          reason: 'old pages removed before planning again',
+        );
+      },
+    );
+
     test('restored while running: planned again, not stuck', () async {
       manifest('c1', imageManifest('c1'));
       await manager.enqueueChapters(testBook, const [ChapterId('c1')]);

@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/core/network/exceptions.dart';
@@ -11,6 +12,7 @@ import 'package:gatuno/features/books/domain/entities/book_type.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_title.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/downloads/data/data_sources/download_records.dart';
+import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
 import 'package:gatuno/features/downloads/data/data_sources/transfer_queue.dart';
 import 'package:gatuno/features/downloads/data/repositories/download_manager.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_network.dart';
@@ -20,14 +22,35 @@ import 'package:gatuno/features/downloads/domain/entities/download_totals.dart';
 import 'package:gatuno/features/downloads/exceptions/download_exceptions.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:mocktail/mocktail.dart';
-import '../../helpers/download_test_doubles.dart';
-import 'package:gatuno/features/downloads/data/data_sources/download_storage.dart';
+
 import '../../helpers/download_manager_harness.dart';
+import '../../helpers/download_test_doubles.dart';
 
 void main() {
   setUpDownloadManager();
 
   group('resilience', () {
+    test('a resync event whose listing fails is retried later', () async {
+      await manager.dispose();
+      final flaky = _FlakyListingQueue().._failed = true;
+      transfers = flaky;
+      manager = build();
+      await manager.start();
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => flaky.enqueued.length == 2);
+      // A task vanishes; the resync after it cannot list the queue once.
+      flaky.active.remove(flaky.enqueued.first.taskId);
+      flaky._failed = false;
+
+      flaky.controller.add(const TransfersResynced());
+
+      await until(
+        () => flaky.enqueued.length == 3,
+        reason: 'the retry requeues the lost file',
+      );
+    });
+
     test(
       'a notFound retry whose files cannot be deleted stays failed',
       () async {

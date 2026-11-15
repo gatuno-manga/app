@@ -105,7 +105,9 @@ class DownloadStorage {
     String relativePath,
   ) async {
     final target = await file(bookId, chapterId, relativePath);
-    return await target.exists() ? target.length() : null;
+    // One stat, not exists() then length(): the heal calls this per chapter.
+    final stat = await target.stat();
+    return stat.type == FileSystemEntityType.notFound ? null : stat.size;
   }
 
   /// Deletes the chapter's directory; `false` when it could not.
