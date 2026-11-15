@@ -33,9 +33,7 @@ class AppLabeledSegmentedButton<T> extends StatelessWidget {
     final enabled = onChanged != null;
     // Same 38% onSurface the disabled segments use.
     final disabled = theme.colorScheme.onSurface.withValues(alpha: 0.38);
-    final secondary =
-        theme.extension<GatunoColors>()?.palette.textSecondary ??
-        theme.colorScheme.onSurfaceVariant;
+    final secondary = theme.textSecondary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +59,7 @@ class AppLabeledSegmentedButton<T> extends StatelessWidget {
           ],
         ),
         SegmentedButton<T>(
-          segments: segments,
+          segments: [for (final segment in segments) _named(segment)],
           selected: {value},
           expandedInsets: expanded ? EdgeInsets.zero : null,
           onSelectionChanged: enabled ? (s) => onChanged!(s.first) : null,
@@ -69,4 +67,16 @@ class AppLabeledSegmentedButton<T> extends StatelessWidget {
       ],
     );
   }
+
+  /// Puts [label] in each segment's spoken name, so a screen reader exploring
+  /// by touch knows which choice a segment belongs to.
+  ButtonSegment<T> _named(ButtonSegment<T> segment) => ButtonSegment<T>(
+    value: segment.value,
+    icon: segment.icon,
+    tooltip: segment.tooltip,
+    enabled: segment.enabled,
+    label: segment.label == null
+        ? null
+        : Semantics(label: label, child: segment.label),
+  );
 }

@@ -13,9 +13,7 @@ class SettingsNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color =
-        theme.extension<GatunoColors>()?.palette.textSecondary ??
-        theme.colorScheme.onSurfaceVariant;
+    final color = theme.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),

@@ -94,4 +94,21 @@ void main() {
       tester.view.physicalSize.width / tester.view.devicePixelRatio,
     );
   });
+
+  testWidgets('each segment names the choice it belongs to', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      wrap(
+        AppLabeledSegmentedButton<int>(
+          label: 'Count',
+          segments: segments,
+          value: 1,
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.bySemanticsLabel(RegExp(r'Count\s+Two')), findsOneWidget);
+    semantics.dispose();
+  });
 }

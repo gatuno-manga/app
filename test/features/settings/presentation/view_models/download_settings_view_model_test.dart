@@ -69,6 +69,35 @@ void main() {
     expect(await saving, isTrue);
   });
 
+  test(
+    'a saved rule of one type does not undo a pending choice of another',
+    () async {
+      final mangaSave = Completer<void>();
+      final manhwaSave = Completer<void>();
+      when(
+        () => rules.set(BookType.manga, any()),
+      ).thenAnswer((_) => mangaSave.future);
+      when(
+        () => rules.set(BookType.manhwa, any()),
+      ).thenAnswer((_) => manhwaSave.future);
+      await pumpEventQueue();
+
+      final manga = viewModel.setRule(BookType.manga, DownloadNetwork.any);
+      final manhwa = viewModel.setRule(BookType.manhwa, DownloadNetwork.any);
+      // Manga lands and the stored rules report it; Manhwa is still saving.
+      stored.add({...initial, BookType.manga: DownloadNetwork.any});
+      mangaSave.complete();
+      await manga;
+      await pumpEventQueue();
+
+      expect(viewModel.state.rules[BookType.manga], DownloadNetwork.any);
+      expect(viewModel.state.rules[BookType.manhwa], DownloadNetwork.any);
+      manhwaSave.complete();
+      expect(await manhwa, isTrue);
+      expect(viewModel.state.rules[BookType.manhwa], DownloadNetwork.any);
+    },
+  );
+
   test('a failed save reports failure and restores the saved rule', () async {
     when(() => rules.set(any(), any())).thenThrow(Exception('disk full'));
     await pumpEventQueue();

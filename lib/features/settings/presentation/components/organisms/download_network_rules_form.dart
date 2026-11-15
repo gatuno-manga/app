@@ -4,6 +4,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../../core/theme/theme.dart';
 import '../../../../../shared/components/molecules/app_labeled_segmented_button.dart';
 import '../../../../downloads/domain/entities/download_network.dart';
+import '../../../../downloads/domain/repositories/download_network_rules.dart';
 import '../../../../reading/domain/entities/reading_enums.dart';
 import '../molecules/settings_notice.dart';
 
@@ -36,9 +37,7 @@ class DownloadNetworkRulesForm extends StatelessWidget {
           child: Text(
             l10n.settingsDownloadNetwork,
             style: theme.textTheme.labelMedium?.copyWith(
-              color:
-                  theme.extension<GatunoColors>()?.palette.textSecondary ??
-                  theme.colorScheme.onSurfaceVariant,
+              color: theme.textSecondary,
             ),
           ),
         ),
@@ -59,7 +58,7 @@ class DownloadNetworkRulesForm extends StatelessWidget {
                 label: Text(l10n.settingsDownloadWifiAndMobile),
               ),
             ],
-            value: rules[type] ?? DownloadNetwork.unmetered,
+            value: rules[type] ?? DownloadNetworkRules.defaultRule,
             onChanged: onChanged == null
                 ? null
                 : (network) => onChanged(type, network),
