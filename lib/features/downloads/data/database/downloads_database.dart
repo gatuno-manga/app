@@ -6,7 +6,8 @@ import '../../domain/entities/download_state.dart';
 
 part 'downloads_database.g.dart';
 
-/// A book with at least one chapter download.
+/// A book with at least one chapter download, or with automatic download of
+/// new chapters turned on.
 class DownloadBooks extends Table {
   TextColumn get bookId => text()();
 
@@ -14,6 +15,10 @@ class DownloadBooks extends Table {
   TextColumn get bookType => textEnum<BookType>()();
 
   DateTimeColumn get enqueuedAt => dateTime()();
+
+  /// When automatic download of new chapters was turned on; `null` while it
+  /// is off. A row with it set outlives its last chapter.
+  DateTimeColumn get autoDownloadSince => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {bookId};
@@ -86,13 +91,16 @@ class DownloadsDatabase extends _$DownloadsDatabase {
     : super(executor ?? driftDatabase(name: 'downloads'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Each step stands alone, so steps added later stack on it.
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.createIndex(idxDownloadFilesUrl);
+      if (from < 3) {
+        await m.addColumn(downloadBooks, downloadBooks.autoDownloadSince);
+      }
     },
   );
 

@@ -5,6 +5,7 @@ import 'presentation/views/books_screen.dart';
 import 'presentation/view_models/books_view_model.dart';
 import 'presentation/views/book_details_screen.dart';
 import 'presentation/view_models/book_details_view_model.dart';
+import 'presentation/view_models/book_downloads_view_model.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/router/router_keys.dart';
 
@@ -28,7 +29,11 @@ final StatefulShellBranch booksBranch = StatefulShellBranch(
             final bookId = state.pathParameters['bookId']!;
             return Provider<BookDetailsViewModel>(
               create: (_) => sl<BookDetailsViewModel>(param1: bookId),
-              child: const BookDetailsPage(),
+              child: Provider<BookDownloadsViewModel>(
+                create: (_) => sl<BookDownloadsViewModel>(param1: bookId),
+                dispose: (_, vm) => vm.dispose(),
+                child: const BookDetailsPage(),
+              ),
             );
           },
         ),

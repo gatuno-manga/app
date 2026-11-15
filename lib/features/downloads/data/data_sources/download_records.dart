@@ -119,19 +119,79 @@ class DownloadRecords {
   Future<List<String>> bookIds() =>
       _db.select(_db.downloadBooks).map((b) => b.bookId).get();
 
-  /// Deletes the book when it has no chapter left; `true` if it did.
+  /// Whether [bookId] has no chapter left. Its row is then deleted, unless
+  /// automatic download is on for it: that row stays, holding the setting.
   Future<bool> deleteBookIfEmpty(String bookId) => _db.transaction(() async {
+    if (await _hasChapters(bookId)) return false;
+    await (_db.delete(
+          _db.downloadBooks,
+        )..where((b) => b.bookId.equals(bookId) & b.autoDownloadSince.isNull()))
+        .go();
+    return true;
+  });
+
+  Future<bool> _hasChapters(String bookId) async {
     final left =
         await (_db.select(_db.downloadChapters)
               ..where((c) => c.bookId.equals(bookId))
               ..limit(1))
             .get();
-    if (left.isNotEmpty) return false;
-    await (_db.delete(
-      _db.downloadBooks,
-    )..where((b) => b.bookId.equals(bookId))).go();
-    return true;
+    return left.isNotEmpty;
+  }
+
+  // Automatic download
+
+  /// Turns automatic download of [bookId] on from [since], recording the book
+  /// if it has no row yet.
+  Future<void> enableAutoDownload(String bookId, DateTime since) => _db
+      .into(_db.downloadBooks)
+      .insert(
+        DownloadBooksCompanion.insert(
+          bookId: bookId,
+          bookType: BookType.other,
+          enqueuedAt: since,
+          autoDownloadSince: Value(since),
+        ),
+        onConflict: DoUpdate(
+          (_) => DownloadBooksCompanion(autoDownloadSince: Value(since)),
+        ),
+      );
+
+  /// Turns automatic download of [bookId] off; a row left with no chapter
+  /// goes.
+  Future<void> disableAutoDownload(String bookId) => _db.transaction(() async {
+    await (_db.update(_db.downloadBooks)..where((b) => b.bookId.equals(bookId)))
+        .write(const DownloadBooksCompanion(autoDownloadSince: Value(null)));
+    if (!await _hasChapters(bookId)) {
+      await (_db.delete(
+        _db.downloadBooks,
+      )..where((b) => b.bookId.equals(bookId))).go();
+    }
   });
+
+  /// When automatic download of [bookId] was turned on, or `null` while it
+  /// is off. Emits on listen, then on every change.
+  Stream<DateTime?> watchAutoDownloadSince(String bookId) =>
+      (_db.selectOnly(_db.downloadBooks)
+            ..addColumns([_db.downloadBooks.autoDownloadSince])
+            ..where(_db.downloadBooks.bookId.equals(bookId)))
+          .map((row) => row.read(_db.downloadBooks.autoDownloadSince))
+          .watchSingleOrNull()
+          .distinct();
+
+  /// Books with automatic download on, oldest setting first.
+  Future<List<({String bookId, DateTime since})>> autoDownloadBooks() async {
+    final b = _db.downloadBooks;
+    final rows =
+        await (_db.select(b)
+              ..where((t) => t.autoDownloadSince.isNotNull())
+              ..orderBy([(t) => OrderingTerm.asc(t.autoDownloadSince)]))
+            .get();
+    return [
+      for (final row in rows)
+        (bookId: row.bookId, since: row.autoDownloadSince!),
+    ];
+  }
 
   // Chapters
 

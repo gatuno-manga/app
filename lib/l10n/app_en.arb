@@ -539,5 +539,162 @@
         "type": "String"
       }
     }
-  }
+  },
+  "booksSelect": "Select",
+  "booksMoreOptions": "More options",
+  "booksDownloadsSummaryOfTotal": "{total, plural, =1{{done} of 1 chapter downloaded · {size}} other{{done} of {total} chapters downloaded · {size}}}",
+  "@booksDownloadsSummaryOfTotal": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "booksDownloadsSummary": "{done, plural, =1{1 chapter downloaded · {size}} other{{done} chapters downloaded · {size}}}",
+  "@booksDownloadsSummary": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "booksDownloadsPhaseActive": "{count, plural, =1{Downloading 1 chapter} other{Downloading {count} chapters}}",
+  "@booksDownloadsPhaseActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksDownloadsPhaseWaitingWifi": "Waiting for Wi-Fi",
+  "booksDownloadsPhaseWaitingConnection": "Waiting for connection",
+  "booksDownloadsPhasePaused": "{count, plural, =1{1 chapter paused} other{{count} chapters paused}}",
+  "@booksDownloadsPhasePaused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksDownloadsPhaseFailed": "{count, plural, =1{1 chapter failed} other{{count} chapters failed}}",
+  "@booksDownloadsPhaseFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksDownloadsPauseAll": "Pause all",
+  "booksDownloadsResumeAll": "Resume",
+  "booksDownloadsRetryFailed": "Try again ({count})",
+  "@booksDownloadsRetryFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksSelectionCount": "{count, plural, =0{None selected} =1{1 selected} other{{count} selected}}",
+  "@booksSelectionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksSelectionClose": "Leave selection",
+  "booksSelectionSelectLoaded": "Select loaded chapters",
+  "booksSelectionDownload": "Download",
+  "booksSelectionDelete": "Delete",
+  "booksSelectionPause": "Pause",
+  "booksSelectionResume": "Resume",
+  "booksSelectionRetry": "Retry",
+  "booksOptionsTitle": "Book options",
+  "booksOptionsDownloads": "Downloads",
+  "booksDownloadAll": "Download all",
+  "booksDownloadAllSubtitle": "Includes chapters not loaded yet",
+  "booksDownloadAllOffline": "Needs a connection to the server",
+  "booksDeleteAllDownloads": "Delete all downloads",
+  "booksDeleteAllDownloadsSubtitle": "{count, plural, =1{1 chapter · {size}} other{{count} chapters · {size}}}",
+  "@booksDeleteAllDownloadsSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "booksAutoDownload": "Download new chapters",
+  "booksAutoDownloadSubtitle": "Automatically downloads this book's new chapters",
+  "booksChapterDownloadFailed": "The download failed",
+  "booksChapterDownloaded": "Downloaded · {size}",
+  "@booksChapterDownloaded": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "booksChapterDownloadRetry": "Try again",
+  "booksChapterDownloadDelete": "Delete download",
+  "booksDownloadErrorSignIn": "Sign in again to download this chapter.",
+  "booksDownloadErrorStorageFull": "There isn't enough free space on this device.",
+  "booksDownloadErrorNotFound": "The server no longer has this chapter.",
+  "booksDownloadErrorTimedOut": "A file took too long to download.",
+  "booksDownloadErrorServer": "The server couldn't send this chapter.",
+  "booksDownloadErrorUnknown": "Something went wrong while downloading.",
+  "booksDeleteChaptersTitle": "{count, plural, =1{Delete 1 chapter?} other{Delete {count} chapters?}}",
+  "@booksDeleteChaptersTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "booksDeleteChaptersBody": "{count, plural, =1{The chapter will be deleted from this device, freeing {size}. You can download it again later.} other{The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.}}",
+  "@booksDeleteChaptersBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "booksDeleteAllTitle": "Delete all downloads of this book?",
+  "booksDeleteConfirm": "Delete",
+  "booksDownloadSignInRequired": "Sign in to download chapters.",
+  "booksDownloadSignIn": "Sign in",
+  "booksDownloadActionFailed": "Couldn't update the downloads. Try again.",
+  "booksDownloadStatusNone": "Not downloaded",
+  "booksDownloadStatusQueued": "Queued",
+  "booksDownloadStatusRunning": "Downloading, {percent}%",
+  "@booksDownloadStatusRunning": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "booksDownloadStatusWaitingWifi": "Waiting for Wi-Fi",
+  "booksDownloadStatusWaitingConnection": "Waiting for connection",
+  "booksDownloadStatusPaused": "Paused",
+  "booksDownloadStatusFailed": "Download failed",
+  "booksDownloadStatusDone": "Downloaded",
+  "booksDownloadHintDownload": "Tap to download",
+  "booksDownloadHintPause": "Tap to pause",
+  "booksDownloadHintResume": "Tap to resume",
+  "booksDownloadHintOptions": "Tap for options"
 }

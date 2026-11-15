@@ -2233,6 +2233,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{failed} of {total} files failed'**
   String downloadsNotificationErrorBody(String failed, String total);
+
+  /// No description provided for @booksSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get booksSelect;
+
+  /// No description provided for @booksMoreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get booksMoreOptions;
+
+  /// No description provided for @booksDownloadsSummaryOfTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{total, plural, =1{{done} of 1 chapter downloaded · {size}} other{{done} of {total} chapters downloaded · {size}}}'**
+  String booksDownloadsSummaryOfTotal(int done, int total, String size);
+
+  /// No description provided for @booksDownloadsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{done, plural, =1{1 chapter downloaded · {size}} other{{done} chapters downloaded · {size}}}'**
+  String booksDownloadsSummary(int done, String size);
+
+  /// No description provided for @booksDownloadsPhaseActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Downloading 1 chapter} other{Downloading {count} chapters}}'**
+  String booksDownloadsPhaseActive(int count);
+
+  /// No description provided for @booksDownloadsPhaseWaitingWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Wi-Fi'**
+  String get booksDownloadsPhaseWaitingWifi;
+
+  /// No description provided for @booksDownloadsPhaseWaitingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for connection'**
+  String get booksDownloadsPhaseWaitingConnection;
+
+  /// No description provided for @booksDownloadsPhasePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 chapter paused} other{{count} chapters paused}}'**
+  String booksDownloadsPhasePaused(int count);
+
+  /// No description provided for @booksDownloadsPhaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 chapter failed} other{{count} chapters failed}}'**
+  String booksDownloadsPhaseFailed(int count);
+
+  /// No description provided for @booksDownloadsPauseAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause all'**
+  String get booksDownloadsPauseAll;
+
+  /// No description provided for @booksDownloadsResumeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get booksDownloadsResumeAll;
+
+  /// No description provided for @booksDownloadsRetryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again ({count})'**
+  String booksDownloadsRetryFailed(int count);
+
+  /// No description provided for @booksSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{None selected} =1{1 selected} other{{count} selected}}'**
+  String booksSelectionCount(int count);
+
+  /// No description provided for @booksSelectionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave selection'**
+  String get booksSelectionClose;
+
+  /// No description provided for @booksSelectionSelectLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Select loaded chapters'**
+  String get booksSelectionSelectLoaded;
+
+  /// No description provided for @booksSelectionDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get booksSelectionDownload;
+
+  /// No description provided for @booksSelectionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get booksSelectionDelete;
+
+  /// No description provided for @booksSelectionPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get booksSelectionPause;
+
+  /// No description provided for @booksSelectionResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get booksSelectionResume;
+
+  /// No description provided for @booksSelectionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get booksSelectionRetry;
+
+  /// No description provided for @booksOptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Book options'**
+  String get booksOptionsTitle;
+
+  /// No description provided for @booksOptionsDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get booksOptionsDownloads;
+
+  /// No description provided for @booksDownloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all'**
+  String get booksDownloadAll;
+
+  /// No description provided for @booksDownloadAllSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes chapters not loaded yet'**
+  String get booksDownloadAllSubtitle;
+
+  /// No description provided for @booksDownloadAllOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a connection to the server'**
+  String get booksDownloadAllOffline;
+
+  /// No description provided for @booksDeleteAllDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all downloads'**
+  String get booksDeleteAllDownloads;
+
+  /// No description provided for @booksDeleteAllDownloadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 chapter · {size}} other{{count} chapters · {size}}}'**
+  String booksDeleteAllDownloadsSubtitle(int count, String size);
+
+  /// No description provided for @booksAutoDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download new chapters'**
+  String get booksAutoDownload;
+
+  /// No description provided for @booksAutoDownloadSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically downloads this book\'s new chapters'**
+  String get booksAutoDownloadSubtitle;
+
+  /// No description provided for @booksChapterDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The download failed'**
+  String get booksChapterDownloadFailed;
+
+  /// No description provided for @booksChapterDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded · {size}'**
+  String booksChapterDownloaded(String size);
+
+  /// No description provided for @booksChapterDownloadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get booksChapterDownloadRetry;
+
+  /// No description provided for @booksChapterDownloadDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete download'**
+  String get booksChapterDownloadDelete;
+
+  /// No description provided for @booksDownloadErrorSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to download this chapter.'**
+  String get booksDownloadErrorSignIn;
+
+  /// No description provided for @booksDownloadErrorStorageFull.
+  ///
+  /// In en, this message translates to:
+  /// **'There isn\'t enough free space on this device.'**
+  String get booksDownloadErrorStorageFull;
+
+  /// No description provided for @booksDownloadErrorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The server no longer has this chapter.'**
+  String get booksDownloadErrorNotFound;
+
+  /// No description provided for @booksDownloadErrorTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'A file took too long to download.'**
+  String get booksDownloadErrorTimedOut;
+
+  /// No description provided for @booksDownloadErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'The server couldn\'t send this chapter.'**
+  String get booksDownloadErrorServer;
+
+  /// No description provided for @booksDownloadErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while downloading.'**
+  String get booksDownloadErrorUnknown;
+
+  /// No description provided for @booksDeleteChaptersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Delete 1 chapter?} other{Delete {count} chapters?}}'**
+  String booksDeleteChaptersTitle(int count);
+
+  /// No description provided for @booksDeleteChaptersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The chapter will be deleted from this device, freeing {size}. You can download it again later.} other{The {count} chapters will be deleted from this device, freeing {size}. You can download them again later.}}'**
+  String booksDeleteChaptersBody(int count, String size);
+
+  /// No description provided for @booksDeleteAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all downloads of this book?'**
+  String get booksDeleteAllTitle;
+
+  /// No description provided for @booksDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get booksDeleteConfirm;
+
+  /// No description provided for @booksDownloadSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to download chapters.'**
+  String get booksDownloadSignInRequired;
+
+  /// No description provided for @booksDownloadSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get booksDownloadSignIn;
+
+  /// No description provided for @booksDownloadActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the downloads. Try again.'**
+  String get booksDownloadActionFailed;
+
+  /// No description provided for @booksDownloadStatusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not downloaded'**
+  String get booksDownloadStatusNone;
+
+  /// No description provided for @booksDownloadStatusQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get booksDownloadStatusQueued;
+
+  /// No description provided for @booksDownloadStatusRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading, {percent}%'**
+  String booksDownloadStatusRunning(int percent);
+
+  /// No description provided for @booksDownloadStatusWaitingWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Wi-Fi'**
+  String get booksDownloadStatusWaitingWifi;
+
+  /// No description provided for @booksDownloadStatusWaitingConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for connection'**
+  String get booksDownloadStatusWaitingConnection;
+
+  /// No description provided for @booksDownloadStatusPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get booksDownloadStatusPaused;
+
+  /// No description provided for @booksDownloadStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get booksDownloadStatusFailed;
+
+  /// No description provided for @booksDownloadStatusDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get booksDownloadStatusDone;
+
+  /// No description provided for @booksDownloadHintDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to download'**
+  String get booksDownloadHintDownload;
+
+  /// No description provided for @booksDownloadHintPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to pause'**
+  String get booksDownloadHintPause;
+
+  /// No description provided for @booksDownloadHintResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to resume'**
+  String get booksDownloadHintResume;
+
+  /// No description provided for @booksDownloadHintOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap for options'**
+  String get booksDownloadHintOptions;
 }
 
 class _AppLocalizationsDelegate

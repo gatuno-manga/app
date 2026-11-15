@@ -21,11 +21,15 @@ class AppTextButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final AppTextButtonTone tone;
 
+  /// Drawn before [text], in the same color.
+  final IconData? icon;
+
   const AppTextButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.tone = AppTextButtonTone.neutral,
+    this.icon,
   });
 
   @override
@@ -37,15 +41,21 @@ class AppTextButton extends StatelessWidget {
       AppTextButtonTone.danger => colorScheme.error,
     };
 
-    return TextButton(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        // Height keeps the 48dp tap target; width follows the label.
-        minimumSize: const Size(0, 48),
-      ),
-      child: Text(text),
+    final style = TextButton.styleFrom(
+      foregroundColor: color,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      // Height keeps the 48dp tap target; width follows the label.
+      minimumSize: const Size(0, 48),
     );
+    final icon = this.icon;
+    if (icon != null) {
+      return TextButton.icon(
+        onPressed: onPressed,
+        style: style,
+        icon: Icon(icon, size: 18),
+        label: Text(text),
+      );
+    }
+    return TextButton(onPressed: onPressed, style: style, child: Text(text));
   }
 }
