@@ -48,6 +48,7 @@ dependencies:
   local_auth_android: ^2.3.0
   local_auth_darwin: ^2.0.5
   connectivity_plus: ^7.3.1
+  background_downloader: ^9.6.6
 
 dev_dependencies:
   flutter_test:

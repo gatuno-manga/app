@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bg_downloader_notification_channel_name">Downloads</string>
+    <string name="bg_downloader_notification_channel_description">Progresso do download de capítulos</string>
+    <string name="bg_downloader_cancel">Cancelar</string>
+</resources>

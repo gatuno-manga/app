@@ -2101,6 +2101,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This isn\'t saved on this device yet. It loads once the server is reachable again.'**
   String get offlineEmptyMessage;
+
+  /// No description provided for @downloadsNotificationRunningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading chapters'**
+  String get downloadsNotificationRunningTitle;
+
+  /// Progress of the download notification; the arguments are filled in by the system.
+  ///
+  /// In en, this message translates to:
+  /// **'{finished} of {total} files'**
+  String downloadsNotificationRunningBody(String finished, String total);
+
+  /// No description provided for @downloadsNotificationCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads finished'**
+  String get downloadsNotificationCompleteTitle;
+
+  /// No description provided for @downloadsNotificationCompleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{total} files downloaded'**
+  String downloadsNotificationCompleteBody(String total);
+
+  /// No description provided for @downloadsNotificationErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Some downloads failed'**
+  String get downloadsNotificationErrorTitle;
+
+  /// No description provided for @downloadsNotificationErrorBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{failed} of {total} files failed'**
+  String downloadsNotificationErrorBody(String failed, String total);
 }
 
 class _AppLocalizationsDelegate

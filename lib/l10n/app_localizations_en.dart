@@ -1127,4 +1127,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineEmptyMessage =>
       'This isn\'t saved on this device yet. It loads once the server is reachable again.';
+
+  @override
+  String get downloadsNotificationRunningTitle => 'Downloading chapters';
+
+  @override
+  String downloadsNotificationRunningBody(String finished, String total) {
+    return '$finished of $total files';
+  }
+
+  @override
+  String get downloadsNotificationCompleteTitle => 'Downloads finished';
+
+  @override
+  String downloadsNotificationCompleteBody(String total) {
+    return '$total files downloaded';
+  }
+
+  @override
+  String get downloadsNotificationErrorTitle => 'Some downloads failed';
+
+  @override
+  String downloadsNotificationErrorBody(String failed, String total) {
+    return '$failed of $total files failed';
+  }
 }
