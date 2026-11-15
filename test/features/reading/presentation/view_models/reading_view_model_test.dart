@@ -197,7 +197,8 @@ void main() {
       await viewModel.loadChapter(chapterId);
       connectivity.probeResult = ConnectivityStatus.online;
 
-      expect(await viewModel.retryOffline(), isTrue);
+      await viewModel.retryOffline();
+      expect(viewModel.state.stillOffline, isFalse);
 
       expect(connectivity.checks, 1);
       expect(viewModel.state.isRetrying, isFalse);
@@ -209,9 +210,10 @@ void main() {
       connectivity.goOffline();
       await viewModel.loadChapter(chapterId);
 
-      expect(await viewModel.retryOffline(), isFalse);
+      await viewModel.retryOffline();
 
       expect(viewModel.state.isOfflineMiss, isTrue);
+      expect(viewModel.state.stillOffline, isTrue);
       expect(viewModel.state.isRetrying, isFalse);
       verify(() => repository.openChapter(id)).called(1);
     });
@@ -224,10 +226,29 @@ void main() {
         await viewModel.loadChapter(chapterId);
         connectivity.probeResult = ConnectivityStatus.online;
 
-        expect(await viewModel.retryOffline(), isFalse);
+        await viewModel.retryOffline();
         expect(viewModel.state.isOfflineMiss, isTrue);
+        expect(viewModel.state.stillOffline, isTrue);
       },
     );
+
+    test('reconnecting clears the still-offline message', () async {
+      var calls = 0;
+      when(() => repository.openChapter(id)).thenAnswer((_) async {
+        if (calls++ == 0) throw OfflineException();
+        return OpenedChapter(chapter: _chapter(), isDownloaded: false);
+      });
+      connectivity.goOffline();
+      await viewModel.loadChapter(chapterId);
+      await viewModel.retryOffline();
+      expect(viewModel.state.stillOffline, isTrue);
+
+      connectivity.reconnect();
+      await _settle();
+
+      expect(viewModel.state.stillOffline, isFalse);
+      expect(viewModel.chapter, isNotNull);
+    });
 
     test('the error retry opens the last chapter asked for', () async {
       when(() => repository.openChapter(id)).thenThrow(Exception('boom'));

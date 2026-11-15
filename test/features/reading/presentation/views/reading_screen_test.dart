@@ -93,27 +93,6 @@ void main() {
   });
 
   group('ReadingScreen', () {
-    testWidgets('a retry while still offline says so', (tester) async {
-      final st = ReadingState.initial().copyWith(isOfflineMiss: true);
-      stateController.add(st);
-      when(() => mockViewModel.state).thenReturn(st);
-      when(() => mockViewModel.retryOffline()).thenAnswer((_) async => false);
-
-      await tester.pumpApp(
-        const ReadingScreen(chapterId: '123', initialPage: 0),
-      );
-      await tester.tap(find.text('Retry'));
-      await tester.pump();
-
-      verify(() => mockViewModel.retryOffline()).called(1);
-      expect(find.text('Still offline.'), findsOneWidget);
-
-      // A reconnect opened the chapter: the message no longer holds.
-      stateController.add(ReadingState.initial());
-      await tester.pumpAndSettle();
-      expect(find.text('Still offline.'), findsNothing);
-    });
-
     testWidgets('initializes viewModel and loads chapter', (tester) async {
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
@@ -123,34 +102,24 @@ void main() {
       expect(find.byType(ReadingTemplate), findsOneWidget);
     });
 
-    testWidgets('a retry after the message timed out shows it again', (
+    testWidgets('the offline view retries offline and says when it failed', (
       tester,
     ) async {
-      final st = ReadingState.initial().copyWith(isOfflineMiss: true);
+      final st = ReadingState.initial().copyWith(
+        isOfflineMiss: true,
+        stillOffline: true,
+      );
       stateController.add(st);
       when(() => mockViewModel.state).thenReturn(st);
-      when(() => mockViewModel.retryOffline()).thenAnswer((_) async => false);
+      when(() => mockViewModel.retryOffline()).thenAnswer((_) async {});
+
       await tester.pumpApp(
         const ReadingScreen(chapterId: '123', initialPage: 0),
       );
-
-      await tester.tap(find.text('Retry'));
-      await tester.pumpAndSettle();
-      // Past the SnackBar's own duration.
-      await tester.pump(const Duration(seconds: 5));
-      await tester.pumpAndSettle();
-      expect(find.text('Still offline.'), findsNothing);
-
-      await tester.tap(find.text('Retry'));
-      await tester.pump();
-      expect(tester.takeException(), isNull);
       expect(find.text('Still offline.'), findsOneWidget);
 
-      // Leaving after it timed out again is fine too.
-      await tester.pump(const Duration(seconds: 5));
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(const SizedBox());
-      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('Retry'));
+      verify(() => mockViewModel.retryOffline()).called(1);
     });
 
     testWidgets('renders loading state', (tester) async {

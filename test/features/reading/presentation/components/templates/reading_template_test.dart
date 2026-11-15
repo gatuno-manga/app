@@ -91,5 +91,36 @@ void main() {
       await tester.tap(find.byTooltip('Go Back'));
       expect(wentBack, 1);
     });
+
+    testWidgets('a failed offline retry is said under the offline view', (
+      tester,
+    ) async {
+      await tester.pumpApp(
+        ReadingTemplate(
+          isLoading: false,
+          isOfflineMiss: true,
+          stillOffline: true,
+          onOfflineRetry: () {},
+          onRetry: () {},
+          onGoBack: () {},
+          readerBuilder: (_) => const SizedBox(),
+        ),
+      );
+
+      expect(find.byType(AppOfflineEmptyView), findsOneWidget);
+      final message = find.text('Still offline.');
+      expect(message, findsOneWidget);
+      expect(
+        tester
+            .widget<Semantics>(
+              find
+                  .ancestor(of: message, matching: find.byType(Semantics))
+                  .first,
+            )
+            .properties
+            .liveRegion,
+        isTrue,
+      );
+    });
   });
 }

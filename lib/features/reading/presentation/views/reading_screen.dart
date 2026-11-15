@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/di/injection.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../view_models/reading_view_model.dart';
 import '../../domain/use_cases/reader_preferences_service.dart';
 import '../../domain/entities/reading_chapter.dart';
@@ -60,36 +57,6 @@ class _ReadingScreenContent extends StatefulWidget {
 }
 
 class _ReadingScreenContentState extends State<_ReadingScreenContent> {
-  /// The "still offline" message, closed once the offline view goes away (a
-  /// reconnect opened the chapter, or the reader left).
-  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _stillOffline;
-  late final StreamSubscription<ReadingState> _stateSubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _stateSubscription = context.read<ReadingViewModel>().stateStream.listen((
-      state,
-    ) {
-      if (!state.isOfflineMiss) _closeStillOffline();
-    });
-  }
-
-  @override
-  void dispose() {
-    _stateSubscription.cancel();
-    _closeStillOffline();
-    super.dispose();
-  }
-
-  /// Closes the message if it is still up; one that timed out already
-  /// cleared [_stillOffline] (closing it again would hide another SnackBar).
-  void _closeStillOffline() {
-    final shown = _stillOffline;
-    _stillOffline = null;
-    shown?.close();
-  }
-
   @override
   void didUpdateWidget(_ReadingScreenContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -115,7 +82,8 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
           chapter: state.chapter,
           isOfflineMiss: state.isOfflineMiss,
           isRetrying: state.isRetrying,
-          onOfflineRetry: () => _retryOffline(viewModel),
+          stillOffline: state.stillOffline,
+          onOfflineRetry: viewModel.retryOffline,
           onRetry: viewModel.retry,
           onGoBack: () {
             if (context.canPop()) {
@@ -128,22 +96,6 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
         );
       },
     );
-  }
-
-  /// Says so when the server is still unreachable: the offline view itself
-  /// does not change, and a SnackBar is announced to screen readers.
-  Future<void> _retryOffline(ReadingViewModel viewModel) async {
-    final reachable = await viewModel.retryOffline();
-    if (reachable || !mounted) return;
-    final l10n = AppLocalizations.of(context)!;
-    _closeStillOffline();
-    final shown = ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.readingStillOffline)));
-    _stillOffline = shown;
-    shown.closed.whenComplete(() {
-      if (identical(_stillOffline, shown)) _stillOffline = null;
-    });
   }
 
   Widget _buildReader(ReadingChapter chapter) {
