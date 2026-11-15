@@ -126,17 +126,45 @@ void main() {
       },
     );
 
-    test('a paused update is ignored', () async {
+    test('an unexpected paused task is cancelled, then resynced', () async {
+      when(
+        () => downloader.cancelTasksWithIds(any()),
+      ).thenAnswer((_) async => true);
       await start(ios: false);
 
       updates.add(paused());
-      await Future<void>.delayed(
-        BackgroundDownloaderTransferQueue.resumeSettle * 2,
-      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
 
+      verify(() => downloader.cancelTasksWithIds(['c1/1@s.1'])).called(1);
       verifyNever(() => downloader.resume(any()));
-      verifyNever(() => downloader.resumeAll(group: any(named: 'group')));
-      expect(events, isEmpty);
+      expect(events, [const TransfersResynced()]);
+    });
+
+    test('cancels replayed during start are the user\'s, not events', () async {
+      when(() => downloader.resumeFromBackground()).thenAnswer((_) async {
+        updates.add(
+          TaskStatusUpdate(
+            DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+            TaskStatus.canceled,
+          ),
+        );
+        updates.add(
+          TaskStatusUpdate(
+            DownloadTask(taskId: 'c1/2@s.1', url: 'https://srv/2.jpg'),
+            TaskStatus.complete,
+          ),
+        );
+      });
+      final q = queue = BackgroundDownloaderTransferQueue(
+        downloader: downloader,
+        texts: () => _texts,
+        resumesPausedTasks: false,
+      );
+      sub = q.events.listen(events.add);
+
+      expect(await q.start(), {'c1/1@s.1'});
+      await Future<void>.delayed(Duration.zero);
+      expect(events, isEmpty, reason: 'settled by the caller, not replayed');
     });
   });
 
@@ -172,6 +200,25 @@ void main() {
 
       verify(() => downloader.resumeAll(group: any(named: 'group'))).called(1);
       expect(events, [const TransfersResynced()]);
+    });
+
+    test('cancels during start are the system\'s: not returned', () async {
+      when(() => downloader.resumeFromBackground()).thenAnswer((_) async {
+        updates.add(
+          TaskStatusUpdate(
+            DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+            TaskStatus.canceled,
+          ),
+        );
+      });
+      final q = queue = BackgroundDownloaderTransferQueue(
+        downloader: downloader,
+        texts: () => _texts,
+        resumesPausedTasks: true,
+      );
+      sub = q.events.listen(events.add);
+
+      expect(await q.start(), isEmpty);
     });
 
     test('tasks do not allow pause', () async {

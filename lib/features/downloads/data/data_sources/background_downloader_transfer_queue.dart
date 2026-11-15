@@ -72,6 +72,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   final StreamController<TransferEvent> _events =
       StreamController<TransferEvent>.broadcast();
   StreamSubscription<TaskUpdate>? _updates;
+
+  /// Set while [start] settles stored updates: they are not forwarded, and
+  /// cancels among them are collected as the user's.
+  Set<String>? _replayedUserCancels;
   bool _permissionAsked = false;
 
   BackgroundDownloaderTransferQueue({
@@ -86,7 +90,8 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   Stream<TransferEvent> get events => _events.stream;
 
   @override
-  Future<void> start() async {
+  Future<Set<String>> start() async {
+    final userCancels = _replayedUserCancels = <String>{};
     _updates ??= _downloader.updates.listen(_onUpdate);
     await _downloader.configure(
       // No holding queue: it lives in the app process, so files waiting in
@@ -116,6 +121,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
       // No resync event: the caller reconciles right after start.
       await _sweep(notify: false);
     }
+    // Stored updates reach the listener asynchronously: let them land.
+    await Future<void>.delayed(Duration.zero);
+    _replayedUserCancels = null;
+    return userCancels;
   }
 
   void _configureNotifications() {
@@ -132,15 +141,43 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   }
 
   void _onUpdate(TaskUpdate update) {
+    final replayed = _replayedUserCancels;
+    if (replayed != null) {
+      // Android: the only cancels the app does not make come from the
+      // notification. iOS: cancels during start are the system's (a
+      // force-quit), and those files are queued again.
+      if (!_resumesPausedTasks &&
+          update is TaskStatusUpdate &&
+          update.status == TaskStatus.canceled) {
+        replayed.add(update.task.taskId);
+      }
+      if (!(update is TaskStatusUpdate && update.status == TaskStatus.paused)) {
+        return;
+      }
+    }
     if (update is TaskStatusUpdate && update.status == TaskStatus.paused) {
       if (_resumesPausedTasks) {
         _sweepTimer?.cancel();
         _sweepTimer = Timer(resumeSettle, () => unawaited(_sweep()));
+      } else {
+        // Android tasks never allow pause; a paused one (enqueued by an
+        // older build) would sit in the plugin's paused list forever.
+        AppLogger.w('Unexpected paused download; cancelling it', _logTag);
+        unawaited(_cancelUnexpectedPause(update.task.taskId));
       }
       return;
     }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
+  }
+
+  Future<void> _cancelUnexpectedPause(String taskId) async {
+    try {
+      await _downloader.cancelTasksWithIds([taskId]);
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not cancel a paused download', e, stackTrace, _logTag);
+    }
+    if (!_events.isClosed) _events.add(const TransfersResynced());
   }
 
   /// Resumes every paused task, one sweep at a time: the plugin removes a
@@ -185,6 +222,9 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
           // Both platforms say "Insufficient space to store the file...".
           when description.toLowerCase().contains('insufficient space') =>
         DownloadErrors.storageFull,
+      TaskConnectionException(:final description)
+          when description.toLowerCase().contains('timed out') =>
+        DownloadErrors.timedOut,
       TaskHttpException() || TaskConnectionException() => DownloadErrors.server,
       _ => DownloadErrors.unknown,
     };

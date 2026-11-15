@@ -145,14 +145,19 @@ class DownloadManager implements DownloadService {
           }),
         );
       return _serial(() async {
+        var userCancels = const <String>{};
         try {
-          await _transfers.start();
+          userCancels = await _transfers.start();
         } catch (e, stackTrace) {
           // Planning and the records still work; files wait for a restart.
           AppLogger.e('Native downloader unavailable', e, stackTrace, _logTag);
         }
         final rules = await _loadRules();
         if (!_rules.isClosed) _rules.add(rules);
+        // Before reconciling, which would queue those files again.
+        for (final taskId in userCancels) {
+          await _onUserCancel(taskId);
+        }
         await _reconcile();
       }).whenComplete(() => unawaited(_plan()));
     }();
@@ -537,18 +542,27 @@ class DownloadManager implements DownloadService {
         await _continue(chapter.chapterId);
       case TransferFailed(:final error):
         await _fail(chapter.chapterId, error);
-      case TransferCancelled():
-        // Not cancelled by us (we clear the id first): the user cancelled
-        // from the notification. Treat it as a pause, so nothing is lost.
-        await _records.setTask(file.fileId, null);
-        await _transition(chapter, DownloadEvent.pause);
+      case TransferCancelled(:final taskId):
+        await _onUserCancel(taskId);
     }
   }
 
-  /// Applies what happened while the app was not running: files whose native
-  /// task vanished are queued again, and [_continue] marks those on disk
-  /// done. A file that failed while the app was closed gets one more try:
-  /// its stored failure arrives after this, under the old, now stale, id.
+  /// A cancel the app did not ask for (it unbinds ids before cancelling)
+  /// came from the user, from a notification: pause the chapter, so what is
+  /// on disk is kept and a resume continues it.
+  Future<void> _onUserCancel(String taskId) async {
+    final file = await _records.fileForTask(taskId);
+    if (file == null) return;
+    final chapter = await _records.chapter(file.chapterId);
+    if (chapter == null) return;
+    await _records.releaseTaskIds({taskId});
+    await _transition(chapter, DownloadEvent.pause);
+  }
+
+  /// Applies what happened while the app was not running (user cancels are
+  /// applied before): files whose native task vanished are queued again,
+  /// and [_continue] marks those on disk done. A file that failed while the
+  /// app was closed is queued again, so it gets one more try.
   Future<void> _reconcile() async {
     final active = await _transfers.activeTaskIds();
     await _resync(active);
@@ -564,7 +578,7 @@ class DownloadManager implements DownloadService {
     // the native queue, or a late duplicate. They must not run.
     final orphans = active.difference(recorded);
     if (orphans.isNotEmpty) await _transfers.cancel(orphans);
-    await _records.clearTaskIds(recorded.difference(active));
+    await _records.releaseTaskIds(recorded.difference(active));
     for (final chapter in await _records.activePlanned()) {
       await _continue(chapter.chapterId);
     }
@@ -581,13 +595,10 @@ class DownloadManager implements DownloadService {
   /// Requeues the chapters with a queued file whose stored rule differs from
   /// what the current rules want for its book type.
   Future<void> _applyRules() async {
-    final rules = _rules.value;
-    final chapterIds = {
-      for (final file in await _records.queuedFiles())
-        if (file.queuedOnWifi !=
-            (rules[file.bookType] == DownloadNetwork.unmetered))
-          file.chapterId,
-    }.toList();
+    final chapterIds = await _records.chaptersQueuedAgainstRules({
+      for (final entry in _rules.value.entries)
+        if (entry.value == DownloadNetwork.unmetered) entry.key,
+    });
     await _cancelFiles(chapterIds);
     for (final chapterId in chapterIds) {
       await _continue(chapterId);
@@ -660,7 +671,9 @@ class DownloadManager implements DownloadService {
     final transfers = <FileTransfer>[];
     final taskIds = <String, String>{};
     for (final file in unqueued) {
-      final taskId = TransferIds.forAttempt(file.fileId, _session, ++_attempt);
+      // A new id per attempt (and per app session), so a late event from an
+      // earlier attempt cannot pass for the current one.
+      final taskId = '${file.fileId}@$_session.${++_attempt}';
       taskIds[file.fileId] = taskId;
       final target = DownloadStorage.transferTarget(
         chapter.bookId,
@@ -693,14 +706,7 @@ class DownloadManager implements DownloadService {
   /// Cancels the native tasks of the chapters' pending files, in one call. Their ids are
   /// cleared first, so the cancel events that follow are recognized as ours.
   Future<void> _cancelFiles(List<String> chapterIds) async {
-    if (chapterIds.isEmpty) return;
-    final queued = [
-      for (final file in await _records.pendingFilesOf(chapterIds))
-        if (file.nativeTaskId != null) file,
-    ];
-    if (queued.isEmpty) return;
-    await _records.assignTasks({for (final f in queued) f.fileId: null});
-    await _cancelTasks([for (final f in queued) f.nativeTaskId!]);
+    await _cancelTasks(await _records.releaseTasksOf(chapterIds));
   }
 
   Future<void> _cancelTasks(List<String> taskIds) async {

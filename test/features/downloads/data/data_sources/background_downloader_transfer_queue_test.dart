@@ -49,6 +49,10 @@ void main() {
       const TransferFailed('c1/1@1', DownloadErrors.storageFull),
     );
     expect(
+      map(TaskStatus.failed, TaskConnectionException('Task timed out')),
+      const TransferFailed('c1/1@1', DownloadErrors.timedOut),
+    );
+    expect(
       map(TaskStatus.failed, TaskConnectionException('reset')),
       const TransferFailed('c1/1@1', DownloadErrors.server),
     );
@@ -56,9 +60,5 @@ void main() {
       map(TaskStatus.failed),
       const TransferFailed('c1/1@1', DownloadErrors.unknown),
     );
-  });
-
-  test('task ids carry the file id and the attempt', () {
-    expect(TransferIds.forAttempt('c1/3', 's1', 7), 'c1/3@s1.7');
   });
 }

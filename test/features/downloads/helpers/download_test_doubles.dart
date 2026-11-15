@@ -71,7 +71,10 @@ class FakeTransferQueue implements TransferQueue {
   Stream<TransferEvent> get events => controller.stream;
 
   @override
-  Future<void> start() async {}
+  Future<Set<String>> start() async => {...userCancelsWhileClosed};
+
+  /// What [start] reports the user cancelled while the app was closed.
+  Set<String> userCancelsWhileClosed = {};
 
   @override
   Future<void> enqueue(List<FileTransfer> transfers) async {
@@ -143,7 +146,10 @@ class GatedTransferQueue extends FakeTransferQueue {
   GatedTransferQueue(this.gate);
 
   @override
-  Future<void> start() => gate;
+  Future<Set<String>> start() async {
+    await gate;
+    return const {};
+  }
 }
 
 /// A transfer queue whose cancelAll fails, as with the plugin unavailable.

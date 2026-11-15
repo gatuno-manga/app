@@ -4,6 +4,4 @@
     <string name="bg_downloader_notification_channel_name">Downloads</string>
     <string name="bg_downloader_notification_channel_description">Chapter download progress</string>
     <string name="bg_downloader_cancel">Cancel</string>
-    <string name="bg_downloader_pause">Pause</string>
-    <string name="bg_downloader_resume">Resume</string>
 </resources>

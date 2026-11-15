@@ -142,6 +142,27 @@ void main() {
   });
 
   group('restart', () {
+    test('a notification cancel while closed pauses the chapter', () async {
+      manifest('c1', imageManifest('c1'));
+      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
+      await until(() => transfers.enqueued.length == 2);
+      final ids = [for (final t in transfers.enqueued) t.taskId];
+
+      // The app is closed; the user taps Cancel on the notification.
+      await manager.dispose();
+      transfers.active.clear();
+      transfers.userCancelsWhileClosed = ids.toSet();
+      final before = transfers.enqueued.length;
+      manager = build();
+      await manager.start();
+
+      expect((await chapter('c1'))!.state, DownloadState.paused);
+      expect(transfers.enqueued.length, before, reason: 'nothing requeued');
+
+      await manager.resume(const DownloadScope.all());
+      await until(() => transfers.queuedFor('c1').length == 2);
+    });
+
     test(
       'files finished while closed are done; lost tasks are queued again',
       () async {

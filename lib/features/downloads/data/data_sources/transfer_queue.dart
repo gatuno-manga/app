@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 /// One file for the native downloader.
 class FileTransfer extends Equatable {
-  /// Unique per attempt; see [TransferIds].
+  /// Opaque to the queue; the caller makes it unique per attempt.
   final String taskId;
   final String url;
   final Map<String, String> headers;
@@ -81,33 +81,35 @@ class TransferCancelled extends TaskTransferEvent {
   const TransferCancelled(super.taskId);
 }
 
-/// Native task ids are `<fileId>@<session>.<attempt>`: a file enqueued
-/// again (after a pause, a network rule change, or in a later app session)
-/// gets a new id, so a late event from an earlier attempt cannot be
-/// mistaken for the current one.
-abstract final class TransferIds {
-  static String forAttempt(String fileId, String session, int attempt) =>
-      '$fileId@$session.$attempt';
-}
-
 /// The native background downloader. Transfers keep running when the app is
-/// closed; their events are delivered when it runs again.
+/// closed.
 ///
 /// Implemented today by an adapter over a third-party plugin, to be replaced
-/// by the app's own plugin. An implementation must: write each file to the
-/// given directory under the application support directory; report each
-/// task's outcome under its id (events may come after a restart); list in
-/// [activeTaskIds] only its own queued or running tasks, stable once [start]
-/// returns; and emit [TransfersResynced] when tasks may have left the queue
-/// silently.
+/// by the app's own plugin. What a consumer can rely on:
+///
+/// - Each file is written to [FileTransfer.directory] (relative to the
+///   application support directory) under [FileTransfer.filename]; a file
+///   on disk is complete.
+/// - [start] runs first. Outcomes that happened while the app was not
+///   running are not replayed as [events]: a finished file is on disk, a
+///   failed or system-cancelled one is no longer in [activeTaskIds], and the
+///   transfers the user cancelled (from a notification, say) are returned
+///   by [start]. Once [start] returns, [activeTaskIds] is stable and the
+///   consumer reconciles from it and the disk.
+/// - After [start], [events] reports each task's outcome under its id, as it
+///   happens. A [TransferCancelled] the consumer did not ask for came from
+///   the user.
+/// - [activeTaskIds] lists only this queue's queued or running tasks.
+/// - [TransfersResynced] is emitted when tasks may have left the queue
+///   without an event of their own.
 abstract class TransferQueue {
-  /// Every event, including those that happened while the app was closed
-  /// (delivered after [start]).
+  /// Outcomes of transfers, from [start] on.
   Stream<TransferEvent> get events;
 
-  /// Configures the downloader and replays events stored while the app was
-  /// not running. Listen to [events] first.
-  Future<void> start();
+  /// Configures the downloader and settles what happened while the app was
+  /// not running. Returns the ids of transfers the user cancelled meanwhile.
+  /// Listen to [events] first.
+  Future<Set<String>> start();
 
   Future<void> enqueue(List<FileTransfer> transfers);
 
