@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/theme.dart';
+import '../../../core/theme/semantic_colors.dart';
 
 /// A label above a single-choice [SegmentedButton] (Figma `Seletor
 /// segmentado`, styled by the theme's `segmentedButtonTheme`); a null
@@ -33,30 +33,35 @@ class AppLabeledSegmentedButton<T> extends StatelessWidget {
     final enabled = onChanged != null;
     // Same 38% onSurface the disabled segments use.
     final disabled = theme.colorScheme.onSurface.withValues(alpha: 0.38);
-    final secondary = theme.textSecondary;
+    final secondary = theme.mutedColor;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 2,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: enabled ? null : disabled,
-              ),
-            ),
-            if (description != null)
+        // Its own node, read right before its segments, not merged into
+        // whatever text surrounds the control.
+        Semantics(
+          container: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 2,
+            children: [
               Text(
-                description!,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: enabled ? secondary : disabled,
+                label,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: enabled ? null : disabled,
                 ),
               ),
-          ],
+              if (description != null)
+                Text(
+                  description!,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: enabled ? secondary : disabled,
+                  ),
+                ),
+            ],
+          ),
         ),
         SegmentedButton<T>(
           segments: [for (final segment in segments) _named(segment)],

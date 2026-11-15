@@ -45,8 +45,10 @@ class DownloadSettingsViewModel
   final DownloadNetworkRules _rules;
   late final StreamSubscription<Map<BookType, DownloadNetwork>> _subscription;
 
-  /// What is saved, to restore a choice whose save failed.
-  Map<BookType, DownloadNetwork> _stored = const {};
+  /// What is saved, to restore a choice whose save failed. The defaults
+  /// until the saved rules arrive.
+  Map<BookType, DownloadNetwork> _stored =
+      DownloadSettingsState.initial().rules;
 
   /// Choices shown before their save lands, kept over the saved rules so a
   /// save of another type does not flip them back meanwhile.
@@ -57,7 +59,7 @@ class DownloadSettingsViewModel
       super(DownloadSettingsState.initial()) {
     _subscription = _rules.watch().listen((rules) {
       _stored = rules;
-      _show();
+      emit(state.copyWith(rules: {..._stored, ..._pending}, isLoaded: true));
     });
   }
 
@@ -70,7 +72,7 @@ class DownloadSettingsViewModel
     try {
       await _rules.set(type, network);
       // Saved: the watch stream may report it a little later.
-      if (_stored.isNotEmpty) _stored = {..._stored, type: network};
+      _stored = {..._stored, type: network};
       return true;
     } catch (e, stackTrace) {
       AppLogger.e('Network rule not saved', e, stackTrace, _logTag);
@@ -82,13 +84,7 @@ class DownloadSettingsViewModel
     }
   }
 
-  void _show() {
-    if (_stored.isEmpty) {
-      emit(state.copyWith(rules: {...state.rules, ..._pending}));
-      return;
-    }
-    emit(state.copyWith(rules: {..._stored, ..._pending}, isLoaded: true));
-  }
+  void _show() => emit(state.copyWith(rules: {..._stored, ..._pending}));
 
   @override
   void dispose() {

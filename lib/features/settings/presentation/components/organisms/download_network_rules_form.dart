@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
-import '../../../../../core/theme/theme.dart';
+import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../../shared/components/molecules/app_labeled_segmented_button.dart';
 import '../../../../downloads/domain/entities/download_network.dart';
 import '../../../../downloads/domain/repositories/download_network_rules.dart';
@@ -32,12 +32,14 @@ class DownloadNetworkRulesForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 16,
       children: [
+        // A container, or the rows' plain text would merge into the heading.
         Semantics(
+          container: true,
           header: true,
           child: Text(
             l10n.settingsDownloadNetwork,
             style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.textSecondary,
+              color: theme.mutedColor,
             ),
           ),
         ),

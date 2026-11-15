@@ -124,4 +124,25 @@ void main() {
       expect(control(tester, i).onSelectionChanged, isNull);
     }
   });
+
+  testWidgets('the heading is only the heading for screen readers', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    SharedPreferences.setMockInitialValues({});
+    final rules = StoredDownloadNetworkRules(DownloadNetworkRulesStorage());
+    addTearDown(rules.dispose);
+    await pumpPage(tester, rules);
+
+    final heading = tester.getSemantics(find.text('Download network'));
+    expect(heading.flagsCollection.isHeader, isTrue);
+    expect(heading.label, 'Download network');
+    // The notice and each row's caption are their own nodes.
+    expect(
+      find.bySemanticsLabel(RegExp(r'^When you switch to Wi-Fi only')),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel(RegExp(r'^Other\s+Includes')), findsOneWidget);
+    semantics.dispose();
+  });
 }

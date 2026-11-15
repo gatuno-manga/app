@@ -123,15 +123,6 @@ class GatunoColors extends ThemeExtension<GatunoColors> {
   }
 }
 
-/// Theme tokens read through [ThemeData].
-extension GatunoThemeData on ThemeData {
-  /// `color/text-secondary`, or Material's nearest role outside AppTheme
-  /// (a bare MaterialApp in tests).
-  Color get textSecondary =>
-      extension<GatunoColors>()?.palette.textSecondary ??
-      colorScheme.onSurfaceVariant;
-}
-
 class AppTheme {
   static final ThemeData lightTheme = _build(lightPalette, _lightVariant);
   static final ThemeData darkTheme = _build(darkPalette, _darkVariant);
