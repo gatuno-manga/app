@@ -9,6 +9,7 @@ import '../../core/network/dio_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../books/domain/repositories/books_repository.dart';
 import 'data/data_sources/background_downloader_transfer_queue.dart';
+import 'data/data_sources/download_network_rules_storage.dart';
 import 'data/data_sources/download_records.dart';
 import 'data/data_sources/download_remote_data_source.dart';
 import 'data/data_sources/download_storage.dart';
@@ -17,10 +18,11 @@ import 'data/data_sources/unmetered_network_monitor.dart';
 import 'data/database/downloads_database.dart';
 import 'data/repositories/download_manager.dart';
 import 'data/repositories/downloaded_content_impl.dart';
+import 'data/repositories/stored_download_network_rules.dart';
 import 'domain/repositories/download_network_policy.dart';
+import 'domain/repositories/download_network_rules.dart';
 import 'domain/repositories/download_service.dart';
 import 'domain/repositories/downloaded_content.dart';
-import 'data/repositories/any_network_policy.dart';
 
 /// Registers downloads. Needs DioClient, ConnectivityService, CoverStore and
 /// BooksRepository. Start the engine with [startDownloads] once the Dio
@@ -50,9 +52,19 @@ void initDownloadsInjection(GetIt sl) {
   sl.registerLazySingleton<TransferQueue>(
     () => sl<BackgroundDownloaderTransferQueue>(),
   );
-  // Replaced by the user's per-type setting.
+  sl.registerLazySingleton<DownloadNetworkRulesStorage>(
+    DownloadNetworkRulesStorage.new,
+  );
+  sl.registerLazySingleton<StoredDownloadNetworkRules>(
+    () => StoredDownloadNetworkRules(sl<DownloadNetworkRulesStorage>()),
+    dispose: (rules) => rules.dispose(),
+  );
+  sl.registerLazySingleton<DownloadNetworkRules>(
+    () => sl<StoredDownloadNetworkRules>(),
+  );
+  // The engine reads the same rules the settings screen edits.
   sl.registerLazySingleton<DownloadNetworkPolicy>(
-    () => const AnyNetworkPolicy(),
+    () => sl<DownloadNetworkRules>(),
   );
   sl.registerLazySingleton<DownloadManager>(
     () => DownloadManager(

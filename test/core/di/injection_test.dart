@@ -6,6 +6,9 @@ import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dar
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/core/network/dio_client.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_network_policy.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_network_rules.dart';
+import 'package:gatuno/features/settings/presentation/view_models/download_settings_view_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,6 +47,9 @@ void main() {
       expect(sl.isRegistered<AuthService>(), true);
       expect(sl.isRegistered<UserService>(), true);
       expect(sl.isRegistered<HomeViewModel>(), true);
+      // The engine obeys the rules the settings screen edits.
+      expect(sl<DownloadNetworkPolicy>(), same(sl<DownloadNetworkRules>()));
+      expect(sl.isRegistered<DownloadSettingsViewModel>(), true);
     });
   });
 }
