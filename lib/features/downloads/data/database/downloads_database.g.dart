@@ -38,8 +38,25 @@ class $DownloadBooksTable extends DownloadBooks
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _autoDownloadSinceMeta = const VerificationMeta(
+    'autoDownloadSince',
+  );
   @override
-  List<GeneratedColumn> get $columns => [bookId, bookType, enqueuedAt];
+  late final GeneratedColumn<DateTime> autoDownloadSince =
+      GeneratedColumn<DateTime>(
+        'auto_download_since',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    bookId,
+    bookType,
+    enqueuedAt,
+    autoDownloadSince,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -68,6 +85,15 @@ class $DownloadBooksTable extends DownloadBooks
     } else if (isInserting) {
       context.missing(_enqueuedAtMeta);
     }
+    if (data.containsKey('auto_download_since')) {
+      context.handle(
+        _autoDownloadSinceMeta,
+        autoDownloadSince.isAcceptableOrUnknown(
+          data['auto_download_since']!,
+          _autoDownloadSinceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -91,6 +117,10 @@ class $DownloadBooksTable extends DownloadBooks
         DriftSqlType.dateTime,
         data['${effectivePrefix}enqueued_at'],
       )!,
+      autoDownloadSince: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}auto_download_since'],
+      ),
     );
   }
 
@@ -109,10 +139,15 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
   /// For the network rule; `other` until the book's details are known.
   final BookType bookType;
   final DateTime enqueuedAt;
+
+  /// When automatic download of new chapters was turned on; `null` while it
+  /// is off. A row with it set outlives its last chapter.
+  final DateTime? autoDownloadSince;
   const DownloadBook({
     required this.bookId,
     required this.bookType,
     required this.enqueuedAt,
+    this.autoDownloadSince,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -124,6 +159,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       );
     }
     map['enqueued_at'] = Variable<DateTime>(enqueuedAt);
+    if (!nullToAbsent || autoDownloadSince != null) {
+      map['auto_download_since'] = Variable<DateTime>(autoDownloadSince);
+    }
     return map;
   }
 
@@ -132,6 +170,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       bookId: Value(bookId),
       bookType: Value(bookType),
       enqueuedAt: Value(enqueuedAt),
+      autoDownloadSince: autoDownloadSince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(autoDownloadSince),
     );
   }
 
@@ -146,6 +187,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
         serializer.fromJson<String>(json['bookType']),
       ),
       enqueuedAt: serializer.fromJson<DateTime>(json['enqueuedAt']),
+      autoDownloadSince: serializer.fromJson<DateTime?>(
+        json['autoDownloadSince'],
+      ),
     );
   }
   @override
@@ -157,6 +201,7 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
         $DownloadBooksTable.$converterbookType.toJson(bookType),
       ),
       'enqueuedAt': serializer.toJson<DateTime>(enqueuedAt),
+      'autoDownloadSince': serializer.toJson<DateTime?>(autoDownloadSince),
     };
   }
 
@@ -164,10 +209,14 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     String? bookId,
     BookType? bookType,
     DateTime? enqueuedAt,
+    Value<DateTime?> autoDownloadSince = const Value.absent(),
   }) => DownloadBook(
     bookId: bookId ?? this.bookId,
     bookType: bookType ?? this.bookType,
     enqueuedAt: enqueuedAt ?? this.enqueuedAt,
+    autoDownloadSince: autoDownloadSince.present
+        ? autoDownloadSince.value
+        : this.autoDownloadSince,
   );
   DownloadBook copyWithCompanion(DownloadBooksCompanion data) {
     return DownloadBook(
@@ -176,6 +225,9 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
       enqueuedAt: data.enqueuedAt.present
           ? data.enqueuedAt.value
           : this.enqueuedAt,
+      autoDownloadSince: data.autoDownloadSince.present
+          ? data.autoDownloadSince.value
+          : this.autoDownloadSince,
     );
   }
 
@@ -184,37 +236,43 @@ class DownloadBook extends DataClass implements Insertable<DownloadBook> {
     return (StringBuffer('DownloadBook(')
           ..write('bookId: $bookId, ')
           ..write('bookType: $bookType, ')
-          ..write('enqueuedAt: $enqueuedAt')
+          ..write('enqueuedAt: $enqueuedAt, ')
+          ..write('autoDownloadSince: $autoDownloadSince')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(bookId, bookType, enqueuedAt);
+  int get hashCode =>
+      Object.hash(bookId, bookType, enqueuedAt, autoDownloadSince);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DownloadBook &&
           other.bookId == this.bookId &&
           other.bookType == this.bookType &&
-          other.enqueuedAt == this.enqueuedAt);
+          other.enqueuedAt == this.enqueuedAt &&
+          other.autoDownloadSince == this.autoDownloadSince);
 }
 
 class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
   final Value<String> bookId;
   final Value<BookType> bookType;
   final Value<DateTime> enqueuedAt;
+  final Value<DateTime?> autoDownloadSince;
   final Value<int> rowid;
   const DownloadBooksCompanion({
     this.bookId = const Value.absent(),
     this.bookType = const Value.absent(),
     this.enqueuedAt = const Value.absent(),
+    this.autoDownloadSince = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DownloadBooksCompanion.insert({
     required String bookId,
     required BookType bookType,
     required DateTime enqueuedAt,
+    this.autoDownloadSince = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : bookId = Value(bookId),
        bookType = Value(bookType),
@@ -223,12 +281,14 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     Expression<String>? bookId,
     Expression<String>? bookType,
     Expression<DateTime>? enqueuedAt,
+    Expression<DateTime>? autoDownloadSince,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (bookId != null) 'book_id': bookId,
       if (bookType != null) 'book_type': bookType,
       if (enqueuedAt != null) 'enqueued_at': enqueuedAt,
+      if (autoDownloadSince != null) 'auto_download_since': autoDownloadSince,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -237,12 +297,14 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     Value<String>? bookId,
     Value<BookType>? bookType,
     Value<DateTime>? enqueuedAt,
+    Value<DateTime?>? autoDownloadSince,
     Value<int>? rowid,
   }) {
     return DownloadBooksCompanion(
       bookId: bookId ?? this.bookId,
       bookType: bookType ?? this.bookType,
       enqueuedAt: enqueuedAt ?? this.enqueuedAt,
+      autoDownloadSince: autoDownloadSince ?? this.autoDownloadSince,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -261,6 +323,9 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
     if (enqueuedAt.present) {
       map['enqueued_at'] = Variable<DateTime>(enqueuedAt.value);
     }
+    if (autoDownloadSince.present) {
+      map['auto_download_since'] = Variable<DateTime>(autoDownloadSince.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -273,6 +338,7 @@ class DownloadBooksCompanion extends UpdateCompanion<DownloadBook> {
           ..write('bookId: $bookId, ')
           ..write('bookType: $bookType, ')
           ..write('enqueuedAt: $enqueuedAt, ')
+          ..write('autoDownloadSince: $autoDownloadSince, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1399,6 +1465,7 @@ typedef $$DownloadBooksTableCreateCompanionBuilder =
       required String bookId,
       required BookType bookType,
       required DateTime enqueuedAt,
+      Value<DateTime?> autoDownloadSince,
       Value<int> rowid,
     });
 typedef $$DownloadBooksTableUpdateCompanionBuilder =
@@ -1406,6 +1473,7 @@ typedef $$DownloadBooksTableUpdateCompanionBuilder =
       Value<String> bookId,
       Value<BookType> bookType,
       Value<DateTime> enqueuedAt,
+      Value<DateTime?> autoDownloadSince,
       Value<int> rowid,
     });
 
@@ -1433,6 +1501,11 @@ class $$DownloadBooksTableFilterComposer
     column: $table.enqueuedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get autoDownloadSince => $composableBuilder(
+    column: $table.autoDownloadSince,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$DownloadBooksTableOrderingComposer
@@ -1458,6 +1531,11 @@ class $$DownloadBooksTableOrderingComposer
     column: $table.enqueuedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get autoDownloadSince => $composableBuilder(
+    column: $table.autoDownloadSince,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DownloadBooksTableAnnotationComposer
@@ -1477,6 +1555,11 @@ class $$DownloadBooksTableAnnotationComposer
 
   GeneratedColumn<DateTime> get enqueuedAt => $composableBuilder(
     column: $table.enqueuedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get autoDownloadSince => $composableBuilder(
+    column: $table.autoDownloadSince,
     builder: (column) => column,
   );
 }
@@ -1521,11 +1604,13 @@ class $$DownloadBooksTableTableManager
                 Value<String> bookId = const Value.absent(),
                 Value<BookType> bookType = const Value.absent(),
                 Value<DateTime> enqueuedAt = const Value.absent(),
+                Value<DateTime?> autoDownloadSince = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion(
                 bookId: bookId,
                 bookType: bookType,
                 enqueuedAt: enqueuedAt,
+                autoDownloadSince: autoDownloadSince,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1533,11 +1618,13 @@ class $$DownloadBooksTableTableManager
                 required String bookId,
                 required BookType bookType,
                 required DateTime enqueuedAt,
+                Value<DateTime?> autoDownloadSince = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DownloadBooksCompanion.insert(
                 bookId: bookId,
                 bookType: bookType,
                 enqueuedAt: enqueuedAt,
+                autoDownloadSince: autoDownloadSince,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

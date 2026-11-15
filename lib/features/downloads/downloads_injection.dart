@@ -16,9 +16,11 @@ import 'data/data_sources/download_storage.dart';
 import 'data/data_sources/transfer_queue.dart';
 import 'data/data_sources/unmetered_network_monitor.dart';
 import 'data/database/downloads_database.dart';
+import 'data/repositories/auto_download_preferences_impl.dart';
 import 'data/repositories/download_manager.dart';
 import 'data/repositories/downloaded_content_impl.dart';
 import 'data/repositories/stored_download_network_rules.dart';
+import 'domain/repositories/auto_download_preferences.dart';
 import 'domain/repositories/download_network_policy.dart';
 import 'domain/repositories/download_network_rules.dart';
 import 'domain/repositories/download_service.dart';
@@ -81,6 +83,9 @@ void initDownloadsInjection(GetIt sl) {
     dispose: (manager) => manager.dispose(),
   );
   sl.registerLazySingleton<DownloadService>(() => sl<DownloadManager>());
+  sl.registerLazySingleton<AutoDownloadPreferences>(
+    () => AutoDownloadPreferencesImpl(sl<DownloadRecords>()),
+  );
   sl.registerLazySingleton<DownloadedContent>(
     () => DownloadedContentImpl(
       sl<DownloadRecords>(),
