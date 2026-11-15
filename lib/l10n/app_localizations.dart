@@ -782,6 +782,30 @@ abstract class AppLocalizations {
   /// **'Error updating API URL'**
   String get settingsApiUrlError;
 
+  /// No description provided for @settingsServerChangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change server?'**
+  String get settingsServerChangeTitle;
+
+  /// No description provided for @settingsServerChangeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The 1 chapter in your downloads ({size}) will be deleted, and the offline library saved on this device will be cleared.} other{The {count} chapters in your downloads ({size}) will be deleted, and the offline library saved on this device will be cleared.}}'**
+  String settingsServerChangeBody(int count, String size);
+
+  /// No description provided for @settingsServerChangeBodyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloads and the offline library saved on this device will be deleted.'**
+  String get settingsServerChangeBodyUnknown;
+
+  /// No description provided for @settingsServerChangeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch and delete'**
+  String get settingsServerChangeConfirm;
+
   /// No description provided for @settingsAllowedUrlsSection.
   ///
   /// In en, this message translates to:

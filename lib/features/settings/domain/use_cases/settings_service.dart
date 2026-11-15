@@ -99,7 +99,7 @@ class SettingsService {
       // After the switch: anything that starts from now on goes to the new
       // server, and what was still in flight to the old one is dropped by
       // the wipe's cache epoch.
-      if (previous != null && _normalize(previous) != _normalize(url)) {
+      if (_isDifferent(previous, url)) {
         await _clearServerData();
       }
     } catch (e, stackTrace) {
@@ -141,6 +141,14 @@ class SettingsService {
       AppLogger.e('Error clearing the old server data', e, stackTrace, _logTag);
     }
   }
+
+  /// Whether switching to [url] leaves the configured server, which deletes
+  /// its downloads and offline cache. The first setup (no server yet) and
+  /// the same URL with or without a trailing slash are not a change.
+  bool isDifferentServer(String url) => _isDifferent(state.apiUrl, url);
+
+  static bool _isDifferent(String? previous, String url) =>
+      previous != null && _normalize(previous) != _normalize(url);
 
   static String _normalize(String url) =>
       url.endsWith('/') ? url.substring(0, url.length - 1) : url;

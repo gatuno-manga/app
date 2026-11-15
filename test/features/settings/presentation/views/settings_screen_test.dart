@@ -9,6 +9,8 @@ import 'package:gatuno/features/reading/presentation/components/organisms/reader
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
+import 'package:gatuno/features/downloads/domain/entities/download_totals.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
 import 'package:gatuno/features/settings/presentation/views/settings_screen.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/presentation/components/molecules/settings_profile_card.dart';
@@ -19,6 +21,7 @@ import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+import 'package:gatuno/shared/components/organisms/app_confirm_dialog.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
@@ -29,10 +32,13 @@ import '../../../app_lock/helpers/app_lock_mocks.dart';
 
 class MockUserService extends Mock implements UserService {}
 
+class MockDownloadService extends Mock implements DownloadService {}
+
 void main() {
   late MockSettingsService mockSettingsService;
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
+  late MockDownloadService mockDownloadService;
   late SettingsViewModel viewModel;
   late ReaderPreferencesService readerPreferences;
 
@@ -53,6 +59,11 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
+    mockDownloadService = MockDownloadService();
+    when(
+      () => mockDownloadService.totals(),
+    ).thenAnswer((_) async => DownloadTotals.empty);
+    when(() => mockSettingsService.isDifferentServer(any())).thenReturn(true);
 
     when(
       () => mockSettingsService.settingsStream,
@@ -75,6 +86,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await initTestDI(
@@ -161,8 +173,101 @@ void main() {
       () => mockSettingsService.setApiUrl('https://new-api.com'),
     ).called(1);
 
+    expect(find.byType(AppConfirmDialog), findsNothing);
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.text('API URL updated successfully'), findsOneWidget);
+  });
+
+  group('server change with downloads', () {
+    const totals = DownloadTotals(chapters: 34, bytes: 1288490189); // 1.2 GB
+
+    Future<void> saveOtherServer(WidgetTester tester) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      when(
+        () => mockSettingsService.validateApiUrl(any()),
+      ).thenAnswer((_) async => true);
+      when(() => mockSettingsService.setApiUrl(any())).thenAnswer((_) async {});
+
+      await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+      await tester.enterText(find.byType(TextField).first, 'https://other.com');
+      await tester.tap(find.text('Connect'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tapAndClose(WidgetTester tester, String label) async {
+      await tester.tap(find.text(label));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('asks with the chapter count and size', (tester) async {
+      when(() => mockDownloadService.totals()).thenAnswer((_) async => totals);
+
+      await saveOtherServer(tester);
+
+      expect(find.byType(AppConfirmDialog), findsOneWidget);
+      expect(find.text('Change server?'), findsOneWidget);
+      expect(
+        find.text(
+          'The 34 chapters in your downloads (1.2\u00A0GB) will be deleted, '
+          'and the offline library saved on this device will be cleared.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Switch and delete'), findsOneWidget);
+      verifyNever(() => mockSettingsService.setApiUrl(any()));
+    });
+
+    testWidgets('formats a large chapter count for the locale', (tester) async {
+      when(() => mockDownloadService.totals()).thenAnswer(
+        (_) async => const DownloadTotals(chapters: 1234, bytes: 1024),
+      );
+
+      await saveOtherServer(tester);
+
+      expect(find.textContaining('The 1,234 chapters'), findsOneWidget);
+    });
+
+    testWidgets('cancel keeps the server and shows no message', (tester) async {
+      when(() => mockDownloadService.totals()).thenAnswer((_) async => totals);
+
+      await saveOtherServer(tester);
+      await tapAndClose(tester, 'Cancel');
+
+      expect(find.byType(AppConfirmDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      verifyNever(() => mockSettingsService.setApiUrl(any()));
+    });
+
+    testWidgets('confirm switches the server', (tester) async {
+      when(() => mockDownloadService.totals()).thenAnswer((_) async => totals);
+
+      await saveOtherServer(tester);
+      await tapAndClose(tester, 'Switch and delete');
+
+      expect(find.byType(AppConfirmDialog), findsNothing);
+      verify(
+        () => mockSettingsService.setApiUrl('https://other.com'),
+      ).called(1);
+      expect(find.text('API URL updated successfully'), findsOneWidget);
+    });
+
+    testWidgets('asks without numbers when the downloads cannot be counted', (
+      tester,
+    ) async {
+      when(() => mockDownloadService.totals()).thenThrow(StateError('db'));
+
+      await saveOtherServer(tester);
+
+      expect(
+        find.text(
+          'The downloads and the offline library saved on this device will '
+          'be deleted.',
+        ),
+        findsOneWidget,
+      );
+    });
   });
 
   testWidgets('SettingsPage persists the picked theme', (tester) async {
@@ -205,6 +310,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
@@ -228,6 +334,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);

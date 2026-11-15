@@ -5,11 +5,14 @@ import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/logging/logger.dart';
+
 import '../view_models/settings_view_model.dart';
 import '../../../reading/domain/use_cases/reader_preferences_service.dart';
 import '../../../reading/presentation/components/organisms/reader_preferences_controls.dart';
 import '../../../reading/presentation/components/organisms/text_reader_settings_section.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../../shared/components/organisms/app_confirm_dialog.dart';
+import '../../../../shared/utils/format_bytes.dart';
 import '../../../app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
 import '../components/molecules/settings_caption.dart';
 import '../components/molecules/settings_profile_card.dart';
@@ -27,14 +30,33 @@ class SettingsPage extends StatelessWidget {
     String url,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final success = await viewModel.updateApiUrl(url);
+    final result = await viewModel.updateApiUrl(
+      url,
+      // The page may have left while the URL was checked.
+      confirmServerChange: (totals) async =>
+          context.mounted &&
+          await AppConfirmDialog.show(
+            context,
+            title: l10n.settingsServerChangeTitle,
+            body: totals == null
+                ? l10n.settingsServerChangeBodyUnknown
+                : l10n.settingsServerChangeBody(
+                    totals.chapters,
+                    formatBytes(totals.bytes, l10n.localeName),
+                  ),
+            confirmLabel: l10n.settingsServerChangeConfirm,
+            destructive: true,
+          ),
+    );
 
-    if (!context.mounted) return;
+    if (!context.mounted || result == ApiUrlUpdateResult.cancelled) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success ? l10n.settingsApiUrlSuccess : l10n.settingsApiUrlError,
+          result == ApiUrlUpdateResult.saved
+              ? l10n.settingsApiUrlSuccess
+              : l10n.settingsApiUrlError,
         ),
       ),
     );

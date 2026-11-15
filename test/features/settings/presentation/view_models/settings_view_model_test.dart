@@ -5,6 +5,8 @@ import 'package:gatuno/core/theme/app_theme_choice.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/domain/use_cases/settings_service.dart';
+import 'package:gatuno/features/downloads/domain/entities/download_totals.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
@@ -19,16 +21,20 @@ class MockAuthService extends Mock implements AuthService {}
 
 class MockUserService extends Mock implements UserService {}
 
+class MockDownloadService extends Mock implements DownloadService {}
+
 void main() {
   late SettingsViewModel viewModel;
   late MockSettingsService mockSettingsService;
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
+  late MockDownloadService mockDownloadService;
 
   SettingsViewModel buildViewModel() => SettingsViewModel(
     settingsService: mockSettingsService,
     authService: mockAuthService,
     userService: mockUserService,
+    downloadService: mockDownloadService,
   );
 
   setUpAll(() => registerFallbackValue(AppThemeChoice.system));
@@ -37,6 +43,7 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
+    mockDownloadService = MockDownloadService();
 
     // When listening, we need to stub streams
     when(
@@ -94,33 +101,151 @@ void main() {
       ).called(1);
     });
 
-    test('updateApiUrl should validate and update if valid', () async {
-      when(
-        () => mockSettingsService.validateApiUrl(any()),
-      ).thenAnswer((_) async => true);
-      when(() => mockSettingsService.setApiUrl(any())).thenAnswer((_) async {});
+    group('updateApiUrl', () {
+      late List<DownloadTotals?> asked;
+      late bool answer;
 
-      final result = await viewModel.updateApiUrl('http://valid.com');
+      Future<ApiUrlUpdateResult> save(String url) => viewModel.updateApiUrl(
+        url,
+        confirmServerChange: (totals) async {
+          asked.add(totals);
+          return answer;
+        },
+      );
 
-      expect(result, isTrue);
-      verify(
-        () => mockSettingsService.validateApiUrl('http://valid.com'),
-      ).called(1);
-      verify(() => mockSettingsService.setApiUrl('http://valid.com')).called(1);
-    });
+      setUp(() {
+        asked = [];
+        answer = true;
+        when(
+          () => mockSettingsService.validateApiUrl(any()),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockSettingsService.setApiUrl(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockSettingsService.isDifferentServer(any()),
+        ).thenReturn(true);
+        when(
+          () => mockDownloadService.totals(),
+        ).thenAnswer((_) async => DownloadTotals.empty);
+      });
 
-    test('updateApiUrl should return false if invalid', () async {
-      when(
-        () => mockSettingsService.validateApiUrl(any()),
-      ).thenAnswer((_) async => false);
+      test('saves a different server without asking when there are no '
+          'downloads', () async {
+        final result = await save('http://valid.com/');
 
-      final result = await viewModel.updateApiUrl('http://invalid.com');
+        expect(result, ApiUrlUpdateResult.saved);
+        expect(asked, isEmpty);
+        verify(
+          () => mockSettingsService.validateApiUrl('http://valid.com/'),
+        ).called(1);
+        verify(
+          () => mockSettingsService.setApiUrl('http://valid.com'),
+        ).called(1);
+        expect(viewModel.state.isLoading, isFalse);
+      });
 
-      expect(result, isFalse);
-      verify(
-        () => mockSettingsService.validateApiUrl('http://invalid.com'),
-      ).called(1);
-      verifyNever(() => mockSettingsService.setApiUrl(any()));
+      test('asks with the totals when there are downloads, and a cancel '
+          'keeps the server', () async {
+        const totals = DownloadTotals(chapters: 12, bytes: 340 * 1024 * 1024);
+        when(
+          () => mockDownloadService.totals(),
+        ).thenAnswer((_) async => totals);
+        answer = false;
+
+        final result = await save('http://other.com');
+
+        expect(result, ApiUrlUpdateResult.cancelled);
+        expect(asked, [totals]);
+        verifyNever(() => mockSettingsService.setApiUrl(any()));
+        expect(viewModel.state.isLoading, isFalse);
+      });
+
+      test('is not loading while the user decides', () async {
+        when(
+          () => mockDownloadService.totals(),
+        ).thenAnswer((_) async => const DownloadTotals(chapters: 1, bytes: 1));
+        bool? loadingWhileAsked;
+
+        await viewModel.updateApiUrl(
+          'http://other.com',
+          confirmServerChange: (_) async {
+            loadingWhileAsked = viewModel.state.isLoading;
+            return true;
+          },
+        );
+
+        expect(loadingWhileAsked, isFalse);
+        expect(viewModel.state.isLoading, isFalse);
+      });
+
+      test('a confirm with downloads switches the server', () async {
+        const totals = DownloadTotals(chapters: 1, bytes: 10);
+        when(
+          () => mockDownloadService.totals(),
+        ).thenAnswer((_) async => totals);
+
+        final result = await save('http://other.com');
+
+        expect(result, ApiUrlUpdateResult.saved);
+        expect(asked, [totals]);
+        verify(
+          () => mockSettingsService.setApiUrl('http://other.com'),
+        ).called(1);
+      });
+
+      test('the same server neither counts downloads nor asks', () async {
+        when(
+          () => mockSettingsService.isDifferentServer('http://test.com'),
+        ).thenReturn(false);
+
+        final result = await save('http://test.com/');
+
+        expect(result, ApiUrlUpdateResult.saved);
+        expect(asked, isEmpty);
+        verifyNever(() => mockDownloadService.totals());
+        verify(
+          () => mockSettingsService.setApiUrl('http://test.com'),
+        ).called(1);
+      });
+
+      test('an invalid URL fails without asking', () async {
+        when(
+          () => mockSettingsService.validateApiUrl(any()),
+        ).thenAnswer((_) async => false);
+
+        final result = await save('http://invalid.com');
+
+        expect(result, ApiUrlUpdateResult.failed);
+        expect(asked, isEmpty);
+        verifyNever(() => mockDownloadService.totals());
+        verifyNever(() => mockSettingsService.setApiUrl(any()));
+      });
+
+      test(
+        'asks without numbers when the downloads cannot be counted',
+        () async {
+          when(() => mockDownloadService.totals()).thenThrow(StateError('db'));
+          answer = false;
+
+          final result = await save('http://other.com');
+
+          expect(result, ApiUrlUpdateResult.cancelled);
+          expect(asked, [null]);
+          verifyNever(() => mockSettingsService.setApiUrl(any()));
+        },
+      );
+
+      test('a failed save is reported as failed', () async {
+        when(
+          () => mockSettingsService.setApiUrl(any()),
+        ).thenThrow(StateError('disk'));
+
+        final result = await save('http://other.com');
+
+        expect(result, ApiUrlUpdateResult.failed);
+        expect(viewModel.state.isLoading, isFalse);
+      });
     });
 
     test('follows the profile stream', () async {
