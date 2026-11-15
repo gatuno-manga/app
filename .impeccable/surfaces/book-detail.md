@@ -10,8 +10,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `903:637` /books/:id — Capítulos (mobile)
 - `903:928` /books/:id — Mais opções aberto (mobile)
 - `906:1075` /books/:id — Capítulos agrupados (mobile)
+- `1011:4909` /books/:id — Downloads · confirmar exclusão (#165, sub-section `1011:4908` "Livro · Downloads (#165)"): `Diálogo/Confirmação` Destrutivo with the chapter count and the space freed
 
 ## Figma components used
+- `Diálogo/Confirmação` (issue #165, `1010:1327`) → multi-chapter delete confirmation
 - `Livro/Capa` → cover
 - `Tag` → metadata tags
 - `Livro/Aba` → tabs
@@ -30,10 +32,22 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `color/text-secondary`
 - `color/primary`
 - `color/context-menu-bg`
+- `color/text-10`
+- `color/overlay`
+- `color/danger`
+- `radius/xl`
+- `space/sm`
+- `space/md`
+- `space/lg`
+- `space/2xl`
 - `Título/2`
+- `Título/3`
+- `Corpo/Pequeno`
+- `Interface/Botão`
 - `Corpo/Padrão`
 - `Interface/Rótulo`
 - `Vidro/Dropdown`
+- `Vidro/Painel`
 
 ## States in Figma
 - Chapters tab, more-options menu open, chapters grouped by number.

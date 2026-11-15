@@ -52,6 +52,8 @@ void main() {
       'success': p.success,
       'lilac': p.lilac,
       'cyan': p.cyan,
+      // Same in every theme, so it is a static on AppPalette, not a per-theme field.
+      'on-lilac': AppPalette.onLilac,
       'primary-10': p.primary10,
       'primary-15': p.primary15,
       'primary-40': p.primary40,
