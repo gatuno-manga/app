@@ -8,12 +8,16 @@ class BookActionButtons extends StatelessWidget {
   final VoidCallback? onMenuPressed;
   final VoidCallback? onSyncPressed;
 
+  /// What a screen reader announces for the ⋮ button.
+  final String? menuTooltip;
+
   const BookActionButtons({
     super.key,
     required this.onStartReading,
     this.hasProgress = false,
     this.onMenuPressed,
     this.onSyncPressed,
+    this.menuTooltip,
   });
 
   @override
@@ -31,7 +35,11 @@ class BookActionButtons extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        _ActionButton(icon: Icons.more_vert, onPressed: onMenuPressed),
+        _ActionButton(
+          icon: Icons.more_vert,
+          onPressed: onMenuPressed,
+          tooltip: menuTooltip,
+        ),
         const SizedBox(width: 12),
         _ActionButton(icon: Icons.sync, onPressed: onSyncPressed),
       ],
@@ -42,8 +50,9 @@ class BookActionButtons extends StatelessWidget {
 class _ActionButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
+  final String? tooltip;
 
-  const _ActionButton({required this.icon, this.onPressed});
+  const _ActionButton({required this.icon, this.onPressed, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +66,7 @@ class _ActionButton extends StatelessWidget {
       child: IconButton(
         icon: Icon(icon, color: colorScheme.primary),
         onPressed: onPressed,
+        tooltip: tooltip,
       ),
     );
   }

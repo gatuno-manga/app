@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
 import 'package:gatuno/features/books/domain/value_objects/chapter_id.dart';
 import 'package:gatuno/features/books/presentation/view_models/book_downloads_view_model.dart';
 import 'package:gatuno/features/downloads/domain/entities/auto_download.dart';
@@ -11,44 +8,11 @@ import 'package:gatuno/features/downloads/domain/entities/book_download.dart';
 import 'package:gatuno/features/downloads/domain/entities/chapter_download.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_scope.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_state.dart';
-import 'package:gatuno/features/downloads/domain/repositories/auto_download_preferences.dart';
-import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:rxdart/rxdart.dart';
 
-class MockDownloadService extends Mock implements DownloadService {}
+import '../../helpers/book_downloads_fixture.dart';
 
-class MockAutoDownloadPreferences extends Mock
-    implements AutoDownloadPreferences {}
-
-class MockAuthService extends Mock implements AuthService {}
-
-class FakeConnectivityService implements ConnectivityService {
-  final BehaviorSubject<ConnectivityStatus> subject;
-
-  FakeConnectivityService(ConnectivityStatus initial)
-    : subject = BehaviorSubject.seeded(initial);
-
-  @override
-  ConnectivityStatus get status => subject.value;
-
-  @override
-  Stream<ConnectivityStatus> get statusStream => subject.stream;
-
-  @override
-  Stream<void> get onReconnected => const Stream.empty();
-
-  @override
-  Future<void> checkNow() async {}
-
-  @override
-  void reportReachable() {}
-
-  @override
-  void reportUnreachable() {}
-}
-
-const book = BookId('book-1');
+const book = fixtureBook;
 const c1 = ChapterId('c1');
 const c2 = ChapterId('c2');
 const c3 = ChapterId('c3');
@@ -59,17 +23,13 @@ ChapterDownload chapter(ChapterId id, DownloadState state, {int bytes = 0}) =>
 void main() {
   late MockDownloadService downloads;
   late MockAutoDownloadPreferences prefs;
-  late MockAuthService auth;
+  late MockDownloadsAuthService auth;
   late FakeConnectivityService connectivity;
-  late BehaviorSubject<BookDownload?> bookDownload;
-  late BehaviorSubject<AutoDownload?> autoDownload;
-  late BehaviorSubject<AuthState> authState;
   late BookDownloadsViewModel vm;
 
-  setUpAll(() {
-    registerFallbackValue(const DownloadScope.all());
-    registerFallbackValue(book);
-  });
+  final fixture = BookDownloadsFixture();
+
+  setUpAll(BookDownloadsFixture.registerFallbacks);
 
   BookDownloadsViewModel build() => BookDownloadsViewModel(
     downloads: downloads,
@@ -80,37 +40,16 @@ void main() {
   );
 
   Future<void> show(List<ChapterDownload> chapters) async {
-    bookDownload.add(BookDownload(bookId: book, chapters: chapters));
+    fixture.bookDownload.add(BookDownload(bookId: book, chapters: chapters));
     await pumpEventQueue();
   }
 
   setUp(() async {
-    downloads = MockDownloadService();
-    prefs = MockAutoDownloadPreferences();
-    auth = MockAuthService();
-    connectivity = FakeConnectivityService(ConnectivityStatus.online);
-    bookDownload = BehaviorSubject.seeded(null);
-    autoDownload = BehaviorSubject.seeded(null);
-    authState = BehaviorSubject.seeded(AuthState.authenticated);
-
-    when(() => downloads.watchBook(book)).thenAnswer((_) => bookDownload);
-    when(() => prefs.watch(book)).thenAnswer((_) => autoDownload);
-    when(
-      () => auth.authenticated,
-    ).thenAnswer((_) => authState.value == AuthState.authenticated);
-    when(() => auth.authStateStream).thenAnswer((_) => authState);
-    for (final stub in <Future<void> Function()>[
-      () => downloads.enqueueChapters(any(), any()),
-      () => downloads.enqueueBook(any()),
-      () => downloads.pause(any()),
-      () => downloads.resume(any()),
-      () => downloads.retry(any()),
-      () => downloads.delete(any()),
-      () => prefs.enable(any()),
-      () => prefs.disable(any()),
-    ]) {
-      when(stub).thenAnswer((_) async {});
-    }
+    fixture.setUp();
+    downloads = fixture.downloads;
+    prefs = fixture.prefs;
+    auth = fixture.auth;
+    connectivity = fixture.connectivity;
 
     vm = build();
     await pumpEventQueue();
@@ -118,10 +57,7 @@ void main() {
 
   tearDown(() async {
     vm.dispose();
-    await bookDownload.close();
-    await autoDownload.close();
-    await authState.close();
-    await connectivity.subject.close();
+    await fixture.tearDown();
   });
 
   group('state', () {
@@ -130,9 +66,9 @@ void main() {
       () async {
         final since = DateTime(2026, 11, 15);
         await show([chapter(c1, DownloadState.done)]);
-        autoDownload.add(AutoDownload(bookId: book, since: since));
+        fixture.autoDownload.add(AutoDownload(bookId: book, since: since));
         connectivity.subject.add(ConnectivityStatus.offline);
-        authState.add(AuthState.unauthenticated);
+        fixture.authState.add(AuthState.unauthenticated);
         await pumpEventQueue();
 
         expect(vm.state.chapter(c1)?.state, DownloadState.done);
@@ -314,7 +250,7 @@ void main() {
 
   group('guest', () {
     setUp(() async {
-      authState.add(AuthState.unauthenticated);
+      fixture.authState.add(AuthState.unauthenticated);
       await pumpEventQueue();
     });
 
@@ -445,10 +381,124 @@ void main() {
   test('dispose stops following the streams', () async {
     vm.dispose();
 
-    expect(bookDownload.hasListener, isFalse);
-    expect(autoDownload.hasListener, isFalse);
-    expect(authState.hasListener, isFalse);
+    expect(fixture.bookDownload.hasListener, isFalse);
+    expect(fixture.autoDownload.hasListener, isFalse);
+    expect(fixture.authState.hasListener, isFalse);
     expect(connectivity.subject.hasListener, isFalse);
     vm = build();
+  });
+
+  group('display', () {
+    test('statusOf maps states, the Wi-Fi wait and offline', () async {
+      const wifi = ChapterId('w');
+      const paused = ChapterId('p');
+      const failed = ChapterId('f');
+      const done = ChapterId('d');
+      await show([
+        chapterDownload(c1, DownloadState.queued),
+        chapterDownload(c2, DownloadState.running),
+        chapterDownload(
+          wifi,
+          DownloadState.queued,
+          reason: DownloadWaitReason.waitingForNetwork,
+        ),
+        chapterDownload(paused, DownloadState.paused),
+        chapterDownload(failed, DownloadState.failed),
+        chapterDownload(done, DownloadState.done),
+      ]);
+
+      expect(vm.state.statusOf(c3), ChapterDownloadStatus.none);
+      expect(vm.state.statusOf(c1), ChapterDownloadStatus.queued);
+      expect(vm.state.statusOf(c2), ChapterDownloadStatus.running);
+      expect(vm.state.statusOf(wifi), ChapterDownloadStatus.waitingForNetwork);
+      expect(vm.state.statusOf(paused), ChapterDownloadStatus.paused);
+      expect(vm.state.statusOf(failed), ChapterDownloadStatus.failed);
+      expect(vm.state.statusOf(done), ChapterDownloadStatus.done);
+
+      connectivity.subject.add(ConnectivityStatus.offline);
+      await pumpEventQueue();
+
+      for (final id in [c1, c2, wifi]) {
+        expect(
+          vm.state.statusOf(id),
+          ChapterDownloadStatus.waitingForConnection,
+          reason: 'offline wins for $id',
+        );
+      }
+      expect(vm.state.statusOf(paused), ChapterDownloadStatus.paused);
+    });
+
+    test('phase by priority, and null without downloads', () async {
+      expect(vm.state.phase, isNull);
+
+      await show([
+        chapterDownload(c1, DownloadState.running),
+        chapterDownload(c2, DownloadState.paused),
+        chapterDownload(c3, DownloadState.failed),
+      ]);
+      expect(vm.state.phase, BookDownloadPhase.active);
+
+      connectivity.subject.add(ConnectivityStatus.offline);
+      await pumpEventQueue();
+      expect(vm.state.phase, BookDownloadPhase.waitingForConnection);
+
+      await show([
+        chapterDownload(c2, DownloadState.paused),
+        chapterDownload(c3, DownloadState.failed),
+      ]);
+      expect(vm.state.phase, BookDownloadPhase.paused);
+
+      await show([chapterDownload(c3, DownloadState.failed)]);
+      expect(vm.state.phase, BookDownloadPhase.failed);
+
+      await show([chapterDownload(c3, DownloadState.done)]);
+      expect(vm.state.phase, BookDownloadPhase.done);
+    });
+
+    test('the bar measures the files of active chapters only', () async {
+      await show([
+        chapterDownload(c1, DownloadState.running, filesDone: 1, filesTotal: 4),
+        chapterDownload(c2, DownloadState.queued, filesTotal: 4),
+        chapterDownload(c3, DownloadState.done, filesDone: 10, filesTotal: 10),
+      ]);
+
+      expect(vm.state.activeProgress, 1 / 8);
+      expect(vm.state.activeCount, 2);
+      expect(vm.state.downloadCount, 3);
+    });
+
+    test('the bar is 0 before any manifest is known', () async {
+      await show([chapterDownload(c1, DownloadState.queued)]);
+
+      expect(vm.state.activeProgress, 0);
+    });
+
+    test('waiting for Wi-Fi only when every active chapter does', () async {
+      const wifi = DownloadWaitReason.waitingForNetwork;
+      await show([
+        chapterDownload(c1, DownloadState.queued, reason: wifi),
+        chapterDownload(c2, DownloadState.running, reason: wifi),
+        chapterDownload(c3, DownloadState.done),
+      ]);
+      expect(vm.state.allActiveWaitForWifi, isTrue);
+
+      await show([
+        chapterDownload(c1, DownloadState.queued, reason: wifi),
+        chapterDownload(c2, DownloadState.running),
+      ]);
+      expect(vm.state.allActiveWaitForWifi, isFalse);
+
+      await show([chapterDownload(c3, DownloadState.done)]);
+      expect(vm.state.allActiveWaitForWifi, isFalse);
+    });
+
+    test('selectionHasDownload', () async {
+      await show([chapterDownload(c1, DownloadState.done)]);
+      vm.startSelection(c2);
+      expect(vm.state.selectionHasDownload, isFalse);
+
+      vm.toggleSelection(c1);
+      expect(vm.state.selectionHasDownload, isTrue);
+    });
   });
 }

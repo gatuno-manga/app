@@ -1218,4 +1218,242 @@ class AppLocalizationsEn extends AppLocalizations {
   String downloadsNotificationErrorBody(String failed, String total) {
     return '$failed of $total files failed';
   }
+
+  @override
+  String get booksSelect => 'Select';
+
+  @override
+  String get booksMoreOptions => 'More options';
+
+  @override
+  String booksDownloadsSummaryOfTotal(int done, int total, String size) {
+    return '$done of $total chapters downloaded · $size';
+  }
+
+  @override
+  String booksDownloadsSummary(int done, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      done,
+      locale: localeName,
+      other: '$done chapters downloaded · $size',
+      one: '1 chapter downloaded · $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String booksDownloadsPhaseActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Downloading $count chapters',
+      one: 'Downloading 1 chapter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get booksDownloadsPhaseWaitingWifi => 'Waiting for Wi-Fi';
+
+  @override
+  String get booksDownloadsPhaseWaitingConnection => 'Waiting for connection';
+
+  @override
+  String booksDownloadsPhasePaused(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chapters paused',
+      one: '1 chapter paused',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String booksDownloadsPhaseFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chapters failed',
+      one: '1 chapter failed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get booksDownloadsPauseAll => 'Pause all';
+
+  @override
+  String get booksDownloadsResumeAll => 'Resume';
+
+  @override
+  String booksDownloadsRetryFailed(int count) {
+    return 'Try again ($count)';
+  }
+
+  @override
+  String booksSelectionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+      zero: 'None selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get booksSelectionClose => 'Leave selection';
+
+  @override
+  String get booksSelectionSelectLoaded => 'Select loaded chapters';
+
+  @override
+  String get booksSelectionDownload => 'Download';
+
+  @override
+  String get booksSelectionDelete => 'Delete';
+
+  @override
+  String get booksSelectionPause => 'Pause';
+
+  @override
+  String get booksSelectionResume => 'Resume';
+
+  @override
+  String get booksSelectionRetry => 'Retry';
+
+  @override
+  String get booksSelectionSelected => 'Selected';
+
+  @override
+  String get booksSelectionNotSelected => 'Not selected';
+
+  @override
+  String get booksOptionsTitle => 'Book options';
+
+  @override
+  String get booksOptionsDownloads => 'Downloads';
+
+  @override
+  String get booksDownloadAll => 'Download all';
+
+  @override
+  String get booksDownloadAllSubtitle => 'Includes chapters not loaded yet';
+
+  @override
+  String get booksDownloadAllOffline => 'Needs a connection to the server';
+
+  @override
+  String get booksDeleteAllDownloads => 'Delete all downloads';
+
+  @override
+  String booksDeleteAllDownloadsSubtitle(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count chapters · $size',
+      one: '1 chapter · $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get booksAutoDownload => 'Download new chapters';
+
+  @override
+  String get booksAutoDownloadSubtitle =>
+      'Automatically downloads this book\'s new chapters';
+
+  @override
+  String get booksChapterDownloadFailed => 'The download failed';
+
+  @override
+  String booksChapterDownloaded(String size) {
+    return 'Downloaded · $size';
+  }
+
+  @override
+  String get booksChapterDownloadRetry => 'Try again';
+
+  @override
+  String get booksChapterDownloadDelete => 'Delete download';
+
+  @override
+  String get booksDownloadErrorSignIn =>
+      'Sign in again to download this chapter.';
+
+  @override
+  String get booksDownloadErrorStorageFull =>
+      'There isn\'t enough free space on this device.';
+
+  @override
+  String get booksDownloadErrorNotFound =>
+      'The server no longer has this chapter.';
+
+  @override
+  String get booksDownloadErrorTimedOut => 'A file took too long to download.';
+
+  @override
+  String get booksDownloadErrorServer =>
+      'The server couldn\'t send this chapter.';
+
+  @override
+  String get booksDownloadErrorUnknown =>
+      'Something went wrong while downloading.';
+
+  @override
+  String booksDeleteChaptersTitle(int count) {
+    return 'Delete $count chapters?';
+  }
+
+  @override
+  String booksDeleteChaptersBody(int count, String size) {
+    return 'The $count chapters will be deleted from this device, freeing $size. You can download them again later.';
+  }
+
+  @override
+  String get booksDeleteAllTitle => 'Delete all downloads of this book?';
+
+  @override
+  String get booksDeleteConfirm => 'Delete';
+
+  @override
+  String get booksDownloadSignInRequired => 'Sign in to download chapters.';
+
+  @override
+  String get booksDownloadSignIn => 'Sign in';
+
+  @override
+  String get booksDownloadActionFailed =>
+      'Couldn\'t update the downloads. Try again.';
+
+  @override
+  String get booksDownloadStatusNone => 'Download chapter';
+
+  @override
+  String get booksDownloadStatusQueued => 'Queued. Tap to pause';
+
+  @override
+  String booksDownloadStatusRunning(int percent) {
+    return 'Downloading, $percent%. Tap to pause';
+  }
+
+  @override
+  String get booksDownloadStatusWaitingWifi =>
+      'Waiting for Wi-Fi. Tap to pause';
+
+  @override
+  String get booksDownloadStatusWaitingConnection =>
+      'Waiting for connection. Tap to pause';
+
+  @override
+  String get booksDownloadStatusPaused => 'Paused. Tap to resume';
+
+  @override
+  String get booksDownloadStatusFailed => 'Download failed. Tap for options';
+
+  @override
+  String get booksDownloadStatusDone => 'Downloaded. Tap for options';
 }

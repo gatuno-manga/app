@@ -15,6 +15,9 @@ import '../../../downloads/domain/repositories/auto_download_preferences.dart';
 import '../../../downloads/domain/repositories/download_service.dart';
 import '../../domain/value_objects/book_id.dart';
 import '../../domain/value_objects/chapter_id.dart';
+import '../models/download_display.dart';
+
+export '../models/download_display.dart';
 
 /// A one-off message for the screen to show, then clear with
 /// [BookDownloadsViewModel.clearNotice].
@@ -146,6 +149,79 @@ class BookDownloadsState extends Equatable {
   /// Bytes on disk of [chapterIds], for the delete confirmation.
   int bytesOf(Iterable<ChapterId> chapterIds) =>
       chapterIds.fold(0, (sum, id) => sum + (chapter(id)?.bytes ?? 0));
+
+  ChapterDownloadStatus statusOf(ChapterId chapterId) {
+    final c = chapter(chapterId);
+    if (c == null) return ChapterDownloadStatus.none;
+    switch (c.state) {
+      case DownloadState.queued:
+      case DownloadState.running:
+        if (offline) return ChapterDownloadStatus.waitingForConnection;
+        if (c.reason == DownloadWaitReason.waitingForNetwork) {
+          return ChapterDownloadStatus.waitingForNetwork;
+        }
+        return c.state == DownloadState.running
+            ? ChapterDownloadStatus.running
+            : ChapterDownloadStatus.queued;
+      case DownloadState.paused:
+        return ChapterDownloadStatus.paused;
+      case DownloadState.failed:
+        return ChapterDownloadStatus.failed;
+      case DownloadState.done:
+        return ChapterDownloadStatus.done;
+    }
+  }
+
+  List<ChapterDownload> get _chapters =>
+      download?.chapters ?? const <ChapterDownload>[];
+
+  List<ChapterDownload> get _active => [
+    for (final c in _chapters)
+      if (c.state == DownloadState.queued || c.state == DownloadState.running)
+        c,
+  ];
+
+  int count(DownloadState state) => download?.count(state) ?? 0;
+
+  /// Every chapter download of the book, in any state: what Delete all
+  /// removes.
+  int get downloadCount => _chapters.length;
+
+  int get activeCount => _active.length;
+
+  /// Every active chapter waits for Wi-Fi.
+  bool get allActiveWaitForWifi =>
+      _active.isNotEmpty &&
+      _active.every((c) => c.reason == DownloadWaitReason.waitingForNetwork);
+
+  /// The strip's status line: active > waiting for connection > paused >
+  /// failed > done. `null` when the book has no downloads.
+  BookDownloadPhase? get phase {
+    if (_chapters.isEmpty) return null;
+    if (_active.isNotEmpty) {
+      return offline
+          ? BookDownloadPhase.waitingForConnection
+          : BookDownloadPhase.active;
+    }
+    if (count(DownloadState.paused) > 0) return BookDownloadPhase.paused;
+    if (count(DownloadState.failed) > 0) return BookDownloadPhase.failed;
+    return BookDownloadPhase.done;
+  }
+
+  /// Files on disk out of the files known, over the active chapters only:
+  /// the strip's bar, shown while any chapter is active.
+  double get activeProgress {
+    var done = 0;
+    var total = 0;
+    for (final c in _active) {
+      done += c.filesDone;
+      total += c.filesTotal;
+    }
+    return total == 0 ? 0 : done / total;
+  }
+
+  /// Some selected chapter has a download, so Delete has something to do.
+  bool get selectionHasDownload => selection.any((id) => chapter(id) != null);
 
   /// The strip's action: pause while anything is active, then resume what is
   /// paused, then retry what failed.

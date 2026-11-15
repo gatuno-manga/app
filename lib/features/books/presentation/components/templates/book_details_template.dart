@@ -3,38 +3,63 @@ import 'package:gatuno/core/theme/theme.dart';
 
 class BookDetailsTemplate extends StatelessWidget {
   final Widget? appBar;
+
+  /// Draws the body under [appBar]; off for an opaque bar, such as the
+  /// selection bar, that would otherwise hide the top of the page.
+  final bool appBarOverlaysBody;
   final Widget cover;
   final Widget header;
   final Widget actionButtons;
   final Widget tags;
   final Widget description;
+
+  /// The download summary, between the description and the chapters.
+  final Widget? downloadSummary;
+
+  /// Controls above the chapter list (the Select button).
+  final Widget? chapterControls;
   final Widget chapterList;
+
+  /// A bar fixed to the bottom (selection actions).
+  final Widget? bottomBar;
   final ScrollController? scrollController;
 
   const BookDetailsTemplate({
     super.key,
     this.appBar,
+    this.appBarOverlaysBody = true,
     required this.cover,
     required this.header,
     required this.actionButtons,
     required this.tags,
     required this.description,
+    this.downloadSummary,
+    this.chapterControls,
     required this.chapterList,
+    this.bottomBar,
     this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
     final gatunoColors = Theme.of(context).extension<GatunoColors>();
+    final appBar = this.appBar;
+    final downloadSummary = this.downloadSummary;
+    final chapterControls = this.chapterControls;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: appBar != null
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight),
-              child: appBar!,
-            )
-          : null,
+      extendBodyBehindAppBar: appBarOverlaysBody,
+      // The selection bar floats over the list, which pads its end for it.
+      extendBody: true,
+      appBar: appBar == null
+          ? null
+          : PreferredSize(
+              preferredSize: appBar is PreferredSizeWidget
+                  ? appBar.preferredSize
+                  : const Size.fromHeight(kToolbarHeight),
+              child: appBar,
+            ),
+      bottomNavigationBar: bottomBar,
       body: Container(
         decoration: BoxDecoration(gradient: gatunoColors?.degrader),
         child: CustomScrollView(
@@ -42,6 +67,7 @@ class BookDetailsTemplate extends StatelessWidget {
           slivers: [
             SliverToBoxAdapter(
               child: SafeArea(
+                top: appBarOverlaysBody,
                 bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
@@ -57,6 +83,18 @@ class BookDetailsTemplate extends StatelessWidget {
                       const SizedBox(height: 24),
                       description,
                       const SizedBox(height: 32),
+                      if (downloadSummary != null) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: downloadSummary,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (chapterControls != null)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: chapterControls,
+                        ),
                     ],
                   ),
                 ),
