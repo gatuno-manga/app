@@ -11,6 +11,8 @@ class FileTransfer extends Equatable {
   final String directory;
   final String filename;
 
+  /// Only over Wi-Fi (the Wi-Fi transport; Ethernet does not count, as
+  /// Android's Wi-Fi constraint does not accept it).
   final bool requiresWiFi;
 
   const FileTransfer({
@@ -111,7 +113,10 @@ class TransferCancelled extends TaskTransferEvent {
 ///   network timeouts, the system stopping the task) or `unknown` (anything
 ///   else, including connection failures the platform does not classify).
 /// - [enqueue] never throws: a refused or failed enqueue is reported as
-///   [TransferFailed] for each file.
+///   [TransferFailed] for each file. [cancel], [cancelAll] and
+///   [requestNotificationPermission] never throw either: failures are
+///   logged, and a task a cancel misses is cancelled later as an orphan.
+///   [activeTaskIds] may throw; the consumer then keeps its bindings.
 /// - [cancel] of an unknown or finished id does nothing. Cancels the
 ///   consumer makes may or may not produce [TransferCancelled]; the consumer
 ///   unbinds the ids first. A [TransferCancelled] the consumer did not ask

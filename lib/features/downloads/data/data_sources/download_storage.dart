@@ -108,9 +108,10 @@ class DownloadStorage {
     return await target.exists() ? target.length() : null;
   }
 
-  Future<void> deleteChapter(String bookId, String chapterId) async {
+  /// Deletes the chapter's directory; `false` when it could not.
+  Future<bool> deleteChapter(String bookId, String chapterId) async {
     final manifest = await file(bookId, chapterId, manifestName);
-    await _delete(manifest.parent);
+    return _delete(manifest.parent);
   }
 
   Future<void> deleteBook(String bookId) async {
@@ -143,11 +144,13 @@ class DownloadStorage {
     }
   }
 
-  Future<void> _delete(Directory dir) async {
+  Future<bool> _delete(Directory dir) async {
     try {
       if (await dir.exists()) await dir.delete(recursive: true);
+      return true;
     } catch (e, stackTrace) {
       AppLogger.e('Could not delete downloads', e, stackTrace, _logTag);
+      return false;
     }
   }
 

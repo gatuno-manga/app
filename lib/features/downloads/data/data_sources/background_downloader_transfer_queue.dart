@@ -288,12 +288,20 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   Future<void> cancel(Iterable<String> taskIds) async {
     final ids = taskIds.toList();
     if (ids.isEmpty) return;
-    await _downloader.cancelTasksWithIds(ids);
+    try {
+      await _downloader.cancelTasksWithIds(ids);
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not cancel downloads', e, stackTrace, _logTag);
+    }
   }
 
   @override
   Future<void> cancelAll() async {
-    await cancel(await activeTaskIds());
+    try {
+      await cancel(await activeTaskIds());
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not list downloads to cancel', e, stackTrace, _logTag);
+    }
   }
 
   /// Waits for a running resume sweep: a task being resumed is briefly in

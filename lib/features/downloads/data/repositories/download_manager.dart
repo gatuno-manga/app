@@ -309,13 +309,9 @@ class DownloadManager implements DownloadService {
   /// one. Cancels every native task, recorded or not.
   Future<void> clearAll() => _serial(() async {
     _deletedAll++;
-    try {
-      await _transfers.cancelAll();
-    } catch (e, stackTrace) {
-      // The wipe must happen regardless; the next start cancels native
-      // tasks no record points at.
-      AppLogger.e('Could not cancel native downloads', e, stackTrace, _logTag);
-    }
+    // Never throws (see TransferQueue); a task it misses is cancelled as an
+    // orphan at the next start.
+    await _transfers.cancelAll();
     final books = await _records.bookIds();
     await _records.clear();
     await _storage.deleteAll();
@@ -441,6 +437,7 @@ class DownloadManager implements DownloadService {
   }
 
   void _schedulePlanRetry() {
+    if (_disposed) return;
     _planRetry ??= Timer(_planRetryDelay, () {
       _planRetry = null;
       unawaited(_plan());
@@ -526,33 +523,37 @@ class DownloadManager implements DownloadService {
   // ---------------------------------------------------------------------------
   // Native events, reconciliation and rules (inside _serial)
 
-  Future<void> _onTransfer(TransferEvent event) => switch (event) {
-    TransfersResynced() => _resyncNow(),
-    TransferCancelled(:final taskId) => _onUserCancel({taskId}),
-    TransferStarted(:final taskId) => _onFileEvent(
-      taskId,
-      (chapter, _) => _transition(chapter, DownloadEvent.fileStarted),
-    ),
-    TransferCompleted(:final taskId) => _onFileEvent(taskId, _onFileDone),
-    TransferFailed(:final taskId, :final error) => _onFileEvent(
-      taskId,
-      (chapter, _) => _fail(chapter.chapterId, error),
-    ),
-  };
+  Future<void> _onTransfer(TransferEvent event) async {
+    switch (event) {
+      case TransfersResynced():
+        await _resyncNow();
+      case TransferCancelled(:final taskId):
+        await _onUserCancel({taskId});
+      case TransferStarted(:final taskId):
+        if (await _fileOf(taskId) case (final chapter, _)) {
+          await _transition(chapter, DownloadEvent.fileStarted);
+        }
+      case TransferCompleted(:final taskId):
+        if (await _fileOf(taskId) case (final chapter, final file)) {
+          await _onFileDone(chapter, file);
+        }
+      case TransferFailed(:final taskId, :final error):
+        if (await _fileOf(taskId) case (final chapter, _)) {
+          await _failChapter(chapter, error);
+        }
+    }
+  }
 
   Future<void> _resyncNow() async => _resync(await _transfers.activeTaskIds());
 
-  /// Runs [handle] for the file of the current attempt [taskId]; events of
-  /// an earlier attempt, cancelled or replaced, are ignored.
-  Future<void> _onFileEvent(
-    String taskId,
-    Future<void> Function(DownloadChapter chapter, DownloadFile file) handle,
-  ) async {
+  /// The chapter and file of the current attempt [taskId]; `null` for an
+  /// earlier attempt, cancelled or replaced.
+  Future<(DownloadChapter, DownloadFile)?> _fileOf(String taskId) async {
     final file = await _records.fileForTask(taskId);
-    if (file == null) return;
+    if (file == null) return null;
     final chapter = await _records.chapter(file.chapterId);
-    if (chapter == null) return;
-    await handle(chapter, file);
+    if (chapter == null) return null;
+    return (chapter, file);
   }
 
   Future<void> _onFileDone(DownloadChapter chapter, DownloadFile file) async {
@@ -562,7 +563,7 @@ class DownloadManager implements DownloadService {
       file.relativePath,
     );
     if (size == null) {
-      await _fail(chapter.chapterId, DownloadErrors.unknown);
+      await _failChapter(chapter, DownloadErrors.unknown);
       return;
     }
     await _records.markDone(file.fileId, size);
@@ -598,6 +599,7 @@ class DownloadManager implements DownloadService {
   /// downloaded file, so one file (the last done one, else the manifest) is
   /// enough to tell.
   Future<void> _healLostChapters() async {
+    final lost = <DownloadChapter>[];
     for (final planned in await _records.plannedChapterSamples()) {
       final probe = planned.sample ?? DownloadStorage.manifestName;
       if (await _storage.sizeOf(planned.bookId, planned.chapterId, probe) !=
@@ -605,16 +607,33 @@ class DownloadManager implements DownloadService {
         continue;
       }
       final chapter = await _records.chapter(planned.chapterId);
-      if (chapter == null) continue;
-      // Directory first: if the app dies before the reset, the chapter is
-      // still planned with its manifest gone, and the next start heals it.
-      await _storage.deleteChapter(planned.bookId, planned.chapterId);
-      await _transition(chapter, DownloadEvent.lost);
-      // Unbinds the files' tasks by deleting their rows: _resync then
-      // cancels them as orphans.
-      await _records.resetPlan(planned.chapterId);
+      if (chapter != null) lost.add(chapter);
     }
+    if (lost.isEmpty) return;
+    final replanned = await _deleteForReplan(lost);
+    final unbound = <String>[];
+    await _records.transaction(() async {
+      for (final chapter in replanned) {
+        unbound.addAll(await _applyEvent(chapter, DownloadEvent.lost) ?? []);
+        // Deleting the file rows unbinds their tasks too: _resync cancels
+        // them as orphans.
+        await _records.resetPlan(chapter.chapterId);
+      }
+    });
+    await _cancelTasks(unbound);
   }
+
+  /// Deletes the directories of [chapters] before their plan is reset, so a
+  /// crash in between leaves them planned with their files gone (the next
+  /// start heals them) and old pages never pass for new ones. Returns the
+  /// chapters whose directory is gone; the others keep their plan.
+  Future<List<DownloadChapter>> _deleteForReplan(
+    List<DownloadChapter> chapters,
+  ) async => [
+    for (final chapter in chapters)
+      if (await _storage.deleteChapter(chapter.bookId, chapter.chapterId))
+        chapter,
+  ];
 
   /// Files of active chapters whose task is no longer in [active] are queued
   /// again; [_continue] also marks those already on disk done.
@@ -675,10 +694,10 @@ class DownloadManager implements DownloadService {
     if (event == DownloadEvent.retry &&
         row.error == DownloadErrors.notFound &&
         row.planned) {
-      await _records.resetPlan(row.chapterId);
-      // File names follow page positions, not content: old pages would pass
-      // for new ones.
-      await _storage.deleteChapter(row.bookId, row.chapterId);
+      // The chapter may have been re-scraped: plan it again from scratch.
+      if ((await _deleteForReplan([row])).isNotEmpty) {
+        await _records.resetPlan(row.chapterId);
+      }
       return;
     }
     await _continue(row.chapterId);
@@ -745,9 +764,11 @@ class DownloadManager implements DownloadService {
   /// what is missing.
   Future<void> _fail(String chapterId, String error) async {
     final chapter = await _records.chapter(chapterId);
-    if (chapter == null) return;
-    await _transition(chapter, DownloadEvent.fail, error: error);
+    if (chapter != null) await _failChapter(chapter, error);
   }
+
+  Future<void> _failChapter(DownloadChapter chapter, String error) =>
+      _transition(chapter, DownloadEvent.fail, error: error);
 
   /// Unbinds the native tasks of the chapters' bound files and cancels them.
   /// The ids are cleared first, so any cancel events that follow are stale.

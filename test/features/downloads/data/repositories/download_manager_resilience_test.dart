@@ -175,21 +175,6 @@ void main() {
       expect((await chapter('c1'))!.state, DownloadState.queued);
     });
 
-    test('clearAll wipes even when the native cancel throws', () async {
-      await manager.dispose();
-      transfers = ThrowingCancelQueue();
-      manager = build();
-      await manager.start();
-      manifest('t1', textManifest('t1'));
-      await manager.enqueueChapters(testBook, const [ChapterId('t1')]);
-      await untilState('t1', DownloadState.done);
-
-      await manager.clearAll();
-
-      expect(await manager.watchAll().first, isEmpty);
-      expect(Directory('${dir.path}/downloads').existsSync(), isFalse);
-    });
-
     test('a failed re-plan does not keep counting the old manifest', () async {
       manifest('c1', imageManifest('c1'));
       await manager.enqueueChapters(testBook, const [ChapterId('c1')]);

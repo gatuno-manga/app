@@ -5,8 +5,8 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/logging/logger.dart';
 
-/// Whether the device is on Wi-Fi or Ethernet, for downloads restricted to
-/// unmetered networks. Only labels a waiting download; the native downloader
+/// Whether the device is on Wi-Fi, for downloads restricted to unmetered
+/// networks. Only labels a waiting download; the native downloader
 /// enforces the rule itself.
 class UnmeteredNetworkMonitor {
   static const String _logTag = 'UnmeteredNetworkMonitor';
@@ -32,10 +32,9 @@ class UnmeteredNetworkMonitor {
 
   void _update(List<ConnectivityResult> results) {
     if (_unmetered.isClosed) return;
-    _unmetered.add(
-      results.contains(ConnectivityResult.wifi) ||
-          results.contains(ConnectivityResult.ethernet),
-    );
+    // Wi-Fi only, matching FileTransfer.requiresWiFi (Android's Wi-Fi
+    // constraint does not accept Ethernet).
+    _unmetered.add(results.contains(ConnectivityResult.wifi));
   }
 
   Future<void> dispose() async {

@@ -152,11 +152,5 @@ class GatedTransferQueue extends FakeTransferQueue {
   }
 }
 
-/// A transfer queue whose cancelAll fails, as with the plugin unavailable.
-class ThrowingCancelQueue extends FakeTransferQueue {
-  @override
-  Future<void> cancelAll() => Future.error(StateError('no plugin'));
-}
-
 /// The chapter of a transfer: task ids start with `<chapterId>/`.
 String chapterOf(FileTransfer transfer) => transfer.taskId.split('/').first;

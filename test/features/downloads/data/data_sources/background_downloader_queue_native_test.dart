@@ -259,6 +259,23 @@ void main() {
     });
   });
 
+  test('cancel and cancelAll never throw', () async {
+    final q = await start(ios: false);
+    when(
+      () => downloader.cancelTasksWithIds(any()),
+    ).thenThrow(Exception('native error'));
+    when(
+      () => downloader.allTaskIds(group: any(named: 'group')),
+    ).thenAnswer((_) async => ['c1/1@s.1']);
+
+    await q.cancel(['c1/1@s.1']);
+    await q.cancelAll();
+    when(
+      () => downloader.allTaskIds(group: any(named: 'group')),
+    ).thenThrow(Exception('native error'));
+    await q.cancelAll();
+  });
+
   test('a native enqueue that throws fails every file', () async {
     final q = await start(ios: false);
     when(() => downloader.enqueueAll(any())).thenThrow(Exception('boom'));
