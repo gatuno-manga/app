@@ -121,6 +121,23 @@ void main() {
         expect(wipes, 0);
       });
 
+      group('isDifferentServer', () {
+        test('is false before the first setup', () {
+          expect(settingsService.isDifferentServer('http://a.com'), isFalse);
+        });
+
+        test('ignores a trailing slash', () async {
+          await settingsService.setApiUrl('http://a.com');
+          expect(settingsService.isDifferentServer('http://a.com/'), isFalse);
+          expect(settingsService.isDifferentServer('http://a.com'), isFalse);
+        });
+
+        test('is true for another server', () async {
+          await settingsService.setApiUrl('http://a.com');
+          expect(settingsService.isDifferentServer('http://b.com'), isTrue);
+        });
+      });
+
       test('a failed wipe does not block the switch', () async {
         settingsService = SettingsService(
           mockStorage,

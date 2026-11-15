@@ -9,6 +9,8 @@ import 'package:gatuno/features/reading/presentation/components/organisms/reader
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
+import 'package:gatuno/features/downloads/domain/entities/download_totals.dart';
+import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
 import 'package:gatuno/features/settings/presentation/views/settings_screen.dart';
 import 'package:gatuno/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:gatuno/features/settings/presentation/components/molecules/settings_profile_card.dart';
@@ -29,10 +31,13 @@ import '../../../app_lock/helpers/app_lock_mocks.dart';
 
 class MockUserService extends Mock implements UserService {}
 
+class MockDownloadService extends Mock implements DownloadService {}
+
 void main() {
   late MockSettingsService mockSettingsService;
   late MockAuthService mockAuthService;
   late MockUserService mockUserService;
+  late MockDownloadService mockDownloadService;
   late SettingsViewModel viewModel;
   late ReaderPreferencesService readerPreferences;
 
@@ -53,6 +58,11 @@ void main() {
     mockSettingsService = MockSettingsService();
     mockAuthService = MockAuthService();
     mockUserService = MockUserService();
+    mockDownloadService = MockDownloadService();
+    when(
+      () => mockDownloadService.totals(),
+    ).thenAnswer((_) async => DownloadTotals.empty);
+    when(() => mockSettingsService.isDifferentServer(any())).thenReturn(true);
 
     when(
       () => mockSettingsService.settingsStream,
@@ -75,6 +85,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await initTestDI(
@@ -192,6 +203,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
@@ -215,6 +227,7 @@ void main() {
       settingsService: mockSettingsService,
       authService: mockAuthService,
       userService: mockUserService,
+      downloadService: mockDownloadService,
     );
 
     await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);

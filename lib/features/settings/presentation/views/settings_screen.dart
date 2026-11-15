@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/logging/logger.dart';
+
 import '../view_models/settings_view_model.dart';
 import '../../../reading/domain/use_cases/reader_preferences_service.dart';
 import '../../../reading/presentation/components/organisms/reader_preferences_controls.dart';
@@ -27,14 +28,20 @@ class SettingsPage extends StatelessWidget {
     String url,
   ) async {
     final l10n = AppLocalizations.of(context)!;
-    final success = await viewModel.updateApiUrl(url);
+    // Part 2 of #147 shows the confirmation dialog here.
+    final result = await viewModel.updateApiUrl(
+      url,
+      confirmServerChange: (_) async => true,
+    );
 
-    if (!context.mounted) return;
+    if (!context.mounted || result == ApiUrlUpdateResult.cancelled) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success ? l10n.settingsApiUrlSuccess : l10n.settingsApiUrlError,
+          result == ApiUrlUpdateResult.saved
+              ? l10n.settingsApiUrlSuccess
+              : l10n.settingsApiUrlError,
         ),
       ),
     );

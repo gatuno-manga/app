@@ -1,11 +1,15 @@
 import 'dart:async';
+
 import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/theme/app_theme_choice.dart';
 import '../../../../core/logging/logger.dart';
 import '../../domain/use_cases/settings_service.dart';
 import '../../../authentication/domain/use_cases/auth_service.dart';
+import '../../../downloads/domain/entities/download_totals.dart';
+import '../../../downloads/domain/repositories/download_service.dart';
 import '../../../users/data/models/user_model.dart';
 import '../../../users/domain/use_cases/user_service.dart';
+
 import 'package:equatable/equatable.dart';
 
 class SettingsState extends Equatable {
@@ -66,10 +70,29 @@ class SettingsState extends Equatable {
   ];
 }
 
+/// Outcome of saving a server URL from the settings form.
+enum ApiUrlUpdateResult {
+  /// The URL answered and is now the configured server.
+  saved,
+
+  /// The URL did not answer, or saving it failed.
+  failed,
+
+  /// The user kept the current server instead of deleting their downloads.
+  cancelled,
+}
+
+/// Asks the user to confirm that switching servers deletes their downloads.
+/// [totals] is null when the downloads could not be counted. Returns whether
+/// to go ahead.
+typedef ConfirmServerChange = Future<bool> Function(DownloadTotals? totals);
+
 class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
+  static const String _logTag = 'SettingsViewModel';
   final SettingsService _settingsService;
   final AuthService _authService;
   final UserService _userService;
+  final DownloadService _downloadService;
   late final StreamSubscription<void> _settingsSubscription;
   late final StreamSubscription<AuthState> _authSubscription;
   late final StreamSubscription<UserModel> _profileSubscription;
@@ -78,9 +101,11 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
     required SettingsService settingsService,
     required AuthService authService,
     required UserService userService,
+    required DownloadService downloadService,
   }) : _settingsService = settingsService,
        _authService = authService,
        _userService = userService,
+       _downloadService = downloadService,
        super(SettingsState.initial()) {
     _settingsSubscription = _settingsService.settingsStream.listen(
       (_) => _syncState(),
@@ -132,29 +157,52 @@ class SettingsViewModel extends BaseStreamViewModel<SettingsState> {
     }
   }
 
-  Future<bool> updateApiUrl(String url) async {
+  /// Validates [url] and makes it the server. When it is a different server
+  /// and downloads exist (or cannot be counted), [confirmServerChange] is
+  /// asked first, since the switch deletes them.
+  Future<ApiUrlUpdateResult> updateApiUrl(
+    String url, {
+    required ConfirmServerChange confirmServerChange,
+  }) async {
     emit(state.copyWith(isLoading: true));
 
     try {
       final isValid = await _settingsService.validateApiUrl(url);
-      if (isValid) {
-        final formattedUrl = url.endsWith('/')
-            ? url.substring(0, url.length - 1)
-            : url;
-        await _settingsService.setApiUrl(formattedUrl);
-        return true;
+      if (!isValid) return ApiUrlUpdateResult.failed;
+
+      final formattedUrl = url.endsWith('/')
+          ? url.substring(0, url.length - 1)
+          : url;
+      if (_settingsService.isDifferentServer(formattedUrl)) {
+        final totals = await _downloadTotals();
+        final needsConfirmation = totals == null || totals.chapters > 0;
+        if (needsConfirmation && !await confirmServerChange(totals)) {
+          return ApiUrlUpdateResult.cancelled;
+        }
       }
-      return false;
+      await _settingsService.setApiUrl(formattedUrl);
+      return ApiUrlUpdateResult.saved;
     } catch (e, stackTrace) {
       AppLogger.e(
         'Error updating API URL in ViewModel',
         e,
         stackTrace,
-        'SettingsViewModel',
+        _logTag,
       );
-      return false;
+      return ApiUrlUpdateResult.failed;
     } finally {
       emit(state.copyWith(isLoading: false));
+    }
+  }
+
+  /// Null when the count fails: the caller then still asks, without numbers,
+  /// so downloads are never deleted without a confirmation.
+  Future<DownloadTotals?> _downloadTotals() async {
+    try {
+      return await _downloadService.totals();
+    } catch (e, stackTrace) {
+      AppLogger.e('Could not count downloads', e, stackTrace, _logTag);
+      return null;
     }
   }
 }

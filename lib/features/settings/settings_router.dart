@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import 'presentation/views/settings_screen.dart';
 import 'presentation/view_models/settings_view_model.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
@@ -13,6 +14,7 @@ import '../certificates/certificates_router.dart';
 import 'presentation/views/mfa_settings_screen.dart';
 import '../app_lock/presentation/views/app_lock_settings_screen.dart';
 import '../../../core/di/injection.dart';
+import '../downloads/domain/repositories/download_service.dart';
 
 final GlobalKey<NavigatorState> settingsNavigatorKey =
     GlobalKey<NavigatorState>();
@@ -29,6 +31,7 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
               settingsService: sl<SettingsService>(),
               authService: sl<AuthService>(),
               userService: sl<UserService>(),
+              downloadService: sl<DownloadService>(),
             ),
           ),
           // Shared singleton owned by DI: provided, never disposed here.
