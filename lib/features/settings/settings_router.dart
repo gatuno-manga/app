@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'presentation/views/settings_screen.dart';
 import 'presentation/view_models/settings_view_model.dart';
+import 'presentation/view_models/download_settings_view_model.dart';
+import 'presentation/views/download_settings_screen.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
 import '../settings/domain/use_cases/settings_service.dart';
 import '../reading/domain/use_cases/reader_preferences_service.dart';
@@ -40,6 +42,16 @@ final StatefulShellBranch settingsBranch = StatefulShellBranch(
       ),
       routes: [
         ...certificatesRoutes,
+        GoRoute(
+          // No guard: downloads outlive a sign-out, so their rules must stay
+          // reachable for guests too.
+          path: 'download',
+          builder: (context, state) => Provider<DownloadSettingsViewModel>(
+            create: (_) => sl<DownloadSettingsViewModel>(),
+            dispose: (_, viewModel) => viewModel.dispose(),
+            child: const DownloadSettingsPage(),
+          ),
+        ),
         GoRoute(
           path: 'app-lock',
           builder: (context, state) => const AppLockSettingsPage(),

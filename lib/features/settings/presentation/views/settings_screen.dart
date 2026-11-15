@@ -117,6 +117,16 @@ class SettingsPage extends StatelessWidget {
               ),
             ],
           ),
+          downloadsSectionHeader: SettingsSectionHeader(
+            title: l10n.settingsDownloadsSection,
+          ),
+          downloadNetworkTile: ListTile(
+            title: Text(l10n.settingsDownloadNetwork),
+            subtitle: Text(l10n.settingsDownloadNetworkDesc),
+            leading: const Icon(Icons.download_outlined),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/settings/download'),
+          ),
           apiSectionHeader: SettingsSectionHeader(
             title: l10n.settingsApiSection,
           ),

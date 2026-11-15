@@ -34,25 +34,36 @@ class DownloadSettingsViewModel
   final DownloadNetworkRules _rules;
   late final StreamSubscription<Map<BookType, DownloadNetwork>> _subscription;
 
+  /// What is saved, to restore a choice whose save failed.
+  Map<BookType, DownloadNetwork> _stored = const {};
+
   DownloadSettingsViewModel({required DownloadNetworkRules rules})
     : _rules = rules,
       super(DownloadSettingsState.initial()) {
     _subscription = _rules.watch().listen(
-      (rules) => emit(state.copyWith(rules: rules)),
+      (rules) {
+        _stored = rules;
+        emit(state.copyWith(rules: rules));
+      },
       onError: (Object e, StackTrace stackTrace) =>
           AppLogger.e('Network rules unavailable', e, stackTrace, _logTag),
     );
   }
 
-  /// Saves the rule of [type]. Returns false when it was not saved: the
-  /// previous rule stays selected, since the state follows what is stored,
-  /// and the screen tells the user.
+  /// Shows [network] for [type] at once and saves it. Returns false when
+  /// it was not saved: the saved rule is shown again, and the screen tells
+  /// the user.
   Future<bool> setRule(BookType type, DownloadNetwork network) async {
+    emit(state.copyWith(rules: {...state.rules, type: network}));
     try {
       await _rules.set(type, network);
       return true;
     } catch (e, stackTrace) {
       AppLogger.e('Network rule not saved', e, stackTrace, _logTag);
+      final saved = _stored[type];
+      if (saved != null) {
+        emit(state.copyWith(rules: {...state.rules, type: saved}));
+      }
       return false;
     }
   }

@@ -383,6 +383,36 @@ class AppLocalizationsPt extends AppLocalizations {
       'Gerenciar certificados confiáveis e ignorados';
 
   @override
+  String get settingsDownloadsSection => 'Downloads';
+
+  @override
+  String get settingsDownloadNetwork => 'Rede para downloads';
+
+  @override
+  String get settingsDownloadNetworkDesc =>
+      'Escolha quando baixar cada tipo de livro';
+
+  @override
+  String get settingsDownloadTitle => 'Downloads';
+
+  @override
+  String get settingsDownloadWifiOnly => 'Só Wi-Fi';
+
+  @override
+  String get settingsDownloadWifiAndMobile => 'Wi-Fi e dados';
+
+  @override
+  String get settingsDownloadOtherHint => 'Inclui livros sem tipo';
+
+  @override
+  String get settingsDownloadNetworkNotice =>
+      'Ao trocar para Só Wi-Fi, downloads em andamento por dados móveis pausam até haver Wi-Fi, e arquivos que estavam pela metade recomeçam do zero. As mudanças valem na hora.';
+
+  @override
+  String get settingsDownloadSaveError =>
+      'Não foi possível salvar. A regra anterior foi mantida.';
+
+  @override
   String get settingsDiagnosticsSection => 'Diagnósticos';
 
   @override

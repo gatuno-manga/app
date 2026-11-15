@@ -818,6 +818,60 @@ abstract class AppLocalizations {
   /// **'Manage trusted and ignored certificates'**
   String get settingsCertificatesDesc;
 
+  /// No description provided for @settingsDownloadsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get settingsDownloadsSection;
+
+  /// No description provided for @settingsDownloadNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Download network'**
+  String get settingsDownloadNetwork;
+
+  /// No description provided for @settingsDownloadNetworkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose when to download each book type'**
+  String get settingsDownloadNetworkDesc;
+
+  /// No description provided for @settingsDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get settingsDownloadTitle;
+
+  /// No description provided for @settingsDownloadWifiOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi only'**
+  String get settingsDownloadWifiOnly;
+
+  /// No description provided for @settingsDownloadWifiAndMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi and data'**
+  String get settingsDownloadWifiAndMobile;
+
+  /// No description provided for @settingsDownloadOtherHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes books with no type'**
+  String get settingsDownloadOtherHint;
+
+  /// No description provided for @settingsDownloadNetworkNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'When you switch to Wi-Fi only, downloads in progress on mobile data pause until there is Wi-Fi, and files that were halfway start over. Changes apply right away.'**
+  String get settingsDownloadNetworkNotice;
+
+  /// No description provided for @settingsDownloadSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. The previous rule was kept.'**
+  String get settingsDownloadSaveError;
+
   /// No description provided for @settingsDiagnosticsSection.
   ///
   /// In en, this message translates to:

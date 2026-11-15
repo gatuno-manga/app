@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_network.dart';
 import 'package:gatuno/features/downloads/domain/repositories/download_network_rules.dart';
@@ -55,7 +57,19 @@ void main() {
     verify(() => rules.set(BookType.manga, DownloadNetwork.any)).called(1);
   });
 
-  test('a failed save reports failure and keeps the rule', () async {
+  test('setRule shows the new rule before the save finishes', () async {
+    final save = Completer<void>();
+    when(() => rules.set(any(), any())).thenAnswer((_) => save.future);
+    await pumpEventQueue();
+
+    final saving = viewModel.setRule(BookType.manga, DownloadNetwork.any);
+
+    expect(viewModel.state.rules[BookType.manga], DownloadNetwork.any);
+    save.complete();
+    expect(await saving, isTrue);
+  });
+
+  test('a failed save reports failure and restores the saved rule', () async {
     when(() => rules.set(any(), any())).thenThrow(Exception('disk full'));
     await pumpEventQueue();
 
