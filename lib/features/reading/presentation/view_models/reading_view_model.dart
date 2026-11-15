@@ -148,6 +148,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     if (state.isLoading) return;
     _requestedId = chapterId;
     _requestedPage = initialPage;
+    _openedDownloaded = false;
     AppLogger.i(
       'Loading chapter: $chapterId, initialPage: $initialPage',
       _logTag,
@@ -230,16 +231,15 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     return !state.isOfflineMiss;
   }
 
-  /// Going offline is when neighbours start to matter: check them then.
-  /// Online, the result is dropped, since a neighbour may get downloaded
-  /// before the next time offline.
+  /// Going offline is when neighbours start to matter: check them afresh
+  /// each time, since one may have been downloaded while online.
   void _onStatus(ConnectivityStatus status) {
     final offline = status == ConnectivityStatus.offline;
     emit(
       state.copyWith(
         isOffline: offline,
-        previousDownloaded: offline ? null : () => null,
-        nextDownloaded: offline ? null : () => null,
+        previousDownloaded: () => null,
+        nextDownloaded: () => null,
       ),
     );
     final current = state.chapter;
@@ -262,21 +262,20 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     }
   }
 
-  /// Which neighbours open offline. Checked once per chapter while offline: a
-  /// neighbour downloaded while this one is open is picked up on the next
-  /// chapter.
+  /// Which neighbours open offline. Checked when a chapter opens offline and
+  /// each time the status turns offline.
   Future<void> _checkNeighbours(ReadingChapter chapter) async {
     // A missing neighbour stays null: there is nothing to be unavailable.
-    final previous = chapter.hasPrevious
-        ? await _repository.isDownloaded(chapter.previous!)
-        : null;
-    final next = chapter.hasNext
-        ? await _repository.isDownloaded(chapter.next!)
-        : null;
-    // Only for the neighbours checked: a navigation refresh may have
-    // replaced them meanwhile.
+    final (previous, next) = await (
+      _isDownloaded(chapter.hasPrevious ? chapter.previous : null),
+      _isDownloaded(chapter.hasNext ? chapter.next : null),
+    ).wait;
+    // Only for the neighbours checked, and only while still offline: a
+    // navigation refresh may have replaced them, or a reconnect dropped the
+    // check, meanwhile.
     final current = state.chapter;
-    if (current == null ||
+    if (!state.isOffline ||
+        current == null ||
         current.id != chapter.id ||
         current.previous != chapter.previous ||
         current.next != chapter.next) {
@@ -289,6 +288,9 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
       ),
     );
   }
+
+  Future<bool?> _isDownloaded(ChapterId? id) async =>
+      id == null ? null : _repository.isDownloaded(id);
 
   /// A downloaded copy keeps the neighbours it had when it was saved: ask
   /// the server for the current ones, so later chapters stay reachable.

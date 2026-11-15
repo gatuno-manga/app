@@ -336,6 +336,24 @@ void main() {
       expect(viewModel.state.previousUnavailable, isFalse);
     });
 
+    test('a check that lands after reconnecting is dropped', () async {
+      final slow = Completer<bool>();
+      when(
+        () => repository.isDownloaded(const ChapterId('prev')),
+      ).thenAnswer((_) => slow.future);
+      opens(linked());
+      await viewModel.loadChapter(chapterId);
+
+      connectivity.goOffline();
+      await _settle();
+      connectivity.reconnect();
+      await _settle();
+      slow.complete(false);
+      await _settle();
+
+      expect(viewModel.state.previousDownloaded, isNull);
+    });
+
     test('a check for neighbours the refresh replaced is dropped', () async {
       // Offline at open, so the saved neighbours are checked; the first
       // check is slow and lands after the refreshed neighbours'.

@@ -82,9 +82,12 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
     super.dispose();
   }
 
+  /// Closes the message if it is still up; one that timed out already
+  /// cleared [_stillOffline] (closing it again would hide another SnackBar).
   void _closeStillOffline() {
-    _stillOffline?.close();
+    final shown = _stillOffline;
     _stillOffline = null;
+    shown?.close();
   }
 
   @override
@@ -134,9 +137,13 @@ class _ReadingScreenContentState extends State<_ReadingScreenContent> {
     if (reachable || !mounted) return;
     final l10n = AppLocalizations.of(context)!;
     _closeStillOffline();
-    _stillOffline = ScaffoldMessenger.of(
+    final shown = ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(l10n.readingStillOffline)));
+    _stillOffline = shown;
+    shown.closed.whenComplete(() {
+      if (identical(_stillOffline, shown)) _stillOffline = null;
+    });
   }
 
   Widget _buildReader(ReadingChapter chapter) {
