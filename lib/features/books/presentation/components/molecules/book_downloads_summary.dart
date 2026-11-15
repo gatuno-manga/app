@@ -89,10 +89,13 @@ class BookDownloadsSummary extends StatelessWidget {
               ),
               if (actionLabel != null) ...[
                 const SizedBox(width: 8),
-                AppTextButton(
-                  text: actionLabel,
-                  tone: AppTextButtonTone.primary,
-                  onPressed: onAction,
+                // Wraps its label instead of overflowing with large text.
+                Flexible(
+                  child: AppTextButton(
+                    text: actionLabel,
+                    tone: AppTextButtonTone.primary,
+                    onPressed: onAction,
+                  ),
                 ),
               ],
             ],

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
+import 'package:gatuno/core/theme/semantic_colors.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';
@@ -336,7 +337,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('1 selected'), findsOneWidget);
-      expect(find.text('Select'), findsNothing);
+      expect(find.text('Select').hitTestable(), findsNothing);
       expect(
         find.byType(ChapterDownloadIndicator),
         findsNWidgets(3),
@@ -488,6 +489,57 @@ void main() {
     });
   });
 
+  testWidgets('toggling selection mode does not move the list', (tester) async {
+    await pumpPage(tester);
+    final tile = find.ancestor(
+      of: find.text('Chapter 2'),
+      matching: find.byType(ListTile),
+    );
+    final before = tester.getRect(tile).top;
+
+    await tester.longPress(find.text('Chapter 1'));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(tile).top, before);
+
+    await tester.tap(find.byTooltip('Leave selection'));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(tile).top, before);
+  });
+
+  testWidgets('a failed chapter sheet closes once it is retried elsewhere', (
+    tester,
+  ) async {
+    await pumpPage(tester);
+    await show(tester, [chapterDownload(c1, DownloadState.failed)]);
+    await tester.tap(find.bySemanticsLabel('Download failed. Tap for options'));
+    await tester.pumpAndSettle();
+    expect(find.text('The download failed'), findsOneWidget);
+
+    await show(tester, [chapterDownload(c1, DownloadState.queued)]);
+
+    expect(find.text('The download failed'), findsNothing);
+  });
+
+  testWidgets('waiting for Wi-Fi mutes the summary bar', (tester) async {
+    await pumpPage(tester);
+    await show(tester, [
+      chapterDownload(
+        c1,
+        DownloadState.queued,
+        reason: DownloadWaitReason.waitingForNetwork,
+      ),
+    ]);
+
+    expect(find.text('Waiting for Wi-Fi'), findsOneWidget);
+    final theme = Theme.of(tester.element(find.text('Waiting for Wi-Fi')));
+    expect(
+      tester
+          .widget<LinearProgressIndicator>(find.byType(LinearProgressIndicator))
+          .color,
+      theme.legible(theme.mutedColor),
+    );
+  });
+
   testWidgets('the last chapter clears the selection bar', (tester) async {
     await pumpPage(tester);
     await tester.longPress(find.text('Chapter 1'));
@@ -526,6 +578,11 @@ void main() {
 
     await tester.tap(find.text('Select'));
     await tester.pumpAndSettle();
+    expect(
+      find.byIcon(Icons.check_box_outline_blank),
+      findsOneWidget,
+      reason: 'no checkbox on the chapter still being scraped',
+    );
     await tester.tap(find.text('Chapter 2'));
     await tester.pumpAndSettle();
     expect(find.text('None selected'), findsOneWidget);

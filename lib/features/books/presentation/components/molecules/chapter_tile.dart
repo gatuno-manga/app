@@ -42,62 +42,64 @@ class ChapterTile extends StatelessWidget {
     final selected = this.selected;
     final download = this.download;
 
-    return Semantics(
-      selected: selected,
-      child: ListTile(
-        enabled: onTap != null,
-        selected: selected ?? false,
-        selectedColor: theme.colorScheme.onSurface,
-        selectedTileColor: palette.primary10,
-        shape: selected == true
-            ? RoundedRectangleBorder(
-                side: BorderSide(color: theme.colorScheme.primary),
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
-              )
-            : null,
-        // The tile's `selected` flag carries the state for screen readers.
-        leading: selected == null
-            ? null
-            : ExcludeSemantics(
-                child: Icon(
-                  selected ? Icons.check : Icons.check_box_outline_blank,
-                  color: selected
-                      ? theme.colorScheme.primary
-                      : theme.legible(theme.mutedColor),
-                ),
-              ),
-        title: Text(chapterLabel(l10n, chapter)),
-        subtitle: chapter.title != null ? Text(chapter.title!.value) : null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              chapter.completed ? Icons.visibility : Icons.visibility_off,
-              color: onTap == null
-                  ? theme.disabledColor
-                  : (chapter.completed
-                        ? theme.legible(theme.successColor)
-                        : (chapter.read
-                              ? theme.legible(theme.warningColor)
-                              : theme.mutedColor)),
-              size: 20,
-            ),
-            if (download != null)
-              ChapterDownloadIndicator(
-                status: download.status,
-                progress: download.progress,
-                semanticLabel: _downloadLabel(l10n, download),
-                onTap: onDownloadTap,
-              ),
-            if (chapter.scrapingStatus != null) ...[
-              const SizedBox(width: 8),
-              _getStatusBadge(l10n, theme, chapter.scrapingStatus)!,
-            ],
-          ],
+    return ListTile(
+      enabled: onTap != null,
+      selected: selected ?? false,
+      selectedColor: theme.colorScheme.onSurface,
+      selectedTileColor: palette.primary10,
+      // Every tile carries the border, transparent unless selected: the
+      // border adds to the tile's height, and a selected tile must not
+      // push the list down.
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: selected == true
+              ? theme.colorScheme.primary
+              : Colors.transparent,
         ),
-        onTap: onTap,
-        onLongPress: onLongPress,
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
+      // The tile's `selected` flag carries the state for screen readers.
+      leading: selected == null
+          ? null
+          : ExcludeSemantics(
+              child: Icon(
+                selected ? Icons.check : Icons.check_box_outline_blank,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.legible(theme.mutedColor),
+              ),
+            ),
+      title: Text(chapterLabel(l10n, chapter)),
+      subtitle: chapter.title != null ? Text(chapter.title!.value) : null,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            chapter.completed ? Icons.visibility : Icons.visibility_off,
+            color: onTap == null
+                ? theme.disabledColor
+                : (chapter.completed
+                      ? theme.legible(theme.successColor)
+                      : (chapter.read
+                            ? theme.legible(theme.warningColor)
+                            : theme.mutedColor)),
+            size: 20,
+          ),
+          if (download != null)
+            ChapterDownloadIndicator(
+              status: download.status,
+              progress: download.progress,
+              semanticLabel: _downloadLabel(l10n, download),
+              onTap: onDownloadTap,
+            ),
+          if (chapter.scrapingStatus != null) ...[
+            const SizedBox(width: 8),
+            _getStatusBadge(l10n, theme, chapter.scrapingStatus)!,
+          ],
+        ],
+      ),
+      onTap: onTap,
+      onLongPress: onLongPress,
     );
   }
 

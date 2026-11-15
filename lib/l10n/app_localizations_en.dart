@@ -1227,7 +1227,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String booksDownloadsSummaryOfTotal(int done, int total, String size) {
-    return '$done of $total chapters downloaded · $size';
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$done of $total chapters downloaded · $size',
+      one: '$done of 1 chapter downloaded · $size',
+    );
+    return '$_temp0';
   }
 
   @override

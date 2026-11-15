@@ -89,4 +89,38 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsNothing);
     expect(find.byType(TextButton), findsNothing);
   });
+
+  testWidgets('large text on a narrow phone wraps instead of overflowing', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(320, 800),
+            textScaler: TextScaler.linear(2),
+          ),
+          child: Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: BookDownloadsSummary(
+                countLabel: '12 de 120 capítulos baixados · 412,4 MB',
+                statusLabel: '2 capítulos falharam',
+                statusIsError: true,
+                actionLabel: 'Tentar de novo (2)',
+                onAction: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Tentar de novo (2)'), findsOneWidget);
+  });
 }

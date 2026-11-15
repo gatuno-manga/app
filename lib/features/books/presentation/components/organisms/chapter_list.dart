@@ -73,18 +73,21 @@ class ChapterList extends StatelessWidget {
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
         if (index == chapters.length) {
+          // With the Scaffold's extendBody, the bottom padding includes the
+          // selection bar and the system inset: every footer clears both.
+          final bottom = MediaQuery.paddingOf(context).bottom;
           if (isLoading) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
+                child: const CircularProgressIndicator(),
               ),
             );
           }
           if (error != null) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
                 child: Column(
                   children: [
                     Text(error!, textAlign: TextAlign.center),
@@ -95,10 +98,7 @@ class ChapterList extends StatelessWidget {
               ),
             );
           }
-          // With the Scaffold's extendBody, the bottom padding includes the
-          // selection bar and the system inset, so the last chapter clears
-          // both.
-          return SizedBox(height: 32 + MediaQuery.paddingOf(context).bottom);
+          return SizedBox(height: 32 + bottom);
         }
 
         final chapter = chapters[index];
@@ -125,7 +125,10 @@ class ChapterList extends StatelessWidget {
           onLongPress: readable && !selecting
               ? () => downloads.onLongPress(chapter)
               : null,
-          selected: selecting ? downloads.isSelected(chapter) : null,
+          // No checkbox on a chapter that cannot be picked.
+          selected: selecting && readable
+              ? downloads.isSelected(chapter)
+              : null,
           download: readable || display.status != ChapterDownloadStatus.none
               ? display
               : null,

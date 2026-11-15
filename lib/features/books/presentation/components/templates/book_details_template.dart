@@ -4,7 +4,7 @@ import 'package:gatuno/core/theme/theme.dart';
 class BookDetailsTemplate extends StatelessWidget {
   /// Drawn over the top of the body, so swapping the transparent app bar
   /// for the opaque selection bar does not move the list.
-  final Widget? appBar;
+  final PreferredSizeWidget? appBar;
   final Widget cover;
   final Widget header;
   final Widget actionButtons;
@@ -40,7 +40,7 @@ class BookDetailsTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gatunoColors = Theme.of(context).extension<GatunoColors>();
-    final appBar = this.appBar;
+    final topInset = MediaQuery.viewPaddingOf(context).top + kToolbarHeight;
     final downloadSummary = this.downloadSummary;
     final chapterControls = this.chapterControls;
 
@@ -48,14 +48,7 @@ class BookDetailsTemplate extends StatelessWidget {
       extendBodyBehindAppBar: true,
       // The selection bar floats over the list, which pads its end for it.
       extendBody: true,
-      appBar: appBar == null
-          ? null
-          : PreferredSize(
-              preferredSize: appBar is PreferredSizeWidget
-                  ? appBar.preferredSize
-                  : const Size.fromHeight(kToolbarHeight),
-              child: appBar,
-            ),
+      appBar: appBar,
       bottomNavigationBar: bottomBar,
       body: Container(
         decoration: BoxDecoration(gradient: gatunoColors?.degrader),
@@ -63,8 +56,12 @@ class BookDetailsTemplate extends StatelessWidget {
           controller: scrollController,
           slivers: [
             SliverToBoxAdapter(
-              child: SafeArea(
-                bottom: false,
+              // A fixed top inset, the system inset plus a toolbar, rather
+              // than the mounted bar's height: the selection bar is taller,
+              // and following it would move the list when the mode
+              // toggles.
+              child: Padding(
+                padding: EdgeInsets.only(top: topInset),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
                   child: Column(

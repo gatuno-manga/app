@@ -2249,7 +2249,7 @@ abstract class AppLocalizations {
   /// No description provided for @booksDownloadsSummaryOfTotal.
   ///
   /// In en, this message translates to:
-  /// **'{done} of {total} chapters downloaded · {size}'**
+  /// **'{total, plural, =1{{done} of 1 chapter downloaded · {size}} other{{done} of {total} chapters downloaded · {size}}}'**
   String booksDownloadsSummaryOfTotal(int done, int total, String size);
 
   /// No description provided for @booksDownloadsSummary.

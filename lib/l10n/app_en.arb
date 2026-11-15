@@ -542,7 +542,7 @@
   },
   "booksSelect": "Select",
   "booksMoreOptions": "More options",
-  "booksDownloadsSummaryOfTotal": "{done} of {total} chapters downloaded · {size}",
+  "booksDownloadsSummaryOfTotal": "{total, plural, =1{{done} of 1 chapter downloaded · {size}} other{{done} of {total} chapters downloaded · {size}}}",
   "@booksDownloadsSummaryOfTotal": {
     "placeholders": {
       "done": {

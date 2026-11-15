@@ -161,12 +161,20 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
               )
             : null,
         downloadSummary: _summary(context, book, downloads),
-        chapterControls: selecting || selectable.isEmpty
+        // Hidden while selecting but keeping its room, so the list does
+        // not move when the mode toggles.
+        chapterControls: selectable.isEmpty
             ? null
-            : AppTextButton(
-                text: l10n.booksSelect,
-                icon: Icons.check_circle_outline,
-                onPressed: _downloads.startSelection,
+            : Visibility(
+                visible: !selecting,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: AppTextButton(
+                  text: l10n.booksSelect,
+                  icon: Icons.check_circle_outline,
+                  onPressed: _downloads.startSelection,
+                ),
               ),
         bottomBar: selecting ? _selectionActions(context, downloads) : null,
         chapterDownloads: ChapterListDownloads(
@@ -229,7 +237,9 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       },
       onAction: _downloads.runStripAction,
       progress: active ? state.activeProgress : null,
-      progressMuted: phase == BookDownloadPhase.waitingForConnection,
+      progressMuted:
+          phase == BookDownloadPhase.waitingForConnection ||
+          state.allActiveWaitForWifi,
     );
   }
 

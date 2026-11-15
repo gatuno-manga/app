@@ -110,41 +110,60 @@ class BookDownloadsFlows {
   }
 
   /// A tap on [chapter]'s indicator: acts directly, or opens the sheet of
-  /// a failed or downloaded chapter.
+  /// a failed or downloaded chapter. The sheet follows the download and
+  /// closes once the chapter leaves that state (a retry from the summary,
+  /// a delete).
   Future<void> tapIndicator(BuildContext context, Chapter chapter) async {
     final sheet = await viewModel.tapIndicator(chapter.id);
     if (sheet == null || !context.mounted) return;
-    final download = viewModel.state.chapter(chapter.id);
-    if (download == null) return;
     final l10n = AppLocalizations.of(context)!;
     final title = chapterHeading(l10n, chapter);
+    final shownState = sheet == ChapterIndicatorAction.openFailed
+        ? DownloadState.failed
+        : DownloadState.done;
     await showAppModalBottomSheet<void>(
       context: context,
       glass: true,
-      builder: (sheetContext) {
-        void close() => Navigator.of(sheetContext).pop();
-        return sheet == ChapterIndicatorAction.openFailed
-            ? ChapterDownloadSheet.failed(
-                title: title,
-                reason: failureReason(l10n, download.error),
-                onRetry: () {
-                  close();
-                  viewModel.retry([chapter.id]);
-                },
-                onDelete: () {
-                  close();
-                  viewModel.delete([chapter.id]);
-                },
-              )
-            : ChapterDownloadSheet.done(
-                title: title,
-                size: sizeOf(sheetContext, download.bytes),
-                onDelete: () {
-                  close();
-                  viewModel.delete([chapter.id]);
-                },
-              );
-      },
+      builder: (sheetContext) => StreamBuilder<BookDownloadsState>(
+        stream: viewModel.stateStream,
+        initialData: viewModel.state,
+        builder: (sheetContext, snapshot) {
+          final navigator = Navigator.of(sheetContext);
+          void close() => navigator.pop();
+          final download = snapshot.data!.chapter(chapter.id);
+          if (download?.state != shownState) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Gone already when its own button closed it.
+              if (sheetContext.mounted &&
+                  (ModalRoute.of(sheetContext)?.isCurrent ?? false)) {
+                close();
+              }
+            });
+            return const SizedBox.shrink();
+          }
+          return shownState == DownloadState.failed
+              ? ChapterDownloadSheet.failed(
+                  title: title,
+                  reason: failureReason(l10n, download!.error),
+                  onRetry: () {
+                    close();
+                    viewModel.retry([chapter.id]);
+                  },
+                  onDelete: () {
+                    close();
+                    viewModel.delete([chapter.id]);
+                  },
+                )
+              : ChapterDownloadSheet.done(
+                  title: title,
+                  size: sizeOf(sheetContext, download!.bytes),
+                  onDelete: () {
+                    close();
+                    viewModel.delete([chapter.id]);
+                  },
+                );
+        },
+      ),
     );
   }
 }

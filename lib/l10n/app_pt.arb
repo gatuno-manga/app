@@ -511,7 +511,7 @@
   "downloadsNotificationErrorBody": "{failed} de {total} arquivos falharam",
   "booksSelect": "Selecionar",
   "booksMoreOptions": "Mais opções",
-  "booksDownloadsSummaryOfTotal": "{done} de {total} capítulos baixados · {size}",
+  "booksDownloadsSummaryOfTotal": "{total, plural, =1{{done} de 1 capítulo baixado · {size}} other{{done} de {total} capítulos baixados · {size}}}",
   "booksDownloadsSummary": "{done, plural, =1{1 capítulo baixado · {size}} other{{done} capítulos baixados · {size}}}",
   "booksDownloadsPhaseActive": "{count, plural, =1{Baixando 1 capítulo} other{Baixando {count} capítulos}}",
   "booksDownloadsPhaseWaitingWifi": "Aguardando Wi-Fi",
