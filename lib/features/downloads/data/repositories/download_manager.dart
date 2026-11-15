@@ -155,9 +155,7 @@ class DownloadManager implements DownloadService {
         final rules = await _loadRules();
         if (!_rules.isClosed) _rules.add(rules);
         // Before reconciling, which would queue those files again.
-        for (final taskId in userCancels) {
-          await _onUserCancel(taskId);
-        }
+        await _onUserCancel(userCancels);
         await _reconcile();
       }).whenComplete(() => unawaited(_plan()));
     }();
@@ -543,20 +541,23 @@ class DownloadManager implements DownloadService {
       case TransferFailed(:final error):
         await _fail(chapter.chapterId, error);
       case TransferCancelled(:final taskId):
-        await _onUserCancel(taskId);
+        await _onUserCancel({taskId});
     }
   }
 
   /// A cancel the app did not ask for (it unbinds ids before cancelling)
-  /// came from the user, from a notification: pause the chapter, so what is
-  /// on disk is kept and a resume continues it.
-  Future<void> _onUserCancel(String taskId) async {
-    final file = await _records.fileForTask(taskId);
-    if (file == null) return;
-    final chapter = await _records.chapter(file.chapterId);
-    if (chapter == null) return;
-    await _records.releaseTaskIds({taskId});
-    await _transition(chapter, DownloadEvent.pause);
+  /// came from the user, from the download notification, which covers all
+  /// downloads: pause every active chapter, in one batch. What is on disk is
+  /// kept and a resume continues it. Ids of earlier attempts are ignored.
+  Future<void> _onUserCancel(Set<String> taskIds) async {
+    final current = await _records.boundTaskIdsAmong(taskIds);
+    if (current.isEmpty) return;
+    await _records.releaseTaskIds(current);
+    final cancelled = <String>[];
+    for (final row in await _records.chaptersIn(const DownloadScope.all())) {
+      await _transition(row, DownloadEvent.pause, cancelInto: cancelled);
+    }
+    await _cancelTasks(cancelled);
   }
 
   /// Applies what happened while the app was not running (user cancels are
@@ -703,8 +704,8 @@ class DownloadManager implements DownloadService {
     await _transition(chapter, DownloadEvent.fail, error: error);
   }
 
-  /// Cancels the native tasks of the chapters' pending files, in one call. Their ids are
-  /// cleared first, so the cancel events that follow are recognized as ours.
+  /// Unbinds the native tasks of the chapters' bound files and cancels them.
+  /// The ids are cleared first, so any cancel events that follow are stale.
   Future<void> _cancelFiles(List<String> chapterIds) async {
     await _cancelTasks(await _records.releaseTasksOf(chapterIds));
   }

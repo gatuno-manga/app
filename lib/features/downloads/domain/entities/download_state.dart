@@ -17,7 +17,7 @@ abstract final class DownloadErrors {
   /// The server no longer has the chapter or one of its files.
   static const String notFound = 'notFound';
 
-  /// A file took longer than the platform allows a background transfer
+  /// A file took longer than the platform allows one background transfer
   /// (Android: 9 minutes per try).
   static const String timedOut = 'timedOut';
 

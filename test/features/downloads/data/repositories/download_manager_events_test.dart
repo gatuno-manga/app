@@ -119,13 +119,21 @@ void main() {
       expect(transfers.queuedFor('c1').single.filename, '0002.webp');
     });
 
-    test('a cancel from the notification pauses the chapter', () async {
-      final [first, second] = transfers.enqueued;
+    test('a cancel from the notification pauses every download', () async {
+      manifest('c2', imageManifest('c2', pages: 1));
+      await manager.enqueueChapters(testBook, const [ChapterId('c2')]);
+      await until(() => transfers.enqueued.length == 3);
+      final [first, second, third] = transfers.enqueued;
       transfers.active.remove(first.taskId);
+
       transfers.controller.add(TransferCancelled(first.taskId));
 
       await untilState('c1', DownloadState.paused);
-      expect(transfers.cancelled, [second.taskId]);
+      await untilState('c2', DownloadState.paused);
+      expect(
+        transfers.cancelled,
+        unorderedEquals([second.taskId, third.taskId]),
+      );
     });
 
     test('events of a replaced attempt are ignored', () async {
@@ -142,25 +150,33 @@ void main() {
   });
 
   group('restart', () {
-    test('a notification cancel while closed pauses the chapter', () async {
+    test('a notification cancel while closed pauses every download', () async {
       manifest('c1', imageManifest('c1'));
-      await manager.enqueueChapters(testBook, const [ChapterId('c1')]);
-      await until(() => transfers.enqueued.length == 2);
-      final ids = [for (final t in transfers.enqueued) t.taskId];
+      manifest('c2', imageManifest('c2', pages: 1));
+      await manager.enqueueChapters(testBook, const [
+        ChapterId('c1'),
+        ChapterId('c2'),
+      ]);
+      await until(() => transfers.enqueued.length == 3);
+      final cancelledFile = transfers.enqueued.first.taskId;
 
-      // The app is closed; the user taps Cancel on the notification.
+      // The app is closed; the user taps Cancel on the notification, which
+      // reaches the files running at that moment.
       await manager.dispose();
-      transfers.active.clear();
-      transfers.userCancelsWhileClosed = ids.toSet();
+      transfers.active.remove(cancelledFile);
+      transfers.userCancelsWhileClosed = {cancelledFile};
       final before = transfers.enqueued.length;
       manager = build();
       await manager.start();
 
       expect((await chapter('c1'))!.state, DownloadState.paused);
+      expect((await chapter('c2'))!.state, DownloadState.paused);
       expect(transfers.enqueued.length, before, reason: 'nothing requeued');
+      expect(transfers.active, isEmpty, reason: 'the rest cancelled');
 
       await manager.resume(const DownloadScope.all());
       await until(() => transfers.queuedFor('c1').length == 2);
+      await until(() => transfers.queuedFor('c2').length == 1);
     });
 
     test(

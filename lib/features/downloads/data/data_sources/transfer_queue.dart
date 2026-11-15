@@ -89,19 +89,31 @@ class TransferCancelled extends TaskTransferEvent {
 ///
 /// - Each file is written to [FileTransfer.directory] (relative to the
 ///   application support directory) under [FileTransfer.filename]; a file
-///   on disk is complete.
+///   on disk is complete. Downloaded files are kept out of device backups.
 /// - [start] runs first. Outcomes that happened while the app was not
 ///   running are not replayed as [events]: a finished file is on disk, a
 ///   failed or system-cancelled one is no longer in [activeTaskIds], and the
-///   transfers the user cancelled (from a notification, say) are returned
-///   by [start]. Once [start] returns, [activeTaskIds] is stable and the
-///   consumer reconciles from it and the disk.
-/// - After [start], [events] reports each task's outcome under its id, as it
-///   happens. A [TransferCancelled] the consumer did not ask for came from
-///   the user.
-/// - [activeTaskIds] lists only this queue's queued or running tasks.
+///   transfers the user cancelled are returned by [start]. Once [start]
+///   returns, [activeTaskIds] is stable and the consumer reconciles from it
+///   and the disk. A failing [start] still leaves [events] working.
+/// - [activeTaskIds] lists every task of this queue that may still produce
+///   its file or an outcome: queued, running, waiting to retry, or paused
+///   for a later resume. A task left out may be enqueued again.
+/// - After [start], [events] reports outcomes as they happen. A file is
+///   tried 3 times (with backoff) before [TransferFailed]; its error is a
+///   `DownloadErrors` code: `notFound` (HTTP 404), `storageFull` (less than
+///   200 MB would remain), `timedOut` (the platform cut one try short),
+///   `server` (other HTTP or connection errors) or `unknown`.
+/// - [enqueue] never throws: a refused or failed enqueue is reported as
+///   [TransferFailed] for each file.
+/// - [cancel] of an unknown or finished id does nothing. Cancels the
+///   consumer makes may or may not produce [TransferCancelled]; the consumer
+///   unbinds the ids first. A [TransferCancelled] the consumer did not ask
+///   for came from the user.
 /// - [TransfersResynced] is emitted when tasks may have left the queue
 ///   without an event of their own.
+/// - Progress is shown in one grouped system notification while the app is
+///   in the background.
 abstract class TransferQueue {
   /// Outcomes of transfers, from [start] on.
   Stream<TransferEvent> get events;

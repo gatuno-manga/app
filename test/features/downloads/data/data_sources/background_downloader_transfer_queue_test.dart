@@ -53,6 +53,15 @@ void main() {
       const TransferFailed('c1/1@1', DownloadErrors.timedOut),
     );
     expect(
+      map(
+        TaskStatus.failed,
+        TaskConnectionException(
+          'java.net.SocketTimeoutException: Read timed out',
+        ),
+      ),
+      const TransferFailed('c1/1@1', DownloadErrors.server),
+    );
+    expect(
       map(TaskStatus.failed, TaskConnectionException('reset')),
       const TransferFailed('c1/1@1', DownloadErrors.server),
     );

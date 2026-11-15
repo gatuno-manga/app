@@ -126,18 +126,40 @@ void main() {
       },
     );
 
-    test('an unexpected paused task is cancelled, then resynced', () async {
-      when(
-        () => downloader.cancelTasksWithIds(any()),
-      ).thenAnswer((_) async => true);
+    test('a paused update is ignored (tasks never allow pause)', () async {
       await start(ios: false);
 
       updates.add(paused());
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await Future<void>.delayed(
+        BackgroundDownloaderTransferQueue.resumeSettle * 2,
+      );
 
-      verify(() => downloader.cancelTasksWithIds(['c1/1@s.1'])).called(1);
       verifyNever(() => downloader.resume(any()));
-      expect(events, [const TransfersResynced()]);
+      verifyNever(() => downloader.resumeAll(group: any(named: 'group')));
+      expect(events, isEmpty);
+    });
+
+    test('a failing start still forwards later events', () async {
+      when(
+        () => downloader.resumeFromBackground(),
+      ).thenThrow(StateError('undecodable stored update'));
+      final q = queue = BackgroundDownloaderTransferQueue(
+        downloader: downloader,
+        texts: () => _texts,
+        resumesPausedTasks: false,
+      );
+      sub = q.events.listen(events.add);
+      await expectLater(q.start(), throwsStateError);
+
+      updates.add(
+        TaskStatusUpdate(
+          DownloadTask(taskId: 'c1/1@s.1', url: 'https://srv/1.jpg'),
+          TaskStatus.complete,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(events, [const TransferCompleted('c1/1@s.1')]);
     });
 
     test('cancels replayed during start are the user\'s, not events', () async {

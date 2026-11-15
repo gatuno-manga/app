@@ -93,6 +93,16 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   Future<Set<String>> start() async {
     final userCancels = _replayedUserCancels = <String>{};
     _updates ??= _downloader.updates.listen(_onUpdate);
+    try {
+      await _settleStoredUpdates();
+      return userCancels;
+    } finally {
+      // Even if start fails, later updates must reach the consumer.
+      _replayedUserCancels = null;
+    }
+  }
+
+  Future<void> _settleStoredUpdates() async {
     await _downloader.configure(
       // No holding queue: it lives in the app process, so files waiting in
       // it are lost when the app is killed. WorkManager and URLSession
@@ -123,8 +133,6 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
     }
     // Stored updates reach the listener asynchronously: let them land.
     await Future<void>.delayed(Duration.zero);
-    _replayedUserCancels = null;
-    return userCancels;
   }
 
   void _configureNotifications() {
@@ -141,43 +149,30 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
   }
 
   void _onUpdate(TaskUpdate update) {
-    final replayed = _replayedUserCancels;
-    if (replayed != null) {
-      // Android: the only cancels the app does not make come from the
-      // notification. iOS: cancels during start are the system's (a
-      // force-quit), and those files are queued again.
-      if (!_resumesPausedTasks &&
-          update is TaskStatusUpdate &&
-          update.status == TaskStatus.canceled) {
-        replayed.add(update.task.taskId);
-      }
-      if (!(update is TaskStatusUpdate && update.status == TaskStatus.paused)) {
-        return;
-      }
-    }
-    if (update is TaskStatusUpdate && update.status == TaskStatus.paused) {
+    final isStatus = update is TaskStatusUpdate;
+    final status = isStatus ? update.status : null;
+    if (status == TaskStatus.paused) {
+      // Only iOS tasks pause (the system cancelled them with resume data);
+      // Android tasks never allow pause.
       if (_resumesPausedTasks) {
         _sweepTimer?.cancel();
         _sweepTimer = Timer(resumeSettle, () => unawaited(_sweep()));
-      } else {
-        // Android tasks never allow pause; a paused one (enqueued by an
-        // older build) would sit in the plugin's paused list forever.
-        AppLogger.w('Unexpected paused download; cancelling it', _logTag);
-        unawaited(_cancelUnexpectedPause(update.task.taskId));
+      }
+      return;
+    }
+    final replayed = _replayedUserCancels;
+    if (replayed != null) {
+      // Settled by the consumer, not replayed. Android: the only cancels the
+      // app does not make come from the notification. iOS: cancels during
+      // start are the system's (a force-quit), and those files are queued
+      // again.
+      if (!_resumesPausedTasks && status == TaskStatus.canceled) {
+        replayed.add(update.task.taskId);
       }
       return;
     }
     final event = eventOf(update);
     if (event != null && !_events.isClosed) _events.add(event);
-  }
-
-  Future<void> _cancelUnexpectedPause(String taskId) async {
-    try {
-      await _downloader.cancelTasksWithIds([taskId]);
-    } catch (e, stackTrace) {
-      AppLogger.e('Could not cancel a paused download', e, stackTrace, _logTag);
-    }
-    if (!_events.isClosed) _events.add(const TransfersResynced());
   }
 
   /// Resumes every paused task, one sweep at a time: the plugin removes a
@@ -222,8 +217,10 @@ class BackgroundDownloaderTransferQueue implements TransferQueue {
           // Both platforms say "Insufficient space to store the file...".
           when description.toLowerCase().contains('insufficient space') =>
         DownloadErrors.storageFull,
+      // The plugin's exact text for WorkManager's 9-minute cut; a socket
+      // timeout ("Read timed out") stays a server error.
       TaskConnectionException(:final description)
-          when description.toLowerCase().contains('timed out') =>
+          when description == 'Task timed out' =>
         DownloadErrors.timedOut,
       TaskHttpException() || TaskConnectionException() => DownloadErrors.server,
       _ => DownloadErrors.unknown,

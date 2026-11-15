@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../../../core/logging/logger.dart';
-import 'transfer_queue.dart';
 
 /// Files of downloaded chapters, under `downloads/` in the application
 /// support directory (app-controlled storage the OS never clears):
@@ -13,8 +12,8 @@ import 'transfer_queue.dart';
 /// downloads/<bookId>/<chapterId>/document.pdf
 /// ```
 class DownloadStorage {
-  /// The directory under the application support directory, which
-  /// [FileTransfer.directory] is relative to.
+  /// The directory under the application support directory that holds
+  /// every download.
   static const String rootName = 'downloads';
   static const String manifestName = 'chapter.json';
 
