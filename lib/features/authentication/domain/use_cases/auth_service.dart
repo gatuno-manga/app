@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import '../../../../core/connectivity/connectivity_service.dart';
 import '../../../../core/network/exceptions.dart';
 import '../repositories/auth_repository.dart';
 import '../../../../core/logging/logger.dart';
@@ -15,6 +16,7 @@ enum AuthState { uninitialized, unauthenticated, authenticated }
 class AuthService with WidgetsBindingObserver {
   final AuthRepository _authRepository;
   final TokenManager _tokenManager;
+  late final StreamSubscription<void> _reconnectedSubscription;
   static const String _logTag = 'AuthService';
 
   final _authStateSubject = BehaviorSubject<AuthState>.seeded(
@@ -23,18 +25,25 @@ class AuthService with WidgetsBindingObserver {
   Stream<AuthState> get authStateStream => _authStateSubject.stream;
   AuthState get authState => _authStateSubject.value;
 
-  AuthService(this._authRepository, this._tokenManager) {
-    _tokenManager.onRefreshFailed = () async {
-      await logout();
-    };
+  AuthService(
+    this._authRepository,
+    this._tokenManager,
+    ConnectivityService connectivity,
+  ) {
     _tokenManager.onTokenChanged = () {
       _updateAuthState();
     };
+    // A refresh that failed offline keeps the expired token; retry it as soon
+    // as the server answers again instead of waiting for the next request.
+    _reconnectedSubscription = connectivity.onReconnected.listen(
+      (_) => _refreshIfExpired(),
+    );
     WidgetsBinding.instance.addObserver(this);
     _initAuth();
   }
 
   void dispose() {
+    _reconnectedSubscription.cancel();
     _authStateSubject.close();
     WidgetsBinding.instance.removeObserver(this);
   }
@@ -54,6 +63,17 @@ class AuthService with WidgetsBindingObserver {
       _tokenManager.pauseRefresh();
     } else if (state == AppLifecycleState.resumed) {
       _tokenManager.evaluateTokenState();
+    }
+  }
+
+  Future<void> _refreshIfExpired() async {
+    final token = _tokenManager.currentToken;
+    if (token == null || token.isEmpty || !JwtDecoder.isExpired(token)) return;
+    AppLogger.i('Reconnected with an expired token, refreshing', _logTag);
+    try {
+      await _tokenManager.performTokenRefresh();
+    } catch (e) {
+      AppLogger.w('Refresh after reconnect failed: $e', _logTag);
     }
   }
 
@@ -191,10 +211,11 @@ class AuthService with WidgetsBindingObserver {
       AppLogger.i('Token expired in isAuthenticated check', _logTag);
       try {
         await _tokenManager.performTokenRefresh();
-        authenticated = _tokenManager.currentToken != null;
       } catch (e) {
-        authenticated = false;
+        AppLogger.w('Refresh in isAuthenticated failed: $e', _logTag);
       }
+      // A refused refresh clears the token; a network failure keeps it.
+      authenticated = _tokenManager.currentToken != null;
     }
 
     if (authenticated != (authState == AuthState.authenticated)) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../../../../core/network/exceptions.dart';
 import '../../../../core/network/token_provider.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../core/utils/jwt_decoder.dart';
@@ -18,7 +19,6 @@ class TokenManager implements TokenProvider {
   String? _token;
   String? get currentToken => _token;
 
-  Future<void> Function()? onRefreshFailed;
   void Function()? onTokenChanged;
 
   TokenManager(this._authRepository, this._authStorage);
@@ -109,11 +109,24 @@ class TokenManager implements TokenProvider {
       AppLogger.i('Token refresh success', _logTag);
     } catch (e, stackTrace) {
       AppLogger.e('Token refresh failed', e, stackTrace, _logTag);
-      if (onRefreshFailed != null) {
-        await onRefreshFailed!();
+      if (_isSessionDead(e)) {
+        // Local only: /auth/logout needs a valid access token, and calling it
+        // from here would wait on this very refresh (#159).
+        AppLogger.w('Refresh refused, signing out locally', _logTag);
+        await clearToken();
       }
       rethrow;
     }
+  }
+
+  /// The API answers 401 for every refused refresh. Anything else (no
+  /// network, timeout, 429, 5xx) keeps the token so the user stays signed in
+  /// offline and the refresh is tried again later.
+  ///
+  /// The API also answers 401 for a refresh that collides with its own lock;
+  /// #196 stops signing out on it once gatuno-manga/api#164 gives it a code.
+  bool _isSessionDead(Object error) {
+    return error is UnauthorizedException;
   }
 
   void scheduleRefresh() {
