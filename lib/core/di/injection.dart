@@ -30,14 +30,24 @@ Future<void> initDI() async {
   // background new-chapter run hands over to this engine from now on, and
   // one already running is asked to stop and waited for (bounded).
   final handoff = NewChapterCheckHandoff()..listen();
-  sl.registerSingleton<NewChapterCheckHandoff>(
-    handoff,
-    dispose: (handoff) => handoff.close(),
-  );
-  await NewChapterCheckHandoff.stopBackgroundRun(
-    timeout: const Duration(seconds: 10),
-  );
+  try {
+    sl.registerSingleton<NewChapterCheckHandoff>(
+      handoff,
+      dispose: (handoff) => handoff.close(),
+    );
+    await NewChapterCheckHandoff.stopBackgroundRun(
+      timeout: const Duration(seconds: 10),
+    );
+    await _initAppServices(handoff);
+  } catch (_) {
+    // Hand-overs accepted meanwhile would wait for a check that never comes.
+    handoff.close();
+    rethrow;
+  }
+}
 
+/// Everything after the hand-over set-up; [handoff] is served at the end.
+Future<void> _initAppServices(NewChapterCheckHandoff handoff) async {
   await initCoreDI();
 
   initAppLockInjection(sl);

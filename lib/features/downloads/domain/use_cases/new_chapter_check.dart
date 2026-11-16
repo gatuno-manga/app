@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../../core/logging/logger.dart';
+import '../../../../core/network/exceptions.dart';
 import '../../../books/domain/value_objects/book_id.dart';
 import '../../../books/domain/value_objects/chapter_id.dart';
 import '../entities/auto_download_check_state.dart';
@@ -171,6 +172,11 @@ class NewChapterCheck {
         listed = await _source.chaptersOf([for (final b in batch) b.bookId]);
       } catch (e, stackTrace) {
         AppLogger.e('Could not list chapters', e, stackTrace, _logTag);
+        // An unreachable server did not answer: the check counts as not
+        // tried, so the reconnect trigger runs it again.
+        if (only == null && (e is NetworkException || e is OfflineException)) {
+          _lastFullAttempt = null;
+        }
         return result(NewChapterCheckOutcome.failed);
       }
       for (final book in batch) {

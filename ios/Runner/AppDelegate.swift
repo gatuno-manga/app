@@ -14,8 +14,9 @@ import workmanager_apple
     UNUserNotificationCenter.current().delegate = self
     // The background new-chapter check (#94) runs in its own engine, which
     // needs the plugins too. Its BGAppRefreshTask handler must be registered
-    // before launch finishes; the identifier matches Info.plist and
-    // WorkmanagerCheckScheduler.taskId, the delay its 6-hour interval.
+    // before launch finishes. Keep in step with the Dart side: the
+    // identifier is WorkmanagerCheckScheduler.taskId (also in Info.plist),
+    // the delay CheckingAutoDownloadPreferences.interval.
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }

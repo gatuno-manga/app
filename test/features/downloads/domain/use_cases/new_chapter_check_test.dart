@@ -431,6 +431,21 @@ void main() {
       expect(source.calls, hasLength(2));
     });
 
+    test('an unreachable server does not count as tried', () async {
+      await enable(bookA);
+      source.error = NetworkException();
+
+      await check.runIfStale(const Duration(hours: 1));
+      source.error = null;
+      source.chapters[bookA] = [ready('c1')];
+
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.done,
+      );
+      expect(source.calls, hasLength(2));
+    });
+
     test('skips when no book has it on', () async {
       expect(
         (await check.runIfStale(const Duration(hours: 1))).outcome,

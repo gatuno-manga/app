@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/di/background_injection.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/network/app_mqtt_service.dart';
+import 'package:gatuno/core/offline/cache_epoch.dart';
+import 'package:gatuno/features/downloads/data/data_sources/new_chapter_check_handoff.dart';
 import 'package:gatuno/features/downloads/data/data_sources/workmanager_check_scheduler.dart';
 import 'package:gatuno/features/downloads/domain/use_cases/checking_auto_download_preferences.dart';
 import 'package:gatuno/features/downloads/domain/repositories/auto_download_preferences.dart';
@@ -66,6 +68,23 @@ void main() {
       );
       expect(sl<NewChapterCheckScheduler>(), isA<WorkmanagerCheckScheduler>());
       expect(sl.isRegistered<NewChapterCheck>(), true);
+    });
+
+    test('a failed start lets background hand-overs go', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
+      // Registered twice: the start fails midway, in the core services.
+      sl.registerSingleton<CacheEpoch>(CacheEpoch());
+
+      await expectLater(initDI(), throwsA(anything));
+
+      expect(
+        await NewChapterCheckHandoff.handOff(
+          acceptTimeout: const Duration(milliseconds: 100),
+          deadline: DateTime.now().add(const Duration(minutes: 1)),
+        ),
+        isNull,
+      );
     });
 
     test('initBackgroundDI registers only what the check needs', () async {

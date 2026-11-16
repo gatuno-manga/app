@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:rxdart/rxdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../core/connectivity/connectivity_service.dart';
 import '../../core/covers/cover_store.dart';
 import '../../core/network/dio_client.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/lifecycle/app_resumes.dart';
 import '../../core/logging/logger.dart';
+import '../../l10n/app_localizations.dart';
 import '../authentication/domain/use_cases/auth_service.dart';
 import '../books/domain/repositories/books_repository.dart';
 import '../settings/domain/use_cases/settings_service.dart';
@@ -22,6 +22,7 @@ import 'data/data_sources/download_storage.dart';
 import 'data/data_sources/new_chapter_check_handoff.dart';
 import 'data/data_sources/transfer_queue.dart';
 import 'data/data_sources/unmetered_network_monitor.dart';
+import 'data/data_sources/workmanager_check_scheduler.dart';
 import 'data/database/downloads_database.dart';
 import 'data/repositories/auto_download_preferences_impl.dart';
 import 'data/repositories/download_manager.dart';
@@ -41,7 +42,8 @@ import 'domain/use_cases/checking_auto_download_preferences.dart';
 import 'domain/use_cases/new_chapter_check.dart';
 import 'domain/use_cases/new_chapter_check_run.dart';
 import 'domain/use_cases/new_chapter_check_triggers.dart';
-import 'data/data_sources/workmanager_check_scheduler.dart';
+
+const String _logTag = 'DownloadsInjection';
 
 /// Registers downloads. Needs DioClient, ConnectivityService, CoverStore,
 /// BooksRepository, AuthService and SettingsService (resolved on first use).
@@ -192,7 +194,7 @@ Future<bool> _signedIn(AuthService auth) async {
 void launchDownloads(GetIt sl) => unawaited(
   startDownloads(sl).catchError(
     (Object e, StackTrace stackTrace) =>
-        AppLogger.e('Downloads did not start', e, stackTrace, 'downloads'),
+        AppLogger.e('Downloads did not start', e, stackTrace, _logTag),
   ),
 );
 
