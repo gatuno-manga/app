@@ -28,19 +28,25 @@ class WorkmanagerCheckScheduler implements NewChapterCheckScheduler {
       Platform.isIOS ? const Duration(seconds: 20) : const Duration(minutes: 8);
 
   final Workmanager _workmanager;
+  final Future<bool> Function(String uniqueName) _isScheduled;
   final void Function() _dispatcher;
   Future<void>? _initialized;
 
   /// [dispatcher] is the top-level `@pragma('vm:entry-point')` function the
   /// background engine starts with.
-  WorkmanagerCheckScheduler(this._dispatcher, {Workmanager? workmanager})
-    : _workmanager = workmanager ?? Workmanager();
+  WorkmanagerCheckScheduler(
+    this._dispatcher, {
+    Workmanager? workmanager,
+    Future<bool> Function(String uniqueName)? isScheduled,
+  }) : _workmanager = workmanager ?? Workmanager(),
+       // The plugin's iOS Dart wrapper refuses isScheduledByUniqueName
+       // although its native side answers it (BGTaskScheduler pending
+       // requests); the host API reaches both platforms' native side.
+       _isScheduled =
+           isScheduled ?? WorkmanagerHostApi().isScheduledByUniqueName;
 
   Future<void> _initialize() =>
       _initialized ??= _workmanager.initialize(_dispatcher);
-
-  @override
-  Duration get runBudget => budget;
 
   /// Registers only when no task is pending or the interval changed: iOS
   /// resubmits the next run 'interval from now' on every registration, so
@@ -68,10 +74,11 @@ class WorkmanagerCheckScheduler implements NewChapterCheckScheduler {
 
   Future<bool> _isPending() async {
     try {
-      return await _workmanager.isScheduledByUniqueName(taskId);
+      return await _isScheduled(taskId);
     } catch (_) {
-      // Unknown: registering again is the safe side.
-      return false;
+      // Unknown: registering on every start would push an iOS run back
+      // each time, so trust the stored interval.
+      return true;
     }
   }
 

@@ -11,6 +11,19 @@ void _dispatcher() {}
 void main() {
   late MockWorkmanager workmanager;
   late bool pending;
+  late List<String> asked;
+
+  /// [pending] answers the platform's pending check, like the native side.
+  WorkmanagerCheckScheduler newScheduler({Object? error}) =>
+      WorkmanagerCheckScheduler(
+        _dispatcher,
+        workmanager: workmanager,
+        isScheduled: (name) async {
+          asked.add(name);
+          if (error != null) throw error;
+          return pending;
+        },
+      );
   late WorkmanagerCheckScheduler scheduler;
 
   setUpAll(() {
@@ -35,13 +48,8 @@ void main() {
     ).thenAnswer((_) async {});
     when(() => workmanager.cancelByUniqueName(any())).thenAnswer((_) async {});
     pending = true;
-    when(
-      () => workmanager.isScheduledByUniqueName(any()),
-    ).thenAnswer((_) async => pending);
-    scheduler = WorkmanagerCheckScheduler(
-      _dispatcher,
-      workmanager: workmanager,
-    );
+    asked = [];
+    scheduler = newScheduler();
   });
 
   List<dynamic> registrations(Duration interval) => verify(
@@ -70,10 +78,17 @@ void main() {
     const interval = Duration(hours: 6);
 
     await scheduler.schedule(interval);
-    await WorkmanagerCheckScheduler(
-      _dispatcher,
-      workmanager: workmanager,
-    ).schedule(interval);
+    await newScheduler().schedule(interval);
+
+    expect(registrations(interval), hasLength(1));
+    expect(asked, [WorkmanagerCheckScheduler.taskId]);
+  });
+
+  test('an unanswered pending check trusts the stored interval', () async {
+    const interval = Duration(hours: 6);
+    await scheduler.schedule(interval);
+
+    await newScheduler(error: UnsupportedError('not here')).schedule(interval);
 
     expect(registrations(interval), hasLength(1));
   });
