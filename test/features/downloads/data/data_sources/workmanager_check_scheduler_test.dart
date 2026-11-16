@@ -10,6 +10,7 @@ void _dispatcher() {}
 
 void main() {
   late MockWorkmanager workmanager;
+  late bool pending;
   late WorkmanagerCheckScheduler scheduler;
 
   setUpAll(() {
@@ -33,6 +34,10 @@ void main() {
       ),
     ).thenAnswer((_) async {});
     when(() => workmanager.cancelByUniqueName(any())).thenAnswer((_) async {});
+    pending = true;
+    when(
+      () => workmanager.isScheduledByUniqueName(any()),
+    ).thenAnswer((_) async => pending);
     scheduler = WorkmanagerCheckScheduler(
       _dispatcher,
       workmanager: workmanager,
@@ -71,6 +76,17 @@ void main() {
     ).schedule(interval);
 
     expect(registrations(interval), hasLength(1));
+  });
+
+  test('registers again when the platform has no task pending', () async {
+    const interval = Duration(hours: 6);
+    await scheduler.schedule(interval);
+    // An iOS submit that failed quietly (Background App Refresh off).
+    pending = false;
+
+    await scheduler.schedule(interval);
+
+    expect(registrations(interval), hasLength(2));
   });
 
   test('registers again for a new interval or after a cancel', () async {

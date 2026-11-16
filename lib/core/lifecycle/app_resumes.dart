@@ -6,19 +6,20 @@ import 'package:flutter/widgets.dart';
 /// should catch up then (the new-chapter check).
 class AppResumes {
   final StreamController<void> _controller = StreamController<void>.broadcast();
-  AppLifecycleListener? _listener;
+  late final AppLifecycleListener _listener;
 
-  Stream<void> get stream {
-    _listener ??= AppLifecycleListener(
+  AppResumes() {
+    _listener = AppLifecycleListener(
       onResume: () {
         if (!_controller.isClosed) _controller.add(null);
       },
     );
-    return _controller.stream;
   }
 
+  Stream<void> get stream => _controller.stream;
+
   Future<void> dispose() async {
-    _listener?.dispose();
+    _listener.dispose();
     await _controller.close();
   }
 }

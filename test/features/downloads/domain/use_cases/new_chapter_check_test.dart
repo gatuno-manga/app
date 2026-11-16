@@ -273,7 +273,7 @@ void main() {
   test('a failure reading the records is reported, not thrown', () async {
     final broken = MockLedger();
     when(broken.books).thenThrow(StateError('database closed'));
-    check = NewChapterCheck(
+    NewChapterCheck brokenCheck() => NewChapterCheck(
       ledger: broken,
       source: source,
       downloads: downloads,
@@ -281,9 +281,10 @@ void main() {
       server: () => server,
     );
 
-    expect((await check.run()).outcome, NewChapterCheckOutcome.failed);
+    expect((await brokenCheck().run()).outcome, NewChapterCheckOutcome.failed);
+    check = brokenCheck();
     expect(
-      (await check.runIfStale(const Duration(hours: 1)))?.outcome,
+      (await check.runIfStale(const Duration(hours: 1))).outcome,
       NewChapterCheckOutcome.failed,
     );
   });
@@ -383,14 +384,20 @@ void main() {
       await withBaseline(bookA, [ready('c1')]);
       now = now.subtract(const Duration(hours: 5, minutes: 30));
 
-      expect(await check.runIfStale(const Duration(hours: 1)), isNull);
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.skipped,
+      );
       expect(source.calls, hasLength(1));
     });
 
     test('runs when the least recently checked book is old', () async {
       await withBaseline(bookA, [ready('c1')]);
 
-      expect(await check.runIfStale(const Duration(hours: 1)), isNotNull);
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.done,
+      );
       expect(source.calls, hasLength(2));
     });
 
@@ -399,11 +406,36 @@ void main() {
       await withBaseline(bookB, [ready('c1')]);
       now = now.subtract(const Duration(hours: 6));
 
-      expect(await check.runIfStale(const Duration(hours: 1)), isNotNull);
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.done,
+      );
+    });
+
+    test('a failed full check is not tried again within the hour', () async {
+      await enable(bookA);
+      source.error = ServerException();
+
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.failed,
+      );
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.skipped,
+      );
+      expect(source.calls, hasLength(1));
+
+      now = now.add(const Duration(hours: 2));
+      await check.runIfStale(const Duration(hours: 1));
+      expect(source.calls, hasLength(2));
     });
 
     test('skips when no book has it on', () async {
-      expect(await check.runIfStale(const Duration(hours: 1)), isNull);
+      expect(
+        (await check.runIfStale(const Duration(hours: 1))).outcome,
+        NewChapterCheckOutcome.skipped,
+      );
       expect(source.calls, isEmpty);
     });
   });

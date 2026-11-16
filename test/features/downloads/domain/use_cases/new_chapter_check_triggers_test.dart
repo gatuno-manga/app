@@ -17,7 +17,9 @@ void main() {
   setUp(() {
     check = MockCheck();
     triggers = StreamController<void>.broadcast();
-    when(() => check.runIfStale(any())).thenAnswer((_) async => null);
+    when(() => check.runIfStale(any())).thenAnswer(
+      (_) async => const NewChapterCheckResult(NewChapterCheckOutcome.skipped),
+    );
     subject = NewChapterCheckTriggers(check, triggers: triggers.stream);
   });
 

@@ -9,4 +9,7 @@ abstract class NewChapterCheckScheduler {
 
   /// Stops the periodic check.
   Future<void> cancel();
+
+  /// How long one run may take from the moment the platform starts it.
+  Duration get runBudget;
 }

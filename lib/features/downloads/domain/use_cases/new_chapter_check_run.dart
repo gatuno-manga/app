@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import '../../../../core/logging/logger.dart';
 import '../repositories/download_service.dart';
@@ -18,12 +17,6 @@ class NewChapterCheckRun {
 
   NewChapterCheckRun(this._check, this._downloads);
 
-  /// How long a run may take from the moment the task starts: iOS gives a
-  /// `BGAppRefreshTask` about 30 s, from which the engine's boot is taken
-  /// too; Android WorkManager stops a worker at 10 min.
-  static Duration get budget =>
-      Platform.isIOS ? const Duration(seconds: 20) : const Duration(minutes: 8);
-
   /// Runs until done, [deadline], or [stopped] (the app asked for the
   /// database and the session). Never throws.
   Future<void> run({required DateTime deadline, Future<void>? stopped}) async {
@@ -31,7 +24,10 @@ class NewChapterCheckRun {
     unawaited(stopped?.then((_) => stop = true));
     try {
       // The deadline bounds the whole run, also a native call that never
-      // answers: the platform kills a task that overstays.
+      // answers: the platform kills a task that overstays. A check cut off
+      // here is abandoned, not cancelled; at worst a chapter is queued but
+      // not recorded, and the next check finds it downloading and records
+      // it.
       final result = await _check
           .run(deadline: deadline, stopRequested: () => stop)
           .timeout(deadline.difference(DateTime.now()));

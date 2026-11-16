@@ -26,8 +26,8 @@ class NewChapterCheckHandoff {
   static const String finished = 'finished';
 
   ReceivePort? _port;
-  Future<void> Function()? _check;
-  final List<SendPort> _waiting = [];
+  Future<void> Function(DateTime deadline)? _check;
+  final List<_Request> _waiting = [];
 
   /// App side: takes background runs from now on; they wait for [serve].
   void listen() {
@@ -35,29 +35,35 @@ class NewChapterCheckHandoff {
     final port = _port = ReceivePort();
     _register(port.sendPort, uiPortName);
     port.listen((message) {
-      if (message is! SendPort) return;
-      message.send(accepted);
+      final request = _Request.decode(message);
+      if (request == null) return;
+      request.reply.send(accepted);
       final check = _check;
       if (check == null) {
-        _waiting.add(message);
+        _waiting.add(request);
       } else {
-        _run(check, message);
+        _run(check, request);
       }
     });
   }
 
   /// App side: runs [check] for every background run handed over, also the
-  /// ones that came before.
-  void serve(Future<void> Function() check) {
+  /// ones that came before, with the background task's deadline: the
+  /// platform may suspend the app once that task ends.
+  void serve(Future<void> Function(DateTime deadline) check) {
     _check = check;
-    for (final reply in _waiting) {
-      _run(check, reply);
+    for (final request in _waiting) {
+      _run(check, request);
     }
     _waiting.clear();
   }
 
-  void _run(Future<void> Function() check, SendPort reply) =>
-      unawaited(check().whenComplete(() => reply.send(finished)));
+  void _run(Future<void> Function(DateTime deadline) check, _Request request) =>
+      unawaited(
+        check(
+          request.deadline,
+        ).whenComplete(() => request.reply.send(finished)),
+      );
 
   void close() {
     final port = _port;
@@ -65,8 +71,8 @@ class NewChapterCheckHandoff {
     _unregister(port.sendPort, uiPortName);
     port.close();
     _port = null;
-    for (final reply in _waiting) {
-      reply.send(finished);
+    for (final request in _waiting) {
+      request.reply.send(finished);
     }
     _waiting.clear();
   }
@@ -101,10 +107,8 @@ class NewChapterCheckHandoff {
   }
 
   /// Background side: hands the check to the app's engine. `null` when no
-  /// app engine answered within [acceptTimeout] (none, or a dead one);
-  /// otherwise `done` completes when the app finished the check, or at
-  /// [deadline] (if the app dies meanwhile the time is up anyway).
-  static Future<({Future<void> done})?> handOff({
+  /// app engine answered within [acceptTimeout] (none, or a dead one).
+  static Future<HandedOffRun?> handOff({
     required Duration acceptTimeout,
     required DateTime deadline,
   }) async {
@@ -117,7 +121,7 @@ class NewChapterCheckHandoff {
       reply.close();
     }
 
-    ui.send(reply.sendPort);
+    ui.send(_Request(reply.sendPort, deadline).encode());
     final got = await messages.moveNext().timeout(
       acceptTimeout,
       onTimeout: () => false,
@@ -137,8 +141,7 @@ class NewChapterCheckHandoff {
       }
     }
 
-    // A record: an async function would flatten a returned future.
-    return (done: finish());
+    return HandedOffRun._(finish());
   }
 
   static void _register(SendPort port, String name) {
@@ -152,6 +155,34 @@ class NewChapterCheckHandoff {
       IsolateNameServer.removePortNameMapping(name);
     }
   }
+}
+
+/// A check the app's engine took over from a background run.
+class HandedOffRun {
+  /// Completes when the app finished the check, or at the deadline (if the
+  /// app dies meanwhile the time is up anyway).
+  final Future<void> done;
+
+  HandedOffRun._(this.done);
+}
+
+/// A hand-over request: where to answer, and the background task's
+/// deadline. Sent as a list of plain values.
+class _Request {
+  final SendPort reply;
+  final DateTime deadline;
+
+  const _Request(this.reply, this.deadline);
+
+  List<Object> encode() => [reply, deadline.millisecondsSinceEpoch];
+
+  static _Request? decode(Object? message) => switch (message) {
+    [final SendPort reply, final int deadline] => _Request(
+      reply,
+      DateTime.fromMillisecondsSinceEpoch(deadline),
+    ),
+    _ => null,
+  };
 }
 
 /// A background run in progress, visible to the app's engine, which can ask

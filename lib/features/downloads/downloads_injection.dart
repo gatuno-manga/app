@@ -201,11 +201,7 @@ void launchDownloads(GetIt sl) => unawaited(
 /// Keeps the background schedule in step with the setting.
 void startNewChapterChecks(GetIt sl, NewChapterCheckHandoff handoff) {
   sl<NewChapterCheckTriggers>().start();
-  handoff.serve(
-    () => sl<NewChapterCheckRun>().run(
-      deadline: DateTime.now().add(NewChapterCheckRun.budget),
-    ),
-  );
+  handoff.serve((deadline) => sl<NewChapterCheckRun>().run(deadline: deadline));
   unawaited(sl<CheckingAutoDownloadPreferences>().syncSchedule());
 }
 

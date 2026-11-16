@@ -17,11 +17,13 @@ void main() {
     );
   });
 
-  DateTime inAMinute() => DateTime.now().add(const Duration(minutes: 1));
+  final deadline = DateTime.fromMillisecondsSinceEpoch(
+    DateTime.now().add(const Duration(minutes: 1)).millisecondsSinceEpoch,
+  );
 
-  Future<({Future<void> done})?> handOff() => NewChapterCheckHandoff.handOff(
+  Future<HandedOffRun?> handOff() => NewChapterCheckHandoff.handOff(
     acceptTimeout: const Duration(milliseconds: 100),
-    deadline: inAMinute(),
+    deadline: deadline,
   );
 
   group('background run handed to the app', () {
@@ -53,12 +55,16 @@ void main() {
       // Requests before the app's services are ready wait for serve.
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(ran, isFalse);
-      handoff.serve(() {
+      DateTime? servedDeadline;
+      handoff.serve((deadline) {
         ran = true;
+        servedDeadline = deadline;
         return check.future;
       });
       await Future<void>.delayed(const Duration(milliseconds: 20));
       expect(ran, isTrue);
+      // The app works to the background task's deadline, not its own.
+      expect(servedDeadline, deadline);
       expect(done, isFalse);
 
       check.complete();

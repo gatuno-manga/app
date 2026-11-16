@@ -17,6 +17,9 @@ enum NewChapterCheckOutcome {
   /// Every book was read (some may have been skipped, see the log).
   done,
 
+  /// Not run: every book was checked recently, or none has it on.
+  skipped,
+
   /// Nobody is signed in: nothing was read or written. The next check after
   /// signing in catches up.
   signedOut,
@@ -64,6 +67,9 @@ class NewChapterCheck {
 
   Future<void> _tail = Future<void>.value();
 
+  /// When this isolate last started a full check, whatever its outcome.
+  DateTime? _lastFullAttempt;
+
   NewChapterCheck({
     required NewChapterLedger ledger,
     required NewChapterSource source,
@@ -92,28 +98,33 @@ class NewChapterCheck {
     ),
   );
 
-  /// Runs a full check unless every book was checked less than [maxAge]
-  /// ago; `null` when skipped (also when no book has automatic download
-  /// on).
-  Future<NewChapterCheckResult?> runIfStale(Duration maxAge) => _serial(
+  /// Runs a full check unless every book was checked, or a full check was
+  /// tried, less than [maxAge] ago ([NewChapterCheckOutcome.skipped]). A
+  /// failed check counts as tried, so a server answering errors is not asked
+  /// again on every resume.
+  Future<NewChapterCheckResult> runIfStale(Duration maxAge) => _serial(
     () => _guarded(() async {
+      bool fresh(DateTime? at) => at != null && _now().difference(at) < maxAge;
+      if (fresh(_lastFullAttempt)) return _skipped;
       final books = await _ledger.books();
-      if (books.isEmpty) return null;
       // Never checked books come first, then the least recently checked.
-      final oldest = books.first.checkedAt;
-      if (oldest != null && _now().difference(oldest) < maxAge) return null;
+      if (books.isEmpty || fresh(books.first.checkedAt)) return _skipped;
       return _run();
     }),
   );
 
-  Future<T> _guarded<T extends NewChapterCheckResult?>(
-    Future<T> Function() action,
+  static const NewChapterCheckResult _skipped = NewChapterCheckResult(
+    NewChapterCheckOutcome.skipped,
+  );
+
+  Future<NewChapterCheckResult> _guarded(
+    Future<NewChapterCheckResult> Function() action,
   ) async {
     try {
       return await action();
     } catch (e, stackTrace) {
       AppLogger.e('Check failed', e, stackTrace, _logTag);
-      return const NewChapterCheckResult(NewChapterCheckOutcome.failed) as T;
+      return const NewChapterCheckResult(NewChapterCheckOutcome.failed);
     }
   }
 
@@ -132,6 +143,7 @@ class NewChapterCheck {
       AppLogger.i('Skipped: signed out', _logTag);
       return const NewChapterCheckResult(NewChapterCheckOutcome.signedOut);
     }
+    if (only == null) _lastFullAttempt = _now();
     final server = _server();
     if (server == null) {
       return const NewChapterCheckResult(NewChapterCheckOutcome.noServer);
