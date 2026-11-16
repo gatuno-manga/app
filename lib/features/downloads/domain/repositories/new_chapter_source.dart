@@ -9,5 +9,8 @@ abstract class NewChapterSource {
   /// Every chapter of each of [bookIds] (at most [maxBooks]), by book. A book
   /// the server did not return (deleted, or hidden from this user) is
   /// missing from the map.
+  ///
+  /// Throws `NetworkException` (or `OfflineException`) when the server
+  /// cannot be reached, and other `AppExceptions` when it answers an error.
   Future<Map<BookId, List<ListedChapter>>> chaptersOf(List<BookId> bookIds);
 }

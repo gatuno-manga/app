@@ -35,7 +35,8 @@ enum NewChapterCheckOutcome {
   /// read go first next time.
   stopped,
 
-  /// The server, or the local records, could not be read.
+  /// The server (unreachable, or answering an error) or the local records
+  /// could not be read.
   failed,
 }
 
@@ -101,8 +102,9 @@ class NewChapterCheck {
 
   /// Runs a full check unless every book was checked, or a full check was
   /// tried, less than [maxAge] ago ([NewChapterCheckOutcome.skipped]). A
-  /// failed check counts as tried, so a server answering errors is not asked
-  /// again on every resume.
+  /// check the server answered with an error counts as tried, so it is not
+  /// asked again on every resume; one that could not reach the server does
+  /// not, so the reconnect trigger runs it again.
   Future<NewChapterCheckResult> runIfStale(Duration maxAge) => _serial(
     () => _guarded(() async {
       bool fresh(DateTime? at) => at != null && _now().difference(at) < maxAge;
