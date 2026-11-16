@@ -32,6 +32,9 @@ class ApiConstants {
   // Sync Route
   static const String syncUnified = '/sync';
 
+  // GraphQL: the new-chapter check lists the chapters of many books at once
+  static const String graphql = '/graphql';
+
   // Object Storage
   static const String s3Prefix = '/s3/';
 }

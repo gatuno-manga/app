@@ -21,9 +21,18 @@ void main() {
   /// the steps after it.
   Future<void> writeOld(int version) async {
     final old = DownloadsDatabase(NativeDatabase(file));
+    await old.customStatement('DROP TABLE auto_download_seen');
     await old.customStatement(
-      'ALTER TABLE download_books DROP COLUMN auto_download_since',
+      'ALTER TABLE download_books DROP COLUMN auto_download_baseline_for',
     );
+    await old.customStatement(
+      'ALTER TABLE download_books DROP COLUMN auto_download_checked_at',
+    );
+    if (version < 3) {
+      await old.customStatement(
+        'ALTER TABLE download_books DROP COLUMN auto_download_since',
+      );
+    }
     if (version < 2) {
       await old.customStatement('DROP INDEX idx_download_files_url');
     }
@@ -45,35 +54,41 @@ void main() {
       .map((r) => r.read<int>('user_version'))
       .getSingle();
 
-  for (final from in [1, 2]) {
-    test('version $from gains autoDownloadSince and keeps its books', () async {
-      await writeOld(from);
+  for (final from in [1, 2, 3]) {
+    test(
+      'version $from gains the auto-download columns and keeps its books',
+      () async {
+        await writeOld(from);
 
-      final db = DownloadsDatabase(NativeDatabase(file));
-      addTearDown(db.close);
+        final db = DownloadsDatabase(NativeDatabase(file));
+        addTearDown(db.close);
 
-      final row = await db.select(db.downloadBooks).getSingle();
-      expect(row.bookId, 'book-1');
-      expect(row.bookType, BookType.manga);
-      expect(row.autoDownloadSince, isNull);
-      expect(await userVersion(db), 3);
+        final row = await db.select(db.downloadBooks).getSingle();
+        expect(row.bookId, 'book-1');
+        expect(row.bookType, BookType.manga);
+        expect(row.autoDownloadSince, isNull);
+        expect(row.autoDownloadBaselineFor, isNull);
+        expect(row.autoDownloadCheckedAt, isNull);
+        expect(await db.select(db.autoDownloadSeen).get(), isEmpty);
+        expect(await userVersion(db), 4);
 
-      final since = DateTime(2026, 11, 15);
-      await DownloadRecords(db).enableAutoDownload('book-1', since);
-      expect(
-        (await db.select(db.downloadBooks).getSingle()).autoDownloadSince,
-        since,
-      );
-    });
+        final since = DateTime(2026, 11, 15);
+        await DownloadRecords(db).enableAutoDownload('book-1', since);
+        expect(
+          (await db.select(db.downloadBooks).getSingle()).autoDownloadSince,
+          since,
+        );
+      },
+    );
   }
 
-  test('a new database starts at version 3', () async {
+  test('a new database starts at version 4', () async {
     final db = DownloadsDatabase(NativeDatabase.memory());
     addTearDown(db.close);
 
     await db.select(db.downloadBooks).get();
 
-    expect(db.schemaVersion, 3);
-    expect(await userVersion(db), 3);
+    expect(db.schemaVersion, 4);
+    expect(await userVersion(db), 4);
   });
 }

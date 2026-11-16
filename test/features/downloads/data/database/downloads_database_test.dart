@@ -35,12 +35,19 @@ void main() {
 
   test('upgrading from version 1 adds the file URL index', () async {
     // A version 1 database: today's schema without the index and without
-    // version 3's auto-download column.
+    // the auto-download columns and table of versions 3 and 4.
     final v1 = DownloadsDatabase(NativeDatabase(file));
     await v1.customStatement('DROP INDEX idx_download_files_url');
-    await v1.customStatement(
-      'ALTER TABLE download_books DROP COLUMN auto_download_since',
-    );
+    for (final column in [
+      'auto_download_since',
+      'auto_download_baseline_for',
+      'auto_download_checked_at',
+    ]) {
+      await v1.customStatement(
+        'ALTER TABLE download_books DROP COLUMN $column',
+      );
+    }
+    await v1.customStatement('DROP TABLE auto_download_seen');
     await v1.customStatement('PRAGMA user_version = 1');
     await v1
         .into(v1.downloadFiles)
@@ -60,7 +67,7 @@ void main() {
 
     expect(await hasUrlIndex(db), isTrue);
     expect(await db.select(db.downloadFiles).get(), hasLength(1));
-    expect(db.schemaVersion, 3);
+    expect(db.schemaVersion, 4);
   });
 
   test('the index serves lookups by URL', () async {
