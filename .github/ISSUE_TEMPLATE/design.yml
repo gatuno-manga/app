@@ -1,0 +1,50 @@
+name: Design
+description: Figma design work (frames, components, variables)
+labels: ["type:design"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: >-
+        The feature being designed, or `area:app` for cross-cutting work
+        (navigation shell, shared components, token bindings). Maintainers will
+        apply the matching `area:*` label.
+      options:
+        - area:app
+        - area:reader
+        - area:library
+        - area:auth
+        - area:sync
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What needs designing, and why?
+    validations:
+      required: true
+  - type: textarea
+    id: figma
+    attributes:
+      label: Figma page and frames
+      description: >-
+        The page in the Gatuno Figma file and the frames or components to
+        create or change. Link existing ones with their node-id URLs.
+    validations:
+      required: true
+  - type: textarea
+    id: states
+    attributes:
+      label: States to draw
+      description: Loading, empty, error, offline, sizes and themes the design must cover.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: >-
+        Task list (`- [ ] ...`) to tick when closing. A Figma-only issue is
+        closed with a comment that links the finished frames.
+    validations:
+      required: true

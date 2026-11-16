@@ -32,6 +32,7 @@ items = [
     { name = "type:refactor", color = "5319e7", description = "Restructure without changing behaviour" },
     { name = "type:test", color = "bfd4f2", description = "Tests and test infrastructure" },
     { name = "type:ci", color = "ededed", description = "CI/CD pipelines and workflows" },
+    { name = "type:design", color = "a259ff", description = "Figma design work: frames, components, variables" },
     { name = "area:app", color = "2ea44f", description = "General app code, cross-cutting or uncategorised" },
     { name = "area:reader", color = "0e8a16", description = "Chapter readers (image, PDF, EPUB)" },
     { name = "area:library", color = "0e8a16", description = "Book listing, collections, downloads" },

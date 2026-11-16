@@ -43,6 +43,13 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md):
 5. Open a pull request with a conventional title and `Closes #N` in the body.
    Merges are merge commits only.
 
+When you file an issue for Figma work (frames, components, variables), use
+`type:design` with the area of the feature being designed, or `area:app` for
+cross-cutting work; never `area:docs`. `design` is not a branch or commit type:
+a `DESIGN.md` change for that issue goes on `docs/<issue>` with `docs(...)`
+commits. Issues that change both Figma and code keep their code type. See
+"Design issues" in `CONTRIBUTING.md`.
+
 ## Project layout
 
 ```text
