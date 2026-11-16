@@ -2,10 +2,10 @@ import 'dart:async';
 
 import '../../../../core/logging/logger.dart';
 import '../../../books/domain/value_objects/book_id.dart';
-import '../../domain/entities/auto_download.dart';
-import '../../domain/repositories/auto_download_preferences.dart';
-import '../../domain/repositories/new_chapter_check_scheduler.dart';
-import '../../domain/use_cases/new_chapter_check.dart';
+import '../entities/auto_download.dart';
+import '../repositories/auto_download_preferences.dart';
+import '../repositories/new_chapter_check_scheduler.dart';
+import 'new_chapter_check.dart';
 
 /// [AutoDownloadPreferences] that keeps the new-chapter check in step with
 /// the setting: turning it on checks the book at once, so the chapters it
@@ -43,7 +43,8 @@ class CheckingAutoDownloadPreferences implements AutoDownloadPreferences {
   Future<List<AutoDownload>> enabledBooks() => _inner.enabledBooks();
 
   /// Schedules the background check when some book has automatic download
-  /// on, and cancels it otherwise (also after a server change wiped them).
+  /// on, and cancels it otherwise. Run on start and after a server change
+  /// wiped the settings.
   Future<void> syncSchedule() => _guard(() async {
     if ((await _inner.enabledBooks()).isEmpty) {
       await _scheduler.cancel();

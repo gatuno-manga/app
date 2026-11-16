@@ -65,6 +65,21 @@ void main() {
     await wait;
   });
 
+  test('stops when asked to', () async {
+    final stop = Completer<void>();
+    final wait = awaitPlanned(
+      downloads,
+      {
+        book: [const ChapterId('c1')],
+      },
+      deadline: DateTime.now().add(const Duration(minutes: 1)),
+      stopped: stop.future,
+    );
+
+    stop.complete();
+    await wait;
+  });
+
   test('gives up at the deadline', () async {
     await awaitPlanned(downloads, {
       book: [const ChapterId('c1')],

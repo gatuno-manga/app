@@ -42,5 +42,6 @@ class RecordsNewChapterLedger implements NewChapterLedger {
   );
 
   @override
-  Future<DateTime?> lastCheck() => _records.lastAutoDownloadCheck();
+  Future<bool> isCurrent(AutoDownloadCheckState book) async =>
+      await _records.autoDownloadSince(book.bookId.value) == book.since;
 }

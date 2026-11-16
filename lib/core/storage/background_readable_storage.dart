@@ -52,9 +52,15 @@ class BackgroundReadableStorage {
     for (final MapEntry(:key, :value) in old.entries) {
       if (!_owns(key)) continue;
       // The keychain keeps one item per key whatever its accessibility, so
-      // the old one goes first.
+      // the old one goes first; it comes back if the new one cannot be
+      // written, rather than signing the user out.
       await _legacy.delete(key: key);
-      await storage.write(key: key, value: value);
+      try {
+        await storage.write(key: key, value: value);
+      } catch (_) {
+        await _legacy.write(key: key, value: value);
+        rethrow;
+      }
     }
   }
 }

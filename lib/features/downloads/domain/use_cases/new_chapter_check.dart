@@ -5,6 +5,7 @@ import '../../../books/domain/value_objects/book_id.dart';
 import '../../../books/domain/value_objects/chapter_id.dart';
 import '../entities/auto_download_check_state.dart';
 import '../entities/chapter_download.dart';
+import '../entities/download_scope.dart';
 import '../entities/listed_chapter.dart';
 import '../repositories/download_service.dart';
 import '../repositories/new_chapter_ledger.dart';
@@ -26,10 +27,11 @@ enum NewChapterCheckOutcome {
   /// The server changed during the check, which stopped writing.
   serverChanged,
 
-  /// The deadline came first; the books not read go first next time.
-  outOfTime,
+  /// The deadline came first, or the run was asked to stop; the books not
+  /// read go first next time.
+  stopped,
 
-  /// The server could not be read.
+  /// The server, or the local records, could not be read.
   failed,
 }
 
@@ -77,18 +79,43 @@ class NewChapterCheck {
        _now = now ?? DateTime.now;
 
   /// Checks every book with automatic download on, or only [only]. Stops
-  /// before reading another batch once [deadline] has passed.
-  Future<NewChapterCheckResult> run({BookId? only, DateTime? deadline}) =>
-      _serial(() => _run(only: only, deadline: deadline));
+  /// before the next book once [deadline] has passed or [stopRequested]
+  /// says so. Never throws: a failure is logged and returned as
+  /// [NewChapterCheckOutcome.failed].
+  Future<NewChapterCheckResult> run({
+    BookId? only,
+    DateTime? deadline,
+    bool Function()? stopRequested,
+  }) => _serial(
+    () => _guarded(
+      () => _run(only: only, deadline: deadline, stopRequested: stopRequested),
+    ),
+  );
 
-  /// Runs a full check unless one ran less than [maxAge] ago; `null` when
-  /// skipped.
-  Future<NewChapterCheckResult?> runIfStale(Duration maxAge) =>
-      _serial(() async {
-        final last = await _ledger.lastCheck();
-        if (last != null && _now().difference(last) < maxAge) return null;
-        return _run();
-      });
+  /// Runs a full check unless every book was checked less than [maxAge]
+  /// ago; `null` when skipped (also when no book has automatic download
+  /// on).
+  Future<NewChapterCheckResult?> runIfStale(Duration maxAge) => _serial(
+    () => _guarded(() async {
+      final books = await _ledger.books();
+      if (books.isEmpty) return null;
+      // Never checked books come first, then the least recently checked.
+      final oldest = books.first.checkedAt;
+      if (oldest != null && _now().difference(oldest) < maxAge) return null;
+      return _run();
+    }),
+  );
+
+  Future<T> _guarded<T extends NewChapterCheckResult?>(
+    Future<T> Function() action,
+  ) async {
+    try {
+      return await action();
+    } catch (e, stackTrace) {
+      AppLogger.e('Check failed', e, stackTrace, _logTag);
+      return const NewChapterCheckResult(NewChapterCheckOutcome.failed) as T;
+    }
+  }
 
   Future<T> _serial<T>(Future<T> Function() action) {
     final result = _tail.then((_) => action());
@@ -96,7 +123,11 @@ class NewChapterCheck {
     return result;
   }
 
-  Future<NewChapterCheckResult> _run({BookId? only, DateTime? deadline}) async {
+  Future<NewChapterCheckResult> _run({
+    BookId? only,
+    DateTime? deadline,
+    bool Function()? stopRequested,
+  }) async {
     if (!await _signedIn()) {
       AppLogger.i('Skipped: signed out', _logTag);
       return const NewChapterCheckResult(NewChapterCheckOutcome.signedOut);
@@ -113,10 +144,14 @@ class NewChapterCheck {
     NewChapterCheckResult result(NewChapterCheckOutcome outcome) =>
         NewChapterCheckResult(outcome, queued: queued);
 
+    bool mustStop() =>
+        (deadline != null && !_now().isBefore(deadline)) ||
+        (stopRequested?.call() ?? false);
+
     for (var i = 0; i < books.length; i += NewChapterSource.maxBooks) {
-      if (deadline != null && !_now().isBefore(deadline)) {
-        AppLogger.i('Out of time after $i of ${books.length} books', _logTag);
-        return result(NewChapterCheckOutcome.outOfTime);
+      if (mustStop()) {
+        AppLogger.i('Stopped after $i of ${books.length} books', _logTag);
+        return result(NewChapterCheckOutcome.stopped);
       }
       final batch = books.skip(i).take(NewChapterSource.maxBooks).toList();
       final Map<BookId, List<ListedChapter>> listed;
@@ -127,14 +162,25 @@ class NewChapterCheck {
         return result(NewChapterCheckOutcome.failed);
       }
       for (final book in batch) {
+        if (mustStop()) {
+          AppLogger.i('Stopped within a batch', _logTag);
+          return result(NewChapterCheckOutcome.stopped);
+        }
         if (_server() != server) {
           AppLogger.i('Server changed: stopped', _logTag);
           return result(NewChapterCheckOutcome.serverChanged);
         }
         final chapters = listed[book.bookId];
         if (chapters == null) {
-          // Deleted on the server or hidden from this user: keep the setting.
+          // Deleted on the server or hidden from this user: keep the
+          // setting, and let the other books go first next time.
           AppLogger.w('Book ${book.bookId.value} not returned', _logTag);
+          await _ledger.record(
+            book,
+            chapters: const {},
+            baseline: false,
+            at: _now(),
+          );
           continue;
         }
         final ids = await _checkBook(book, chapters, server);
@@ -170,8 +216,12 @@ class NewChapterCheck {
         hasBaseline: book.hasBaseline,
       );
       if (decision.queue.isNotEmpty) {
-        // A chapter id of the old server means nothing on the new one.
-        if (_server() != server) return const [];
+        // A chapter id of the old server means nothing on the new one, and
+        // a book turned off (or on again) since the check began gets
+        // nothing.
+        if (_server() != server || !await _ledger.isCurrent(book)) {
+          return const [];
+        }
         // Queued before it is recorded: a failure here leaves it new, so the
         // next check tries again instead of losing it.
         await _downloads.enqueueChapters(book.bookId, decision.queue);
@@ -183,7 +233,12 @@ class NewChapterCheck {
         at: _now(),
       );
       if (!recorded) {
+        // Turned off or on again while queueing: take the chapters back.
         AppLogger.i('Book ${book.bookId.value} changed meanwhile', _logTag);
+        if (decision.queue.isNotEmpty) {
+          await _downloads.delete(DownloadScope.chapters(decision.queue));
+        }
+        return const [];
       }
       return decision.queue;
     } catch (e, stackTrace) {

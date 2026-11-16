@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../../domain/repositories/new_chapter_check_scheduler.dart';
@@ -13,8 +14,14 @@ class WorkmanagerCheckScheduler implements NewChapterCheckScheduler {
   /// listed in Info.plist and registered in AppDelegate.
   static const String taskId = 'com.gatuno.app.newChapterCheck';
 
+  /// The interval of the current schedule, in seconds. iOS resubmits the
+  /// next run 'interval from now' on every registration, so an app opened
+  /// more often than that would never get a background run if each start
+  /// registered again.
+  static const String _scheduledKey = 'new_chapter_check_interval';
+
   final Workmanager _workmanager;
-  final Function _dispatcher;
+  final void Function() _dispatcher;
   Future<void>? _initialized;
 
   /// [dispatcher] is the top-level `@pragma('vm:entry-point')` function the
@@ -28,6 +35,8 @@ class WorkmanagerCheckScheduler implements NewChapterCheckScheduler {
   @override
   Future<void> schedule(Duration interval) async {
     await _initialize();
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt(_scheduledKey) == interval.inSeconds) return;
     await _workmanager.registerPeriodicTask(
       taskId,
       taskId,
@@ -38,11 +47,13 @@ class WorkmanagerCheckScheduler implements NewChapterCheckScheduler {
       // Keeps the running schedule, picking up a new interval.
       existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
     );
+    await prefs.setInt(_scheduledKey, interval.inSeconds);
   }
 
   @override
   Future<void> cancel() async {
     await _initialize();
     await _workmanager.cancelByUniqueName(taskId);
+    await (await SharedPreferences.getInstance()).remove(_scheduledKey);
   }
 }

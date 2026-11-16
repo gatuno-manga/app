@@ -58,6 +58,27 @@ void main() {
     verifyNever(() => legacy.delete(key: 'pin'));
   });
 
+  test('a failed write puts the old item back', () async {
+    when(() => legacy.readAll()).thenAnswer((_) async => {'cookie_host': 'b'});
+    when(
+      () => legacy.write(
+        key: any(named: 'key'),
+        value: any(named: 'value'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => storage.write(key: 'cookie_host', value: 'b'),
+    ).thenThrow(Exception('keychain'));
+
+    await store(isIOS: true).migrate();
+
+    verifyInOrder([
+      () => legacy.delete(key: 'cookie_host'),
+      () => storage.write(key: 'cookie_host', value: 'b'),
+      () => legacy.write(key: 'cookie_host', value: 'b'),
+    ]);
+  });
+
   test('does nothing on Android', () async {
     await store(isIOS: false).migrate();
 

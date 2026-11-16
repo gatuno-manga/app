@@ -10,14 +10,18 @@ import 'package:gatuno/features/downloads/data/database/downloads_database.dart'
 import 'package:gatuno/features/downloads/data/repositories/records_new_chapter_ledger.dart';
 import 'package:gatuno/features/downloads/domain/entities/book_download.dart';
 import 'package:gatuno/features/downloads/domain/entities/chapter_download.dart';
+import 'package:gatuno/features/downloads/domain/entities/download_scope.dart';
 import 'package:gatuno/features/downloads/domain/entities/download_state.dart';
 import 'package:gatuno/features/downloads/domain/entities/listed_chapter.dart';
 import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
+import 'package:gatuno/features/downloads/domain/repositories/new_chapter_ledger.dart';
 import 'package:gatuno/features/downloads/domain/repositories/new_chapter_source.dart';
 import 'package:gatuno/features/downloads/domain/use_cases/new_chapter_check.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDownloadService extends Mock implements DownloadService {}
+
+class MockLedger extends Mock implements NewChapterLedger {}
 
 /// Serves [chapters] by book; books not in it are "not returned".
 class FakeSource implements NewChapterSource {
@@ -55,7 +59,10 @@ void main() {
   late DateTime now;
   late NewChapterCheck check;
 
-  setUpAll(() => registerFallbackValue(bookA));
+  setUpAll(() {
+    registerFallbackValue(bookA);
+    registerFallbackValue(const DownloadScope.all());
+  });
 
   setUp(() {
     db = DownloadsDatabase(NativeDatabase.memory());
@@ -73,6 +80,7 @@ void main() {
     when(
       () => downloads.enqueueChapters(any(), any()),
     ).thenAnswer((_) async {});
+    when(() => downloads.delete(any())).thenAnswer((_) async {});
     check = NewChapterCheck(
       ledger: ledger,
       source: source,
@@ -215,8 +223,69 @@ void main() {
     expect(result.outcome, NewChapterCheckOutcome.done);
     final books = await ledger.books();
     expect(books.map((b) => b.bookId), containsAll([bookA, bookB]));
-    expect(books.firstWhere((b) => b.bookId == bookA).checkedAt, isNull);
+    final missing = books.firstWhere((b) => b.bookId == bookA);
+    // Checked, so it does not hold the first slot of every run.
+    expect(missing.checkedAt, now);
+    expect(missing.hasBaseline, isFalse);
     expect(books.firstWhere((b) => b.bookId == bookB).hasBaseline, isTrue);
+  });
+
+  test('a book turned off while the server answers gets nothing', () async {
+    await withBaseline(bookA, [ready('c1')]);
+    source.chapters[bookA] = [ready('c1'), ready('c2')];
+    source.onCall = () => unawaited(records.disableAutoDownload('book-a'));
+
+    final result = await check.run();
+
+    expect(result.queued, isEmpty);
+    verifyNever(() => downloads.enqueueChapters(any(), any()));
+  });
+
+  test('a book turned off while queueing gets its chapters back', () async {
+    await withBaseline(bookA, [ready('c1')]);
+    source.chapters[bookA] = [ready('c1'), ready('c2')];
+    when(
+      () => downloads.enqueueChapters(any(), any()),
+    ).thenAnswer((_) => records.disableAutoDownload('book-a'));
+
+    final result = await check.run();
+
+    expect(result.queued, isEmpty);
+    verify(
+      () => downloads.delete(const DownloadScope.chapters([ChapterId('c2')])),
+    ).called(1);
+  });
+
+  test('stops before the next book once asked to', () async {
+    await enable(bookA);
+    await enable(bookB);
+    source.chapters[bookA] = [ready('c1')];
+    source.chapters[bookB] = [ready('c1')];
+    var stop = false;
+    source.onCall = () => stop = true;
+
+    final result = await check.run(stopRequested: () => stop);
+
+    expect(result.outcome, NewChapterCheckOutcome.stopped);
+    expect((await ledger.books()).every((b) => b.checkedAt == null), isTrue);
+  });
+
+  test('a failure reading the records is reported, not thrown', () async {
+    final broken = MockLedger();
+    when(broken.books).thenThrow(StateError('database closed'));
+    check = NewChapterCheck(
+      ledger: broken,
+      source: source,
+      downloads: downloads,
+      signedIn: () async => true,
+      server: () => server,
+    );
+
+    expect((await check.run()).outcome, NewChapterCheckOutcome.failed);
+    expect(
+      (await check.runIfStale(const Duration(hours: 1)))?.outcome,
+      NewChapterCheckOutcome.failed,
+    );
   });
 
   test('a server error ends the check as failed', () async {
@@ -256,17 +325,20 @@ void main() {
       await enable(BookId('book-$i'));
       source.chapters[BookId('book-$i')] = [ready('c$i')];
     }
-    final deadline = now.add(const Duration(seconds: 20));
-    source.onCall = () => now = now.add(const Duration(seconds: 30));
+    // The first batch is read in time, the deadline passes during the
+    // second request.
+    final deadline = now.add(const Duration(seconds: 15));
+    source.onCall = () => now = now.add(const Duration(seconds: 10));
 
     final result = await check.run(deadline: deadline);
 
-    expect(result.outcome, NewChapterCheckOutcome.outOfTime);
-    expect(source.calls, hasLength(1));
+    expect(result.outcome, NewChapterCheckOutcome.stopped);
+    expect(source.calls, hasLength(2));
+    final unread = source.calls[1].single;
 
     source.onCall = null;
     await check.run();
-    expect(source.calls[1].first, isNot(isIn(source.calls[0])));
+    expect(source.calls[2].first, unread);
   });
 
   test('only checks the given book', () async {
@@ -307,7 +379,7 @@ void main() {
   });
 
   group('runIfStale', () {
-    test('skips when a check ran recently', () async {
+    test('skips when every book was checked recently', () async {
       await withBaseline(bookA, [ready('c1')]);
       now = now.subtract(const Duration(hours: 5, minutes: 30));
 
@@ -315,11 +387,24 @@ void main() {
       expect(source.calls, hasLength(1));
     });
 
-    test('runs when the last check is old', () async {
+    test('runs when the least recently checked book is old', () async {
       await withBaseline(bookA, [ready('c1')]);
 
       expect(await check.runIfStale(const Duration(hours: 1)), isNotNull);
       expect(source.calls, hasLength(2));
+    });
+
+    test('a fresh check of one book does not hide the others', () async {
+      await enable(bookA);
+      await withBaseline(bookB, [ready('c1')]);
+      now = now.subtract(const Duration(hours: 6));
+
+      expect(await check.runIfStale(const Duration(hours: 1)), isNotNull);
+    });
+
+    test('skips when no book has it on', () async {
+      expect(await check.runIfStale(const Duration(hours: 1)), isNull);
+      expect(source.calls, isEmpty);
     });
   });
 }

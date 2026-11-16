@@ -25,6 +25,7 @@ abstract class NewChapterLedger {
     required DateTime at,
   });
 
-  /// When any book was last checked; `null` if never.
-  Future<DateTime?> lastCheck();
+  /// Whether automatic download of `book.bookId` is still on from
+  /// `book.since`: not turned off or on again, nor wiped.
+  Future<bool> isCurrent(AutoDownloadCheckState book);
 }

@@ -5,7 +5,7 @@ import 'package:gatuno/core/di/background_injection.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/network/app_mqtt_service.dart';
 import 'package:gatuno/features/downloads/data/data_sources/workmanager_check_scheduler.dart';
-import 'package:gatuno/features/downloads/data/repositories/checking_auto_download_preferences.dart';
+import 'package:gatuno/features/downloads/domain/use_cases/checking_auto_download_preferences.dart';
 import 'package:gatuno/features/downloads/domain/repositories/auto_download_preferences.dart';
 import 'package:gatuno/features/downloads/domain/repositories/download_service.dart';
 import 'package:gatuno/features/downloads/domain/repositories/new_chapter_check_scheduler.dart';

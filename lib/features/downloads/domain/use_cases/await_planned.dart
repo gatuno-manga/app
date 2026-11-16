@@ -7,7 +7,8 @@ import '../entities/download_state.dart';
 import '../repositories/download_service.dart';
 
 /// Waits until every chapter in [chapters] is planned (its files are with
-/// the native queue, or it is done, failed or paused), or until [deadline].
+/// the native queue, or it is done, failed or paused), until [deadline], or
+/// until [stopped] completes.
 ///
 /// A background run must not end while chapters are still being planned:
 /// planning needs the app, the files then download without it.
@@ -15,23 +16,26 @@ Future<void> awaitPlanned(
   DownloadService downloads,
   Map<BookId, List<ChapterId>> chapters, {
   required DateTime deadline,
+  Future<void>? stopped,
   DateTime Function() now = DateTime.now,
 }) async {
+  var stop = false;
+  unawaited(stopped?.then((_) => stop = true));
   for (final MapEntry(key: bookId, value: ids) in chapters.entries) {
     final left = deadline.difference(now());
-    if (left <= Duration.zero) return;
+    if (left <= Duration.zero || stop) return;
     final wanted = ids.toSet();
     try {
-      await downloads
-          .watchBook(bookId)
-          .firstWhere((book) {
-            final planned = {
-              for (final chapter in book?.chapters ?? const <ChapterDownload>[])
-                if (_isPlanned(chapter)) chapter.chapterId,
-            };
-            return planned.containsAll(wanted);
-          })
-          .timeout(left);
+      final planned = downloads.watchBook(bookId).firstWhere((book) {
+        final planned = {
+          for (final chapter in book?.chapters ?? const <ChapterDownload>[])
+            if (_isPlanned(chapter)) chapter.chapterId,
+        };
+        return planned.containsAll(wanted);
+      });
+      // Its error, if the stop came first, has nobody to report to.
+      planned.ignore();
+      await Future.any<Object?>([planned, ?stopped]).timeout(left);
     } on TimeoutException {
       return;
     } on StateError {

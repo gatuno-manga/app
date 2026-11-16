@@ -33,7 +33,7 @@ void main() {
       await only(),
       AutoDownloadCheckState(bookId: bookA, since: since, hasBaseline: false),
     );
-    expect(await ledger.lastCheck(), isNull);
+    expect(await ledger.isCurrent(await only()), isTrue);
   });
 
   test('a baseline replaces the seen set and marks the check', () async {
@@ -57,7 +57,6 @@ void main() {
       const ChapterId('c1'),
       const ChapterId('c2'),
     });
-    expect(await ledger.lastCheck(), at);
   });
 
   test('later checks add to the seen set', () async {
@@ -118,6 +117,7 @@ void main() {
     await records.enableAutoDownload('book-a', since);
     final stale = await only();
     await records.enableAutoDownload('book-a', DateTime(2026, 11, 16));
+    expect(await ledger.isCurrent(stale), isFalse);
 
     expect(
       await ledger.record(
@@ -131,6 +131,7 @@ void main() {
     expect(await ledger.seen(bookA), isEmpty);
 
     await records.disableAutoDownload('book-a');
+    expect(await ledger.isCurrent(stale), isFalse);
     expect(
       await ledger.record(
         stale,

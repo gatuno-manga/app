@@ -269,13 +269,10 @@ class DownloadRecords {
     return true;
   });
 
-  /// When the new-chapter check last read any book, or `null` if never.
-  Future<DateTime?> lastAutoDownloadCheck() {
-    final checkedAt = _db.downloadBooks.autoDownloadCheckedAt.max();
-    return (_db.selectOnly(
-      _db.downloadBooks,
-    )..addColumns([checkedAt])).map((row) => row.read(checkedAt)).getSingle();
-  }
+  /// When automatic download of [bookId] was turned on, or `null` while it
+  /// is off.
+  Future<DateTime?> autoDownloadSince(String bookId) =>
+      watchAutoDownloadSince(bookId).first;
 
   // Chapters
 

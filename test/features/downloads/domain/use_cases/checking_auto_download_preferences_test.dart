@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/domain/value_objects/book_id.dart';
-import 'package:gatuno/features/downloads/data/repositories/checking_auto_download_preferences.dart';
+import 'package:gatuno/features/downloads/domain/use_cases/checking_auto_download_preferences.dart';
 import 'package:gatuno/features/downloads/domain/entities/auto_download.dart';
 import 'package:gatuno/features/downloads/domain/repositories/auto_download_preferences.dart';
 import 'package:gatuno/features/downloads/domain/repositories/new_chapter_check_scheduler.dart';
