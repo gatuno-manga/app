@@ -2,6 +2,7 @@ import 'package:gatuno/features/authentication/domain/value_objects/email_addres
 import 'package:gatuno/features/authentication/domain/value_objects/password.dart';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/token_manager.dart';
 import 'package:gatuno/features/authentication/domain/repositories/auth_repository.dart';
@@ -11,6 +12,8 @@ import 'package:mocktail/mocktail.dart';
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockTokenManager extends Mock implements TokenManager {}
+
+class MockConnectivityService extends Mock implements ConnectivityService {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +35,16 @@ void main() {
     when(() => mockTokenManager.initialize()).thenAnswer((_) async {});
     when(() => mockTokenManager.currentToken).thenReturn(null);
 
-    authService = AuthService(mockAuthRepository, mockTokenManager);
+    final connectivity = MockConnectivityService();
+    when(
+      () => connectivity.onReconnected,
+    ).thenAnswer((_) => const Stream.empty());
+
+    authService = AuthService(
+      mockAuthRepository,
+      mockTokenManager,
+      connectivity,
+    );
   });
 
   final tToken = AuthToken('access');

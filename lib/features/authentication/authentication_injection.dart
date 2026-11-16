@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../../core/connectivity/connectivity_service.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/network/token_provider.dart';
 import 'data/data_sources/auth_local_data_source.dart';
@@ -30,6 +31,10 @@ void initAuthenticationInjection(GetIt sl) {
 
   // Use Cases / Services
   sl.registerLazySingleton<AuthService>(
-    () => AuthService(sl<AuthRepository>(), sl<TokenManager>()),
+    () => AuthService(
+      sl<AuthRepository>(),
+      sl<TokenManager>(),
+      sl<ConnectivityService>(),
+    ),
   );
 }

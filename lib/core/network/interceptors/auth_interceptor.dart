@@ -4,7 +4,14 @@ import '../api_constants.dart';
 import '../token_provider.dart';
 import '../../logging/logger.dart';
 
-class AuthInterceptor extends QueuedInterceptor {
+/// Attaches the access token and retries once after a 401.
+///
+/// A plain [Interceptor], not a `QueuedInterceptor`: the token refresh and
+/// the 401 retry go through this same Dio, so a queue would make them wait
+/// behind the request that is waiting for them (#159). `TokenProvider`
+/// already makes concurrent callers share one refresh, which the API needs:
+/// it rotates refresh tokens and revokes the session on reuse.
+class AuthInterceptor extends Interceptor {
   final DioClient dioClient;
   final TokenProvider tokenProvider;
   static const String _logTag = 'AuthInterceptor';
@@ -24,7 +31,17 @@ class AuthInterceptor extends QueuedInterceptor {
     ApiConstants.mfaTotpDisable,
   ];
 
+  /// Marks a request this interceptor already retried after a 401, so a
+  /// second 401 goes to the caller instead of starting another refresh.
+  static const String retriedExtraKey = 'authRetried';
+
   AuthInterceptor({required this.dioClient, required this.tokenProvider});
+
+  Future<Response<dynamic>> _retry(RequestOptions options, String token) {
+    options.headers['Authorization'] = 'Bearer $token';
+    options.extra[retriedExtraKey] = true;
+    return dioClient.dio.fetch<dynamic>(options);
+  }
 
   bool _shouldIntercept(RequestOptions options) {
     // 1. Check if the request is targeting the API origin
@@ -75,6 +92,7 @@ class AuthInterceptor extends QueuedInterceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401 &&
         _shouldIntercept(err.requestOptions) &&
+        err.requestOptions.extra[retriedExtraKey] != true &&
         !_noRetryPaths.any(err.requestOptions.uri.path.endsWith)) {
       AppLogger.i('Intercepted 401 for: ${err.requestOptions.path}', _logTag);
 
@@ -90,9 +108,7 @@ class AuthInterceptor extends QueuedInterceptor {
           _logTag,
         );
         try {
-          final options = err.requestOptions;
-          options.headers['Authorization'] = 'Bearer $currentToken';
-          final response = await dioClient.dio.fetch<dynamic>(options);
+          final response = await _retry(err.requestOptions, currentToken);
           return handler.resolve(response);
         } catch (e) {
           AppLogger.e(
@@ -112,9 +128,7 @@ class AuthInterceptor extends QueuedInterceptor {
 
         if (newToken != null && newToken.isNotEmpty) {
           AppLogger.i('Retrying original request with new token', _logTag);
-          final options = err.requestOptions;
-          options.headers['Authorization'] = 'Bearer $newToken';
-          final response = await dioClient.dio.fetch<dynamic>(options);
+          final response = await _retry(err.requestOptions, newToken);
           return handler.resolve(response);
         } else {
           AppLogger.e(
