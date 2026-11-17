@@ -1,0 +1,28 @@
+workspace = "default"
+project = "gatuno-manga-app"
+drop_subagent_captures = "true"
+
+[briefing]
+inject_on_session_start = "true"
+max_chars = 4000
+
+[capture]
+ignore_paths = [
+  ".env*",
+  "**/key.properties",
+  "**/*.jks",
+  "**/*.keystore",
+  "**/*.p12",
+  "**/*.pem",
+  "**/*.key",
+  "**/GoogleService-Info.plist",
+  "**/google-services.json",
+  "**/*.db",
+  "**/*.sqlite",
+  "**/*.sqlite3",
+  ".dart_tool/**",
+  "build/**",
+  "coverage/**",
+  "lib/**/*.g.dart",
+  "lib/l10n/app_localizations*.dart",
+]
