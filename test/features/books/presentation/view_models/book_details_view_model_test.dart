@@ -66,7 +66,9 @@ void main() {
         hasNextPage: false,
       );
 
-      when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer((_) async => book);
+      when(
+        () => mockRepository.getBook(const BookId(bookId)),
+      ).thenAnswer((_) async => book);
       when(
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => chapterList);
@@ -74,7 +76,8 @@ void main() {
         () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
       ).thenAnswer((_) async => null);
       when(
-        () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+        () =>
+            mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
       ).thenAnswer((_) async => []);
 
       await viewModel.fetchBookDetails();
@@ -96,9 +99,9 @@ void main() {
         hasNextPage: false,
       );
 
-      when(
-        () => mockRepository.getBook(const BookId(bookId)),
-      ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
+      when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer(
+        (_) async => const Book(id: BookId(bookId), title: BookTitle('Test')),
+      );
       when(
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => chapterList);
@@ -106,7 +109,8 @@ void main() {
         () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
       ).thenAnswer((_) async => null);
       when(
-        () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+        () =>
+            mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
       ).thenAnswer((_) async => []);
 
       await viewModel.fetchBookDetails();
@@ -133,17 +137,20 @@ void main() {
           completed: false,
         );
 
-        when(
-          () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
+        when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer(
+          (_) async => const Book(id: BookId(bookId), title: BookTitle('Test')),
+        );
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
         when(
-          () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
         ).thenAnswer((_) async => progress);
         when(
-          () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
         ).thenAnswer((_) async => []);
 
         await viewModel.fetchBookDetails();
@@ -172,17 +179,20 @@ void main() {
           completed: true,
         );
 
-        when(
-          () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
+        when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer(
+          (_) async => const Book(id: BookId(bookId), title: BookTitle('Test')),
+        );
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
         when(
-          () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
         ).thenAnswer((_) async => progress);
         when(
-          () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
         ).thenAnswer((_) async => []);
 
         await viewModel.fetchBookDetails();
@@ -207,17 +217,20 @@ void main() {
           completed: true,
         );
 
-        when(
-          () => mockRepository.getBook(const BookId(bookId)),
-        ).thenAnswer((_) async => const Book(id: BookId(bookId), title: BookTitle('Test')));
+        when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer(
+          (_) async => const Book(id: BookId(bookId), title: BookTitle('Test')),
+        );
         when(
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
         when(
-          () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
         ).thenAnswer((_) async => progress);
         when(
-          () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
         ).thenAnswer((_) async => []);
 
         await viewModel.fetchBookDetails();
@@ -249,12 +262,15 @@ void main() {
         hasNextPage: false,
       );
 
-      when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer((_) async => book);
+      when(
+        () => mockRepository.getBook(const BookId(bookId)),
+      ).thenAnswer((_) async => book);
       when(
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => initialChapterList);
       when(
-        () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+        () =>
+            mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
       ).thenAnswer((_) async => []);
 
       await viewModel.fetchBookDetails();
@@ -263,7 +279,8 @@ void main() {
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => moreChapterList);
       when(
-        () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+        () =>
+            mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
       ).thenAnswer((_) async => []);
 
       await viewModel.loadMoreChapters();
@@ -278,12 +295,15 @@ void main() {
       const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
       const chapterList = ChapterList(data: [], hasNextPage: false);
 
-      when(() => mockRepository.getBook(const BookId(bookId))).thenAnswer((_) async => book);
+      when(
+        () => mockRepository.getBook(const BookId(bookId)),
+      ).thenAnswer((_) async => book);
       when(
         () => mockRepository.getBookChapters(const BookId(bookId), any()),
       ).thenAnswer((_) async => chapterList);
       when(
-        () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+        () =>
+            mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
       ).thenAnswer((_) async => []);
 
       viewModel.setChapterOrder(ChapterSortOrder.desc);
@@ -312,7 +332,9 @@ void main() {
       viewModel.clearError(); // Just to trigger it, we need to set error first
 
       // We can't set error directly, so we trigger a failure
-      when(() => mockRepository.getBook(const BookId(bookId))).thenThrow(Exception('Error'));
+      when(
+        () => mockRepository.getBook(const BookId(bookId)),
+      ).thenThrow(Exception('Error'));
 
       return viewModel.fetchBookDetails().then((_) {
         expect(viewModel.error, isNotNull);
@@ -327,8 +349,18 @@ void main() {
         const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
         const chapterList = ChapterList(
           data: [
-            Chapter(id: ChapterId('1'), index: ChapterIndex(1.0), read: false, completed: false),
-            Chapter(id: ChapterId('2'), index: ChapterIndex(2.0), read: false, completed: false),
+            Chapter(
+              id: ChapterId('1'),
+              index: ChapterIndex(1.0),
+              read: false,
+              completed: false,
+            ),
+            Chapter(
+              id: ChapterId('2'),
+              index: ChapterIndex(2.0),
+              read: false,
+              completed: false,
+            ),
           ],
           hasNextPage: false,
         );
@@ -340,10 +372,13 @@ void main() {
           () => mockRepository.getBookChapters(const BookId(bookId), any()),
         ).thenAnswer((_) async => chapterList);
         when(
-          () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
         ).thenAnswer((_) async => null);
         when(
-          () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
         ).thenAnswer((_) async => []);
 
         await viewModel.fetchBookDetails();
@@ -362,15 +397,19 @@ void main() {
           chapterId: '2',
           bookId: bookId,
           pageIndex: 5,
+          totalPages: 6,
           timestamp: DateTime.now(),
           completed: false,
         );
 
         when(
-          () => mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
         ).thenAnswer((_) async => progress2);
         when(
-          () => mockProgressCoordinator.getAllProgressForBook(const BookId(bookId)),
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
         ).thenAnswer((_) async => [progress1, progress2]);
 
         await viewModel.refreshReadStatus();
@@ -379,6 +418,66 @@ void main() {
         expect(viewModel.chapterList?.data[0].read, true);
         expect(viewModel.chapterList?.data[1].completed, false);
         expect(viewModel.chapterList?.data[1].read, true);
+      },
+    );
+
+    test(
+      'refreshReadStatus keeps read false when progress is below 80% and not completed',
+      () async {
+        const book = Book(id: BookId(bookId), title: BookTitle('Test Book'));
+        const chapterList = ChapterList(
+          data: [
+            Chapter(
+              id: ChapterId('1'),
+              index: ChapterIndex(1.0),
+              read: false,
+              completed: false,
+            ),
+          ],
+          hasNextPage: false,
+        );
+
+        when(
+          () => mockRepository.getBook(const BookId(bookId)),
+        ).thenAnswer((_) async => book);
+        when(
+          () => mockRepository.getBookChapters(const BookId(bookId), any()),
+        ).thenAnswer((_) async => chapterList);
+        when(
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
+        ).thenAnswer((_) async => []);
+
+        await viewModel.fetchBookDetails();
+
+        final earlyProgress = ReadingProgressData(
+          userId: '1',
+          chapterId: '1',
+          bookId: bookId,
+          pageIndex: 0,
+          totalPages: 20,
+          timestamp: DateTime.now(),
+          completed: false,
+        );
+        when(
+          () =>
+              mockProgressCoordinator.getLastReadChapter(const BookId(bookId)),
+        ).thenAnswer((_) async => earlyProgress);
+        when(
+          () => mockProgressCoordinator.getAllProgressForBook(
+            const BookId(bookId),
+          ),
+        ).thenAnswer((_) async => [earlyProgress]);
+
+        await viewModel.refreshReadStatus();
+
+        expect(viewModel.chapterList?.data[0].completed, false);
+        expect(viewModel.chapterList?.data[0].read, false);
       },
     );
   });

@@ -1,14 +1,17 @@
 import 'package:get_it/get_it.dart';
 import 'data/database/reading_database.dart' hide ReadingProgress;
 import 'data/data_sources/reader_preferences_storage.dart';
+import 'data/repositories/pending_read_marks_local_service.dart';
 import 'data/repositories/reading_progress_local_service.dart';
 import 'data/repositories/reading_repository_impl.dart';
 import 'domain/repositories/reading_repository.dart';
+import 'domain/use_cases/chapter_read_mark_coordinator.dart';
 import 'domain/use_cases/document_source.dart';
 import 'domain/use_cases/reader_preferences_service.dart';
 import 'domain/use_cases/reading_progress_coordinator.dart';
 import 'presentation/view_models/reading_view_model.dart';
 import '../sync/domain/use_cases/local_sync_feature_provider.dart';
+import '../sync/domain/use_cases/pending_read_marks_flusher.dart';
 import 'domain/entities/reading_progress.dart';
 import 'data/repositories/reading_progress_sync_provider_impl.dart';
 import 'data/repositories/reading_progress_mqtt_handler.dart';
@@ -30,6 +33,9 @@ void initReadingDI(GetIt sl) {
   sl.registerLazySingleton<ReadingProgressLocalService>(
     () => ReadingProgressLocalService(sl()),
   );
+  sl.registerLazySingleton<PendingReadMarksLocalService>(
+    () => PendingReadMarksLocalService(sl()),
+  );
 
   sl.registerLazySingleton<LocalSyncFeatureProvider<ReadingProgress>>(
     () => ReadingProgressSyncProviderImpl(sl()),
@@ -44,6 +50,12 @@ void initReadingDI(GetIt sl) {
   sl.registerLazySingleton<ReadingProgressCoordinator>(
     () => ReadingProgressCoordinator(sl(), sl(), sl(), sl()),
   );
+  sl.registerLazySingleton<ChapterReadMarkCoordinator>(
+    () => ChapterReadMarkCoordinator(sl(), sl(), sl(), sl()),
+  );
+  sl.registerLazySingleton<PendingReadMarksFlusher>(
+    () => sl<ChapterReadMarkCoordinator>(),
+  );
 
   // Repositories
   sl.registerLazySingleton<ReadingRepository>(
@@ -53,5 +65,5 @@ void initReadingDI(GetIt sl) {
   sl.registerLazySingleton<DocumentSource>(() => DocumentSource(sl()));
 
   // ViewModels
-  sl.registerFactory(() => ReadingViewModel(sl(), sl(), sl()));
+  sl.registerFactory(() => ReadingViewModel(sl(), sl(), sl(), sl()));
 }

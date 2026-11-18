@@ -473,10 +473,280 @@ class ReadingProgressCompanion extends UpdateCompanion<ReadingProgressData> {
   }
 }
 
+class $PendingReadMarksTable extends PendingReadMarks
+    with TableInfo<$PendingReadMarksTable, PendingReadMark> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingReadMarksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _chapterIdMeta = const VerificationMeta(
+    'chapterId',
+  );
+  @override
+  late final GeneratedColumn<String> chapterId = GeneratedColumn<String>(
+    'chapter_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [userId, chapterId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_read_marks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingReadMark> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('chapter_id')) {
+      context.handle(
+        _chapterIdMeta,
+        chapterId.isAcceptableOrUnknown(data['chapter_id']!, _chapterIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_chapterIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, chapterId};
+  @override
+  PendingReadMark map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingReadMark(
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      chapterId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chapter_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PendingReadMarksTable createAlias(String alias) {
+    return $PendingReadMarksTable(attachedDatabase, alias);
+  }
+}
+
+class PendingReadMark extends DataClass implements Insertable<PendingReadMark> {
+  final String userId;
+  final String chapterId;
+  final DateTime createdAt;
+  const PendingReadMark({
+    required this.userId,
+    required this.chapterId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['chapter_id'] = Variable<String>(chapterId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PendingReadMarksCompanion toCompanion(bool nullToAbsent) {
+    return PendingReadMarksCompanion(
+      userId: Value(userId),
+      chapterId: Value(chapterId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PendingReadMark.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingReadMark(
+      userId: serializer.fromJson<String>(json['userId']),
+      chapterId: serializer.fromJson<String>(json['chapterId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'chapterId': serializer.toJson<String>(chapterId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PendingReadMark copyWith({
+    String? userId,
+    String? chapterId,
+    DateTime? createdAt,
+  }) => PendingReadMark(
+    userId: userId ?? this.userId,
+    chapterId: chapterId ?? this.chapterId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  PendingReadMark copyWithCompanion(PendingReadMarksCompanion data) {
+    return PendingReadMark(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      chapterId: data.chapterId.present ? data.chapterId.value : this.chapterId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingReadMark(')
+          ..write('userId: $userId, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(userId, chapterId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingReadMark &&
+          other.userId == this.userId &&
+          other.chapterId == this.chapterId &&
+          other.createdAt == this.createdAt);
+}
+
+class PendingReadMarksCompanion extends UpdateCompanion<PendingReadMark> {
+  final Value<String> userId;
+  final Value<String> chapterId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const PendingReadMarksCompanion({
+    this.userId = const Value.absent(),
+    this.chapterId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PendingReadMarksCompanion.insert({
+    required String userId,
+    required String chapterId,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId),
+       chapterId = Value(chapterId),
+       createdAt = Value(createdAt);
+  static Insertable<PendingReadMark> custom({
+    Expression<String>? userId,
+    Expression<String>? chapterId,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (chapterId != null) 'chapter_id': chapterId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PendingReadMarksCompanion copyWith({
+    Value<String>? userId,
+    Value<String>? chapterId,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return PendingReadMarksCompanion(
+      userId: userId ?? this.userId,
+      chapterId: chapterId ?? this.chapterId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (chapterId.present) {
+      map['chapter_id'] = Variable<String>(chapterId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingReadMarksCompanion(')
+          ..write('userId: $userId, ')
+          ..write('chapterId: $chapterId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$ReadingDatabase extends GeneratedDatabase {
   _$ReadingDatabase(QueryExecutor e) : super(e);
   $ReadingDatabaseManager get managers => $ReadingDatabaseManager(this);
   late final $ReadingProgressTable readingProgress = $ReadingProgressTable(
+    this,
+  );
+  late final $PendingReadMarksTable pendingReadMarks = $PendingReadMarksTable(
     this,
   );
   late final Index idxReadingProgressRecent = Index(
@@ -489,6 +759,7 @@ abstract class _$ReadingDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     readingProgress,
+    pendingReadMarks,
     idxReadingProgressRecent,
   ];
 }
@@ -743,10 +1014,184 @@ typedef $$ReadingProgressTableProcessedTableManager =
       ReadingProgressData,
       PrefetchHooks Function()
     >;
+typedef $$PendingReadMarksTableCreateCompanionBuilder =
+    PendingReadMarksCompanion Function({
+      required String userId,
+      required String chapterId,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$PendingReadMarksTableUpdateCompanionBuilder =
+    PendingReadMarksCompanion Function({
+      Value<String> userId,
+      Value<String> chapterId,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$PendingReadMarksTableFilterComposer
+    extends Composer<_$ReadingDatabase, $PendingReadMarksTable> {
+  $$PendingReadMarksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chapterId => $composableBuilder(
+    column: $table.chapterId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PendingReadMarksTableOrderingComposer
+    extends Composer<_$ReadingDatabase, $PendingReadMarksTable> {
+  $$PendingReadMarksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chapterId => $composableBuilder(
+    column: $table.chapterId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingReadMarksTableAnnotationComposer
+    extends Composer<_$ReadingDatabase, $PendingReadMarksTable> {
+  $$PendingReadMarksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get chapterId =>
+      $composableBuilder(column: $table.chapterId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$PendingReadMarksTableTableManager
+    extends
+        RootTableManager<
+          _$ReadingDatabase,
+          $PendingReadMarksTable,
+          PendingReadMark,
+          $$PendingReadMarksTableFilterComposer,
+          $$PendingReadMarksTableOrderingComposer,
+          $$PendingReadMarksTableAnnotationComposer,
+          $$PendingReadMarksTableCreateCompanionBuilder,
+          $$PendingReadMarksTableUpdateCompanionBuilder,
+          (
+            PendingReadMark,
+            BaseReferences<
+              _$ReadingDatabase,
+              $PendingReadMarksTable,
+              PendingReadMark
+            >,
+          ),
+          PendingReadMark,
+          PrefetchHooks Function()
+        > {
+  $$PendingReadMarksTableTableManager(
+    _$ReadingDatabase db,
+    $PendingReadMarksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingReadMarksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingReadMarksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingReadMarksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> userId = const Value.absent(),
+                Value<String> chapterId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PendingReadMarksCompanion(
+                userId: userId,
+                chapterId: chapterId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String userId,
+                required String chapterId,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => PendingReadMarksCompanion.insert(
+                userId: userId,
+                chapterId: chapterId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingReadMarksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$ReadingDatabase,
+      $PendingReadMarksTable,
+      PendingReadMark,
+      $$PendingReadMarksTableFilterComposer,
+      $$PendingReadMarksTableOrderingComposer,
+      $$PendingReadMarksTableAnnotationComposer,
+      $$PendingReadMarksTableCreateCompanionBuilder,
+      $$PendingReadMarksTableUpdateCompanionBuilder,
+      (
+        PendingReadMark,
+        BaseReferences<
+          _$ReadingDatabase,
+          $PendingReadMarksTable,
+          PendingReadMark
+        >,
+      ),
+      PendingReadMark,
+      PrefetchHooks Function()
+    >;
 
 class $ReadingDatabaseManager {
   final _$ReadingDatabase _db;
   $ReadingDatabaseManager(this._db);
   $$ReadingProgressTableTableManager get readingProgress =>
       $$ReadingProgressTableTableManager(_db, _db.readingProgress);
+  $$PendingReadMarksTableTableManager get pendingReadMarks =>
+      $$PendingReadMarksTableTableManager(_db, _db.pendingReadMarks);
 }

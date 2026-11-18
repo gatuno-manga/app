@@ -1,4 +1,5 @@
 import '../../../books/domain/value_objects/chapter_id.dart';
+import '../entities/chapter_read_batch_result.dart';
 import '../entities/opened_chapter.dart';
 import '../entities/reading_chapter.dart';
 
@@ -15,4 +16,12 @@ abstract class ReadingRepository {
 
   /// Whether the chapter can be read from the device.
   Future<bool> isDownloaded(ChapterId chapterId);
+
+  /// Marks [chapterId] as read on the server (`POST /chapters/:id/read`).
+  Future<void> markChapterRead(ChapterId chapterId);
+
+  /// Marks [chapterIds] as read on the server (`POST /chapters/batch/read`).
+  Future<List<ChapterReadBatchResult>> markChaptersRead(
+    List<ChapterId> chapterIds,
+  );
 }

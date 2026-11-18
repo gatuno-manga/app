@@ -4,6 +4,7 @@ import 'data/repositories/sync_repository_impl.dart';
 import 'domain/repositories/sync_repository.dart';
 import 'domain/use_cases/app_sync_coordinator.dart';
 import 'domain/use_cases/local_sync_feature_provider.dart';
+import 'domain/use_cases/pending_read_marks_flusher.dart';
 import 'domain/use_cases/reconnect_sync_trigger.dart';
 import '../reading/domain/entities/reading_progress.dart';
 
@@ -18,7 +19,7 @@ void initSyncDI(GetIt sl) {
   sl.registerLazySingleton<AppSyncCoordinator>(
     () => AppSyncCoordinator(sl(), sl(), sl(), [
       sl<LocalSyncFeatureProvider<ReadingProgress>>(),
-    ]),
+    ], pendingReadMarksFlusher: sl<PendingReadMarksFlusher>()),
   );
 
   sl.registerLazySingleton<ReconnectSyncTrigger>(

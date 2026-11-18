@@ -7,6 +7,7 @@ import '../../../../core/logging/logger.dart';
 import '../../../books/domain/value_objects/chapter_id.dart';
 import '../../../downloads/domain/entities/downloaded_chapter.dart';
 import '../../../downloads/domain/repositories/downloaded_content.dart';
+import '../../domain/entities/chapter_read_batch_result.dart';
 import '../../domain/entities/opened_chapter.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/repositories/reading_repository.dart';
@@ -57,6 +58,95 @@ class ReadingRepositoryImpl implements ReadingRepository {
   @override
   Future<bool> isDownloaded(ChapterId chapterId) async =>
       await _downloaded(chapterId) != null;
+
+  @override
+  Future<void> markChapterRead(ChapterId chapterId) async {
+    AppLogger.i('Marking chapter read: ${chapterId.value}', _logTag);
+    try {
+      await _dioClient.dio.post<dynamic>(
+        '${ApiConstants.chapters}/${chapterId.value}/read',
+      );
+    } on AppExceptions {
+      rethrow;
+    } on DioException catch (e) {
+      AppLogger.e(
+        'DioException marking chapter read: ${e.message}',
+        e,
+        e.stackTrace,
+        _logTag,
+      );
+      throw ApiExceptionHandler.handle(e);
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        'Unexpected error marking chapter read',
+        e,
+        stackTrace,
+        _logTag,
+      );
+      throw Exception(
+        'An unexpected error occurred while marking chapter read',
+      );
+    }
+  }
+
+  @override
+  Future<List<ChapterReadBatchResult>> markChaptersRead(
+    List<ChapterId> chapterIds,
+  ) async {
+    if (chapterIds.isEmpty) return const [];
+    AppLogger.i('Batch-marking ${chapterIds.length} chapters read', _logTag);
+    try {
+      final response = await _dioClient.dio.post<dynamic>(
+        ApiConstants.chaptersBatchRead,
+        data: chapterIds.map((id) => id.value).toList(),
+      );
+
+      final raw = response.data;
+      final List<dynamic>? items = switch (raw) {
+        final List<dynamic> list => list,
+        final Map<dynamic, dynamic> map when map['data'] is List<dynamic> =>
+          map['data'] as List<dynamic>,
+        _ => null,
+      };
+      if (items == null) {
+        throw ServerException(
+          message:
+              'Failed to batch-mark chapters read: Invalid response format',
+          statusCode: response.statusCode,
+        );
+      }
+
+      return [
+        for (final item in items)
+          if (item is Map<dynamic, dynamic> && item['chapterId'] is String)
+            ChapterReadBatchResult(
+              chapterId: ChapterId(item['chapterId'] as String),
+              success: item['success'] == true,
+              error: item['error']?.toString(),
+            ),
+      ];
+    } on AppExceptions {
+      rethrow;
+    } on DioException catch (e) {
+      AppLogger.e(
+        'DioException batch-marking chapters read: ${e.message}',
+        e,
+        e.stackTrace,
+        _logTag,
+      );
+      throw ApiExceptionHandler.handle(e);
+    } catch (e, stackTrace) {
+      AppLogger.e(
+        'Unexpected error batch-marking chapters read',
+        e,
+        stackTrace,
+        _logTag,
+      );
+      throw Exception(
+        'An unexpected error occurred while batch-marking chapters read',
+      );
+    }
+  }
 
   /// A broken download must not keep a chapter from opening: the server
   /// answers instead.

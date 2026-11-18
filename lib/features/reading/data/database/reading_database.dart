@@ -17,12 +17,22 @@ class ReadingProgress extends Table {
   Set<Column> get primaryKey => {userId, chapterId};
 }
 
-@DriftDatabase(tables: [ReadingProgress])
-class ReadingDatabase extends _$ReadingDatabase {
-  ReadingDatabase() : super(_openConnection());
+class PendingReadMarks extends Table {
+  TextColumn get userId => text()();
+  TextColumn get chapterId => text()();
+  DateTimeColumn get createdAt => dateTime()();
 
   @override
-  int get schemaVersion => 4;
+  Set<Column> get primaryKey => {userId, chapterId};
+}
+
+@DriftDatabase(tables: [ReadingProgress, PendingReadMarks])
+class ReadingDatabase extends _$ReadingDatabase {
+  ReadingDatabase([QueryExecutor? executor])
+    : super(executor ?? _openConnection());
+
+  @override
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -44,7 +54,9 @@ class ReadingDatabase extends _$ReadingDatabase {
           });
         }
         if (from < 3) {
-          await customStatement('CREATE INDEX idx_reading_progress_recent ON reading_progress(user_id, timestamp);');
+          await customStatement(
+            'CREATE INDEX idx_reading_progress_recent ON reading_progress(user_id, timestamp);',
+          );
         }
         if (from < 4) {
           await transaction(() async {
@@ -60,6 +72,9 @@ class ReadingDatabase extends _$ReadingDatabase {
             );
             await customStatement('DROP TABLE reading_progress_old;');
           });
+        }
+        if (from < 5) {
+          await m.createTable(pendingReadMarks);
         }
       },
     );

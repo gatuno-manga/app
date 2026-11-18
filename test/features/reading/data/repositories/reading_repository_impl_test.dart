@@ -8,6 +8,7 @@ import 'package:gatuno/features/downloads/domain/entities/downloaded_chapter.dar
 import 'package:gatuno/features/downloads/domain/repositories/downloaded_content.dart';
 import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
 import 'package:gatuno/features/reading/data/repositories/reading_repository_impl.dart';
+import 'package:gatuno/features/reading/domain/entities/chapter_read_batch_result.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/fake_connectivity_service.dart';
@@ -214,6 +215,96 @@ void main() {
       expect(await repository.isDownloaded(const ChapterId('saved')), isTrue);
       expect(await repository.isDownloaded(id), isFalse);
       expect(connectivity.status, ConnectivityStatus.online);
+    });
+  });
+
+  group('markChapterRead', () {
+    test('posts to /chapters/:id/read', () async {
+      when(() => dio.post<dynamic>(any())).thenAnswer(
+        (_) async =>
+            Response(statusCode: 204, requestOptions: RequestOptions(path: '')),
+      );
+
+      await repository.markChapterRead(id);
+
+      verify(() => dio.post<dynamic>('/chapters/chapter-1/read')).called(1);
+    });
+
+    test('maps DioException through ApiExceptionHandler', () async {
+      when(() => dio.post<dynamic>(any())).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: ''),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
+      await expectLater(
+        repository.markChapterRead(id),
+        throwsA(isA<NetworkException>()),
+      );
+    });
+  });
+
+  group('markChaptersRead', () {
+    test('posts array of chapter IDs and parses raw list response', () async {
+      const c1 = ChapterId('c1');
+      const c2 = ChapterId('c2');
+      const c3 = ChapterId('c3');
+      when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+        (_) async => Response(
+          data: [
+            {'chapterId': 'c1', 'success': true},
+            {'chapterId': 'c2', 'success': false, 'error': 'Chapter not found'},
+            {'chapterId': 'c3', 'success': false, 'error': 'Internal error'},
+          ],
+          statusCode: 200,
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
+
+      final results = await repository.markChaptersRead(const [c1, c2, c3]);
+
+      verify(
+        () =>
+            dio.post<dynamic>('/chapters/batch/read', data: ['c1', 'c2', 'c3']),
+      ).called(1);
+      expect(results, const [
+        ChapterReadBatchResult(chapterId: c1, success: true),
+        ChapterReadBatchResult(
+          chapterId: c2,
+          success: false,
+          error: 'Chapter not found',
+        ),
+        ChapterReadBatchResult(
+          chapterId: c3,
+          success: false,
+          error: 'Internal error',
+        ),
+      ]);
+      expect(results[0].shouldClearFromQueue, isTrue);
+      expect(results[1].shouldClearFromQueue, isTrue);
+      expect(results[2].shouldClearFromQueue, isFalse);
+    });
+
+    test('parses wrapped data envelope response', () async {
+      const c1 = ChapterId('c1');
+      when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+        (_) async => Response(
+          data: {
+            'data': [
+              {'chapterId': 'c1', 'success': true},
+            ],
+          },
+          statusCode: 201,
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
+
+      final results = await repository.markChaptersRead(const [c1]);
+
+      expect(results, const [
+        ChapterReadBatchResult(chapterId: c1, success: true),
+      ]);
     });
   });
 }
