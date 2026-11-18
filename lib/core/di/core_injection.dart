@@ -13,6 +13,7 @@ import '../covers/cover_store.dart';
 import '../covers/dio_cover_downloader.dart';
 import '../covers/file_cover_store.dart';
 import '../database/offline_cache_database.dart';
+import '../device/device_id_service.dart';
 import '../offline/cache_epoch.dart';
 import '../offline/offline_cache_maintenance.dart';
 import '../offline/read_through.dart';
@@ -22,6 +23,7 @@ import '../network/token_provider.dart';
 import '../network/interceptors/auth_interceptor.dart';
 import '../network/interceptors/cache_interceptor.dart';
 import '../network/interceptors/cookie_interceptor.dart';
+import '../network/interceptors/device_id_interceptor.dart';
 import '../network/interceptors/logging_interceptor.dart';
 import '../network/interceptors/bad_certificate_interceptor.dart';
 import '../network/interceptors/connectivity_interceptor.dart';
@@ -137,6 +139,9 @@ Future<void> initCoreDI() async {
 
   // Initialize settings (including base URL)
   await sl<SettingsService>().init();
+
+  sl.registerLazySingleton<DeviceIdService>(DeviceIdService.new);
+  await sl<DeviceIdService>().init();
 }
 
 /// Dio interceptors, once AuthService (initAuthenticationInjection) and
@@ -144,6 +149,7 @@ Future<void> initCoreDI() async {
 Future<void> setupInterceptors() async {
   setupCookieInterceptor(sl<DioClient>());
   await setupCacheInterceptor(sl<DioClient>());
+  setupDeviceIdInterceptor(sl<DioClient>(), sl<DeviceIdService>());
   setupAuthInterceptor(sl<DioClient>(), sl<TokenProvider>());
   setupLoggingInterceptor(sl<DioClient>());
   setupBadCertificateInterceptor(sl<DioClient>(), sl<CertificatesService>());

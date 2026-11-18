@@ -1,5 +1,7 @@
 package com.gatuno.app
 
+import android.annotation.SuppressLint
+import android.provider.Settings
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -19,7 +21,18 @@ class MainActivity : FlutterFragmentActivity() {
                     else -> result.notImplemented()
                 }
             }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_ID_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getDeviceId" -> result.success(getAndroidId())
+                    else -> result.notImplemented()
+                }
+            }
     }
+
+    @SuppressLint("HardwareIds")
+    private fun getAndroidId(): String? =
+        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
 
     // FLAG_SECURE blanks the app-switcher thumbnail (and blocks screenshots)
     // while the app lock is on.
@@ -33,5 +46,6 @@ class MainActivity : FlutterFragmentActivity() {
 
     private companion object {
         const val PRIVACY_SCREEN_CHANNEL = "com.gatuno.app/privacy_screen"
+        const val DEVICE_ID_CHANNEL = "com.gatuno.app/device_id"
     }
 }
