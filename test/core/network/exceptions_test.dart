@@ -24,13 +24,13 @@ void main() {
       expect((result as ValidationException).errors?['email'], 'invalid');
     });
 
-    test('handles 401 UnauthorizedException', () {
+    test('handles 401 UnauthorizedException and preserves code', () {
       final error = DioException(
         requestOptions: RequestOptions(path: ''),
         response: Response(
           statusCode: 401,
           requestOptions: RequestOptions(path: ''),
-          data: {'message': 'Unauthorized'},
+          data: {'message': 'Unauthorized', 'code': 'REFRESH_TOKEN_INVALID'},
         ),
       );
 
@@ -38,6 +38,7 @@ void main() {
 
       expect(result, isA<UnauthorizedException>());
       expect(result.message, 'Unauthorized');
+      expect((result as UnauthorizedException).code, 'REFRESH_TOKEN_INVALID');
     });
 
     test('handles 403 Forbidden', () {
@@ -54,6 +55,73 @@ void main() {
 
       expect(result, isA<AuthException>());
       expect(result.message, contains('Access denied'));
+    });
+
+    test('handles 403 CSRF_TOKEN_INVALID as CsrfTokenInvalidException', () {
+      final error = DioException(
+        requestOptions: RequestOptions(path: ''),
+        response: Response(
+          statusCode: 403,
+          requestOptions: RequestOptions(path: ''),
+          data: {'message': 'Invalid CSRF token', 'code': 'CSRF_TOKEN_INVALID'},
+        ),
+      );
+
+      final result = ApiExceptionHandler.handle(error);
+
+      expect(result, isA<CsrfTokenInvalidException>());
+      expect(result.statusCode, 403);
+      expect(result.message, 'Invalid CSRF token');
+    });
+
+    test(
+      'handles 409 REFRESH_IN_PROGRESS with Retry-After parsing and clamping',
+      () {
+        RefreshInProgressException parseWithHeader(String? retryAfter) {
+          final error = DioException(
+            requestOptions: RequestOptions(path: ''),
+            response: Response(
+              statusCode: 409,
+              requestOptions: RequestOptions(path: ''),
+              headers: retryAfter == null
+                  ? Headers()
+                  : Headers.fromMap({
+                      'Retry-After': [retryAfter],
+                    }),
+              data: {
+                'message': 'Refresh already in progress',
+                'code': 'REFRESH_IN_PROGRESS',
+              },
+            ),
+          );
+          final result = ApiExceptionHandler.handle(error);
+          expect(result, isA<RefreshInProgressException>());
+          return result as RefreshInProgressException;
+        }
+
+        expect(parseWithHeader('2').retryAfter, const Duration(seconds: 2));
+        expect(parseWithHeader(null).retryAfter, const Duration(seconds: 1));
+        expect(parseWithHeader('0').retryAfter, Duration.zero);
+        expect(parseWithHeader('30').retryAfter, const Duration(seconds: 5));
+        expect(parseWithHeader('abc').retryAfter, const Duration(seconds: 1));
+        expect(parseWithHeader('-2').retryAfter, const Duration(seconds: 1));
+      },
+    );
+
+    test('handles 409 without REFRESH_IN_PROGRESS as AuthException', () {
+      final error = DioException(
+        requestOptions: RequestOptions(path: ''),
+        response: Response(
+          statusCode: 409,
+          requestOptions: RequestOptions(path: ''),
+          data: {'message': 'Conflict', 'code': 'OTHER_CONFLICT'},
+        ),
+      );
+
+      final result = ApiExceptionHandler.handle(error);
+
+      expect(result, isA<AuthException>());
+      expect(result.message, 'Conflict');
     });
 
     test('handles 404 Not Found', () {
