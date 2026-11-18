@@ -7,11 +7,11 @@ on:
   push:
     branches:
       - main
-      - developer
+      - develop
   pull_request:
     branches:
       - main
-      - developer
+      - develop
 
 permissions:
   contents: read
