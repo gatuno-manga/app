@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
 import 'package:gatuno/core/network/api_constants.dart';
@@ -69,12 +70,17 @@ class FakeAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-ResponseBody json(int status, Map<String, dynamic> body) {
+ResponseBody json(
+  int status,
+  Map<String, dynamic> body, {
+  Map<String, List<String>>? headers,
+}) {
   return ResponseBody.fromString(
     jsonEncode(body),
     status,
     headers: {
       Headers.contentTypeHeader: [Headers.jsonContentType],
+      ...?headers,
     },
   );
 }
@@ -115,14 +121,18 @@ void main() {
   final valid = jwt(const Duration(hours: 1));
   final fresh = jwt(const Duration(hours: 2));
 
-  void wire(FakeAdapter adapter, {required String storedToken}) {
+  void wire(
+    FakeAdapter adapter, {
+    required String storedToken,
+    Future<void> Function(Duration)? delay,
+  }) {
     dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
       ..httpClientAdapter = adapter;
     final dioClient = MockDioClient();
     when(() => dioClient.dio).thenReturn(dio);
 
     storage = FakeAuthStorage(storedToken);
-    tokenManager = TokenManager(AuthRepositoryImpl(dio), storage);
+    tokenManager = TokenManager(AuthRepositoryImpl(dio), storage, delay: delay);
     setupAuthInterceptor(dioClient, tokenManager);
   }
 
@@ -174,40 +184,50 @@ void main() {
     timeout: deadlockTimeout,
   );
 
-  test(
-    'a refused refresh signs out locally without calling /auth/logout',
-    () async {
-      final adapter = FakeAdapter({
-        ApiConstants.authRefresh: (_) =>
-            json(401, {'message': 'Access Denied. Invalid token.'}),
-        ApiConstants.logout: (_) => json(401, {'message': 'Unauthorized'}),
-        // Guests can browse: the list answers without a token.
-        ApiConstants.books: (o) => bearer(o) == null
-            ? json(200, {'data': <dynamic>[]})
-            : json(401, {'message': 'Unauthorized'}),
-      });
-      wire(adapter, storedToken: expired);
+  for (final code in const [
+    'REFRESH_TOKEN_MISSING',
+    'REFRESH_TOKEN_INVALID',
+    'REFRESH_SESSION_NOT_FOUND',
+    'REFRESH_TOKEN_REUSED',
+    'REFRESH_USER_NOT_FOUND',
+  ]) {
+    test(
+      'a refused refresh with 401 ($code) signs out locally without calling /auth/logout',
+      () async {
+        final adapter = FakeAdapter({
+          ApiConstants.authRefresh: (_) => json(401, {
+            'message': 'Access Denied. Invalid token.',
+            'code': code,
+          }),
+          ApiConstants.logout: (_) => json(401, {'message': 'Unauthorized'}),
+          // Guests can browse: the list answers without a token.
+          ApiConstants.books: (o) => bearer(o) == null
+              ? json(200, {'data': <dynamic>[]})
+              : json(401, {'message': 'Unauthorized'}),
+        });
+        wire(adapter, storedToken: expired);
 
-      final authService = AuthService(
-        AuthRepositoryImpl(dio),
-        tokenManager,
-        connectivity,
-      );
-      addTearDown(authService.dispose);
-      final request = dio.get<dynamic>(ApiConstants.books);
+        final authService = AuthService(
+          AuthRepositoryImpl(dio),
+          tokenManager,
+          connectivity,
+        );
+        addTearDown(authService.dispose);
+        final request = dio.get<dynamic>(ApiConstants.books);
 
-      await expectLater(
-        authService.authStateStream,
-        emitsThrough(AuthState.unauthenticated),
-      );
-      final response = await request;
+        await expectLater(
+          authService.authStateStream,
+          emitsThrough(AuthState.unauthenticated),
+        );
+        final response = await request;
 
-      expect(response.statusCode, 200);
-      expect(storage.token, isNull);
-      expect(adapter.paths, isNot(contains(ApiConstants.logout)));
-    },
-    timeout: deadlockTimeout,
-  );
+        expect(response.statusCode, 200);
+        expect(storage.token, isNull);
+        expect(adapter.paths, isNot(contains(ApiConstants.logout)));
+      },
+      timeout: deadlockTimeout,
+    );
+  }
   for (final failure in <String, Route>{
     'no network': (o) => throw DioException.connectionError(
       requestOptions: o,
@@ -217,6 +237,10 @@ void main() {
       timeout: const Duration(seconds: 5),
       requestOptions: o,
     ),
+    'a 403 CSRF_TOKEN_INVALID': (_) => json(403, {
+      'message': 'Invalid CSRF token',
+      'code': 'CSRF_TOKEN_INVALID',
+    }),
     'a 429': (_) => json(429, {'message': 'Too Many Requests'}),
     'a 500': (_) => json(500, {'message': 'Internal server error'}),
   }.entries) {
@@ -257,4 +281,200 @@ void main() {
       expect(adapter.paths, isNot(contains(ApiConstants.logout)));
     }, timeout: deadlockTimeout);
   }
+
+  test(
+    'a 409 REFRESH_IN_PROGRESS waits Retry-After and retries once inside the single-flight future',
+    () async {
+      var refreshes = 0;
+      final recordedDelays = <Duration>[];
+      final adapter = FakeAdapter({
+        ApiConstants.authRefresh: (_) {
+          refreshes++;
+          if (refreshes == 1) {
+            return json(
+              409,
+              {
+                'message': 'Refresh already in progress',
+                'code': 'REFRESH_IN_PROGRESS',
+              },
+              headers: {
+                'Retry-After': ['2'],
+              },
+            );
+          }
+          return json(200, {'accessToken': fresh});
+        },
+        ApiConstants.books: (o) => bearer(o) == 'Bearer $fresh'
+            ? json(200, {'data': <dynamic>[]})
+            : json(401, {'message': 'Unauthorized'}),
+      });
+      wire(
+        adapter,
+        storedToken: expired,
+        delay: (d) async => recordedDelays.add(d),
+      );
+
+      final responses = await Future.wait([
+        dio.get<dynamic>(ApiConstants.books),
+        dio.get<dynamic>(ApiConstants.books),
+      ]);
+
+      expect(responses.every((r) => r.statusCode == 200), isTrue);
+      expect(refreshes, 2);
+      expect(recordedDelays, [const Duration(seconds: 2)]);
+      expect(storage.token, fresh);
+      expect(storage.clears, 0);
+    },
+    timeout: deadlockTimeout,
+  );
+
+  test(
+    'a 409 REFRESH_IN_PROGRESS whose retry also gets 409 keeps the user signed in',
+    () async {
+      var refreshes = 0;
+      final recordedDelays = <Duration>[];
+      final adapter = FakeAdapter({
+        ApiConstants.authRefresh: (_) {
+          refreshes++;
+          return json(409, {
+            'message': 'Refresh already in progress',
+            'code': 'REFRESH_IN_PROGRESS',
+          });
+        },
+      });
+      wire(
+        adapter,
+        storedToken: expired,
+        delay: (d) async => recordedDelays.add(d),
+      );
+
+      await expectLater(tokenManager.performTokenRefresh(), throwsException);
+
+      expect(refreshes, 2);
+      expect(recordedDelays, [const Duration(seconds: 1)]);
+      expect(storage.token, expired);
+      expect(storage.clears, 0);
+    },
+    timeout: deadlockTimeout,
+  );
+
+  test(
+    'a 409 REFRESH_IN_PROGRESS whose retry gets 401 signs out locally',
+    () async {
+      var refreshes = 0;
+      final adapter = FakeAdapter({
+        ApiConstants.authRefresh: (_) {
+          refreshes++;
+          if (refreshes == 1) {
+            return json(409, {
+              'message': 'Refresh already in progress',
+              'code': 'REFRESH_IN_PROGRESS',
+            });
+          }
+          return json(401, {
+            'message': 'Invalid refresh token',
+            'code': 'REFRESH_TOKEN_INVALID',
+          });
+        },
+      });
+      wire(adapter, storedToken: expired, delay: (_) async {});
+
+      await expectLater(tokenManager.performTokenRefresh(), throwsException);
+
+      expect(refreshes, 2);
+      expect(storage.token, isNull);
+      expect(storage.clears, 1);
+    },
+    timeout: deadlockTimeout,
+  );
+
+  test(
+    'scheduled refresh reschedules with exponential backoff up to 5m and resets on saveToken/pauseRefresh',
+    () {
+      fakeAsync((async) {
+        var refreshes = 0;
+        var shouldFail = true;
+        final adapter = FakeAdapter({
+          ApiConstants.authRefresh: (_) {
+            refreshes++;
+            return shouldFail
+                ? json(500, {'message': 'Internal server error'})
+                : json(200, {'accessToken': jwt(const Duration(hours: 1))});
+          },
+        });
+        wire(adapter, storedToken: expired);
+
+        tokenManager.initialize();
+        async.elapse(Duration.zero);
+        expect(refreshes, 1);
+
+        // 1st retry at 30s
+        async.elapse(const Duration(seconds: 29));
+        expect(refreshes, 1);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 2);
+
+        // 2nd retry at 60s
+        async.elapse(const Duration(seconds: 59));
+        expect(refreshes, 2);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 3);
+
+        // 3rd retry at 120s
+        async.elapse(const Duration(seconds: 119));
+        expect(refreshes, 3);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 4);
+
+        // 4th retry at 240s
+        async.elapse(const Duration(seconds: 239));
+        expect(refreshes, 4);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 5);
+
+        // 5th retry capped at 5m (300s)
+        async.elapse(const Duration(seconds: 299));
+        expect(refreshes, 5);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 6);
+
+        // Succeed on next 300s retry -> resets backoff
+        shouldFail = false;
+        async.elapse(const Duration(seconds: 300));
+        expect(refreshes, 7);
+
+        // pauseRefresh cancels pending timers cleanly
+        tokenManager.pauseRefresh();
+        async.elapse(const Duration(minutes: 10));
+        expect(refreshes, 7);
+      });
+    },
+  );
+
+  test(
+    'scheduled refresh stops rescheduling after 401 dead-session sign-out',
+    () {
+      fakeAsync((async) {
+        var refreshes = 0;
+        final adapter = FakeAdapter({
+          ApiConstants.authRefresh: (_) {
+            refreshes++;
+            return json(401, {
+              'message': 'Token reused',
+              'code': 'REFRESH_TOKEN_REUSED',
+            });
+          },
+        });
+        wire(adapter, storedToken: expired);
+
+        tokenManager.initialize();
+        async.elapse(Duration.zero);
+        expect(refreshes, 1);
+        expect(storage.token, isNull);
+
+        async.elapse(const Duration(minutes: 10));
+        expect(refreshes, 1);
+      });
+    },
+  );
 }

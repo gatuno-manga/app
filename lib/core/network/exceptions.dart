@@ -64,12 +64,25 @@ class ServerException extends AppExceptions {
 }
 
 class ApiExceptionHandler {
+  static const Duration _defaultRetryAfter = Duration(seconds: 1);
+  static const Duration _maxRetryAfter = Duration(seconds: 5);
+
+  static Duration _parseRetryAfter(String? raw) {
+    if (raw == null) return _defaultRetryAfter;
+    final seconds = int.tryParse(raw.trim());
+    if (seconds == null || seconds < 0) return _defaultRetryAfter;
+    final duration = Duration(seconds: seconds);
+    return duration > _maxRetryAfter ? _maxRetryAfter : duration;
+  }
+
   static AppExceptions handle(DioException error) {
     final dynamic responseData = error.response?.data;
     String? message;
+    String? code;
 
     if (responseData is Map) {
       message = responseData['message']?.toString();
+      code = responseData['code']?.toString();
     }
 
     final statusCode = error.response?.statusCode;
@@ -83,11 +96,26 @@ class ApiExceptionHandler {
               : null,
         );
       case 401:
-        return UnauthorizedException(message: message);
+        return UnauthorizedException(message: message, code: code);
       case 403:
+        if (code == 'CSRF_TOKEN_INVALID') {
+          return CsrfTokenInvalidException(message: message);
+        }
         return AuthException('Access denied: ${message ?? ''}');
       case 404:
         return AuthException('Resource not found');
+      case 409:
+        if (code == 'REFRESH_IN_PROGRESS') {
+          return RefreshInProgressException(
+            message: message,
+            retryAfter: _parseRetryAfter(
+              error.response?.headers.value('retry-after'),
+            ),
+          );
+        }
+        return AuthException(
+          message ?? error.message ?? 'An unexpected error occurred',
+        );
       case 429:
         return TooManyRequestsException(message: message);
       case 500:
