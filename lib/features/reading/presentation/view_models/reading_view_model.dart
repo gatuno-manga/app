@@ -8,7 +8,9 @@ import '../../../../core/logging/logger.dart';
 import '../../../../core/network/exceptions.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
+import '../../domain/entities/reading_read_threshold.dart';
 import '../../domain/repositories/reading_repository.dart';
+import '../../domain/use_cases/chapter_read_mark_coordinator.dart';
 import '../../domain/use_cases/reading_progress_coordinator.dart';
 import '../../../../features/books/domain/value_objects/chapter_id.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
@@ -115,6 +117,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   final ReadingRepository _repository;
   final ReadingProgressCoordinator _progressCoordinator;
   final ConnectivityService _connectivity;
+  final ChapterReadMarkCoordinator _readMarkCoordinator;
   late final StreamSubscription<ConnectivityStatus> _statusSubscription;
   late final StreamSubscription<void> _reconnectSubscription;
   static const String _logTag = 'ReadingViewModel';
@@ -127,10 +130,15 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
   /// The open chapter came from the device's downloads.
   bool _openedDownloaded = false;
 
+  /// Guards against sending duplicate mark-read calls within one loaded
+  /// chapter session.
+  bool _markedCurrentChapterRead = false;
+
   ReadingViewModel(
     this._repository,
     this._progressCoordinator,
     this._connectivity,
+    this._readMarkCoordinator,
   ) : super(
         ReadingState.initial().copyWith(isOffline: _connectivity.isOffline),
       ) {
@@ -157,6 +165,7 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     _requestedId = chapterId;
     _requestedPage = initialPage;
     _openedDownloaded = false;
+    _markedCurrentChapterRead = false;
     AppLogger.i(
       'Loading chapter: $chapterId, initialPage: $initialPage',
       _logTag,
@@ -190,6 +199,11 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
         ),
       );
       saveProgress(completed: isTextChapter);
+      _maybeMarkChapterRead(
+        fetchedChapter,
+        pageIndex: initialPage ?? 0,
+        completed: isTextChapter,
+      );
       if (_connectivity.isOffline) {
         unawaited(_checkNeighbours(fetchedChapter));
       } else if (opened.isDownloaded) {
@@ -350,6 +364,12 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     final chapterToSave = state.chapter;
     if (chapterToSave == null) return;
 
+    _maybeMarkChapterRead(
+      chapterToSave,
+      pageIndex: state.currentPageIndex,
+      completed: completed,
+    );
+
     try {
       await _progressCoordinator.saveProgress(
         chapterId: chapterToSave.id,
@@ -361,5 +381,22 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     } catch (e, stackTrace) {
       AppLogger.e('Error saving progress in ViewModel', e, stackTrace, _logTag);
     }
+  }
+
+  void _maybeMarkChapterRead(
+    ReadingChapter chapter, {
+    required int pageIndex,
+    required bool completed,
+  }) {
+    if (_markedCurrentChapterRead) return;
+    if (!isChapterReadProgress(
+      pageIndex: pageIndex,
+      totalPages: chapter.pages.length,
+      completed: completed,
+    )) {
+      return;
+    }
+    _markedCurrentChapterRead = true;
+    unawaited(_readMarkCoordinator.markRead(chapter.id));
   }
 }

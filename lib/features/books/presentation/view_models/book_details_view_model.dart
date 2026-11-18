@@ -2,6 +2,7 @@ import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../reading/data/database/reading_database.dart';
+import '../../../reading/domain/entities/reading_read_threshold.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/chapter.dart';
@@ -57,26 +58,30 @@ class BookDetailsState extends Equatable {
     return BookDetailsState(
       book: book != null ? book() : this.book,
       chapterList: chapterList != null ? chapterList() : this.chapterList,
-      lastReadChapter: lastReadChapter != null ? lastReadChapter() : this.lastReadChapter,
+      lastReadChapter: lastReadChapter != null
+          ? lastReadChapter()
+          : this.lastReadChapter,
       isLoading: isLoading ?? this.isLoading,
       isLoadingChapters: isLoadingChapters ?? this.isLoadingChapters,
       error: error != null ? error() : this.error,
-      chaptersError: chaptersError != null ? chaptersError() : this.chaptersError,
+      chaptersError: chaptersError != null
+          ? chaptersError()
+          : this.chaptersError,
       options: options ?? this.options,
     );
   }
 
   @override
   List<Object?> get props => [
-        book,
-        chapterList,
-        lastReadChapter,
-        isLoading,
-        isLoadingChapters,
-        error,
-        chaptersError,
-        options,
-      ];
+    book,
+    chapterList,
+    lastReadChapter,
+    isLoading,
+    isLoadingChapters,
+    error,
+    chaptersError,
+    options,
+  ];
 }
 
 class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
@@ -107,7 +112,13 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
     if (state.isLoading) return;
 
     AppLogger.i('Fetching book details for ID: $bookId', _logTag);
-    emit(state.copyWith(isLoading: true, error: () => null, chaptersError: () => null));
+    emit(
+      state.copyWith(
+        isLoading: true,
+        error: () => null,
+        chaptersError: () => null,
+      ),
+    );
 
     try {
       final results = await Future.wait([
@@ -122,19 +133,14 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
       final fetchedLastReadChapter = results[2] as ReadingProgressData?;
       final localProgress = results[3] as List<ReadingProgressData>;
 
-      final progressMap = {
-        for (var p in localProgress) p.chapterId: p,
-      };
+      final progressMap = {for (var p in localProgress) p.chapterId: p};
 
-      final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = progressMap[chapter.id.value];
-        final isCompleted = progress?.completed ?? false;
-        return chapter.copyWith(
-          completed: isCompleted,
-          read: chapter.read || isCompleted || progress != null,
-          lastPage: PositiveInt(progress?.pageIndex ?? 0),
-        );
-      }).toList();
+      final updatedChapters = chaptersResult.data
+          .map(
+            (chapter) =>
+                _mergeChapterProgress(chapter, progressMap[chapter.id.value]),
+          )
+          .toList();
 
       final newChapterList = chaptersResult.copyWith(data: updatedChapters);
 
@@ -147,12 +153,14 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
         _logTag,
       );
 
-      emit(state.copyWith(
-        isLoading: false,
-        book: () => fetchedBook,
-        chapterList: () => newChapterList,
-        lastReadChapter: () => fetchedLastReadChapter,
-      ));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          book: () => fetchedBook,
+          chapterList: () => newChapterList,
+          lastReadChapter: () => fetchedLastReadChapter,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching book details', e, stackTrace, _logTag);
       emit(state.copyWith(isLoading: false, error: () => e.toString()));
@@ -161,7 +169,9 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
 
   Future<void> _fetchLastReadChapter() async {
     try {
-      final newLastReadChapter = await _progressCoordinator.getLastReadChapter(BookId(bookId));
+      final newLastReadChapter = await _progressCoordinator.getLastReadChapter(
+        BookId(bookId),
+      );
       AppLogger.d(
         'Fetched last read chapter: ${newLastReadChapter?.chapterId}, completed: ${newLastReadChapter?.completed}',
         _logTag,
@@ -181,35 +191,31 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
         BookId(bookId),
       );
 
-      final progressMap = {
-        for (var p in localProgress) p.chapterId: p,
-      };
+      final progressMap = {for (var p in localProgress) p.chapterId: p};
 
       var changed = false;
       final updatedChapters = state.chapterList!.data.map((chapter) {
-        final progress = progressMap[chapter.id.value];
-
-        final isCompleted = progress?.completed ?? false;
-        final lastPage = progress?.pageIndex ?? 0;
-        // Mark as read if it is completed or if there is any progress (even if not completed)
-        final isRead = chapter.read || isCompleted || progress != null;
-
-        if (chapter.completed != isCompleted ||
-            chapter.read != isRead ||
-            chapter.lastPage.value != lastPage) {
+        final merged = _mergeChapterProgress(
+          chapter,
+          progressMap[chapter.id.value],
+        );
+        if (merged.completed != chapter.completed ||
+            merged.read != chapter.read ||
+            merged.lastPage.value != chapter.lastPage.value) {
           changed = true;
-          return chapter.copyWith(
-            completed: isCompleted,
-            read: isRead,
-            lastPage: PositiveInt(lastPage),
-          );
+          return merged;
         }
         return chapter;
       }).toList();
 
       if (changed) {
         AppLogger.d('Marking chapters as read/completed locally', _logTag);
-        emit(state.copyWith(chapterList: () => state.chapterList!.copyWith(data: updatedChapters)));
+        emit(
+          state.copyWith(
+            chapterList: () =>
+                state.chapterList!.copyWith(data: updatedChapters),
+          ),
+        );
       }
     }
   }
@@ -229,19 +235,14 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
         BookId(bookId),
       );
 
-      final progressMap = {
-        for (var p in localProgress) p.chapterId: p,
-      };
+      final progressMap = {for (var p in localProgress) p.chapterId: p};
 
-      final updatedChapters = chaptersResult.data.map((chapter) {
-        final progress = progressMap[chapter.id.value];
-        final isCompleted = progress?.completed ?? false;
-        return chapter.copyWith(
-          completed: isCompleted,
-          read: chapter.read || isCompleted || progress != null,
-          lastPage: PositiveInt(progress?.pageIndex ?? 0),
-        );
-      }).toList();
+      final updatedChapters = chaptersResult.data
+          .map(
+            (chapter) =>
+                _mergeChapterProgress(chapter, progressMap[chapter.id.value]),
+          )
+          .toList();
 
       final newChapterList = chaptersResult.copyWith(data: updatedChapters);
 
@@ -250,10 +251,20 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
         _logTag,
       );
 
-      emit(state.copyWith(isLoadingChapters: false, chapterList: () => newChapterList));
+      emit(
+        state.copyWith(
+          isLoadingChapters: false,
+          chapterList: () => newChapterList,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching chapters', e, stackTrace, _logTag);
-      emit(state.copyWith(isLoadingChapters: false, chaptersError: () => e.toString()));
+      emit(
+        state.copyWith(
+          isLoadingChapters: false,
+          chaptersError: () => e.toString(),
+        ),
+      );
     }
   }
 
@@ -269,26 +280,26 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
     emit(state.copyWith(isLoadingChapters: true));
 
     try {
-      final newOptions = state.options.copyWith(cursor: state.chapterList!.nextCursor);
+      final newOptions = state.options.copyWith(
+        cursor: state.chapterList!.nextCursor,
+      );
       emit(state.copyWith(options: newOptions));
-      final result = await _repository.getBookChapters(BookId(bookId), newOptions);
+      final result = await _repository.getBookChapters(
+        BookId(bookId),
+        newOptions,
+      );
       final localProgress = await _progressCoordinator.getAllProgressForBook(
         BookId(bookId),
       );
 
-      final progressMap = {
-        for (var p in localProgress) p.chapterId: p,
-      };
+      final progressMap = {for (var p in localProgress) p.chapterId: p};
 
-      final updatedNewChapters = result.data.map((chapter) {
-        final progress = progressMap[chapter.id.value];
-        final isCompleted = progress?.completed ?? false;
-        return chapter.copyWith(
-          completed: isCompleted,
-          read: chapter.read || isCompleted || progress != null,
-          lastPage: PositiveInt(progress?.pageIndex ?? 0),
-        );
-      }).toList();
+      final updatedNewChapters = result.data
+          .map(
+            (chapter) =>
+                _mergeChapterProgress(chapter, progressMap[chapter.id.value]),
+          )
+          .toList();
 
       final newChapterList = ChapterList(
         data: [...state.chapterList!.data, ...updatedNewChapters],
@@ -301,18 +312,54 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
         _logTag,
       );
 
-      emit(state.copyWith(isLoadingChapters: false, chapterList: () => newChapterList));
+      emit(
+        state.copyWith(
+          isLoadingChapters: false,
+          chapterList: () => newChapterList,
+        ),
+      );
     } catch (e, stackTrace) {
       AppLogger.e('Error fetching more chapters', e, stackTrace, _logTag);
-      emit(state.copyWith(isLoadingChapters: false, chaptersError: () => e.toString()));
+      emit(
+        state.copyWith(
+          isLoadingChapters: false,
+          chaptersError: () => e.toString(),
+        ),
+      );
     }
   }
 
   void setChapterOrder(ChapterSortOrder order) {
     if (state.options.order == order) return;
     AppLogger.i('Setting chapter order to: $order', _logTag);
-    emit(state.copyWith(options: ChapterPageOptions(order: order), chapterList: () => null));
+    emit(
+      state.copyWith(
+        options: ChapterPageOptions(order: order),
+        chapterList: () => null,
+      ),
+    );
     fetchChapters();
+  }
+
+  Chapter _mergeChapterProgress(
+    Chapter chapter,
+    ReadingProgressData? progress,
+  ) {
+    final isCompleted = progress?.completed ?? false;
+    return chapter.copyWith(
+      completed: isCompleted,
+      read: chapter.read || _isProgressRead(progress),
+      lastPage: PositiveInt(progress?.pageIndex ?? 0),
+    );
+  }
+
+  bool _isProgressRead(ReadingProgressData? progress) {
+    if (progress == null) return false;
+    return isChapterReadProgress(
+      pageIndex: progress.pageIndex,
+      totalPages: progress.totalPages ?? 0,
+      completed: progress.completed,
+    );
   }
 
   void clearError() {
@@ -339,7 +386,9 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
     final lastChapterId = state.lastReadChapter!.chapterId;
     if (state.lastReadChapter!.completed) {
       // Find next chapter
-      final currentIndex = chapters.indexWhere((c) => c.id.value == lastChapterId);
+      final currentIndex = chapters.indexWhere(
+        (c) => c.id.value == lastChapterId,
+      );
       if (currentIndex != -1 && currentIndex < chapters.length - 1) {
         final nextId = chapters[currentIndex + 1].id.value;
         AppLogger.d(

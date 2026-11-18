@@ -82,6 +82,7 @@ void main() {
       final remote = source('https://manga.example', adapter);
 
       expect(await remote.fetchManifest('c1'), {'id': 'c1'});
+      expect(adapter.last!.method, 'GET');
       expect(adapter.last!.path, '/chapters/c1');
       expect(
         adapter.last!.receiveTimeout,

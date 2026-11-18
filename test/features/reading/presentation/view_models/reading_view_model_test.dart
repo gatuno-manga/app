@@ -11,8 +11,11 @@ import 'package:gatuno/features/reading/domain/entities/opened_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_chapter.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/reading/domain/repositories/reading_repository.dart';
+import 'package:gatuno/features/reading/domain/use_cases/chapter_read_mark_coordinator.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reading_progress_coordinator.dart';
 import 'package:gatuno/features/reading/domain/value_objects/original_url.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_id.dart';
+import 'package:gatuno/features/reading/domain/value_objects/reading_page_url.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/shared/domain/value_objects/positive_int.dart';
 import 'package:mocktail/mocktail.dart';
@@ -24,11 +27,15 @@ class MockReadingRepository extends Mock implements ReadingRepository {}
 class MockReadingProgressCoordinator extends Mock
     implements ReadingProgressCoordinator {}
 
+class MockChapterReadMarkCoordinator extends Mock
+    implements ChapterReadMarkCoordinator {}
+
 ReadingChapter _chapter({
   String id = 'chapter-1',
   ChapterId? previous,
   ChapterId? next,
   ContentType contentType = ContentType.image,
+  int pageCount = 0,
 }) => ReadingChapter(
   id: ChapterId(id),
   originalUrl: const OriginalUrl('https://origin/c'),
@@ -41,7 +48,14 @@ ReadingChapter _chapter({
   bookId: const BookId('book-1'),
   bookTitle: const BookTitle('Book'),
   totalChapters: const PositiveInt(3),
-  pages: const [],
+  pages: [
+    for (var i = 0; i < pageCount; i++)
+      ReadingPage(
+        id: ReadingPageId('p-$i'),
+        url: ReadingPageUrl('https://cdn.example/p-$i.jpg'),
+        index: PositiveInt(i),
+      ),
+  ],
   comments: const [],
 );
 
@@ -52,6 +66,7 @@ void main() {
   late ReadingViewModel viewModel;
   late MockReadingRepository repository;
   late MockReadingProgressCoordinator coordinator;
+  late MockChapterReadMarkCoordinator readMarkCoordinator;
   late FakeConnectivityService connectivity;
 
   const chapterId = 'chapter-1';
@@ -70,13 +85,19 @@ void main() {
     );
   }
 
-  ReadingViewModel build() =>
-      ReadingViewModel(repository, coordinator, connectivity);
+  ReadingViewModel build() => ReadingViewModel(
+    repository,
+    coordinator,
+    connectivity,
+    readMarkCoordinator,
+  );
 
   setUp(() {
     repository = MockReadingRepository();
     coordinator = MockReadingProgressCoordinator();
+    readMarkCoordinator = MockChapterReadMarkCoordinator();
     connectivity = FakeConnectivityService();
+    when(() => readMarkCoordinator.markRead(any())).thenAnswer((_) async {});
     when(
       () => coordinator.saveProgress(
         chapterId: any(named: 'chapterId'),
@@ -531,6 +552,59 @@ void main() {
           completed: true,
         ),
       ).called(1);
+    });
+  });
+
+  group('explicit mark read', () {
+    test('does not mark read on page 0 of a multi-page chapter', () async {
+      opens(_chapter(pageCount: 5));
+
+      await viewModel.loadChapter(chapterId);
+      await _settle();
+
+      verifyNever(() => readMarkCoordinator.markRead(any()));
+    });
+
+    test('marks read once when page progress reaches 80%', () async {
+      opens(_chapter(pageCount: 5));
+
+      await viewModel.loadChapter(chapterId);
+      viewModel.setCurrentPage(2); // 3/5 = 60%
+      await _settle();
+      verifyNever(() => readMarkCoordinator.markRead(any()));
+
+      viewModel.setCurrentPage(3); // 4/5 = 80%
+      await _settle();
+      verify(() => readMarkCoordinator.markRead(id)).called(1);
+
+      viewModel.setCurrentPage(4); // 5/5 = 100%, must not re-fire
+      await _settle();
+      verifyNever(() => readMarkCoordinator.markRead(any()));
+    });
+
+    test('marks read on open for single-page or initialPage >= 80%', () async {
+      opens(_chapter(id: 'single', pageCount: 1));
+      await viewModel.loadChapter('single');
+      await _settle();
+      verify(
+        () => readMarkCoordinator.markRead(const ChapterId('single')),
+      ).called(1);
+
+      opens(_chapter(id: 'resumed', pageCount: 5), downloaded: true);
+      await viewModel.loadChapter('resumed', initialPage: 3);
+      await _settle();
+      verify(
+        () => readMarkCoordinator.markRead(const ChapterId('resumed')),
+      ).called(1);
+    });
+
+    test('marks read on open for text chapters', () async {
+      opens(_chapter(contentType: ContentType.text), downloaded: true);
+
+      await viewModel.loadChapter(chapterId);
+      await _settle();
+
+      verify(() => readMarkCoordinator.markRead(id)).called(1);
     });
   });
 }

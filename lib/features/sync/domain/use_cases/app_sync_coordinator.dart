@@ -6,12 +6,14 @@ import '../repositories/sync_repository.dart';
 import '../entities/syncable_entity.dart';
 import '../value_objects/sync_feature_key.dart';
 import 'local_sync_feature_provider.dart';
+import 'pending_read_marks_flusher.dart';
 
 class AppSyncCoordinator {
   final SyncLocalDataSource _syncLocal;
   final SyncRepository _syncRepository;
   final AuthService _authService;
   final List<LocalSyncFeatureProvider> _providers;
+  final PendingReadMarksFlusher? _pendingReadMarksFlusher;
 
   static const String _logTag = 'AppSyncCoordinator';
   bool _isSyncing = false;
@@ -20,8 +22,9 @@ class AppSyncCoordinator {
     this._syncLocal,
     this._syncRepository,
     this._authService,
-    this._providers,
-  );
+    this._providers, {
+    PendingReadMarksFlusher? pendingReadMarksFlusher,
+  }) : _pendingReadMarksFlusher = pendingReadMarksFlusher;
 
   Future<void> sync() async {
     if (_isSyncing) {
@@ -76,6 +79,10 @@ class AppSyncCoordinator {
 
       // 5. Update lastSyncAt
       await _syncLocal.setLastSyncAt(user.id, pullResponse.syncedAt);
+
+      // 6. Flush any queued offline chapter-read marks
+      await _pendingReadMarksFlusher?.flushPending(user.id);
+
       AppLogger.i('Unified sync completed successfully', _logTag);
     } catch (e, stackTrace) {
       AppLogger.e('Error during unified sync', e, stackTrace, _logTag);

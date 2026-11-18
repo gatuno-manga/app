@@ -24,6 +24,7 @@ class ApiConstants {
 
   // Chapters Routes
   static const String chapters = '/chapters';
+  static const String chaptersBatchRead = '/chapters/batch/read';
 
   // Reading Progress Routes
   static const String readingProgress = '/users/me/reading-progress';
