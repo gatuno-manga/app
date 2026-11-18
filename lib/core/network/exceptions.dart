@@ -104,17 +104,12 @@ class ApiExceptionHandler {
         return AuthException('Access denied: ${message ?? ''}');
       case 404:
         return AuthException('Resource not found');
-      case 409:
-        if (code == 'REFRESH_IN_PROGRESS') {
-          return RefreshInProgressException(
-            message: message,
-            retryAfter: _parseRetryAfter(
-              error.response?.headers.value('retry-after'),
-            ),
-          );
-        }
-        return AuthException(
-          message ?? error.message ?? 'An unexpected error occurred',
+      case 409 when code == 'REFRESH_IN_PROGRESS':
+        return RefreshInProgressException(
+          message: message,
+          retryAfter: _parseRetryAfter(
+            error.response?.headers.value('retry-after'),
+          ),
         );
       case 429:
         return TooManyRequestsException(message: message);

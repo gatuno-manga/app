@@ -393,13 +393,17 @@ void main() {
     () {
       fakeAsync((async) {
         var refreshes = 0;
-        var shouldFail = true;
         final adapter = FakeAdapter({
           ApiConstants.authRefresh: (_) {
             refreshes++;
-            return shouldFail
-                ? json(500, {'message': 'Internal server error'})
-                : json(200, {'accessToken': jwt(const Duration(hours: 1))});
+            if (refreshes == 7) {
+              // Return a near-expiry token so saveToken immediately triggers
+              // the next scheduled refresh, which will fail (#8).
+              return json(200, {
+                'accessToken': jwt(const Duration(seconds: 30)),
+              });
+            }
+            return json(500, {'message': 'Internal server error'});
           },
         });
         wire(adapter, storedToken: expired);
@@ -438,15 +442,31 @@ void main() {
         async.elapse(const Duration(seconds: 1));
         expect(refreshes, 6);
 
-        // Succeed on next 300s retry -> resets backoff
-        shouldFail = false;
+        // Succeed on 300s retry (#7) -> saveToken resets backoff to 30s and
+        // immediately triggers #8 (because returned token is within 1m buffer),
+        // which fails.
         async.elapse(const Duration(seconds: 300));
-        expect(refreshes, 7);
+        expect(refreshes, 8);
 
-        // pauseRefresh cancels pending timers cleanly
+        // Next retry after saveToken reset must fire at 30s (not 300s)
+        async.elapse(const Duration(seconds: 29));
+        expect(refreshes, 8);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 9);
+
+        // Now next backoff would be 60s; pauseRefresh cancels it and resets to 30s
         tokenManager.pauseRefresh();
         async.elapse(const Duration(minutes: 10));
-        expect(refreshes, 7);
+        expect(refreshes, 9);
+
+        tokenManager.resumeRefresh();
+        async.elapse(Duration.zero);
+        expect(refreshes, 10);
+
+        async.elapse(const Duration(seconds: 29));
+        expect(refreshes, 10);
+        async.elapse(const Duration(seconds: 1));
+        expect(refreshes, 11);
       });
     },
   );
