@@ -38,20 +38,8 @@ class DeviceIdService {
        _getPlatformId = getPlatformId ?? _defaultPlatformId,
        _random = random ?? Random.secure();
 
-  static Future<String?> _defaultPlatformId() async {
-    try {
-      return await _channel.invokeMethod<String>('getDeviceId');
-    } on MissingPluginException {
-      return null;
-    } on PlatformException catch (e, stackTrace) {
-      AppLogger.w(
-        'Platform device ID lookup failed; falling back to random UUID: $e',
-        _logTag,
-      );
-      AppLogger.d(stackTrace.toString(), _logTag);
-      return null;
-    }
-  }
+  static Future<String?> _defaultPlatformId() =>
+      _channel.invokeMethod<String>('getDeviceId');
 
   /// Preloads the device ID into memory during app/background initialization.
   Future<void> init() async {
@@ -102,8 +90,14 @@ class DeviceIdService {
   Future<String?> _safeGetPlatformId() async {
     try {
       return await _getPlatformId();
+    } on MissingPluginException {
+      return null;
     } catch (e, stackTrace) {
-      AppLogger.e('Platform device ID provider threw', e, stackTrace, _logTag);
+      AppLogger.w(
+        'Platform device ID lookup failed; falling back to random UUID: $e',
+        _logTag,
+      );
+      AppLogger.d(stackTrace.toString(), _logTag);
       return null;
     }
   }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import '../api_origin.dart';
 import '../dio_client.dart';
 import '../api_constants.dart';
 import '../token_provider.dart';
@@ -45,19 +46,9 @@ class AuthInterceptor extends Interceptor {
 
   bool _shouldIntercept(RequestOptions options) {
     // 1. Check if the request is targeting the API origin
-    if (options.baseUrl.isEmpty) return false;
+    if (!isApiOrigin(options)) return false;
 
-    final baseUri = Uri.parse(options.baseUrl);
     final requestUri = options.uri;
-
-    // Use a basic origin check (scheme, host, port) to identify API requests.
-    // This prevents leaking tokens to third-party domains.
-    final bool isApiOrigin =
-        requestUri.scheme == baseUri.scheme &&
-        requestUri.host == baseUri.host &&
-        requestUri.port == baseUri.port;
-
-    if (!isApiOrigin) return false;
 
     // 2. Check if the path is excluded from getting the token
     final bool isExcluded = _excludedPaths.any(

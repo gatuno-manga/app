@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../../device/device_id_service.dart';
+import '../../logging/logger.dart';
+import '../api_origin.dart';
 import '../dio_client.dart';
 
 /// Attaches the per-device `x-device-id` header to API-origin requests.
@@ -10,6 +12,7 @@ import '../dio_client.dart';
 /// Unlike [AuthInterceptor], all API endpoints (including sign-in, sign-up,
 /// refresh, and MFA verification) receive `x-device-id`.
 class DeviceIdInterceptor extends Interceptor {
+  static const String _logTag = 'DeviceIdInterceptor';
   static const String headerName = 'x-device-id';
 
   final DeviceIdService _deviceIdService;
@@ -17,25 +20,18 @@ class DeviceIdInterceptor extends Interceptor {
   DeviceIdInterceptor({required DeviceIdService deviceIdService})
     : _deviceIdService = deviceIdService;
 
-  bool _isApiOrigin(RequestOptions options) {
-    if (options.baseUrl.isEmpty) return false;
-    final baseUri = Uri.tryParse(options.baseUrl);
-    if (baseUri == null) return false;
-
-    final requestUri = options.uri;
-    return requestUri.scheme == baseUri.scheme &&
-        requestUri.host == baseUri.host &&
-        requestUri.port == baseUri.port;
-  }
-
   @override
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    if (_isApiOrigin(options)) {
-      final deviceId = await _deviceIdService.getDeviceId();
-      options.headers[headerName] = deviceId;
+    if (isApiOrigin(options)) {
+      try {
+        final deviceId = await _deviceIdService.getDeviceId();
+        options.headers[headerName] = deviceId;
+      } catch (e, stackTrace) {
+        AppLogger.e('Failed to resolve device ID', e, stackTrace, _logTag);
+      }
     }
     return handler.next(options);
   }

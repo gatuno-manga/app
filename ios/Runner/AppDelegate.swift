@@ -32,7 +32,7 @@ import workmanager_apple
       PrivacyScreen.shared.register(with: privacyRegistrar.messenger())
     }
     if let deviceIdRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "DeviceId") {
-      DeviceIdChannel.shared.register(with: deviceIdRegistrar.messenger())
+      DeviceIdChannel.register(with: deviceIdRegistrar.messenger())
     }
   }
 }
@@ -116,16 +116,12 @@ final class PrivacyScreen {
 
 /// Exposes `UIDevice.current.identifierForVendor` over `com.gatuno.app/device_id`
 /// so Dart can derive a per-device identifier before falling back to Keychain.
-final class DeviceIdChannel {
-  static let shared = DeviceIdChannel()
-
+enum DeviceIdChannel {
   private static let channelName = "com.gatuno.app/device_id"
 
-  private init() {}
-
-  func register(with messenger: FlutterBinaryMessenger) {
+  static func register(with messenger: FlutterBinaryMessenger) {
     let channel = FlutterMethodChannel(
-      name: DeviceIdChannel.channelName, binaryMessenger: messenger)
+      name: channelName, binaryMessenger: messenger)
     channel.setMethodCallHandler { call, result in
       guard call.method == "getDeviceId" else {
         result(FlutterMethodNotImplemented)

@@ -78,7 +78,20 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(options.headers[DeviceIdInterceptor.headerName], isNull);
+      verify(() => handler.next(options)).called(1);
       verifyNever(() => deviceIdService.getDeviceId());
+    });
+
+    test('still calls handler.next when getDeviceId throws', () async {
+      final options = RequestOptions(path: '/books', baseUrl: testBaseUrl);
+      when(
+        () => deviceIdService.getDeviceId(),
+      ).thenThrow(StateError('unexpected'));
+
+      createInterceptor().onRequest(options, handler);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(options.headers[DeviceIdInterceptor.headerName], isNull);
       verify(() => handler.next(options)).called(1);
     });
 

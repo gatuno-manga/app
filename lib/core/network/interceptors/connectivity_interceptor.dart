@@ -3,6 +3,7 @@ import 'package:dio_cache_interceptor/dio_cache_interceptor.dart'
     show extraFromNetworkKey;
 
 import '../../connectivity/connectivity_service.dart';
+import '../api_origin.dart';
 import '../dio_client.dart';
 import '../exceptions.dart';
 
@@ -59,12 +60,7 @@ class ConnectivityInterceptor extends Interceptor {
 
   bool _isServer(RequestOptions options) {
     if (options.extra[probeExtraKey] == true) return false;
-    final base = Uri.tryParse(_baseUrl());
-    if (base == null || base.host.isEmpty) return false;
-    final uri = options.uri;
-    return uri.scheme == base.scheme &&
-        uri.host == base.host &&
-        uri.port == base.port;
+    return isApiOrigin(options, baseUrl: _baseUrl());
   }
 }
 
