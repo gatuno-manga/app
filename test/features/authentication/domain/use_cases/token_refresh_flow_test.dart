@@ -397,10 +397,10 @@ void main() {
           ApiConstants.authRefresh: (_) {
             refreshes++;
             if (refreshes == 7) {
-              // Return a near-expiry token so saveToken immediately triggers
-              // the next scheduled refresh, which will fail (#8).
+              // Return a ~65s token so saveToken schedules the next proactive
+              // refresh in ~5s (which will fail as #8).
               return json(200, {
-                'accessToken': jwt(const Duration(seconds: 30)),
+                'accessToken': jwt(const Duration(seconds: 65)),
               });
             }
             return json(500, {'message': 'Internal server error'});
@@ -443,9 +443,12 @@ void main() {
         expect(refreshes, 6);
 
         // Succeed on 300s retry (#7) -> saveToken resets backoff to 30s and
-        // immediately triggers #8 (because returned token is within 1m buffer),
-        // which fails.
+        // schedules proactive refresh in ~5s.
         async.elapse(const Duration(seconds: 300));
+        expect(refreshes, 7);
+
+        // Proactive refresh fires within 5s (#8) and fails.
+        async.elapse(const Duration(seconds: 5));
         expect(refreshes, 8);
 
         // Next retry after saveToken reset must fire at 30s (not 300s)
@@ -460,7 +463,7 @@ void main() {
         expect(refreshes, 9);
 
         tokenManager.resumeRefresh();
-        async.elapse(Duration.zero);
+        async.elapse(const Duration(seconds: 5));
         expect(refreshes, 10);
 
         async.elapse(const Duration(seconds: 29));
