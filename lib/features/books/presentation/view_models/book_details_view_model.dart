@@ -2,6 +2,7 @@ import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../../reading/data/database/reading_database.dart';
+import '../../../reading/domain/entities/reading_read_threshold.dart';
 import '../../../reading/domain/use_cases/reading_progress_coordinator.dart';
 import '../../domain/entities/book.dart';
 import '../../domain/entities/chapter.dart';
@@ -194,21 +195,15 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
 
       var changed = false;
       final updatedChapters = state.chapterList!.data.map((chapter) {
-        final progress = progressMap[chapter.id.value];
-
-        final isCompleted = progress?.completed ?? false;
-        final lastPage = progress?.pageIndex ?? 0;
-        final isRead = chapter.read || _isProgressRead(progress);
-
-        if (chapter.completed != isCompleted ||
-            chapter.read != isRead ||
-            chapter.lastPage.value != lastPage) {
+        final merged = _mergeChapterProgress(
+          chapter,
+          progressMap[chapter.id.value],
+        );
+        if (merged.completed != chapter.completed ||
+            merged.read != chapter.read ||
+            merged.lastPage.value != chapter.lastPage.value) {
           changed = true;
-          return chapter.copyWith(
-            completed: isCompleted,
-            read: isRead,
-            lastPage: PositiveInt(lastPage),
-          );
+          return merged;
         }
         return chapter;
       }).toList();
@@ -360,9 +355,11 @@ class BookDetailsViewModel extends BaseStreamViewModel<BookDetailsState> {
 
   bool _isProgressRead(ReadingProgressData? progress) {
     if (progress == null) return false;
-    if (progress.completed) return true;
-    final totalPages = progress.totalPages ?? 0;
-    return totalPages > 0 && (progress.pageIndex + 1) / totalPages >= 0.8;
+    return isChapterReadProgress(
+      pageIndex: progress.pageIndex,
+      totalPages: progress.totalPages ?? 0,
+      completed: progress.completed,
+    );
   }
 
   void clearError() {

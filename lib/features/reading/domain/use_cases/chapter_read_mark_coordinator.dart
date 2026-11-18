@@ -5,14 +5,14 @@ import '../../../authentication/domain/use_cases/auth_service.dart';
 import '../../../books/domain/value_objects/chapter_id.dart';
 import '../../../sync/domain/use_cases/pending_read_marks_flusher.dart';
 import '../../../users/domain/value_objects/user_id.dart';
-import '../../data/repositories/pending_read_marks_local_service.dart';
+import '../repositories/pending_read_marks_repository.dart';
 import '../repositories/reading_repository.dart';
 
 /// Marks chapters as read on the server for signed-in users, queueing offline or
-/// transient failures in [PendingReadMarksLocalService] for later batch flush.
+/// transient failures in [PendingReadMarksRepository] for later batch flush.
 class ChapterReadMarkCoordinator implements PendingReadMarksFlusher {
   final ReadingRepository _repository;
-  final PendingReadMarksLocalService _pendingLocal;
+  final PendingReadMarksRepository _pendingLocal;
   final AuthService _authService;
   final ConnectivityService _connectivity;
   static const String _logTag = 'ChapterReadMarkCoordinator';

@@ -4,6 +4,7 @@ import 'data/data_sources/reader_preferences_storage.dart';
 import 'data/repositories/pending_read_marks_local_service.dart';
 import 'data/repositories/reading_progress_local_service.dart';
 import 'data/repositories/reading_repository_impl.dart';
+import 'domain/repositories/pending_read_marks_repository.dart';
 import 'domain/repositories/reading_repository.dart';
 import 'domain/use_cases/chapter_read_mark_coordinator.dart';
 import 'domain/use_cases/document_source.dart';
@@ -33,7 +34,7 @@ void initReadingDI(GetIt sl) {
   sl.registerLazySingleton<ReadingProgressLocalService>(
     () => ReadingProgressLocalService(sl()),
   );
-  sl.registerLazySingleton<PendingReadMarksLocalService>(
+  sl.registerLazySingleton<PendingReadMarksRepository>(
     () => PendingReadMarksLocalService(sl()),
   );
 

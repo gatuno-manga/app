@@ -8,6 +8,7 @@ import '../../../../core/logging/logger.dart';
 import '../../../../core/network/exceptions.dart';
 import '../../domain/entities/reading_chapter.dart';
 import '../../domain/entities/reading_enums.dart';
+import '../../domain/entities/reading_read_threshold.dart';
 import '../../domain/repositories/reading_repository.dart';
 import '../../domain/use_cases/chapter_read_mark_coordinator.dart';
 import '../../domain/use_cases/reading_progress_coordinator.dart';
@@ -388,10 +389,13 @@ class ReadingViewModel extends BaseStreamViewModel<ReadingState> {
     required bool completed,
   }) {
     if (_markedCurrentChapterRead) return;
-    final totalPages = chapter.pages.length;
-    final reachedThreshold =
-        totalPages > 0 && (pageIndex + 1) / totalPages >= 0.8;
-    if (!completed && !reachedThreshold) return;
+    if (!isChapterReadProgress(
+      pageIndex: pageIndex,
+      totalPages: chapter.pages.length,
+      completed: completed,
+    )) {
+      return;
+    }
     _markedCurrentChapterRead = true;
     unawaited(_readMarkCoordinator.markRead(chapter.id));
   }

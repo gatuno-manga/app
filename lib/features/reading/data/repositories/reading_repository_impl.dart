@@ -62,31 +62,11 @@ class ReadingRepositoryImpl implements ReadingRepository {
   @override
   Future<void> markChapterRead(ChapterId chapterId) async {
     AppLogger.i('Marking chapter read: ${chapterId.value}', _logTag);
-    try {
+    await _guardRequest('marking chapter read', () async {
       await _dioClient.dio.post<dynamic>(
         '${ApiConstants.chapters}/${chapterId.value}/read',
       );
-    } on AppExceptions {
-      rethrow;
-    } on DioException catch (e) {
-      AppLogger.e(
-        'DioException marking chapter read: ${e.message}',
-        e,
-        e.stackTrace,
-        _logTag,
-      );
-      throw ApiExceptionHandler.handle(e);
-    } catch (e, stackTrace) {
-      AppLogger.e(
-        'Unexpected error marking chapter read',
-        e,
-        stackTrace,
-        _logTag,
-      );
-      throw Exception(
-        'An unexpected error occurred while marking chapter read',
-      );
-    }
+    });
   }
 
   @override
@@ -95,7 +75,7 @@ class ReadingRepositoryImpl implements ReadingRepository {
   ) async {
     if (chapterIds.isEmpty) return const [];
     AppLogger.i('Batch-marking ${chapterIds.length} chapters read', _logTag);
-    try {
+    return _guardRequest('batch-marking chapters read', () async {
       final response = await _dioClient.dio.post<dynamic>(
         ApiConstants.chaptersBatchRead,
         data: chapterIds.map((id) => id.value).toList(),
@@ -125,26 +105,20 @@ class ReadingRepositoryImpl implements ReadingRepository {
               error: item['error']?.toString(),
             ),
       ];
+    });
+  }
+
+  Future<T> _guardRequest<T>(String action, Future<T> Function() run) async {
+    try {
+      return await run();
     } on AppExceptions {
       rethrow;
     } on DioException catch (e) {
-      AppLogger.e(
-        'DioException batch-marking chapters read: ${e.message}',
-        e,
-        e.stackTrace,
-        _logTag,
-      );
+      AppLogger.e('DioException $action: ${e.message}', e, e.stackTrace, _logTag);
       throw ApiExceptionHandler.handle(e);
     } catch (e, stackTrace) {
-      AppLogger.e(
-        'Unexpected error batch-marking chapters read',
-        e,
-        stackTrace,
-        _logTag,
-      );
-      throw Exception(
-        'An unexpected error occurred while batch-marking chapters read',
-      );
+      AppLogger.e('Unexpected error $action', e, stackTrace, _logTag);
+      throw Exception('An unexpected error occurred while $action');
     }
   }
 

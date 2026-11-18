@@ -3,10 +3,11 @@ import 'package:drift/drift.dart';
 import '../../../../core/logging/logger.dart';
 import '../../../../features/books/domain/value_objects/chapter_id.dart';
 import '../../../../features/users/domain/value_objects/user_id.dart';
+import '../../domain/repositories/pending_read_marks_repository.dart';
 import '../database/reading_database.dart';
 
 /// Persists chapter-read marks that could not be sent to the server yet.
-class PendingReadMarksLocalService {
+class PendingReadMarksLocalService implements PendingReadMarksRepository {
   final ReadingDatabase _database;
   static const String _logTag = 'PendingReadMarksLocalService';
 
