@@ -66,6 +66,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Measured by computing the pairs over the card (`color/secondary-60` over `color/app-background`): `color/text` is 10.3:1 or more in every theme. See `figma-contrast` in DESIGN.md for the status tags (1.2-8.7:1 on their tints; `color/warning` in Light is the worst at 1.2:1, `color/success` is 2.2-2.8:1 in Dark, True-dark and Light and `color/danger` 2.5-3.0:1 in Light and Dracula), the link in `color/primary` (3.2:1 in Light) and `color/text-muted` metadata (2.5-4.48:1).
 - The "+" action and the back button are 48 dp targets; the code "+" is an `IconButton` without a tooltip or semantic label.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Not drawn. `/requests` and `/requests/create` are reached from the Home card and from a Settings row; they are pushed screens, so on tablets they keep the rail and use `Shell/Barra superior` Empilhada with text content 720 dp wide at most.
+
 ## Gaps (Figma vs code)
 - First load, error and empty are drawn in the intended look; code uses a bare `CircularProgressIndicator`, an icon with red text and a raw `ElevatedButton.icon`, and a `Icons.inbox_outlined` empty state.
 - `BookRequestCard` is a Material `Card` (elevation 2); Figma uses the flat `color/secondary-60` card with a `color/border` outline.

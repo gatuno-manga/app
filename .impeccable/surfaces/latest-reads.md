@@ -40,6 +40,14 @@ Not implemented in code. Web frames exist too (`925:4328` history, `925:4590` se
 ## Accessibility
 - Not audited.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium: `1107:10039` and `1107:10399` (vazio). Expanded: `1107:10198` and `1107:10452` (vazio).
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Início selected (the screen opens from "Ver tudo" on Home); `Shell/Barra superior` Empilhada; `Histórico/Item` Layout Mobile in 2 (medium) or 3 (expanded) columns under date headings; `Botão` and `Ícone/clock` in the empty state.
+- Reference for #132; no code task in #168 builds it.
+
 ## Gaps (Figma vs code)
 - Surface is designed in Figma but has no route or code.
 - Mobile has no loading or sensitive-visible frame (web does).

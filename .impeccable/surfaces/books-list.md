@@ -44,6 +44,15 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Selected view-selector glyph is `color/on-primary` on `color/primary` (2.5:1 in Dark, True-dark, Slate; 2.4:1 Dracula; 4.0:1 Light), the documented `figma-contrast` gap; selection also reads from the tile fill. Needs a Figma decision.
 - Selector tiles are 36 dp (Figma size), like the pagination buttons.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Grid: `1103:680` medium, `1103:873` expanded. List: `1103:1035` medium, `1103:1210` expanded. Filters: `1103:1424` medium (bottom sheet, 640 dp at most, centered), `1103:1607` expanded (modal side sheet, 360 dp, from the right).
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `Shell/Barra superior` Raiz com busca with the profile avatar in the third action slot; `Seletor cíclico/Visualização`, `Paginação/Página`, `Botão` Contorno "Filtros"; `Livro/Card` Grade (4 columns medium, 6 expanded, minimum 160 dp) or Lista (2 and 3 columns, minimum 320 dp); `Livros/Filtros avançados` Plataforma=Mobile inside the sheets.
+- Code: #252.
+- Not drawn: the random-book actions row of the phone frame (the top bar keeps the two actions), loading and empty states.
+
 ## Gaps (Figma vs code)
 - Mobile has no empty/no-results or loading frame (web has `920:5605`).
 - Cover view mode is drawn on web only; the mobile implementation (issue #6) reuses the web card.

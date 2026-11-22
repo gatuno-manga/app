@@ -52,6 +52,16 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Placeholder and helper text (`color/text-muted`, 12 dp) is about 4.4:1, just below the AA 4.5:1 minimum for normal text. In sign-up the helper line is the only place the password rule is stated.
 - Field outline (`color/border`, translucent) is about 1.3:1 against the background, below the 3:1 guideline for input boundaries; it is a shared token and `Campo/Texto` inherits it.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Sign in: `1109:10267` medium, `1109:10308` expanded. Sign up: `1109:10345` medium, `1109:10387` expanded.
+- Layout: no rail (auth hides the shell); a centered form 480 dp wide at most with left-aligned title and subtitle; fields and buttons fill the form width.
+- Components: `Marca/Logo`, `Campo/Texto`, `Botão` (Primário and Texto).
+- Code: #256 (today `AuthTemplate` caps at 400 dp).
+- Not drawn: the error and loading states (they follow the phone frames inside the same 480 dp form).
+
 ## Gaps (Figma vs code)
 - The Figma section title names the routes /auth/login and /auth/register; code uses `/auth/signin` and `/auth/signup`. The new frames are named after the code routes.
 - `/welcome` (API URL setup) has no frame; tracked in a follow-up issue.

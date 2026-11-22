@@ -65,6 +65,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Disabled Selecionar Arquivo PEM (`color/primary` at 38% on the dialog panel) is about 1.9:1 in Dark (1.7-2.1:1 across themes); that is the disabled treatment the other components use.
 - Tap targets: tabs are 48 dp high, the FAB 56 dp, the dialog actions 48 dp; the row's delete button is 40 dp in Figma (Material's `IconButton` is 48 dp).
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Not drawn. On expanded, `/settings/certificates` opens in the settings detail pane (see surface `settings`, 720 dp content at most); on medium it is pushed with `Shell/Barra superior` Empilhada.
+
 ## Gaps (Figma vs code)
 - The code builds the screen from raw Material parts: `AppBar` with a `TabBar`, `FloatingActionButton`, `ListTile` rows with `IconButton`, `AlertDialog` for the add dialog (raw `TextField` and `ElevatedButton`) and `AlertDialog` for the delete confirmation. Figma draws them through `Abas`, `Botão de ação flutuante`, `Certificado/Item`, `Diálogo/Confiar em certificado` and `Diálogo/Confirmação`. Code follow-ups: extract the tab bar and FAB, and build the row from atoms (`AppIconButton`, `AppTextButton`), use `AppConfirmDialog` (#147) for the delete confirmation and `AppTextField`, `AppButton` and `AppTextButton` in the add dialog.
 - Colors that code takes from Material defaults and Figma binds to tokens: unselected tab label (`onSurfaceVariant`, drawn `color/text-secondary`), tab indicator and divider (drawn `color/primary` and `color/divider`), FAB fill and glyph (`primaryContainer` and `onPrimaryContainer` from the seed, drawn `color/primary` and `color/on-primary`). The row subject is `bodySmall` in `onSurface` (`color/text`) in code and drawn `color/text-secondary`.

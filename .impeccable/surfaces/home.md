@@ -46,6 +46,15 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Accessibility
 - Figma has no annotations; check tap target size of header icons and carousel contrast over cover art manually.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium 834×1194: `1101:469` /home — tablet médio. Expanded 1194×834: `1101:625` /home — tablet expandido.
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Início selected; `Shell/Barra superior` Raiz com logo across the content width, with the profile avatar (`Avatar/Perfil`) in the last action slot (opens the merged profile and settings screen); `Home/Destaque` Plataforma=Tablet (`1100:8359`) capped at 360 dp; `Seção/Cabeçalho`; `Livro/Card` Grade in rows of 4 (medium) or 6 (expanded) cards.
+- Layout rules: see DESIGN.md Layout, "Window size classes and tablets". Code: #255 (rail in #173).
+- Not drawn: the requests call-to-action card and the loading, empty and error states (the phone frame has none either).
+
 ## Gaps (Figma vs code)
 - Frame `913:1380` draws `Shell/Barra superior` (logo, search, avatar; 64 dp, hides on scroll) and `Shell/Barra inferior` (80 dp, labels, three tabs); code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`). `Seção/Cabeçalho` shows "Ver tudo" on "Continue a sua leitura", opening `/latest-reads`.
 - Book requests: the call-to-action card stays on Home and the merged profile and settings screen gets a row for `/requests`; the card is not drawn on Home yet, and code has only the card.

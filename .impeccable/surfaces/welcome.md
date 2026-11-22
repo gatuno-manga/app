@@ -46,6 +46,16 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Conectar` repeats the `color/on-primary` on `color/primary` gap (2.4-4.0:1, see `figma-contrast`). The Material button is 48 dp or more; the Figma `Botão` is 44 dp.
 - The spinner in `color/primary` on the disabled button fill (`color/text-10` over `color/app-background`) is 6.8:1 in Dark, 4.4:1 in Dracula and 2.9:1 in Light; it carries no text, so the 3:1 non-text guideline applies.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium: `1109:10429`. Expanded: `1109:10456`.
+- Layout: no rail; a centered form 480 dp wide at most with the logo (80 dp) and a centered title and instructions.
+- Components: `Marca/Logo`, `Campo/Texto`, `Botão` Primário.
+- Code: #256.
+- Not drawn: the error and loading states.
+
 ## Gaps (Figma vs code)
 - Code draws `Icons.pets` at 80 dp in `color/primary`, not `Marca/Logo`; Figma uses `Marca/Logo`. Code follow-up: use the brand logo.
 - The screen builds a raw `TextField` (outlined border, floating label), `ElevatedButton` and `CircularProgressIndicator` (default 36 dp, no size). Figma uses `Campo/Texto` (label above a filled field), `Botão` and the 24 dp `Indicador de carregamento`. Code follow-up: `AppTextField`, `AppButton` with its loading state.

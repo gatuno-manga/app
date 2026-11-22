@@ -9,7 +9,8 @@
       "themeTable": "884:104",
       "webScreens": "857:6124",
       "components": "857:6123",
-      "standards": "857:6122"
+      "standards": "857:6122",
+      "tabletScreens": "1100:8297"
     },
     "variableCollections": [
       "Gatuno / Tokens (código)",
@@ -1418,6 +1419,10 @@
     {
       "id": "navigation-shell-code-differences",
       "summary": "The #169 components draw the target shell, so code differs and each item is a code follow-up. `AppBottomNavBar` is 48 dp with icons only (tooltips) and three items; Figma is 80 dp with labels, an indicator pill and an optional badge, and a Biblioteca item (a placeholder screen until #130 ships) in place of Settings (#172). The item differs too: code draws a 28 dp icon in `colorScheme.primary` or `onSurfaceVariant` with no indicator and no label; Figma draws a 24 dp icon in `color/primary` or `color/text-secondary` in a `color/primary-15` pill, with a label. Every screen builds its own `AppBar` (`HomeAppBar`, `BooksAppBar`, templates); Figma has one `Shell/Barra superior` with a large collapsing title on tab roots, left-aligned titles everywhere and a small bar on pushed screens that hides and returns like the tab-root bar (#251). Home keeps the `/books?...` links and a requests card; Figma adds a row for `/requests` to the merged profile and settings screen, which Figma opens from an avatar action on every tab root (code: the Settings tab and Home's profile button, #172 and #251). Phone frames (#170): the pushed screens that still carry their own app bar and no bottom bar are `/settings/download`, `/settings/app-lock`, `/settings/mfa` and `/requests/create`; they are redrawn when their code lands. The app lock cover, the auth screens and welcome stay without a shell by design. Figma contrast: the unselected item icon and label in `color/text-secondary` repeat the 3.0-4.3:1 cases of `figma-contrast`; the badge text `color/on-primary` on `color/danger` repeats 3.1-4.1:1; the logo's `#000212` body in the Home bar disappears into the dark themes (see the logo note in `figma-contrast`)."
+    },
+    {
+      "id": "tablet-code-differences",
+      "summary": "The #171 frames draw the tablet layouts, so code differs and each item is a code follow-up. There are no window size classes or breakpoints in code (the reader in #112 asks for its own), and the shell always shows `AppBottomNavBar`; Figma uses the rail from 600 dp up (#173). The books grid takes a fixed column count (`BookGrid`, `SliverGridDelegateWithFixedCrossAxisCount`), not a minimum card width (#252). Book detail is one column (`BookDetailsTemplate`) at every width (#253). Settings is a tab and pushes every sub-page; Figma has no Settings tab and shows the merged profile and settings screen as list-detail on expanded (#254). Home has a carousel of fixed 350 dp height (`FeaturedCarousel`); Figma caps it at 360 dp on tablets and draws a side-by-side panel (#255). `AuthTemplate` caps sign in and sign up at 400 dp and the welcome screen has no cap; Figma uses 480 dp for the three (#256). Bottom sheets already get the 640 dp cap from the Material 3 default (no `bottomSheetTheme`), but the books filters open as a bottom sheet at every width, not as a side sheet on expanded (#252). The rail is 80 dp wide with three destinations (#173). Frames are Dark first with the other four modes checked on a sample; Library and Latest reads frames (references for #130 and #132) are drawn without the routes existing in code."
     }
   ],
   "components": {
@@ -1560,6 +1565,20 @@
         "lib/features/home/presentation/components/organisms/home_app_bar.dart"
       ],
       "issue": 169
+    },
+    "Shell/Trilho de navegação": {
+      "figmaNode": "1112:9248",
+      "variants": "Single component, 80 dp wide, three items (Início, Biblioteca, Livros), resized to the window height; same destinations as Shell/Barra inferior Itens=3; code comes in #173",
+      "code": [],
+      "issue": 171
+    },
+    "Home/Destaque": {
+      "figmaNode": "911:669",
+      "variants": "Plataforma=Web/Mobile; the Tablet variant (690x420 default, capped at 360 dp tall in frames) was added in #171",
+      "code": [
+        "lib/features/home/presentation/components/organisms/featured_carousel.dart"
+      ],
+      "issue": 171
     }
   },
   "fixedColors": [
@@ -1606,5 +1625,48 @@
       ],
       "reason": "Canvas annotation chrome, not app UI."
     }
-  ]
+  ],
+  "windowSizeClasses": {
+    "note": "Material 3 window size classes, one set for the whole app (issues #168 and #171). The reader (#112) takes its breakpoints from here; the code helper is #173.",
+    "classes": [
+      {
+        "name": "Compact",
+        "minWidth": 0,
+        "maxWidth": 599,
+        "navigation": "Shell/Barra inferior",
+        "frame": "390x844 (page 04)"
+      },
+      {
+        "name": "Medium",
+        "minWidth": 600,
+        "maxWidth": 839,
+        "navigation": "Shell/Trilho de navegação",
+        "frame": "834x1194 (page 05)"
+      },
+      {
+        "name": "Expanded",
+        "minWidth": 840,
+        "maxWidth": null,
+        "navigation": "Shell/Trilho de navegação",
+        "frame": "1194x834 (page 05)"
+      }
+    ],
+    "railWidth": 80,
+    "gridMinCardWidth": 160,
+    "listMinCardWidth": 320,
+    "columns": {
+      "gridMedium": 4,
+      "gridExpanded": 6,
+      "listMedium": 2,
+      "listExpanded": 3,
+      "phone": 2
+    },
+    "maxContentWidth": {
+      "form": 480,
+      "text": 720,
+      "bottomSheet": 640,
+      "sideSheet": 360
+    },
+    "carouselMaxHeight": 360
+  }
 }
