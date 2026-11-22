@@ -37,6 +37,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Accessibility
 - Secondary text about 5.0:1 (little headroom) on `color/app-background` (Dark). Avatar shows initials only; no photo state is drawn.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Expanded list-detail with the profile in the detail pane: `1105:9489` (surface `settings`). Medium: the profile page is pushed as on the phone; no separate tablet frame.
+- Components in the detail pane: `Avatar/Perfil`, `Campo/Texto`, `Botão`. The profile is part of the merged profile and settings screen; the avatar in the tab-root top bars opens it and the tab it was opened from stays selected. `/settings/profile` (edit) is a second pushed screen.
+- Code: #254.
+
 ## Gaps (Figma vs code)
 - Profile (`/settings/profile`) and settings (`/settings`) are separate screens in code; settings holds the profile card, sensitive-content switch and API, certificate and log entries.
 - Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.

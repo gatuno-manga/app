@@ -55,6 +55,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Dyslexia preset (Lexend, spacing 5%) and reading ruler are specified; see Figma frame `882:523` (web) for the accessibility spec.
 - Reader theme contrast should be checked per mode, especially `Sépia` accent `#9a4a00` and `Creme` accent `#1b5fad`.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Not drawn for tablets: reader layouts belong to #112 (two-page spread) and #113. The reader hides the rail and takes its breakpoints from the window size classes in DESIGN.md.
+
 ## Gaps (Figma vs code)
 - Reader themes and the text settings sheet (font, size, line spacing, alignment) are implemented for the text reader only; the accessibility sheet (dyslexia preset, word spacing, reading ruler), the `Geral`/`Aparência`/`Privacidade` tabs and `Modo noturno` are not.
 - PDF and EPUB are proposals in Figma; code has `document_reader.dart` and its scope is not audited.

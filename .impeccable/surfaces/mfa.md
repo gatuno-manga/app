@@ -63,6 +63,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - The code field has `AutofillHints.oneTimeCode` and autofocus on the challenge and on the disable dialog; the setup field accepts digits only. Back is blocked while backup codes are shown (`PopScope`), with a snackbar telling the person to save them first.
 - Secret and backup codes are `SelectableText`, so they can be copied by long press; two outlined buttons copy or share them.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Not drawn. On expanded, `/settings/mfa` opens in the settings detail pane (see surface `settings`, 720 dp content at most); on medium it is pushed. `/auth/mfa` follows the 480 dp form rule of the auth surface.
+
 ## Gaps (Figma vs code)
 - The challenge and setup code fields have a leading shield icon (`prefixIcon`); `Campo/Texto` has no icon slot, so the frames omit it (the disable dialog field has no icon in code either).
 - Outlined buttons in code carry icons (`copy`, `open_in_new`, `share`); the `Botão` Contorno instances here show the component's default icon because Figma has no icon swap on it.

@@ -86,6 +86,15 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Accessibility
 - Not audited.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium: `1104:9365` /books/:id — tablet médio (one column, wide header). Expanded: `1104:9629` /books/:id — tablet expandido (two panes).
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `Shell/Barra superior` Empilhada; `Livro/Capa`, `Tag`, `Botão`, `Leitor/Botão ícone`, `Livro/Aba`, `Capítulo/Item` (Layout Mobile at medium, Padrão at expanded).
+- Code: #253.
+- Not drawn: the downloads, options and selection states and sheets of the phone frames; sheets follow the 640 dp rule in DESIGN.md.
+
 ## Gaps (Figma vs code)
 - `903:928` still shows the earlier floating ⋮ menu proposal; the app's ⋮ opens the "Opções do livro" sheet (`1025:5929`).
 - The book sheet's switch row is `AppSwitchRow` (`Interruptor/Item`; it was the reader's `Leitor/Item de ajuste` before #126) and "Excluir download" is `AppButton` with `AppButtonVariant.outlinedDanger` at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.

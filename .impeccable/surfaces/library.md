@@ -46,6 +46,14 @@ No code exists for `/library`. The closest code surface is `/books` (`lib/featur
 - `Livro/Aba` tabs are 40 dp high and 43-77 dp wide, below the 44 dp tap target; the component is shared with the book page, so it is recorded here, not changed.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the `Explorar livros` button and the chapter badges.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium: `1107:9618` and `1107:9911` (vazio). Expanded: `1107:9781` and `1107:9976` (vazio).
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Biblioteca selected (the second of three destinations; until #130 ships the tab is a placeholder); `Shell/Barra superior` Raiz expandida with the profile avatar in the last action slot; `Livro/Aba` (Lendo, Salvos, Concluídos); `Livro/Card` Lista in 2 (medium) or 3 (expanded) columns; `Botão` and `Ícone/bookmark` in the empty state.
+- Reference for #130; no code task in #168 builds it. Guests see the tab with a sign-in prompt (#169 decision); not drawn.
+
 ## Gaps (Figma vs code)
 - The empty frame is tab-agnostic: it hides the tabs and says the whole library is empty, which would be wrong for a user with saved books under another tab. A per-tab empty state is not drawn.
 - The `Cap. N` badge is ambiguous (user progress or latest chapter) and no progress indicator is drawn. The subtitle "Seus livros salvos" overlaps the "Salvos" tab. All three cards reuse the same cover as mock content.

@@ -83,6 +83,16 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - /settings/download: `Seletor segmentado` segments are 48 dp high (meets the target); color/text on the selected `color/primary-40` fill is 6.3-8.2:1 across the five themes; the `color/border` outline and divider are 1.2-1.6:1 (see `figma-contrast`).
 - App lock: `Interruptor/Item` is 64 dp (the longer fallback description wraps to a taller row) and `Rádio/Item` is 56 dp with a 40 dp radio target, both above the 44 dp tap target. The grace header in `color/primary` is 3.5:1 in Light, the cover error in `color/danger` is 3.4:1 in Light, and the cancelled message and unselected radio ring in `color/text-secondary` are 3.0:1 in Dracula, 3.6:1 in True-dark and 4.3:1 in Light (see `figma-contrast`). The code marks the cover title and error as live regions and the unsupported text as a live region; Figma cannot show it.
 
+## Tablet frames (issue #171)
+
+Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
+
+- Medium: `1105:9225` /settings (the merged profile and settings screen, pushed, one column) and `1105:9370` /settings/download (pushed). Expanded list-detail: `1105:9489` (profile preselected) and `1105:9653` (downloads selected).
+- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Início selected (the tab the screen was opened from; there is no Settings tab); `Shell/Barra superior` Empilhada with the title "Configurações", since profile and settings are one pushed screen opened from the avatar action of the tab-root top bars; `Avatar/Perfil`, `Interruptor/Item`, `Lista/Item` (including the new "Solicitar livro" row for `/requests`), `Campo/Texto`, `Seletor segmentado`, `Botão`. The selected list row has a `color/primary-15` fill.
+- Layout rules: list pane 400 dp, detail pane fills the rest with content 720 dp at most; the first entry is selected on open (profile for signed-in users, Downloads for guests).
+- Code: #254.
+- Not drawn: the API URL field and the diagnostics rows beyond "Exportar Logs", the server-change dialogs, and the app lock, MFA and certificates sub-pages in the detail pane (they follow the same pane rules).
+
 ## Gaps (Figma vs code)
 - Figma `997:5052` has no Leitura section; code orders Geral, Leitura, Downloads, API, Certificados, Diagnósticos.
 - The API field shows only a placeholder (`http://sua-api.com/api`) and no save action, although the server URL is always set at first launch; the stored-value and save states are not drawn.
