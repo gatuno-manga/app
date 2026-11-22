@@ -17,7 +17,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `App/Organism/Shell/Barra superior` Type=Expanded root (search, avatar or user icon) and `App/Organism/Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
 - `Core/Atom/Livro/Aba` → tabs (Ativa / Inativa)
 - `Core/Molecule/Livro/Card` (Type=List) → `features/books/presentation/components/molecules/`
-- `Core/Atom/Botão` (Primário) → empty-state action
+- `Core/Atom/Botão` (Primary) → empty-state action
 - `Core/Atom/Ícone/bookmark` → empty-state icon
 
 ## Code

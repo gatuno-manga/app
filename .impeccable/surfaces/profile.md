@@ -12,7 +12,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, "Perfil", no actions) and `App/Organism/Shell/Barra inferior` with Início selected: the screen is pushed above the merged profile and settings screen, from whichever tab opened it (#169, #170; code in #251 and #172)
 - `App/Atom/Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
-- `Core/Atom/Botão` (Contorno) → logout
+- `Core/Atom/Botão` (Outline) → logout
 
 ## Code
 `lib/features/users/presentation/views/me_screen.dart`, components under `lib/features/users/presentation/components/{molecules,templates}`. Redirects to `/auth/signin` when unauthenticated.

@@ -15,7 +15,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `Core/Atom/Marca/Logo`
 - `App/Atom/Campo/Texto` (new local component, `951:869`; State=Default / Focus / Error) → `lib/shared/components/atoms/app_text_field.dart`
-- `Core/Atom/Botão` (Primário, Texto) → `lib/shared/components/atoms/app_button.dart`
+- `Core/Atom/Botão` (Primary, Text) → `lib/shared/components/atoms/app_button.dart`
 - `Core/Atom/Ícone/loader` → loading action
 
 ## Code
@@ -58,7 +58,7 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 
 - Sign in: `1109:10267` medium, `1109:10308` expanded. Sign up: `1109:10345` medium, `1109:10387` expanded.
 - Layout: no rail (auth hides the shell); a centered form 480 dp wide at most with left-aligned title and subtitle; fields and buttons fill the form width.
-- Components: `Core/Atom/Marca/Logo`, `App/Atom/Campo/Texto`, `Core/Atom/Botão` (Primário and Texto).
+- Components: `Core/Atom/Marca/Logo`, `App/Atom/Campo/Texto`, `Core/Atom/Botão` (Primary and Text).
 - Code: #256 (today `AuthTemplate` caps at 400 dp).
 - Not drawn: the error and loading states (they follow the phone frames inside the same 480 dp form).
 

@@ -14,7 +14,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `Core/Atom/Marca/Logo` (80 dp instance; code draws `Icons.pets`, see gaps)
 - `App/Atom/Campo/Texto` (`951:869`; State=Default / Error, help line hidden in the default state) → `lib/shared/components/atoms/app_text_field.dart` (target; code uses a raw `TextField`)
-- `Core/Atom/Botão` (Primário) → `lib/shared/components/atoms/app_button.dart` (target; code uses a raw `ElevatedButton`)
+- `Core/Atom/Botão` (Primary) → `lib/shared/components/atoms/app_button.dart` (target; code uses a raw `ElevatedButton`)
 - `App/Atom/Indicador de carregamento` (Size=Default, `1048:1829`) → `lib/shared/components/atoms/app_loading_indicator.dart`
 
 ## Code
