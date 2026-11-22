@@ -35,6 +35,9 @@ class AppTopBarScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scrollView = CustomScrollView(
+      // The floating bar can hide a focused search field; dragging the list
+      // closes the keyboard instead of typing into a hidden field.
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       controller: controller,
       // Pull to refresh needs a drag even when the content is short.
       physics: wrap == null ? null : const AlwaysScrollableScrollPhysics(),

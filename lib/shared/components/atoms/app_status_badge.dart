@@ -23,8 +23,10 @@ class AppStatusBadge extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall
-            ?.copyWith(color: textColor ?? color, fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: textColor ?? color,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

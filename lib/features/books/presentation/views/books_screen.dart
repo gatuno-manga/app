@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../shared/components/organisms/app_top_bar.dart';
 import '../../../../shared/components/organisms/tab_root_profile_action.dart';
-import '../../../../shared/components/templates/app_top_bar_scaffold.dart';
 import '../../books_launch_intent.dart';
 import '../components/atoms/books_filter_action.dart';
 import '../components/molecules/books_search_field.dart';
@@ -112,8 +111,8 @@ class _BooksPageState extends State<BooksPage> {
       // Rebuilds the body on every state change; BooksContent reads the
       // view model directly.
       builder: (context, snapshot) {
-        final content = BooksContent(viewModel: _viewModel);
-        return AppTopBarScaffold(
+        return BooksContent(
+          viewModel: _viewModel,
           topBar: AppTopBar(
             title: l10n.booksTitle,
             searchField: BooksSearchField(
@@ -132,9 +131,6 @@ class _BooksPageState extends State<BooksPage> {
               const TabRootProfileAction(),
             ],
           ),
-          slivers: content.slivers(context),
-          bottomBar: content.bottomBar(context),
-          wrap: (scrollView) => content.wrap(context, scrollView),
         );
       },
     );

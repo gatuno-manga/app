@@ -12,20 +12,19 @@ import 'package:gatuno/features/book_requests/domain/repositories/book_requests_
 import 'package:gatuno/features/book_requests/presentation/view_models/create_book_request_view_model.dart';
 import 'package:gatuno/features/book_requests/domain/entities/book_request_entity.dart';
 
-class MockBookRequestsRepository extends Mock
-    implements BookRequestsRepository {}
+class MockBookRequestsRepository extends Mock implements BookRequestsRepository {}
 
 void main() {
   late CreateBookRequestViewModel viewModel;
   late MockBookRequestsRepository mockRepository;
 
-  setUpAll(() {
+    setUpAll(() {
     registerFallbackValue(RequestTitle('dummy'));
     registerFallbackValue(RequestUrl('https://dummy.com'));
     registerFallbackValue(const RequestReason('dummy'));
   });
 
-  setUp(() {
+setUp(() {
     mockRepository = MockBookRequestsRepository();
     viewModel = CreateBookRequestViewModel(repository: mockRepository);
   });
@@ -45,18 +44,13 @@ void main() {
         updatedAt: Timestamp.now(),
       );
 
-      when(
-        () => mockRepository.createBookRequest(
-          title: any(named: 'title'),
-          url: any(named: 'url'),
-          reason: any(named: 'reason'),
-        ),
-      ).thenAnswer((_) async => request);
+      when(() => mockRepository.createBookRequest(
+            title: any(named: 'title'),
+            url: any(named: 'url'),
+            reason: any(named: 'reason'),
+          )).thenAnswer((_) async => request);
 
-      final result = await viewModel.submitRequest(
-        title: 'Title',
-        url: 'https://example.com',
-      );
+      final result = await viewModel.submitRequest(title: 'Title', url: 'https://example.com');
 
       expect(result, true);
       expect(viewModel.isSubmitting, false);

@@ -9,6 +9,7 @@ import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dar
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/users/presentation/view_models/me_view_model.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 
 extension PumpApp on WidgetTester {
   /// [theme] applies to the whole app, as `AppTheme` does in production.
@@ -78,6 +79,8 @@ extension PumpApp on WidgetTester {
         Provider.value(value: sl<AuthService>()),
       if (sl.isRegistered<HomeViewModel>())
         Provider.value(value: sl<HomeViewModel>()),
+      if (sl.isRegistered<NavigationViewModel>())
+        Provider.value(value: sl<NavigationViewModel>()),
       if (sl.isRegistered<MeViewModel>())
         Provider.value(value: sl<MeViewModel>()),
     ];

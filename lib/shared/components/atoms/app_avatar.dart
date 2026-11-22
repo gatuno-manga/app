@@ -12,8 +12,6 @@ class AppAvatar extends StatelessWidget {
   /// Draws a neutral placeholder circle while the profile loads.
   final bool isLoading;
   final double radius;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
 
   /// Photo shown over the fallback icon; the icon remains if it is null, empty
   /// or fails to load.
@@ -35,8 +33,6 @@ class AppAvatar extends StatelessWidget {
     this.guest = false,
     this.isLoading = false,
     this.radius = 50,
-    this.backgroundColor,
-    this.foregroundColor,
     this.imageUrl,
     required this.strategy,
     this.onEdit,

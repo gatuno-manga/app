@@ -49,8 +49,9 @@ class AppTextField extends StatelessWidget {
         prefixIcon: prefixIcon,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest
-            .withValues(alpha: 0.5),
+        fillColor: Theme.of(
+          context,
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       ),
     );
   }

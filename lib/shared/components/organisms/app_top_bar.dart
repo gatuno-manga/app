@@ -59,13 +59,7 @@ class AppTopBar extends StatelessWidget {
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       backgroundColor: transparent ? Colors.transparent : null,
-      leading: showBack
-          ? AppIconButton(
-              icon: Icons.arrow_back,
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: onBack ?? () => _defaultBack(context),
-            )
-          : null,
+      leading: showBack ? _backButton(context, theme) : null,
       title: showLogo
           ? Semantics(
               header: true,
@@ -93,6 +87,26 @@ class AppTopBar extends StatelessWidget {
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _backButton(BuildContext context, ThemeData theme) {
+    final button = AppIconButton(
+      icon: Icons.arrow_back,
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+      onPressed: onBack ?? () => _defaultBack(context),
+    );
+    if (!transparent) return button;
+    // Over a cover or scrolling text the arrow needs its own backdrop to
+    // keep its contrast; the 48 dp target stays.
+    return Center(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.colorScheme.surface.withValues(alpha: 0.8),
+        ),
+        child: button,
+      ),
     );
   }
 

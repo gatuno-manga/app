@@ -124,9 +124,33 @@ void main() {
       await tester.tap(find.text('View all').first);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('orderBy=updatedAt'), findsOneWidget);
-      expect(find.textContaining('order=desc'), findsOneWidget);
-      expect(find.textContaining('n='), findsOneWidget);
+      final text = tester.widget<Text>(find.textContaining('Books Page'));
+      final query = Uri.splitQueryString(text.data!.substring(11));
+      expect(query['orderBy'], 'updatedAt');
+      expect(query['order'], 'desc');
+      expect(int.tryParse(query['n'] ?? ''), isNotNull);
+    });
+
+    testWidgets('View all on Recently Added opens Books sorted by creation', (
+      tester,
+    ) async {
+      await pumpHome(
+        tester,
+        withBooks.copyWith(
+          recentlyAdded: HomeBookSection(
+            books: [Book(id: const BookId('b'), title: BookTitle('B'))],
+          ),
+        ),
+      );
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('View all').last);
+      await tester.pumpAndSettle();
+
+      final text = tester.widget<Text>(find.textContaining('Books Page'));
+      final query = Uri.splitQueryString(text.data!.substring(11));
+      expect(query['orderBy'], 'createdAt');
+      expect(query['order'], 'desc');
     });
   });
 

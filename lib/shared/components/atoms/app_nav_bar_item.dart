@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/theme/semantic_colors.dart';
 
 /// One destination of the bottom bar: an icon in an indicator pill over a

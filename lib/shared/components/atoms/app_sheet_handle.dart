@@ -14,8 +14,9 @@ class AppSheetHandle extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           // Material 3 drag handle: onSurfaceVariant at 40%.
-          color: Theme.of(context).colorScheme.onSurfaceVariant
-              .withValues(alpha: 0.4),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           borderRadius: const BorderRadius.all(Radius.circular(2)),
         ),
       ),

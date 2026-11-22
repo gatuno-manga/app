@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gatuno/features/books/domain/value_objects/book_title.dart'
-    as vo;
-import 'package:gatuno/features/books/domain/value_objects/book_description.dart'
-    as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_title.dart' as vo;
+import 'package:gatuno/features/books/domain/value_objects/book_description.dart' as vo;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/book_info.dart';
@@ -14,10 +12,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: BookInfo(
-            title: const vo.BookTitle('Test Title').value,
-            description: const vo.BookDescription('Test Description').value,
-          ),
+          body: BookInfo(title: const vo.BookTitle('Test Title').value, description: const vo.BookDescription('Test Description').value),
         ),
       ),
     );
@@ -33,9 +28,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: BookInfo(title: const vo.BookTitle('Test Title').value),
-        ),
+          home: Scaffold(body: BookInfo(title: const vo.BookTitle('Test Title').value)),
       ),
     );
 
