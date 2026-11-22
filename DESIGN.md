@@ -141,6 +141,7 @@ Figma component library (page "02 · Componentes", node `857:6123`), mapped to c
 | `Cartão de chamada` | Call-to-action card | `shared/components/molecules/app_cta_card.dart` |
 | `Diálogo/Confiar em certificado` | Trust an untrusted server certificate | `shared/components/organisms/certificate_trust_dialog.dart` |
 | `Rádio/Item` | Single-choice row with a leading radio (app lock grace period) | Material `RadioListTile` in `features/app_lock/presentation/views/app_lock_settings_screen.dart` (no shared atom yet) |
+| `Caixa de seleção` | Checkbox row (MFA backup-codes confirmation) | Material `CheckboxListTile` in `features/settings/presentation/views/mfa_settings_screen.dart` (no shared atom yet; `Botão` Contorno stands for the planned `AppOutlinedButton`, see the #128 paragraph below) |
 | `Avaliação/*`, `Histórico/*` | Ratings, reading history | no code counterpart found |
 
 Added in issue #52 (page "02 · Componentes", local, not yet published): `Campo/Texto` (`app_text_field`, Estado=Padrão/Foco/Erro), `Avatar/Perfil` (`app_avatar`, initials only) and `Lista/Item` (settings row). Switch rows used the reader's `Leitor/Item de ajuste` until issue #126 added `Interruptor/Item`.
