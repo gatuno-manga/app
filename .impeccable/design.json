@@ -1590,8 +1590,9 @@
     },
     "App/Molecule/Vista vazia": {
       "figmaNode": "1124:9491",
-      "variants": "text property Message; the icon and the action label are overridden on the instance; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "variants": "text property Message; the icon and the action label are overridden on the instance; added in #265 to replace hand-drawn copies in the frames; code AppEmptyView also has a title line the frames omit",
       "code": [
+        "lib/shared/components/molecules/app_empty_view.dart",
         "lib/features/library/presentation/views/library_screen.dart"
       ],
       "issue": 265
