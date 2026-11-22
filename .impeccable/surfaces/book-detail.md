@@ -10,7 +10,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `903:637` /books/:id — Capítulos (mobile)
 - `903:928` /books/:id — Mais opções aberto (mobile)
 - `906:1075` /books/:id — Capítulos agrupados (mobile)
-- The three frames above carry `Shell/Barra superior` Tipo=Empilhada (back, title "Livro", more) with a transparent fill over the cover, and `Shell/Barra inferior` with Início selected, as opened from Home (#170). Opened from Books the same screen selects Livros.
+- The three frames above carry `App/Organism/Shell/Barra superior` Type=Stacked (back, title "Livro", more) with a transparent fill over the cover, and `App/Organism/Shell/Barra inferior` with Início selected, as opened from Home (#170). Opened from Books the same screen selects Livros.
 - `1023:5698` /books/:id — Downloads · estados dos capítulos (#165): download summary and one tile per indicator state
 - `1023:6647` /books/:id — Downloads · resumo (#165): the five summary states
 - `1023:6696` /books/:id — Downloads · seleção (#165): selection top and bottom bars
@@ -20,24 +20,24 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1025:6181` /books/:id — Downloads · capítulo baixado (folha) (#165)
 - `1025:6243` /books/:id — Downloads · offline (#165): tiles waiting for connection
 - `1025:6544` /books/:id — Downloads · visitante (#165): sign-in SnackBar
-- `1011:4909` /books/:id — Downloads · confirmar exclusão (#165): `Diálogo/Confirmação` Destrutivo with the chapter count and the space freed
+- `1011:4909` /books/:id — Downloads · confirmar exclusão (#165): `App/Organism/Diálogo/Confirmação` Destructive with the chapter count and the space freed
 
 ## Figma components used
-- `Diálogo/Confirmação` (issue #165, `1010:1327`) → multi-chapter delete confirmation
-- `Capítulo/Download` (extended in issue #165, `895:304`) → tile download indicator
-- `Livro/Resumo de downloads` (issue #165, `1023:1377`) → download summary
-- `Capítulos/Barra de seleção` (`1023:1378`) and `Capítulos/Ações da seleção` (`1023:1388`) (issue #165) → selection mode
-- `Lista/Item`, `Interruptor/Item` → book sheet rows
-- `Aviso/Snackbar` → guest sign-in prompt
-- `Livro/Capa` → cover
-- `Tag` → metadata tags
-- `Livro/Aba` → tabs
-- `Capítulo/Item` (Estado=Selecionado for selected tiles in selection mode)
-- `Ícone/square`, `wifi`, `cloud-off`, `pause`, `play`, `check-check` (issue #165, frame `1019:460`) → indicator and selection glyphs
-- `Capítulo/Grupo` → grouped chapters (multi-language)
-- `Botão`
-- `Leitor/Botão ícone`
-- `Menu de contexto/Livro · mais opções` → glass menu in `903:928` (superseded by the Opções do livro sheet)
+- `App/Organism/Diálogo/Confirmação` (issue #165, `1010:1327`) → multi-chapter delete confirmation
+- `Core/Atom/Capítulo/Download` (extended in issue #165, `895:304`) → tile download indicator
+- `App/Organism/Livro/Resumo de downloads` (issue #165, `1023:1377`) → download summary
+- `App/Organism/Capítulos/Barra de seleção` (`1023:1378`) and `App/Organism/Capítulos/Ações da seleção` (`1023:1388`) (issue #165) → selection mode
+- `App/Molecule/Lista/Item`, `Core/Molecule/Interruptor/Item` → book sheet rows
+- `App/Molecule/Aviso/Snackbar` → guest sign-in prompt
+- `Core/Atom/Livro/Capa` → cover
+- `Core/Atom/Tag` → metadata tags
+- `Core/Atom/Livro/Aba` → tabs
+- `Core/Molecule/Capítulo/Item` (State=Selected for selected tiles in selection mode)
+- `Core/Atom/Ícone/square`, `wifi`, `cloud-off`, `pause`, `play`, `check-check` (issue #165, frame `1019:460`) → indicator and selection glyphs
+- `Core/Molecule/Capítulo/Grupo` → grouped chapters (multi-language)
+- `Core/Atom/Botão`
+- `Core/Atom/Leitor/Botão ícone`
+- `Core/Organism/Menu de contexto/Livro · mais opções` → glass menu in `903:928` (superseded by the Opções do livro sheet)
 
 ## Code
 `lib/features/books/presentation/views/book_details_screen.dart`.
@@ -93,12 +93,12 @@ Shell (#172): book detail is pushed inside the tab it was opened from (`/home/bo
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Medium: `1104:9365` /books/:id — tablet médio (one column, wide header). Expanded: `1104:9629` /books/:id — tablet expandido (two panes).
-- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `Shell/Barra superior` Empilhada; `Livro/Capa`, `Tag`, `Botão`, `Leitor/Botão ícone`, `Livro/Aba`, `Capítulo/Item` (Layout Mobile at medium, Padrão at expanded).
+- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `App/Organism/Shell/Barra superior` Stacked; `Core/Atom/Livro/Capa`, `Core/Atom/Tag`, `Core/Atom/Botão`, `Core/Atom/Leitor/Botão ícone`, `Core/Atom/Livro/Aba`, `Core/Molecule/Capítulo/Item` (Layout Mobile at medium, Padrão at expanded).
 - Code: #253.
 - Not drawn: the downloads, options and selection states and sheets of the phone frames; sheets follow the 640 dp rule in DESIGN.md.
 
 ## Gaps (Figma vs code)
 - `903:928` still shows the earlier floating ⋮ menu proposal; the app's ⋮ opens the "Opções do livro" sheet (`1025:5929`).
-- The book sheet's switch row is `AppSwitchRow` (`Interruptor/Item`; it was the reader's `Leitor/Item de ajuste` before #126) and "Excluir download" is `AppButton` with `AppButtonVariant.outlinedDanger` at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.
+- The book sheet's switch row is `AppSwitchRow` (`Core/Molecule/Interruptor/Item`; it was the reader's `Core/Molecule/Leitor/Item de ajuste` before #126) and "Excluir download" is `AppButton` with `AppButtonVariant.outlinedDanger` at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.
 - Mobile frames cover only the chapters tab; other tabs (art, info, related, ratings) are web-only.
 - Admin tools and batch selection are web-only in Figma.

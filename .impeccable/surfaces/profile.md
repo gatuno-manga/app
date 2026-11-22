@@ -10,9 +10,9 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `953:2544` /users/:userId — mobile · Meu Perfil (avatar, name, email, logout)
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Empilhada (back, "Perfil", no actions) and `Shell/Barra inferior` with Início selected: the screen is pushed above the merged profile and settings screen, from whichever tab opened it (#169, #170; code in #251 and #172)
-- `Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
-- `Botão` (Contorno) → logout
+- `App/Organism/Shell/Barra superior` Type=Stacked (back, "Perfil", no actions) and `App/Organism/Shell/Barra inferior` with Início selected: the screen is pushed above the merged profile and settings screen, from whichever tab opened it (#169, #170; code in #251 and #172)
+- `App/Atom/Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
+- `Core/Atom/Botão` (Contorno) → logout
 
 ## Code
 `lib/features/users/presentation/views/me_screen.dart`, components under `lib/features/users/presentation/components/{molecules,templates}`. Redirects to `/auth/signin` when unauthenticated.
@@ -44,7 +44,7 @@ Shell (#172): the profile edit screen is `settings/profile` under each tab root 
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Expanded list-detail with the profile in the detail pane: `1105:9489` (surface `settings`). Medium: the profile page is pushed as on the phone; no separate tablet frame.
-- Components in the detail pane: `Avatar/Perfil`, `Campo/Texto`, `Botão`. The profile is part of the merged "Perfil e configurações" screen, which the avatar in the tab-root top bars opens (the opener's tab stays selected). On medium `/settings/profile` is pushed above the merged screen; on expanded it opens in the detail pane.
+- Components in the detail pane: `App/Atom/Avatar/Perfil`, `App/Atom/Campo/Texto`, `Core/Atom/Botão`. The profile is part of the merged "Perfil e configurações" screen, which the avatar in the tab-root top bars opens (the opener's tab stays selected). On medium `/settings/profile` is pushed above the merged screen; on expanded it opens in the detail pane.
 - Code: #254.
 
 ## Gaps (Figma vs code)
