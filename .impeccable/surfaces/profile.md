@@ -10,7 +10,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `953:2544` /users/:userId — mobile · Meu Perfil (avatar, name, email, logout)
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Empilhada and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Empilhada (back, "Perfil", no actions) and `Shell/Barra inferior` with Início selected: the screen is pushed above the merged profile and settings screen, from whichever tab opened it (#169, #170; code in #251 and #172)
 - `Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
 - `Botão` (Contorno) → logout
 

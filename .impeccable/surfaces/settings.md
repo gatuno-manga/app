@@ -7,7 +7,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Code: `/settings` (`lib/features/settings`), certificates under `/settings/certificates`, download network rules under `/settings/download` (issue #95, `download_settings_screen.dart`), app lock under `/settings/app-lock` plus the lock cover (issue #127, `lib/features/app_lock`)
 
 ## Figma frames
-- `997:5052` /settings — mobile (profile card, general, downloads, API, certificates, diagnostics; replaced `954:2732` in issue #162 and grows to show every tile)
+- `997:5052` /settings — mobile: the merged profile and settings screen, "Perfil e configurações", pushed from the avatar action of any tab root (profile card, general, downloads, API, a "Solicitações de livros" row for `/requests`, certificates, diagnostics; replaced `954:2732` in issue #162 and grows to show every tile; redrawn in #170 with `Shell/Barra superior` Tipo=Empilhada and `Shell/Barra inferior` with Início selected)
+- `1112:8331` /settings — mobile · visitante: sign-in card instead of the profile card, no requests row
 - `997:5174` /settings/download — mobile (five book types, each a `Seletor segmentado`, plus a permanent caption)
 - `997:5230` /settings/download — mobile · erro ao salvar (reverted choice and `Aviso/Snackbar`)
 - `1010:5184` /settings — mobile · confirmar troca de servidor (#147): `Diálogo/Confirmação` Destrutivo with chapter count and size
@@ -23,7 +24,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1052:39074` lock cover — mobile · autenticando (`Botão` with loader, no label)
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz expandida and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned title, actions hidden) and `Shell/Barra inferior` (#169, #170; code in #251 and #172). Settings is no longer a tab: the screen opens from the avatar action in each tab root's top bar.
 - `Avatar/Perfil` (new local component, `951:870`) → profile card
 - `Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Leitor/Item de ajuste`)
 - `Campo/Texto` (new local component, `951:869`) → API base URL
@@ -85,7 +86,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Gaps (Figma vs code)
 - Figma `997:5052` has no Leitura section; code orders Geral, Leitura, Downloads, API, Certificados, Diagnósticos.
 - The API field shows only a placeholder (`http://sua-api.com/api`) and no save action, although the server URL is always set at first launch; the stored-value and save states are not drawn.
-- Signed-out state is not drawn: code shows the profile card as `commonGuest` ("Visitante") with no email, and tapping it opens `/auth/signin` (`settings_screen.dart`).
+- The guest frame `1112:8331` shows a sign-in card in place of the profile card; code shows the profile card as `commonGuest` ("Visitante") with no email, and tapping it opens `/auth/signin` (`settings_screen.dart`).
 - The page header has no subtitle, unlike library and profile; code does not show one either.
 - Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.
 - Figma route /user differs from code `/settings`.
@@ -93,4 +94,4 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `/settings/app-lock` and the lock cover are drawn (issue #127); the code differences are listed in `app-lock-code-differences` in DESIGN.md. The entry row is drawn on `997:5052` with a description cut to one line.
 - No web frame exists (web section `859:28` is empty).
 - Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.
-- Figma has no Settings row for book requests (`/requests`) yet; the decision of #169 is a row here as well as the card on Home (frame redrawn in #170, code in #251). The profile screen (`/settings/profile`) always selects the Configurações tab.
+- Book requests: the decision (#169, changed in #170) is a row on this screen as well as the card on Home; it is drawn on `997:5052` and the two #147 dialog frames. Code has no such row and still has Settings as the third tab (#172, #251). The profile edit screen (`/settings/profile`) is pushed above this one and keeps whichever tab was selected.

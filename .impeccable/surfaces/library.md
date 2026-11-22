@@ -9,9 +9,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Livro/Card` list items)
 - `953:2492` /library — mobile · vazio
+- `1112:8220` /library — mobile · barra recolhida (`Raiz recolhida` state)
+- `1112:8281` /library — mobile · em breve (antes do #130): the placeholder tab the app ships until #130 builds the screen
+- `1112:8305` /library — mobile · visitante: sign-in prompt
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz expandida and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Raiz expandida (search, avatar or user icon) and `Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
 - `Livro/Aba` → tabs (Ativa / Inativa)
 - `Livro/Card` (Tipo=Lista) → `features/books/presentation/components/molecules/`
 - `Botão` (Primário) → empty-state action
@@ -35,6 +38,7 @@ No code exists for `/library`. The closest code surface is `/books` (`lib/featur
 ## States in Figma
 - Loaded: tabs plus list of saved books.
 - Empty: icon, message and a primary action to explore books. The tabs are hidden in this state (a choice, not a code fact).
+- Collapsed top bar (`1112:8220`), the placeholder shipped before #130 (`1112:8281`, "A sua biblioteca chega em breve.") and the guest sign-in prompt (`1112:8305`).
 - No loading or error frame.
 
 ## Accessibility
@@ -45,6 +49,6 @@ No code exists for `/library`. The closest code surface is `/books` (`lib/featur
 ## Gaps (Figma vs code)
 - The empty frame is tab-agnostic: it hides the tabs and says the whole library is empty, which would be wrong for a user with saved books under another tab. A per-tab empty state is not drawn.
 - The `Cap. N` badge is ambiguous (user progress or latest chapter) and no progress indicator is drawn. The subtitle "Seus livros salvos" overlaps the "Salvos" tab. All three cards reuse the same cover as mock content.
-- No code route or screen for `/library`; the frames are a design proposal.
+- No code route or screen for `/library`; the frames are a design proposal, except the placeholder `1112:8281`, which is the screen planned to ship before #130. The placeholder and guest copy have no l10n keys yet.
 - Tab labels (Lendo, Salvos, Concluídos), titles, subtitle and empty message are placeholder copy; no l10n keys exist.
 - No web frame exists for `/library` (web section 1 names the route only).

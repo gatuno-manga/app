@@ -8,11 +8,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma frames
 - `913:1380` /home — mobile
-- The drawer variant `913:1538` was removed in #169; frames still carry the old web header until #170 redraws them.
+- `1112:8067` /home — mobile · visitante (the second action is the user icon, not the avatar)
+- The drawer variant `913:1538` was removed in #169. Frames carry `Shell/Barra superior` Tipo=Raiz com logo and `Shell/Barra inferior` since #170.
 
 ## Figma components used
-- `Shell/Barra superior` (Tipo=Raiz com logo: logo, search and avatar or sign-in) → target of `features/home/presentation/components/organisms/home_app_bar.dart` (shared top bar from #251). Frames still use the web `Shell web/Header` until #170.
-- `Shell/Barra inferior` → `shared/components/molecules/app_bottom_nav_bar.dart`
+- `Shell/Barra superior` (Tipo=Raiz com logo: logo, search and an avatar action, a user icon for guests) → target of `features/home/presentation/components/organisms/home_app_bar.dart` (shared top bar from #251). The avatar action opens the merged profile and settings screen (see `settings.md`).
+- `Shell/Barra inferior` (Itens=3: Início selected, Biblioteca, Livros) → `shared/components/molecules/app_bottom_nav_bar.dart`
 - `Home/Destaque` → `.../organisms/featured_carousel.dart`
 - `Seção/Cabeçalho` → `.../molecules/home_section_header.dart`
 - `Livro/Card` → `features/books/presentation/components/molecules/`
@@ -39,13 +40,13 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## States in Figma
 - Default: featured carousel (`Home/Destaque`, 620 dp) then three sections, the first being continue-reading with a horizontal list of `Livro/Card` (140×295).
-- No drawer variant (removed in #169). Book detail opened from here keeps the Início tab selected.
+- Signed-in and guest variants (`913:1380`, `1112:8067`); no drawer (removed in #169). Book detail opened from here keeps the Início tab selected.
 - No loading, empty or error frame.
 
 ## Accessibility
 - Figma has no annotations; check tap target size of header icons and carousel contrast over cover art manually.
 
 ## Gaps (Figma vs code)
-- Frame `913:1380` still draws the web header; the target is `Shell/Barra superior` with the logo and a 64 dp bar that hides on scroll, plus `Shell/Barra inferior` (80 dp, labels). Code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`).
-- Book requests: the call-to-action card stays on Home and Settings gets a row for `/requests`; code has only the card.
-- Header shows login/profile icon in code (guest vs authenticated); Figma header content not audited.
+- Frame `913:1380` draws `Shell/Barra superior` (logo, search, avatar; 64 dp, hides on scroll) and `Shell/Barra inferior` (80 dp, labels, three tabs); code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`). `Seção/Cabeçalho` shows "Ver tudo" on "Continue a sua leitura", opening `/latest-reads`.
+- Book requests: the call-to-action card stays on Home and the merged profile and settings screen gets a row for `/requests`; the card is not drawn on Home yet, and code has only the card.
+- Code shows a login or profile icon in the header (guest vs authenticated); Figma shows the avatar (signed in) or a user icon (guest) that opens the merged profile and settings screen.

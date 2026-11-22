@@ -14,7 +14,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1060:8623` /settings/certificates — mobile · erro ao adicionar (`Aviso/Snackbar` in `color/danger`, `certErrorInvalidFormat`; the FAB sits above it)
 
 ## Figma components used
-- App bar: drawn inline as in `/settings/download` (back arrow in a 48 dp tile, centered `Título/3`, symmetric spacer); the target is `Shell/Barra superior` Tipo=Empilhada (#169), redrawn in #170 and built in #251.
+- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Certificados") and `Shell/Barra inferior` with Início selected, drawn in #170 (code in #251 and #172); the other pushed Settings frames (`/settings/download`, `/settings/app-lock`, `/settings/mfa`) keep their inline app bar until their code lands.
 - `Abas` (new in #62, `1052:39159`; Selecionada=Primeira/Segunda) → Material `TabBar` in `certificates_template.dart`
 - `Certificado/Item` (new in #62, `1052:39702`; Impressão digital=Sim/Não) → `certificate_item_tile.dart`; its delete action is `Leitor/Botão ícone` Fantasma with `Ícone/trash` in `color/danger`
 - `Botão de ação flutuante` (new in #62, `1052:39160`) → `FloatingActionButton` in `certificates_template.dart`
@@ -72,5 +72,5 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - The empty message is italic in code; Figma has no italic text style, so it is drawn upright in `color/border`.
 - The error snackbar is `colorScheme.error` in code, unlike the lilac snackbar of the theme; the snackbar's action is hidden (code has none).
 - The add dialog's actions are drawn in a row; with a long Selecionar Arquivo PEM label code stacks them (`AlertDialog` overflow). The `certAddPemLabel` string is not used by the dialog.
-- The Figma app bar title is `Título/3` centered, as `AppBarTheme(centerTitle: true)` does; the app bar height is 60 here and 56 in Material.
+- The Figma app bar is the left-aligned `Shell/Barra superior` Tipo=Empilhada at 64 dp (#170); code centres the title (`AppBarTheme(centerTitle: true)`) at 56 dp.
 - No web frame exists.
