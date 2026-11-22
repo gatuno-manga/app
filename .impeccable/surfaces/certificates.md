@@ -60,14 +60,14 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Accessibility
 - Measured by computing the pairs from the variable values. Fingerprint line and empty message in `color/border` (code uses `colorScheme.outline`) on `color/app-background`: 1.2-1.6:1 (1.33:1 in Dark), far below AA; the name and subject pass (`color/text`, `color/text-secondary` at 5.0:1 in Dark).
-- Snackbar text `color/on-lilac` on `color/danger`: 4.9:1 in Dark, True-dark, 5.2:1 Light, 5.5:1 Slate and 6.6:1 Dracula (the code keeps the theme's `onLilac` text style on the error fill).
+- Snackbar text `color/on-lilac` on `color/danger`: 4.9:1 in Dark and True-dark, 5.2:1 in Light, 5.5:1 in Slate and 6.6:1 Dracula (the code keeps the theme's `onLilac` text style on the error fill).
 - FAB glyph `color/on-primary` on `color/primary`: 2.5:1 in Dark, True-dark and Slate, 2.4:1 in Dracula, 4.0:1 in Light (non-text guideline 3:1). Tabs: the selected label in `color/primary` is 8.0:1 in Dark and 3.5:1 in Light; the unselected `color/text-secondary` label repeats the 3.0-4.3:1 cases in `figma-contrast`.
-- Disabled Selecionar Arquivo PEM (`color/primary` at 38% on the dialog panel) is about 1.9:1; that is the disabled treatment the other components use.
+- Disabled Selecionar Arquivo PEM (`color/primary` at 38% on the dialog panel) is about 1.9:1 in Dark (1.7-2.1:1 across themes); that is the disabled treatment the other components use.
 - Tap targets: tabs are 48 dp high, the FAB 56 dp, the dialog actions 48 dp; the row's delete button is 40 dp in Figma (Material's `IconButton` is 48 dp).
 
 ## Gaps (Figma vs code)
 - The code builds the screen from raw Material parts: `AppBar` with a `TabBar`, `FloatingActionButton`, `ListTile` rows with `IconButton`, `AlertDialog` for the add dialog (raw `TextField` and `ElevatedButton`) and `AlertDialog` for the delete confirmation. Figma draws them through `Abas`, `Botão de ação flutuante`, `Certificado/Item`, `Diálogo/Confiar em certificado` and `Diálogo/Confirmação`. Code follow-ups: extract the tab bar, FAB and row into atoms and molecules, use `AppConfirmDialog` (#147) for the delete confirmation and `AppTextField`, `AppButton` and `AppTextButton` in the add dialog.
-- Colors that code takes from Material defaults and Figma binds to tokens: unselected tab label (`onSurfaceVariant`, drawn `color/text-secondary`), tab indicator and divider (drawn `color/primary` and `color/divider`), FAB fill and glyph (`primaryContainer` and `onPrimaryContainer` from the seed, drawn `color/primary` and `color/on-primary`), row subject (ListTile `onSurfaceVariant`, drawn `color/text-secondary`).
+- Colors that code takes from Material defaults and Figma binds to tokens: unselected tab label (`onSurfaceVariant`, drawn `color/text-secondary`), tab indicator and divider (drawn `color/primary` and `color/divider`), FAB fill and glyph (`primaryContainer` and `onPrimaryContainer` from the seed, drawn `color/primary` and `color/on-primary`). The row subject is `bodySmall` in `onSurface` (`color/text`) in code and drawn `color/text-secondary`.
 - The row title uses `titleMedium`, which `AppTypography.textTheme` does not define (`fallback-text-roles`); Figma uses `Corpo/Padrão`.
 - The empty message is italic in code; Figma has no italic text style, so it is drawn upright in `color/border`.
 - The error snackbar is `colorScheme.error` in code, unlike the lilac snackbar of the theme; the snackbar's action is hidden (code has none).
