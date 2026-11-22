@@ -9,7 +9,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `913:1380` /home — mobile
 - `1112:8067` /home — mobile · visitante (the second action is the user icon, not the avatar)
-- `1114:9063` /home — mobile · offline (#260; the call-to-action card disabled with its offline note)
+- `1114:9063` /home — mobile · offline (#260; the call-to-action card `1114:9166` disabled, with its offline note)
 - The drawer variant `913:1538` was removed in #169. Frames carry `Shell/Barra superior` Tipo=Raiz com logo and `Shell/Barra inferior` since #170.
 
 ## Figma components used
