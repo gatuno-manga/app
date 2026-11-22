@@ -23,7 +23,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1052:39074` lock cover — mobile · autenticando (`Botão` with loader, no label)
 
 ## Figma components used
-- `Shell/Header` (Plataforma=Mobile)
+- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz expandida and `Shell/Barra inferior` (#169; code in #251 and #172)
 - `Avatar/Perfil` (new local component, `951:870`) → profile card
 - `Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Leitor/Item de ajuste`)
 - `Campo/Texto` (new local component, `951:869`) → API base URL
@@ -93,3 +93,4 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `/settings/app-lock` and the lock cover are drawn (issue #127); the code differences are listed in `app-lock-code-differences` in DESIGN.md. The entry row is drawn on `997:5052` with a description cut to one line.
 - No web frame exists (web section `859:28` is empty).
 - Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.
+- Figma has no Settings row for book requests (`/requests`) yet; the decision of #169 is a row here as well as the card on Home (frame redrawn in #170, code in #251). The profile screen (`/settings/profile`) always selects the Configurações tab.
