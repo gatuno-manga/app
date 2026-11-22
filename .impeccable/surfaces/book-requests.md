@@ -24,7 +24,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Campo/Texto` (Estado=Padrão/Erro) → `AppTextField`
 - `Botão` Primário → `AppButton`
 - `Esqueleto`, `Indicador de carregamento`, `Vista de erro`, `Cartão de chamada` (components from #126)
-- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Solicitações", "+" action) and `Shell/Barra inferior` with Início selected on the five `/requests` frames, drawn in #170 (code in #251 and #172); `/requests/create` frames keep the inline `app-bar` (back arrow tile, centered title) until their code lands
+- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Solicitações", "+" action) and `Shell/Barra inferior` with Início selected on the five `/requests` frames, drawn in #170 (code in #251 and #172); the five `/requests/create` frames draw `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Novo Pedido", no actions) and `Shell/Barra inferior` with Início selected, redrawn in #260 (code in #251 and #172)
 
 ## Code
 `lib/features/book_requests/presentation/views/{book_requests_list_page,create_book_request_page}.dart`, `components/molecules/book_request_card.dart`, `components/organisms/create_book_request_form.dart`; `lib/shared/components/atoms/app_status_badge.dart`.
@@ -78,4 +78,4 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - Code status badge is `labelSmall` bold on a 20% tint with a 50% border; Figma `Tag` uses `Interface/Rótulo` on 15% and 40% tint tokens.
 - Figma has no info or calendar icon in the icon library: the reason row uses `Ícone/file-text` and the date `Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
 - Code `AppButton` is 48 dp high; Figma `Botão` is 44 dp.
-- The `/requests` frames draw the native `Shell/Barra superior` and `Shell/Barra inferior` of #169 (#170); the `/requests/create` frames still draw the app bar as code builds it today. Entry points are the Home card and a row in the merged profile and settings screen.
+- The `/requests` frames draw the native `Shell/Barra superior` and `Shell/Barra inferior` of #169 (#170); the `/requests/create` frames draw them too since #260. Entry points are the Home card and a row in the merged profile and settings screen.
