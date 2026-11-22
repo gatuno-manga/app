@@ -12,9 +12,7 @@ system: [DESIGN.md](DESIGN.md). Dependencies and versions: `pubspec.yaml`.
 
 Work inside the Nix dev shell (`nix develop`, or direnv via `.envrc`). It
 provides Flutter, JDK 17, the Android SDK, `just`, `lefthook` and Python 3.
-Run `just` to list every task. Claude Code permissions and the Figma plugin are
-preconfigured in `.claude/settings.json`; see "Claude Code setup" in
-`CONTRIBUTING.md`. The ones you need most:
+Run `just` to list every task. The ones you need most:
 
 | Command | Use it when |
 | --- | --- |
@@ -27,6 +25,9 @@ preconfigured in `.claude/settings.json`; see "Claude Code setup" in
 | `just test-lints` | You changed the `gatuno_lints` plugin in `tool/gatuno_lints/` |
 | `just design-tokens` | You touched `DESIGN.md`, `PRODUCT.md`, anything under `.impeccable/`, or `lib/core/theme/` |
 | `just check` | Before pushing: analyze, tests, lint-rule tests and design tokens |
+
+Claude Code permissions and the Figma plugin are preconfigured in
+`.claude/settings.json`; see "Claude Code setup" in `CONTRIBUTING.md`.
 
 Git hooks (`lefthook.yml`): pre-commit runs `just fmt` and `just fix` on staged
 `lib/` and `test/` Dart files, then `just analyze`; pre-push runs
