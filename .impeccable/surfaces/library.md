@@ -41,7 +41,7 @@ Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features
 ## States in Figma
 - Loaded: tabs plus list of saved books.
 - Empty: icon, message and a primary action to explore books. The tabs are hidden in this state (a choice, not a code fact).
-- Collapsed top bar (`1112:8220`), the placeholder shipped before #130 (`1112:8281`, "A sua biblioteca chega em breve.") and the guest sign-in prompt (`1112:8305`).
+- Scrolled-content frame with the Root bar (`1112:8220`), the placeholder shipped before #130 (`1112:8281`, "A sua biblioteca chega em breve.") and the guest sign-in prompt (`1112:8305`).
 - No loading or error frame.
 
 ## Accessibility
