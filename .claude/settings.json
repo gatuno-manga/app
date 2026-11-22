@@ -12,9 +12,10 @@
       "Bash(just check)",
       "Bash(just fmt)",
       "Bash(just fix)",
-      "Bash(dart format:*)",
-      "Bash(dart analyze:*)",
-      "Bash(dart fix:*)",
+      "Bash(dart format .)",
+      "Bash(dart analyze)",
+      "Bash(dart fix --apply)",
+      "Bash(dart fix --dry-run)",
       "Bash(flutter pub get)",
       "Bash(flutter test)",
       "Bash(git status:*)",
@@ -43,6 +44,8 @@
       "Bash(gh pr checks:*)"
     ],
     "deny": [
+      "Edit(**/*.env)",
+      "Read(**/*.env)",
       "Read(**/.env)",
       "Edit(**/.env)",
       "Read(**/.env.*)",

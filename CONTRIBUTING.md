@@ -25,13 +25,14 @@ The repo ships `.claude/settings.json` for [Claude Code](https://claude.com/clau
 It is read after you trust the folder, and it sets:
 
 - **Allowed without a prompt**: the `just` recipes (without arguments),
-  `dart format|analyze|fix`, `flutter pub get`, `flutter test`, a fixed set of
-  `git diff|log|show|branch` forms, `git status`, `git fetch [origin]` and
-  read-only `gh` (`issue view|list`, `pr view|list|checks`). Push, merge,
-  `gh pr create`, `gh issue edit`, `gh api` and other git or `just` forms still
-  ask. Test and analyze run Dart code, so approving an edit to a test file is
+  `dart format .`, `dart analyze`, `dart fix`, `flutter pub get`,
+  `flutter test`, a fixed set of `git diff|log|show|branch` forms,
+  `git status`, `git fetch [origin]` and read-only `gh` (`issue view|list`,
+  `pr view|list|checks`). Push, merge, `gh pr create`, `gh issue edit`,
+  `gh api` and other git, `just`, `dart` or `flutter test` forms still ask.
+  Test and analyze run Dart code, so approving an edit to a test file is
   approving code that runs.
-- **Denied**: reading or editing secrets (`.env` files, keystores,
+- **Denied**: reading or editing secrets (`.env` and `*.env` files, keystores,
   `key.properties`, `*.p12`, `*.p8`, `*.mobileprovision`, `*.cer`, `*.pem`,
   `*.key`, `google-services.json`, `GoogleService-Info.plist`). This is not a
   sandbox: it covers the file tools and the shell readers Claude Code
