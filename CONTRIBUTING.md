@@ -25,10 +25,10 @@ The repo ships `.claude/settings.json` for [Claude Code](https://claude.com/clau
 It is read after you trust the folder, and it sets:
 
 - **Allowed without a prompt**: the `just` recipes (without arguments),
-  `dart format .`, `dart analyze`, `dart fix`, `flutter pub get`,
-  `flutter test`, a fixed set of `git diff|log|show|branch` forms,
-  `git status`, `git fetch [origin]` and read-only `gh` (`issue view|list`,
-  `pr view|list|checks`). Push, merge, `gh pr create`, `gh issue edit`,
+  `dart format .`, `dart analyze`, `dart fix --apply|--dry-run`,
+  `flutter pub get`, `flutter test`, a fixed set of `git diff|log|show|branch`
+  forms, `git status`, `git fetch [origin]` and read-only `gh`
+  (`issue view|list`, `pr view|list|checks`). Push, merge, `gh pr create`, `gh issue edit`,
   `gh api` and other git, `just`, `dart` or `flutter test` forms still ask.
   Test and analyze run Dart code, so approving an edit to a test file is
   approving code that runs.
