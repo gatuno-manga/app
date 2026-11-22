@@ -22,11 +22,11 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `Campo/Texto` (`951:869`) → `lib/shared/components/atoms/app_text_field.dart`
-- `Botão` Primário, Contorno, Texto (`895:204`) → `app_button.dart`; Contorno stands for the raw `OutlinedButton` the screen uses today and the planned `AppOutlinedButton` (#101)
+- `Botão` Primário, Contorno, Texto (set `895:204`, Contorno `895:194`) → `app_button.dart`; Contorno stands for the raw `OutlinedButton` the screen uses today and the planned `AppOutlinedButton` (#101)
 - `Caixa de seleção` (new in #128, `1052:37844`) → Material `CheckboxListTile` (backup-codes confirmation)
-- `Indicador de carregamento` (`1048:1829`, Tamanho=Padrão) → `app_loading_indicator.dart` (the settings loading phase)
+- `Indicador de carregamento` (`1048:1829`, Tamanho=Padrão) → `app_loading_indicator.dart`; the settings loading phase builds a raw `CircularProgressIndicator` today (see Gaps)
 - `Diálogo/Confirmação` (`1010:1327`, Variante=Padrão for reconfigure, Destrutivo for disable) → the two `AlertDialog`s of the settings screen
-- The `app-bar` frame of the `/settings/download` frames (`997:5231`: back 48 dp, title, balancing spacer), copied into each frame: it stands for the Material `AppBar` the code builds (title only; the backup-codes frame hides the back button, as `automaticallyImplyLeading: false` does). The native top app bar component is #169 and is not drawn here.
+- The `app-bar` frame of `/settings/download` (`997:5230`, #162; node `997:5231`: back 48 dp, title, balancing spacer), copied into each frame: it stands for the Material `AppBar` the code builds (title only; the backup-codes frame hides the back button, as `automaticallyImplyLeading: false` does). The native top app bar component is #169 and is not drawn here. The title is one line cut with an ellipsis, as Flutter's `AppBar` does.
 
 ## Code
 `lib/features/authentication/presentation/{views/mfa_challenge_screen.dart,view_models/mfa_challenge_view_model.dart,view_models/mfa_error.dart}` and `lib/features/settings/presentation/{views/mfa_settings_screen.dart,view_models/mfa_settings_view_model.dart}`; strings are the `mfa*` keys in `lib/l10n/app_pt.arb`.
@@ -51,7 +51,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## States in Figma
 - Challenge: default, invalid code, loading. The other errors (`tooManyAttempts`, `network`, `unknown`) use the same message slot with their `mfaError*` text; `challengeExpired` is a snackbar plus a redirect to `/auth/signin` and has no frame.
-- Settings: every `MfaPhase` (loading, load failed, status off/on, setup, backup codes) plus the disable and reconfigure dialogs. The setup phase with an error and the busy button states are not drawn.
+- Settings: every `MfaPhase` (loading, load failed, status off/on, setup, backup codes) plus the disable and reconfigure dialogs. The status and setup phases with an error (a failed disable or setup start shows the message under the content) and the busy button states are not drawn; the challenge's empty-field validation message (`mfaCodeRequired`) is not drawn either.
 - Copy follows `lib/l10n/app_pt.arb`. The secret, backup codes and the "7 códigos de backup restantes" count are sample data.
 - The disabled "Concluir" is drawn at 40% opacity, the same approximation as other disabled buttons; Figma has no disabled button treatment.
 - The Desativar dialog is a detached copy of `Diálogo/Confirmação` Destrutivo with a `Campo/Texto` between message and actions, because the component has no field slot (`Diálogo/Confiar em certificado` has one, but with other text and actions).
@@ -64,9 +64,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Secret and backup codes are `SelectableText`, so they can be copied by long press; two outlined buttons copy or share them.
 
 ## Gaps (Figma vs code)
-- The code field has a leading shield icon (`prefixIcon`); `Campo/Texto` has no icon slot, so the frames omit it.
+- The challenge and setup code fields have a leading shield icon (`prefixIcon`); `Campo/Texto` has no icon slot, so the frames omit it (the disable dialog field has no icon in code either).
 - Outlined buttons in code carry icons (`copy`, `open_in_new`, `share`); the `Botão` Contorno instances here show the component's default icon because Figma has no icon swap on it.
-- The secret and the backup codes are `titleMedium` in a monospace family; Figma has no monospace text style, so the frames use `Título/3`.
+- The secret and the backup codes are `titleMedium` in a monospace family; Figma has no monospace text style, so the frames use `Título/3`. The status heading is also `titleMedium`, a role Figma does not define (`fallback-text-roles`), drawn as `Título/3`.
+- The settings loading phase is a raw `CircularProgressIndicator` (Material default stroke, no size); the frame uses `Indicador de carregamento` Padrão (24 dp, 2 dp stroke), so code should use `AppLoadingIndicator`.
 - The screen builds raw `OutlinedButton`, `TextButton`, `CheckboxListTile` and `AlertDialog` (`raw_widget_outside_atoms`); the frames use `Botão`, `Caixa de seleção` and `Diálogo/Confirmação`.
-- The code's Material `AppBar` title can wrap to two lines at 390 dp with "Autenticação em dois fatores" (as drawn); no ellipsis is specified.
+- Flutter's `AppBar` shows the title on one line and ellipsizes it, so "Autenticação em dois fatores" may be cut on narrow phones or large text scales; the frames draw it one line with an ellipsis, and the overflow treatment (wrap or shorter title) is left to #169.
 - No web (1440 dp) frames, and no Light, True-dark, Dracula or Slate frames: those themes are a mode switch of the same frames.
