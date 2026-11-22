@@ -12,7 +12,9 @@ system: [DESIGN.md](DESIGN.md). Dependencies and versions: `pubspec.yaml`.
 
 Work inside the Nix dev shell (`nix develop`, or direnv via `.envrc`). It
 provides Flutter, JDK 17, the Android SDK, `just`, `lefthook` and Python 3.
-Run `just` to list every task. The ones you need most:
+Run `just` to list every task. Claude Code permissions and the Figma plugin are
+preconfigured in `.claude/settings.json`; see "Claude Code setup" in
+`CONTRIBUTING.md`. The ones you need most:
 
 | Command | Use it when |
 | --- | --- |
