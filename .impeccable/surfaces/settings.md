@@ -24,7 +24,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1052:39074` lock cover — mobile · autenticando (`Botão` with loader, no label)
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned title, actions hidden) and `Shell/Barra inferior` (#169, #170; code in #251 and #172). Settings is no longer a tab: the screen opens from the avatar action in each tab root's top bar.
+- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned title, actions hidden) and `Shell/Barra inferior` (#169, #170; code in #251 and #172). Settings is no longer a tab: the screen opens from the avatar action in each tab root's top bar. The `/settings/download` (`997:5174`, `997:5230`) and `/settings/app-lock` (`1052:38699`, `1052:38771`, `1052:38818`) frames draw both bars too since #260 (titles "Downloads" and "Bloqueio do app", no actions, Início selected); the content area is 700 dp and the snackbar of `997:5230` sits above the bottom bar.
 - `Avatar/Perfil` (new local component, `951:870`) → profile card
 - `Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Leitor/Item de ajuste`)
 - `Campo/Texto` (new local component, `951:869`) → API base URL

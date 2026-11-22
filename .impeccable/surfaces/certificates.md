@@ -14,7 +14,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1060:8623` /settings/certificates — mobile · erro ao adicionar (`Aviso/Snackbar` in `color/danger`, `certErrorInvalidFormat`; the FAB sits above it)
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Certificados") and `Shell/Barra inferior` with Início selected, drawn in #170 (code in #251 and #172); the other pushed Settings frames (`/settings/download`, `/settings/app-lock`, `/settings/mfa`) keep their inline app bar until their code lands.
+- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Certificados") and `Shell/Barra inferior` with Início selected, drawn in #170 (code in #251 and #172); the other pushed Settings frames (`/settings/download`, `/settings/app-lock`, `/settings/mfa`) got the same bars in #260.
 - `Abas` (new in #62, `1052:39159`; Selecionada=Primeira/Segunda) → Material `TabBar` in `certificates_template.dart`
 - `Certificado/Item` (new in #62, `1052:39702`; Impressão digital=Sim/Não) → `certificate_item_tile.dart`; its delete action is `Leitor/Botão ícone` Fantasma with `Ícone/trash` in `color/danger`
 - `Botão de ação flutuante` (new in #62, `1052:39160`) → `FloatingActionButton` in `certificates_template.dart`

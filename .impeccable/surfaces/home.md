@@ -9,6 +9,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `913:1380` /home — mobile
 - `1112:8067` /home — mobile · visitante (the second action is the user icon, not the avatar)
+- `1114:9063` /home — mobile · offline (#260; the call-to-action card `1114:9166` disabled, with its offline note)
 - The drawer variant `913:1538` was removed in #169. Frames carry `Shell/Barra superior` Tipo=Raiz com logo and `Shell/Barra inferior` since #170.
 
 ## Figma components used
@@ -39,8 +40,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Vidro/Painel`
 
 ## States in Figma
-- Default: featured carousel (`Home/Destaque`, 620 dp) then three sections, the first being continue-reading with a horizontal list of `Livro/Card` (140×295).
-- Signed-in and guest variants (`913:1380`, `1112:8067`); no drawer (removed in #169). Book detail opened from here keeps the Início tab selected.
+- Default: featured carousel (`Home/Destaque`, 620 dp) then three sections, the first being continue-reading with a horizontal list of `Livro/Card` (140×295), then the requests `Cartão de chamada` (#260).
+- Signed-in, guest and offline variants (`913:1380`, `1112:8067`, `1114:9063`), each ending in the requests card (#260); no drawer (removed in #169). Book detail opened from here keeps the Início tab selected.
 - No loading, empty or error frame.
 
 ## Accessibility
@@ -57,5 +58,5 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 
 ## Gaps (Figma vs code)
 - Frame `913:1380` draws `Shell/Barra superior` (logo, search, avatar; 64 dp, hides on scroll) and `Shell/Barra inferior` (80 dp, labels, three tabs); code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`). `Seção/Cabeçalho` shows "Ver tudo" on "Continue a sua leitura", opening `/latest-reads`.
-- Book requests: the call-to-action card stays on Home and the merged profile and settings screen gets a row for `/requests`; the card is not drawn on Home yet, and code has only the card.
+- Book requests: the call-to-action card stays on Home and the merged profile and settings screen gets a row for `/requests`. The phone frames draw the card (`Cartão de chamada`, wrapper `home-cta · pedidos de livros`, 16 dp inset, after the last book row) since #260: signed in with the button "Pedidos de Livros" (`1114:9091`), guest with "Faça Login para Solicitar" (`1114:9101`) and offline (`Estado=Desabilitado`, `Nota=Sim`; `1114:9166`). Copy follows `homeCta*` and `bookRequestsTitle` in `lib/l10n/app_pt.arb`. The icon library has no `library_add` or login icon, so both buttons show `Ícone/plus`.
 - Code shows a login or profile icon in the header (guest vs authenticated); Figma shows the avatar (signed in) or a user icon (guest) that opens the merged profile and settings screen.
