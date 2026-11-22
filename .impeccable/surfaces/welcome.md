@@ -51,6 +51,6 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - The screen builds a raw `TextField` (outlined border, floating label), `ElevatedButton` and `CircularProgressIndicator` (default 36 dp, no size). Figma uses `Campo/Texto` (label above a filled field), `Botão` and the 24 dp `Indicador de carregamento`. Code follow-up: `AppTextField`, `AppButton` with its loading state.
 - The disabled field and the disabled button have no Figma state: while loading, code disables both (Material disabled colors, button grows to fit the 36 dp spinner). Figma keeps the field in Padrão and fills the button with `color/text-10`, close to Material's 12% disabled fill.
 - `WelcomeViewModel` hard-codes English messages ("Please enter a URL", "Could not connect to the server. Please check the URL and certificate.", "An unexpected error occurred while saving the URL.") instead of ARB keys. Figma shows the Portuguese text of the connection message; code follow-up: move all three to `app_en.arb` and `app_pt.arb`.
-- Code bolds the title (`headlineMedium` is `Título/1` at w600, with `fontWeight: FontWeight.bold` it renders w700); Figma uses `Título/1` as is.
+- Code bolds the title (`headlineMedium` is `Título/1` at w600; `fontWeight: FontWeight.bold` makes it w700); Figma uses `Título/1` as is.
 - The empty-URL message appears in the same slot as the connection message; only the connection one is drawn.
 - No web frame exists.
