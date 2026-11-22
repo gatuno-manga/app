@@ -1417,7 +1417,7 @@
     },
     {
       "id": "navigation-shell-code-differences",
-      "summary": "The #169 components draw the target shell, so code differs and each item is a code follow-up. `AppBottomNavBar` is 48 dp with icons only (tooltips) and three items; Figma is 80 dp with labels, an indicator pill and an optional badge, and a fourth Biblioteca item once #130 ships (#172). The item differs too: code draws a 28 dp icon in `colorScheme.primary` or `onSurfaceVariant` with no indicator and no label; Figma draws a 24 dp icon in `color/primary` or `color/text-secondary` in a `color/primary-15` pill, with a label. Every screen builds its own `AppBar` (`HomeAppBar`, `BooksAppBar`, templates); Figma has one `Shell/Barra superior` with a large collapsing title on tab roots, left-aligned titles everywhere and a small bar on pushed screens that hides and returns like the tab-root bar (#251). Home keeps the `/books?...` links and a requests card; Figma adds a Settings row for `/requests`. Figma contrast: the unselected item icon and label in `color/text-secondary` repeat the 3.0-4.3:1 cases of `figma-contrast`; the badge text `color/on-primary` on `color/danger` repeats 3.1-4.1:1; the logo's `#000212` body in the Home bar disappears into the dark themes (see the logo note in `figma-contrast`)."
+      "summary": "The #169 components draw the target shell, so code differs and each item is a code follow-up. `AppBottomNavBar` is 48 dp with icons only (tooltips) and three items; Figma is 80 dp with labels, an indicator pill and an optional badge, and a Biblioteca item (a placeholder screen until #130 ships) in place of Settings (#172). The item differs too: code draws a 28 dp icon in `colorScheme.primary` or `onSurfaceVariant` with no indicator and no label; Figma draws a 24 dp icon in `color/primary` or `color/text-secondary` in a `color/primary-15` pill, with a label. Every screen builds its own `AppBar` (`HomeAppBar`, `BooksAppBar`, templates); Figma has one `Shell/Barra superior` with a large collapsing title on tab roots, left-aligned titles everywhere and a small bar on pushed screens that hides and returns like the tab-root bar (#251). Home keeps the `/books?...` links and a requests card; Figma adds a row for `/requests` to the merged profile and settings screen, which Figma opens from an avatar action on every tab root (code: the Settings tab and Home's profile button, #172 and #251). Phone frames (#170): pushed screens that still carry their own app bar and no bottom bar are `/settings/download`, `/settings/app-lock`, `/settings/mfa`, `/requests/create`, the app lock cover and the auth screens' siblings; they are redrawn when their code lands. Figma contrast: the unselected item icon and label in `color/text-secondary` repeat the 3.0-4.3:1 cases of `figma-contrast`; the badge text `color/on-primary` on `color/danger` repeats 3.1-4.1:1; the logo's `#000212` body in the Home bar disappears into the dark themes (see the logo note in `figma-contrast`)."
     }
   ],
   "components": {
@@ -1546,7 +1546,7 @@
     },
     "Shell/Barra inferior": {
       "figmaNode": "1095:1500",
-      "variants": "Itens=3/4; 80 dp tall",
+      "variants": "Itens=3/4; 80 dp tall; the selected tab is the Estado of each nested item; frames draw Itens=3 (Início, Biblioteca, Livros)",
       "code": [
         "lib/shared/components/molecules/app_bottom_nav_bar.dart",
         "lib/shared/components/organisms/navigation_shell.dart"

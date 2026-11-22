@@ -10,9 +10,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `922:1714` /books — mobile · grade
 - `922:1888` /books — mobile · filtros avançados
 - `922:2215` /books — mobile · lista
+- `1112:8121` /books — mobile · barra recolhida (the `Raiz recolhida` state of the top bar after scrolling down)
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz com busca and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Raiz com busca (title, search field, shuffle and random-book actions, avatar) and `Shell/Barra inferior` with Livros selected (#169, #170; code in #251 and #172)
 - `Botão` → search/filter actions
 - `Seletor cíclico/Fonte` → source selector
 - `Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)
@@ -47,4 +48,4 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Mobile has no empty/no-results or loading frame (web has `920:5605`).
 - Cover view mode is drawn on web only; the mobile implementation (issue #6) reuses the web card.
 - Code-only, no Figma frame (issue #6): the view-options bottom sheet (`organisms/books_view_options_sheet.dart`: columns 1–4, navigation Pages/Infinite), the `Icons.tune` button that opens it, infinite scroll with its load-more footer, and the stored view preferences.
-- Figma places sort, random-book actions and the source selector in the body and pagination above the grid; code keeps sort/filter/search in the app bar and pagination below the list.
+- Figma puts the search field and the random-book actions (shuffle, dice) in the top bar and keeps only the filter button, sort and the source selector in the body, with pagination above the grid; code keeps sort/filter/search in the app bar and pagination below the list.

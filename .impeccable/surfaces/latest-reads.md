@@ -11,7 +11,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `926:7198` /latest-reads — mobile · vazio
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Empilhada and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Empilhada (back, "Últimas leituras", search, more) and `Shell/Barra inferior` with Início selected, since the screen is pushed from "Ver tudo" on Home (#169, #170; code in #251 and #172)
 - `Histórico/Data` → date group header
 - `Histórico/Item` → history entry
 - `Histórico/Capítulo`

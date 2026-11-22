@@ -9,9 +9,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Livro/Card` list items)
 - `953:2492` /library — mobile · vazio
+- `1112:8220` /library — mobile · barra recolhida (`Raiz recolhida` state)
+- `1112:8281` /library — mobile · em breve (antes do #130): the placeholder tab the app ships until #130 builds the screen
+- `1112:8305` /library — mobile · visitante: sign-in prompt
 
 ## Figma components used
-- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz expandida and `Shell/Barra inferior` (#169; code in #251 and #172)
+- `Shell/Barra superior` Tipo=Raiz expandida (search, avatar or user icon) and `Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
 - `Livro/Aba` → tabs (Ativa / Inativa)
 - `Livro/Card` (Tipo=Lista) → `features/books/presentation/components/molecules/`
 - `Botão` (Primário) → empty-state action
