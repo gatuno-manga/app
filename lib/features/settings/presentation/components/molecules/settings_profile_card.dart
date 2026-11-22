@@ -7,7 +7,7 @@ class SettingsProfileCard extends StatelessWidget {
   final String name;
   final String? email;
 
-  /// Profile picture over the initials; null keeps the initials.
+  /// Profile picture; null shows the user icon.
   final String? imageUrl;
   final VoidCallback onTap;
 
@@ -24,10 +24,10 @@ class SettingsProfileCard extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       leading: AppAvatar(
-        name: email != null ? name : null,
+        guest: email == null,
         imageUrl: imageUrl,
         strategy: sl<ImageLoadingStrategy>(),
-        radius: 24,
+        radius: 28,
       ),
       title: Text(
         name,

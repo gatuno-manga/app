@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import '../../domain/entities/image_metadata.dart';
 
 part 'image_metadata_model.g.dart';

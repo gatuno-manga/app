@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+
 import '../atoms/app_nav_bar_item.dart';
 
 /// The phone bottom bar: Início, Biblioteca and Livros, in the order of the

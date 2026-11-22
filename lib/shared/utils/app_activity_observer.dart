@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// A wrapper widget that tracks user interactions and app lifecycle.
