@@ -50,8 +50,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `radius/md`
 
 ## States in Figma
-- Challenge: default, invalid code, loading. The other errors (`tooManyAttempts`, `network`, `unknown`) use the same message slot with their `mfaError*` text; `challengeExpired` is a snackbar plus a redirect to `/auth/signin` and has no frame.
-- Settings: every `MfaPhase` (loading, load failed, status off/on, setup, backup codes) plus the disable and reconfigure dialogs. The status and setup phases with an error (a failed disable or setup start shows the message under the content) and the busy button states are not drawn; the challenge's empty-field validation message (`mfaCodeRequired`) is not drawn either.
+- Challenge: default, invalid code, loading. The other errors (`tooManyAttempts`, `network`, `unknown`) use the same message slot with their `mfaError*` text; `challengeExpired` is a snackbar plus a redirect to `/auth/signin` and has no frame. The empty-field validation message (`mfaCodeRequired`) is not drawn either.
+- Settings: every `MfaPhase` (loading, load failed, status off/on, setup, backup codes) plus the disable and reconfigure dialogs. The status and setup phases with an error (a failed enable, reconfigure or disable shows the message under the status; a failed confirmation shows it under the code field) and the busy button states are not drawn.
 - Copy follows `lib/l10n/app_pt.arb`. The secret, backup codes and the "7 códigos de backup restantes" count are sample data.
 - The disabled "Concluir" is drawn at 40% opacity, the same approximation as other disabled buttons; Figma has no disabled button treatment.
 - The Desativar dialog is a detached copy of `Diálogo/Confirmação` Destrutivo with a `Campo/Texto` between message and actions, because the component has no field slot (`Diálogo/Confiar em certificado` has one, but with other text and actions).
