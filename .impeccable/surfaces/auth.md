@@ -4,7 +4,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Route
 - Figma: /auth/login, /auth/register (mobile section `859:37`, "Autenticação — login, cadastro")
-- Code: `/auth/signin`, `/auth/signup` (`lib/features/authentication`); also `/welcome` (API URL setup, no frame)
+- Code: `/auth/signin`, `/auth/signup` (`lib/features/authentication`); `/welcome` (API URL setup) has its own surface file, `welcome.md`
 
 ## Figma frames
 - `954:2559` /auth/signin — mobile
@@ -19,7 +19,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Ícone/loader` → loading action
 
 ## Code
-`lib/features/authentication/presentation/views/{signin_screen,signup_screen}.dart`, templates and organisms under `presentation/components`; shared `app_text_field.dart`, `app_button.dart`. Welcome: `lib/features/welcome/presentation/views/welcome_screen.dart`.
+`lib/features/authentication/presentation/views/{signin_screen,signup_screen}.dart`, templates and organisms under `presentation/components`; shared `app_text_field.dart`, `app_button.dart`. Welcome: see `welcome.md`.
 
 ## Tokens used
 - `color/app-background`

@@ -89,7 +89,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - The page header has no subtitle, unlike library and profile; code does not show one either.
 - Section label "Configuração da API" and field label "URL Base da API" both come from l10n keys and overlap in meaning.
 - Figma route /user differs from code `/settings`.
-- `/settings/certificates` (list, add and remove allowed URLs) has no frame; tracked in a follow-up issue.
+- `/settings/certificates` is drawn in issue #62; see `certificates.md`.
 - `/settings/app-lock` and the lock cover are drawn (issue #127); the code differences are listed in `app-lock-code-differences` in DESIGN.md. The entry row is drawn on `997:5052` with a description cut to one line.
 - No web frame exists (web section `859:28` is empty).
 - Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.

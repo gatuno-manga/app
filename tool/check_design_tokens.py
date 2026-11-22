@@ -23,6 +23,7 @@ REQUIRED_SURFACES = [
     "reader", "library", "profile", "settings", "auth",
     "mfa",
     "book-requests",
+    "welcome", "certificates",
 ]
 HEX = re.compile(r"^#[0-9a-f]{6}([0-9a-f]{2})?$")
 STATUSES = {"match", "differs", "missing"}
