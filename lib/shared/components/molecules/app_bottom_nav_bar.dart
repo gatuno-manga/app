@@ -34,33 +34,38 @@ class AppBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: height,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AppNavBarItem(
-                icon: Icons.home_outlined,
-                selectedIcon: Icons.home,
-                label: l10n.homeTitle,
-                isSelected: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
-              AppNavBarItem(
-                icon: Icons.bookmark_border,
-                selectedIcon: Icons.bookmark,
-                label: l10n.libraryTitle,
-                isSelected: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-              AppNavBarItem(
-                icon: Icons.book_outlined,
-                selectedIcon: Icons.book,
-                label: l10n.booksTitle,
-                isSelected: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-            ],
+        // The bar's opaque background would paint over the items' ink, so the
+        // ink needs a Material of its own above it.
+        child: Material(
+          type: MaterialType.transparency,
+          child: SizedBox(
+            height: height,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppNavBarItem(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home,
+                  label: l10n.homeTitle,
+                  isSelected: currentIndex == 0,
+                  onTap: () => onTap(0),
+                ),
+                AppNavBarItem(
+                  icon: Icons.bookmark_border,
+                  selectedIcon: Icons.bookmark,
+                  label: l10n.libraryTitle,
+                  isSelected: currentIndex == 1,
+                  onTap: () => onTap(1),
+                ),
+                AppNavBarItem(
+                  icon: Icons.book_outlined,
+                  selectedIcon: Icons.book,
+                  label: l10n.booksTitle,
+                  isSelected: currentIndex == 2,
+                  onTap: () => onTap(2),
+                ),
+              ],
+            ),
           ),
         ),
       ),

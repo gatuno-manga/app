@@ -49,6 +49,8 @@ class AppEmptyView extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 message,
+                // Essential copy: the default text color, since
+                // `color/text-secondary` misses AA in some themes.
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),

@@ -85,5 +85,26 @@ void main() {
       await tester.tap(find.text('Library'));
       expect(tapped, 1);
     });
+
+    testWidgets('gives the items a Material of their own for tap ink', (
+      tester,
+    ) async {
+      await pumpBar(tester);
+
+      final material = find.ancestor(
+        of: find.text('Home'),
+        matching: find.byType(Material),
+      );
+      // The nearest Material sits inside the bar, below its opaque
+      // background, so splashes are visible.
+      final nearest = tester.element(material.first);
+      expect(
+        find.descendant(
+          of: find.byType(AppBottomNavBar),
+          matching: find.byWidget(nearest.widget),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

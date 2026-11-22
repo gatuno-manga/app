@@ -44,27 +44,30 @@ class AppNavBarItem extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
+              // `Ink`, not `Container`: a filled Container would paint over
+              // the tap feedback.
+              Ink(
                 width: 64,
                 height: 32,
-                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isSelected
                       ? theme.selectedSubtleColor
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(
-                      isSelected ? (selectedIcon ?? icon) : icon,
-                      size: 24,
-                      color: color,
-                    ),
-                    if (badge != null)
-                      Positioned(top: -4, right: -6, child: badge!),
-                  ],
+                child: Center(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(
+                        isSelected ? (selectedIcon ?? icon) : icon,
+                        size: 24,
+                        color: color,
+                      ),
+                      if (badge != null)
+                        Positioned(top: -4, right: -6, child: badge!),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
