@@ -10,10 +10,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `913:1380` /home — mobile
 - `1112:8067` /home — mobile · visitante (the second action is the user icon, not the avatar)
 - `1114:9063` /home — mobile · offline (#260; the call-to-action card `1114:9166` disabled, with its offline note)
-- The drawer variant `913:1538` was removed in #169. Frames carry `App/Organism/Shell/Barra superior` Type=Root with logo and `App/Organism/Shell/Barra inferior` since #170.
+- The drawer variant `913:1538` was removed in #169. Frames carry `App/Organism/Shell/Barra superior` Type=Root with Show logo=True and `App/Organism/Shell/Barra inferior` since #170.
 
 ## Figma components used
-- `App/Organism/Shell/Barra superior` (Type=Root with logo: logo, search and an avatar action, a user icon for guests) → target of `features/home/presentation/components/organisms/home_app_bar.dart` (shared top bar from #251). The avatar action opens the merged profile and settings screen (see `settings.md`).
+- `App/Organism/Shell/Barra superior` (Type=Root, Show logo=True: logo, search and an avatar action, `Core/Atom/Avatar/Perfil` State=Guest for guests) → target of `features/home/presentation/components/organisms/home_app_bar.dart` (shared top bar from #251). The avatar action opens the merged profile and settings screen (see `settings.md`).
 - `App/Organism/Shell/Barra inferior` (Items=3: Início selected, Biblioteca, Livros) → `shared/components/molecules/app_bottom_nav_bar.dart`
 - `Core/Organism/Home/Destaque` → `.../organisms/featured_carousel.dart`
 - `Core/Molecule/Seção/Cabeçalho` → `.../molecules/home_section_header.dart`
@@ -54,7 +54,7 @@ Shell (#172): `/home` is the first branch of the `StatefulShellRoute` (`home_rou
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Medium 834×1194: `1101:469` /home — tablet médio. Expanded 1194×834: `1101:625` /home — tablet expandido.
-- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Início selected; `App/Organism/Shell/Barra superior` Root with logo across the content width, with the profile avatar (`App/Atom/Avatar/Perfil`) in the last action slot (opens the merged profile and settings screen); `Core/Organism/Home/Destaque` Platform=Tablet (`1100:8359`) capped at 360 dp; `Core/Molecule/Seção/Cabeçalho`; `Core/Molecule/Livro/Card` Grade in rows of 4 (medium) or 6 (expanded) cards.
+- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Início selected; `App/Organism/Shell/Barra superior` Root with Show logo=True across the content width, with the profile avatar (`Core/Atom/Avatar/Perfil`) in the last action slot (opens the merged profile and settings screen); `Core/Organism/Home/Destaque` Platform=Tablet (`1100:8359`) capped at 360 dp; `Core/Molecule/Seção/Cabeçalho`; `Core/Molecule/Livro/Card` Grade in rows of 4 (medium) or 6 (expanded) cards.
 - Layout rules: see DESIGN.md Layout, "Window size classes and tablets". Code: #255 (rail in #173).
 - Not drawn: the requests call-to-action card and the loading, empty and error states (the phone frame has none either).
 

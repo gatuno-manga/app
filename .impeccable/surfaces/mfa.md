@@ -3,10 +3,11 @@
 Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #128 from existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: `/auth/mfa` (section `1052:38039`, "Autenticação — MFA") and `/settings/mfa` (section `1052:39164`, "Configurações — MFA"); both sections are new and sit below the older sections of the page.
+- Figma: `/auth/mfa` (section `1052:38039`, "Autenticação — MFA") and `/settings/mfa` (section `1052:39164`, "Configurações — MFA"); both sections sit next to their parents since #266 (`/auth/mfa` after Autenticação, `/settings/mfa` after Configurações).
 - Code: `/auth/mfa` (`lib/features/authentication/presentation/views/mfa_challenge_screen.dart`, reached after sign-in when the account has two-factor on) and `/settings/mfa` (`lib/features/settings/presentation/views/mfa_settings_screen.dart`).
 
 ## Figma frames
+- Layout (#266): on `/auth/mfa` and on the first three `/settings/mfa` states (carregando, erro ao carregar, desativada) the top bar stays and the content block is vertically centered in the remaining area, 24 dp side padding, 342 dp wide.
 - `1052:38040` /auth/mfa — mobile (description, code field, Verificar)
 - `1052:38063` /auth/mfa — mobile · erro (invalid code message under the field)
 - `1052:38085` /auth/mfa — mobile · carregando (button with loader)
