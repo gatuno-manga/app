@@ -214,14 +214,7 @@ Old names and Figma property labels may still appear in older issues and PRs; th
 | `Esqueleto` | `App/Atom/Esqueleto` |
 | `Indicador de carregamento` | `App/Atom/Indicador de carregamento` |
 | `Caixa de seleção` | `App/Atom/Caixa de seleção` |
-| `Botão de ação flutuante` | `App/Molecule/Solicitação/Cartão de esqueleto` | App | Molecule | Loading placeholder of a request card (four `App/Atom/Esqueleto` text lines) | `features/book_requests` list loading phase (no shared widget yet) |
-| `App/Molecule/Vista vazia` | App | Molecule | Centered empty state: icon, message and one action (latest reads, library) | no shared widget yet; `AppOfflineEmptyView` is the offline one |
-| `App/Molecule/Perfil/Cartão` | App | Molecule | Profile entry at the top of Settings: avatar, name, email and an arrow | profile card in `features/settings` (no shared widget yet) |
-| `App/Molecule/Ordenação/Seletor` | App | Molecule | "Ordenar por:" label with the sort select (Books list) | `AppSelect` row in `features/books` (no shared widget yet) |
-| `App/Molecule/Configurações/Linha de tipo` | App | Molecule | Book type label above an `App/Molecule/Seletor segmentado` (download network per type) | `app_labeled_segmented_button.dart` rows in the download settings |
-| `App/Molecule/Página/Cabeçalho` | App | Molecule | Page header: one-line title or subtitle with an optional icon button | header of latest reads and library (no shared widget yet) |
-| `App/Organism/Livro/Cabeçalho` | App | Organism | Book detail header panel: cover, title, authors, chapter count and release, continue button, small actions | header of `features/books` book detail (no shared widget yet) |
-| `App/Atom/Botão de ação flutuante` |
+| `Botão de ação flutuante` | `App/Atom/Botão de ação flutuante` |
 | `Campo/Texto` | `App/Atom/Campo/Texto` |
 | `Lista/Item` | `App/Molecule/Lista/Item` |
 | `Aviso/Snackbar` | `App/Molecule/Aviso/Snackbar` |
@@ -281,6 +274,13 @@ Variant values (old to new): `Aguardando conexão` → `Waiting for connection`,
 | `App/Molecule/Rádio/Item` | App | Molecule | Single-choice row with a leading radio (app lock grace period) | Material `RadioListTile` in `features/app_lock/presentation/views/app_lock_settings_screen.dart` (no shared atom yet) |
 | `App/Atom/Caixa de seleção` | App | Atom | Checkbox row (MFA backup-codes confirmation) | Material `CheckboxListTile` in `features/settings/presentation/views/mfa_settings_screen.dart` (no shared atom yet; `Core/Atom/Botão` Outline stands for the planned `AppOutlinedButton`, see the #128 paragraph below) |
 | `App/Molecule/Abas` | App | Molecule | Two-tab bar | raw Material `TabBar` in `features/certificates/presentation/components/templates/certificates_template.dart` (no shared widget yet) |
+| `App/Molecule/Solicitação/Cartão de esqueleto` | App | Molecule | Loading placeholder of a request card (four `App/Atom/Esqueleto` text lines) | `features/book_requests/presentation/views/book_requests_list_page.dart` loading phase (no shared widget yet) |
+| `App/Molecule/Vista vazia` | App | Molecule | Centered empty state: icon, message and one action (latest reads, library) | `features/library/presentation/views/library_screen.dart` (the latest reads screen has no code yet; no shared widget; `AppOfflineEmptyView` is the offline one) |
+| `App/Molecule/Perfil/Cartão` | App | Molecule | Profile entry at the top of Settings: avatar, name, email and an arrow | profile entry in `features/settings/presentation/views/settings_screen.dart` (no shared widget yet) |
+| `App/Molecule/Ordenação/Seletor` | App | Molecule | "Ordenar por:" label with the sort select (Books list) | `features/books/presentation/components/molecules/books_sort_action.dart` (no shared widget yet) |
+| `App/Molecule/Configurações/Linha de tipo` | App | Molecule | Book type label above an `App/Molecule/Seletor segmentado` (download network per type) | `shared/components/molecules/app_labeled_segmented_button.dart` rows in `features/settings/presentation/views/download_settings_screen.dart` |
+| `App/Molecule/Página/Cabeçalho` | App | Molecule | Page header: one-line title or subtitle with an optional icon button | `features/library/presentation/views/library_screen.dart` (the latest reads screen has no code yet; no shared widget) |
+| `App/Organism/Livro/Cabeçalho` | App | Organism | Book detail header panel: cover, title, authors, chapter count and release, continue button, small actions | header of `features/books/presentation/views/book_details_screen.dart` (no shared widget yet) |
 | `App/Atom/Botão de ação flutuante` | App | Atom | Floating action button | raw `FloatingActionButton` in `features/certificates/presentation/components/templates/certificates_template.dart` (no shared widget yet) |
 | `App/Molecule/Certificado/Item` | App | Molecule | Certificate list row | `features/certificates/presentation/components/molecules/certificate_item_tile.dart` |
 | `Web/*/Avaliação/*`, `Core/*/Histórico/*` | Web, Core | any | Ratings, reading history | no code counterpart found |

@@ -1584,15 +1584,15 @@
       "figmaNode": "1124:9446",
       "variants": "no properties; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/features/book_requests/presentation/views"
+        "lib/features/book_requests/presentation/views/book_requests_list_page.dart"
       ],
       "issue": 265
     },
     "App/Molecule/Vista vazia": {
       "figmaNode": "1124:9491",
-      "variants": "text property Message; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "variants": "text property Message; the icon and the action label are overridden on the instance; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/shared/components/molecules"
+        "lib/features/library/presentation/views/library_screen.dart"
       ],
       "issue": 265
     },
@@ -1600,7 +1600,7 @@
       "figmaNode": "1124:9549",
       "variants": "text properties Name, Email; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/features/settings/presentation/views"
+        "lib/features/settings/presentation/views/settings_screen.dart"
       ],
       "issue": 265
     },
@@ -1608,7 +1608,7 @@
       "figmaNode": "1124:9594",
       "variants": "text properties Label, Value; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/features/books/presentation/components"
+        "lib/features/books/presentation/components/molecules/books_sort_action.dart"
       ],
       "issue": 265
     },
@@ -1616,7 +1616,8 @@
       "figmaNode": "1124:9624",
       "variants": "text property Label; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/shared/components/molecules/app_labeled_segmented_button.dart"
+        "lib/shared/components/molecules/app_labeled_segmented_button.dart",
+        "lib/features/settings/presentation/views/download_settings_screen.dart"
       ],
       "issue": 265
     },
@@ -1624,7 +1625,7 @@
       "figmaNode": "1125:8991",
       "variants": "text property Title, boolean Show action; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/features/books/presentation/views"
+        "lib/features/library/presentation/views/library_screen.dart"
       ],
       "issue": 265
     },
@@ -1632,7 +1633,7 @@
       "figmaNode": "1125:9063",
       "variants": "text properties Title, Authors, Chapters, Release; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
       "code": [
-        "lib/features/books/presentation/views"
+        "lib/features/books/presentation/views/book_details_screen.dart"
       ],
       "issue": 265
     }
