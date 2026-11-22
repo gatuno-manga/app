@@ -1414,6 +1414,10 @@
     {
       "id": "book-requests-code-differences",
       "summary": "The #129 frames for /requests and /requests/create draw first load, error and empty in the intended look, so code differs and each item is a code follow-up: first load shows Esqueleto cards (code: a CircularProgressIndicator), error uses Vista de erro (code: an error icon, red text and a raw ElevatedButton.icon), empty uses the Cartão de chamada look (code: Icons.inbox_outlined, muted text and a raw ElevatedButton.icon). BookRequestCard is a Material Card with elevation 2 and a bold titleLarge title; Figma Solicitação/Cartão is a flat color/secondary-60 card with a color/border outline and Título/3. AppStatusBadge uses labelSmall bold on a 20% tint with a 50% border; Figma Tag uses Interface/Rótulo on color/*-15 and color/*-40. The icon library has no info or calendar icon, so the reason row uses Ícone/file-text and the date Ícone/clock where code uses Icons.info_outline and Icons.calendar_today. AppButton is 48 dp high and Figma Botão is 44 dp. The Material AppBar (back, title, '+') is drawn as code builds it; the '+' IconButton has no tooltip. Not drawn: pull-to-refresh and the success SnackBar."
+    },
+    {
+      "id": "navigation-shell-code-differences",
+      "summary": "The #169 components draw the target shell, so code differs and each item is a code follow-up. `AppBottomNavBar` is 48 dp with icons only (tooltips) and three items; Figma is 80 dp with labels, an indicator pill and an optional badge, and a fourth Biblioteca item once #130 ships (#172). Every screen builds its own `AppBar` (`HomeAppBar`, `BooksAppBar`, templates); Figma has one `Shell/Barra superior` with a large collapsing title on tab roots, left-aligned titles everywhere and a floating small bar on pushed screens (#251). Home keeps the `/books?...` links and a requests card; Figma adds a Settings row for `/requests`. Figma contrast: the unselected item icon and label in `color/text-secondary` repeat the 3.0-4.3:1 cases of `figma-contrast`; the badge text `color/on-primary` on `color/danger` repeats 3.1-4.1:1; the logo's `#000212` body in the Home bar disappears into the dark themes (see the logo note in `figma-contrast`)."
     }
   ],
   "components": {
@@ -1531,6 +1535,31 @@
         "lib/features/certificates/presentation/components/molecules/certificate_item_tile.dart"
       ],
       "issue": 62
+    },
+    "Shell/Item da barra inferior": {
+      "figmaNode": "1095:1453",
+      "variants": "Estado=Selecionado/Padrão, Selo=Sim/Não; properties Rótulo, Ícone, Contagem",
+      "code": [
+        "lib/shared/components/atoms/app_nav_bar_item.dart"
+      ],
+      "issue": 169
+    },
+    "Shell/Barra inferior": {
+      "figmaNode": "1095:1500",
+      "variants": "Itens=3/4; 80 dp tall",
+      "code": [
+        "lib/shared/components/molecules/app_bottom_nav_bar.dart",
+        "lib/shared/components/organisms/navigation_shell.dart"
+      ],
+      "issue": 169
+    },
+    "Shell/Barra superior": {
+      "figmaNode": "1096:1580",
+      "variants": "Tipo=Raiz expandida (128 dp), Raiz recolhida (64), Raiz com logo (64), Empilhada (64), Raiz com busca (184); properties Título, Mostrar ação 2, Mostrar ação 3",
+      "code": [
+        "lib/shared/components/ (shared top bar, issue #251)"
+      ],
+      "issue": 169
     }
   },
   "fixedColors": [
@@ -1576,14 +1605,6 @@
         "#ffffff@0.90"
       ],
       "reason": "Canvas annotation chrome, not app UI."
-    },
-    {
-      "where": "Home drawer scrim sidebar-overlay",
-      "figmaNode": "913:1538",
-      "colors": [
-        "#000212@0.50"
-      ],
-      "reason": "Pending removal with the drawer (removed in #169, tracked in #168)."
     }
   ]
 }
