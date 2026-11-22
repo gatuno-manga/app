@@ -12,7 +12,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `922:2215` /books — mobile · lista
 
 ## Figma components used
-- `Shell/Header`
+- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz com busca and `Shell/Barra inferior` (#169; code in #251 and #172)
 - `Botão` → search/filter actions
 - `Seletor cíclico/Fonte` → source selector
 - `Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)

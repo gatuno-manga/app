@@ -24,7 +24,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Campo/Texto` (Estado=Padrão/Erro) → `AppTextField`
 - `Botão` Primário → `AppButton`
 - `Esqueleto`, `Indicador de carregamento`, `Vista de erro`, `Cartão de chamada` (components from #126)
-- `Leitor/Botão ícone` and the `app-bar` frame pattern of `/settings/download` → the Material `AppBar` (back and "+" actions); no native top app bar component yet (#169)
+- `Leitor/Botão ícone` and the `app-bar` frame pattern of `/settings/download` → the Material `AppBar` (back and "+" actions); target is `Shell/Barra superior` Tipo=Empilhada (#169; redrawn in #170, built in #251)
 
 ## Code
 `lib/features/book_requests/presentation/views/{book_requests_list_page,create_book_request_page}.dart`, `components/molecules/book_request_card.dart`, `components/organisms/create_book_request_form.dart`; `lib/shared/components/atoms/app_status_badge.dart`.
@@ -72,4 +72,4 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Code status badge is `labelSmall` bold on a 20% tint with a 50% border; Figma `Tag` uses `Interface/Rótulo` on 15% and 40% tint tokens.
 - Figma has no info or calendar icon in the icon library: the reason row uses `Ícone/file-text` and the date `Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
 - Code `AppButton` is 48 dp high; Figma `Botão` is 44 dp.
-- The app bar is drawn as code builds it today (back, centered title, "+"), not as the native top app bar of #169.
+- The app bar is drawn as code builds it today (back, centered title, "+"), not as the native `Shell/Barra superior` of #169 (redrawn in #170, built in #251). Its entry points are the Home card and a Settings row.

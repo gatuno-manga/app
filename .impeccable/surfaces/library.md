@@ -11,7 +11,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `953:2492` /library — mobile · vazio
 
 ## Figma components used
-- `Shell/Header` (Plataforma=Mobile)
+- `Shell web/Header` (the frames still draw it until #170); target `Shell/Barra superior` Tipo=Raiz expandida and `Shell/Barra inferior` (#169; code in #251 and #172)
 - `Livro/Aba` → tabs (Ativa / Inativa)
 - `Livro/Card` (Tipo=Lista) → `features/books/presentation/components/molecules/`
 - `Botão` (Primário) → empty-state action
