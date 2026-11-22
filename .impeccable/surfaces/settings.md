@@ -16,7 +16,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `Shell/Header` (Plataforma=Mobile)
 - `Avatar/Perfil` (new local component, `951:870`) → profile card
-- `Leitor/Item de ajuste` (Controle=Switch) → sensitive-content switch (`app_switch`; reuses the reader component because Figma has no settings switch)
+- `Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Leitor/Item de ajuste`)
 - `Campo/Texto` (new local component, `951:869`) → API base URL
 - `Lista/Item` (new local component, `951:872`) → downloads, certificates, export logs, open logs
 - `Seletor segmentado` (issue #162, `996:5077`) → per-type download network (`AppLabeledSegmentedButton`)
@@ -63,8 +63,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - No frames for API-URL saved/error feedback (`settingsApiUrlSuccess`, `settingsApiUrlError`).
 
 ## Accessibility
-- Measured in Figma against `color/app-background` (Dark): secondary text about 5.0:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Leitor/Item de ajuste` is 64 dp, both above the 44 dp minimum tap target.
-- `Leitor/Item de ajuste` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
+- Measured in Figma against `color/app-background` (Dark): secondary text about 5.0:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Interruptor/Item` is 64 dp, both above the 44 dp minimum tap target.
+- `Interruptor/Item` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 - /settings/download: `Seletor segmentado` segments are 48 dp high (meets the target); color/text on the selected `color/primary-40` fill is 6.3-8.2:1 across the five themes; the `color/border` outline and divider are 1.2-1.6:1 (see `figma-contrast`).
 
 ## Gaps (Figma vs code)

@@ -68,7 +68,7 @@ Frames live in the Figma section `Leitor · Imagem · Ajustes (#70)` (id `979:31
 - `979:3602` Leitor · Imagem · Espaço entre páginas 8 dp (Sépia): the reader without the sheet, showing the gap on the `leitura/fundo` of Sépia
 - `979:3612` Leitor · Imagem · Ajustes (Alto contraste): theme Alto contraste, gap 4 dp
 
-Decisions: the background is the shared theme picker (`Leitor/Tema de leitura`, no new control or token). Rows below it: page gap stepper (`Leitor/Item de ajuste` Controle=Passos; default 0, range 0-16 dp, step 4), "Mostrar indicador de página" (Switch, default on) and "Manter a tela ligada" (Switch, default off). Components reused: `Leitor/Item de ajuste`, `Leitor/Tema de leitura`, `Leitor/Botão ícone`.
+Decisions: the background is the shared theme picker (`Leitor/Tema de leitura`, no new control or token). Rows below it: page gap stepper (`Leitor/Item de ajuste` Controle=Passos; default 0, range 0-16 dp, step 4), "Mostrar indicador de página" (Switch, default on) and "Manter a tela ligada" (Switch, default off). Components reused: `Leitor/Item de ajuste` (Passos), `Interruptor/Item` (switches; the reader's Controle=Switch variants moved there in #126), `Leitor/Tema de leitura`, `Leitor/Botão ícone`.
 
 Gaps:
 - A disabled stepper button is drawn with 38% opacity on the `Leitor/Botão ícone` instance; the component has no disabled variant.
