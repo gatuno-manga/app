@@ -11,6 +11,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `903:928` /books/:id — Mais opções aberto (mobile)
 - `906:1075` /books/:id — Capítulos agrupados (mobile)
 - The three frames above carry `App/Organism/Shell/Barra superior` Type=Stacked (back, title "Livro", more) with a transparent fill over the cover, and `App/Organism/Shell/Barra inferior` with Início selected, as opened from Home (#170). Opened from Books the same screen selects Livros.
+- `App/Organism/Livro/Cabeçalho` (#265, `1125:9063`): the cover, title, authors, continue button and small actions panel on every book detail frame
 - `1023:5698` /books/:id — Downloads · estados dos capítulos (#165): download summary and one tile per indicator state
 - `1023:6647` /books/:id — Downloads · resumo (#165): the five summary states
 - `1023:6696` /books/:id — Downloads · seleção (#165): selection top and bottom bars

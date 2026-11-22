@@ -24,6 +24,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `App/Atom/Campo/Texto` (State=Default/Error) → `AppTextField`
 - `Core/Atom/Botão` Primary → `AppButton`
 - `App/Atom/Esqueleto`, `App/Atom/Indicador de carregamento`, `App/Molecule/Vista de erro`, `App/Molecule/Cartão de chamada` (components from #126)
+- `App/Molecule/Solicitação/Cartão de esqueleto` (#265, `1124:9446`): the four loading cards of `/requests` · primeira carga and carregando mais
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned "Solicitações", "+" action) and `App/Organism/Shell/Barra inferior` with Início selected on the five `/requests` frames, drawn in #170 (code in #251 and #172); the five `/requests/create` frames draw `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned "Novo Pedido", no actions) and `App/Organism/Shell/Barra inferior` with Início selected, redrawn in #260 (code in #251 and #172)
 
 ## Code

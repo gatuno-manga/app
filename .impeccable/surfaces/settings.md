@@ -25,6 +25,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned title, actions hidden) and `App/Organism/Shell/Barra inferior` (#169, #170; code in #251 and #172). Settings is no longer a tab: the screen opens from the avatar action in each tab root's top bar. The `/settings/download` (`997:5174`, `997:5230`) and `/settings/app-lock` (`1052:38699`, `1052:38771`, `1052:38818`) frames draw both bars too since #260 (titles "Downloads" and "Bloqueio do app", no actions, Início selected); the content area is 700 dp and the snackbar of `997:5230` sits above the bottom bar.
+- `App/Molecule/Perfil/Cartão` (#265, `1124:9549`): the profile entry at the top of `/settings`; `App/Molecule/Configurações/Linha de tipo` (#265, `1124:9624`): the five type rows of `/settings/download`
 - `App/Atom/Avatar/Perfil` (new local component, `951:870`) → profile card
 - `Core/Molecule/Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Core/Molecule/Leitor/Item de ajuste`)
 - `App/Atom/Campo/Texto` (new local component, `951:869`) → API base URL

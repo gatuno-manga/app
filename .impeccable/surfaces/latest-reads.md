@@ -12,6 +12,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, "Últimas leituras", search, more) and `App/Organism/Shell/Barra inferior` with Início selected, since the screen is pushed from "Ver tudo" on Home (#169, #170; code in #251 and #172)
+- `App/Molecule/Página/Cabeçalho` (#265, `1125:8991`): the "Capítulos que você leu recentemente" header with the visibility button; `App/Molecule/Vista vazia` (#265, `1124:9491`): the empty history
 - `Core/Molecule/Histórico/Data` → date group header
 - `Core/Molecule/Histórico/Item` → history entry
 - `Core/Molecule/Histórico/Capítulo`
