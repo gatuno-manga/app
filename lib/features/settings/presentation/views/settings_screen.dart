@@ -20,6 +20,7 @@ import '../components/molecules/settings_section_header.dart';
 import '../components/organisms/settings_api_form.dart';
 import '../components/organisms/theme_swatch_grid.dart';
 import '../components/templates/settings_template.dart';
+import '../../../../core/router/shell_navigation.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -94,7 +95,7 @@ class SettingsPage extends StatelessWidget {
             imageUrl: user?.profilePictureUrl,
             onTap: () {
               if (state.isAuthenticated) {
-                context.push('/settings/profile');
+                context.pushInTab('/settings/profile');
               } else {
                 context.push('/auth/signin');
               }
@@ -114,7 +115,7 @@ class SettingsPage extends StatelessWidget {
             onChanged: (value) => viewModel.setSensitiveContentEnabled(value),
           ),
           appLockTile: AppLockSettingsTile(
-            onTap: () => context.push('/settings/app-lock'),
+            onTap: () => context.pushInTab('/settings/app-lock'),
           ),
           securityTile: state.isAuthenticated
               ? ListTile(
@@ -122,7 +123,7 @@ class SettingsPage extends StatelessWidget {
                   subtitle: Text(l10n.settingsMfaDesc),
                   leading: const Icon(Icons.shield_outlined),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.push('/settings/mfa'),
+                  onTap: () => context.pushInTab('/settings/mfa'),
                 )
               : null,
           readingSectionHeader: SettingsSectionHeader(
@@ -147,7 +148,7 @@ class SettingsPage extends StatelessWidget {
             subtitle: Text(l10n.settingsDownloadNetworkDesc),
             leading: const Icon(Icons.download_outlined),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/download'),
+            onTap: () => context.pushInTab('/settings/download'),
           ),
           apiSectionHeader: SettingsSectionHeader(
             title: l10n.settingsApiSection,
@@ -164,7 +165,7 @@ class SettingsPage extends StatelessWidget {
             title: Text(l10n.settingsCertificatesSection),
             subtitle: Text(l10n.settingsCertificatesDesc),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/settings/certificates'),
+            onTap: () => context.pushInTab('/settings/certificates'),
           ),
           diagnosticsSectionHeader: SettingsSectionHeader(
             title: l10n.settingsDiagnosticsSection,

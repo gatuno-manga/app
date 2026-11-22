@@ -38,6 +38,23 @@ extension PumpApp on WidgetTester {
           builder: (context, state) =>
               const Scaffold(body: Text('Profile Page')),
         ),
+        // Pushed screens live under the tab they were opened from; the helper
+        // router stands in for the Home tab.
+        GoRoute(
+          path: '/home/settings',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Settings Page')),
+        ),
+        GoRoute(
+          path: '/home/settings/download',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Download Settings Page')),
+        ),
+        GoRoute(
+          path: '/home/settings/profile',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Profile Page')),
+        ),
         GoRoute(
           path: '/auth/signin',
           builder: (context, state) =>

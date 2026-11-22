@@ -42,6 +42,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/books/presentation/views/book_details_screen.dart`.
 
+Shell (#172): book detail is pushed inside the tab it was opened from (`/home/books/:bookId`, `/library/books/:bookId`, `/books/:bookId`; `book_details_route.dart`), so the bar stays and Início stays selected when Home opens a book. Links use `context.pushInTab('/books/<id>')`.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

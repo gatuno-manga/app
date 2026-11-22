@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title.dart';
 import '../atoms/book_type_badge.dart';
+import '../../../../../core/router/shell_navigation.dart';
 
 /// Grid card: cover with the title below it (Figma `Livro/Card`).
 class BookCard extends StatelessWidget {
@@ -32,7 +32,7 @@ class BookCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.push('/books/${book.id}'),
+        onTap: () => context.pushInTab('/books/${book.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../view_models/book_requests_list_view_model.dart';
 import '../components/molecules/book_request_card.dart';
+import '../../../../core/router/shell_navigation.dart';
 
 class BookRequestsListPage extends StatefulWidget {
   const BookRequestsListPage({super.key});
@@ -48,7 +48,7 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.push('/requests/create'),
+            onPressed: () => context.pushInTab('/requests/create'),
           ),
         ],
       ),
@@ -61,12 +61,16 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
             onRefresh: () => viewModel.fetchRequests(refresh: true),
             child: _buildBody(viewModel, state, l10n),
           );
-        }
+        },
       ),
     );
   }
 
-  Widget _buildBody(BookRequestsListViewModel viewModel, BookRequestsListState state, AppLocalizations l10n) {
+  Widget _buildBody(
+    BookRequestsListViewModel viewModel,
+    BookRequestsListState state,
+    AppLocalizations l10n,
+  ) {
     if (state.isLoading && state.requests.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -76,7 +80,11 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text(
               state.error!,
@@ -102,18 +110,22 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
             Icon(
               Icons.inbox_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
               l10n.bookRequestsEmpty,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => context.push('/requests/create'),
+              onPressed: () => context.pushInTab('/requests/create'),
               icon: const Icon(Icons.add),
               label: Text(l10n.bookRequestsCreateTitle),
             ),

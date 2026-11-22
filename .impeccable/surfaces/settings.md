@@ -39,6 +39,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/settings/presentation/views/settings_screen.dart`, settings components under `presentation/components/{molecules,organisms,templates}`; certificates in `lib/features/certificates`; app lock in `lib/features/app_lock/presentation/{views/app_lock_settings_screen.dart,views/app_lock_screen.dart,components/molecules/app_lock_settings_tile.dart}`.
 
+Shell (#172): Settings is no longer a tab. The screen is pushed from a tab root and mounted under each (`/home/settings`, `/library/settings`, `/books/settings`, with `download`, `app-lock`, `mfa`, `certificates` and `profile` below it); `/settings` redirects to the Home copy. It still renders `SettingsPage` until the merged content lands (#251).
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

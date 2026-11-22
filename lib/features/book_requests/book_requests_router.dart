@@ -6,16 +6,18 @@ import 'presentation/view_models/create_book_request_view_model.dart';
 import 'presentation/views/book_requests_list_page.dart';
 import 'presentation/views/create_book_request_page.dart';
 
-final bookRequestsRoutes = [
+/// Relative to a tab root (see `shellPushedRoutes`); `/requests` redirects to
+/// the Home copy.
+List<RouteBase> bookRequestsRoutes() => [
   GoRoute(
-    path: '/requests',
+    path: 'requests',
     builder: (context, state) => Provider(
       create: (_) => sl<BookRequestsListViewModel>(),
       child: const BookRequestsListPage(),
     ),
   ),
   GoRoute(
-    path: '/requests/create',
+    path: 'requests/create',
     builder: (context, state) => Provider(
       create: (_) => sl<CreateBookRequestViewModel>(),
       child: const CreateBookRequestPage(),

@@ -82,7 +82,7 @@ void main() {
     expect(find.byType(UserProfileIcon), findsNothing);
   });
 
-  testWidgets('tapping the avatar opens the profile', (tester) async {
+  testWidgets('tapping the avatar opens the profile and settings screen', (tester) async {
     await pumpHome(
       tester,
       HomeState.initial().copyWith(
@@ -95,7 +95,7 @@ void main() {
     await tester.tap(find.byType(UserProfileIcon));
     await tester.pumpAndSettle();
 
-    expect(find.text('Profile Page'), findsOneWidget);
+    expect(find.text('Settings Page'), findsOneWidget);
   });
 
   testWidgets('tapping the login icon opens sign in', (tester) async {

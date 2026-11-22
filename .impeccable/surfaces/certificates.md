@@ -26,6 +26,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/certificates/presentation/views/certificates_screen.dart` (`CertificatesPage`), `components/templates/certificates_template.dart`, `components/organisms/certificate_list.dart`, `components/molecules/{certificate_item_tile,certificate_add_dialog}.dart`, `components/atoms/certificate_empty_state.dart`; domain in `domain/`. Untrusted-certificate prompts elsewhere use `shared/components/organisms/certificate_trust_dialog.dart` (Figma `Diálogo/Confiar em certificado`).
 
+Shell (#172): `certificates` sits below the settings route under each tab root (`/home/settings/certificates`, ...), so the bar stays.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

@@ -7,6 +7,7 @@ import '../components/organisms/home_app_bar.dart';
 import '../components/organisms/home_sections.dart';
 import '../../../../shared/components/molecules/app_offline_empty_view.dart';
 import '../view_models/home_view_model.dart';
+import '../../../../core/router/shell_navigation.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,10 +22,6 @@ class HomePage extends StatelessWidget {
       initialData: viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        final ctaRoute = state.isAuthenticated
-            ? '/requests'
-            : '/auth/signin?redirect=/requests';
-
         return HomeTemplate(
           appBar: HomeAppBar(
             title: l10n.homeTitle,
@@ -33,7 +30,7 @@ class HomePage extends StatelessWidget {
             // Guest while the profile loads keeps the avatar skeleton.
             displayName: state.user.isGuest ? null : state.user.displayName,
             imageUrl: state.user.profilePictureUrl,
-            onProfilePressed: () => context.push('/settings/profile'),
+            onProfilePressed: () => context.pushInTab('/settings'),
             onSignInPressed: () => context.push('/auth/signin'),
             profileTooltip: l10n.homeProfile,
             signInTooltip: l10n.homeSignIn,
@@ -64,7 +61,9 @@ class HomePage extends StatelessWidget {
                   // Both destinations need the server.
                   onCtaPressed: state.isOffline
                       ? null
-                      : () => context.push(ctaRoute),
+                      : () => state.isAuthenticated
+                            ? context.pushInTab('/requests')
+                            : context.push('/auth/signin?redirect=/requests'),
                   ctaNote: state.isOffline ? l10n.homeCtaOfflineNote : null,
                 ),
         );

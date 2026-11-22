@@ -566,5 +566,8 @@
   "booksDownloadHintDownload": "Toque para baixar",
   "booksDownloadHintPause": "Toque para pausar",
   "booksDownloadHintResume": "Toque para retomar",
-  "booksDownloadHintOptions": "Toque para ver opções"
+  "booksDownloadHintOptions": "Toque para ver opções",
+  "libraryTitle": "Biblioteca",
+  "libraryComingSoonTitle": "Em breve",
+  "libraryComingSoonBody": "A sua biblioteca chega em breve."
 }

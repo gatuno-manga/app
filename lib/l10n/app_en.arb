@@ -696,5 +696,8 @@
   "booksDownloadHintDownload": "Tap to download",
   "booksDownloadHintPause": "Tap to pause",
   "booksDownloadHintResume": "Tap to resume",
-  "booksDownloadHintOptions": "Tap for options"
+  "booksDownloadHintOptions": "Tap for options",
+  "libraryTitle": "Library",
+  "libraryComingSoonTitle": "Coming soon",
+  "libraryComingSoonBody": "Your library is coming soon."
 }

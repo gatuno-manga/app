@@ -157,7 +157,7 @@ Figma component library (page "02 · Componentes", node `857:6123`), mapped to c
 | `Livro/Capa` | Cover image | `shared/components/atoms/app_image.dart`, `app_image_placeholder.dart` |
 | `Livro/Card` | Book card | `features/books/presentation/components/molecules/` |
 | `Paginação/Página` | Pagination | `shared/components/molecules/pagination.dart` |
-| `Shell/Barra inferior`, `Shell/Item da barra inferior` | Bottom navigation bar and its item | `shared/components/molecules/app_bottom_nav_bar.dart`, `shared/components/atoms/app_nav_bar_item.dart`, `shared/components/organisms/navigation_shell.dart` (code is icons only, 48 dp; see gap `navigation-shell-code-differences`) |
+| `Shell/Barra inferior`, `Shell/Item da barra inferior` | Bottom navigation bar and its item | `shared/components/molecules/app_bottom_nav_bar.dart` (80 dp, three items), `shared/components/atoms/app_nav_bar_item.dart` (icon in an indicator pill over a label, badge slot), `shared/components/organisms/navigation_shell.dart` (re-tap pops to the root, then scrolls to the top via `shared/presentation/branch_scroll_scope.dart`; see gap `navigation-shell-code-differences`) |
 | `Shell/Barra superior` | Top app bar per screen | shared top bar widget added in #251 (`shared/components/`); today each screen builds its own `AppBar` (`features/home/presentation/components/organisms/home_app_bar.dart` and others) |
 | `Shell/Trilho de navegação` | Navigation rail for medium and expanded windows | planned in issue #173 (`shared/components/`, with the window size helper) |
 | `Shell web/Header`, `Shell web/Item de navegação`, `Shell web/Menu lateral` | Web only (header, side menu) | none: the app has no drawer or web header |

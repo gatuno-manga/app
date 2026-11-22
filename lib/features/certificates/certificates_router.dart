@@ -5,7 +5,8 @@ import 'presentation/view_models/certificates_view_model.dart';
 import 'domain/use_cases/certificates_service.dart';
 import '../../../core/di/injection.dart';
 
-final certificatesRoutes = [
+/// A fresh list per call: each tab's settings copy needs its own routes.
+List<RouteBase> certificatesRoutes() => [
   GoRoute(
     path: 'certificates',
     builder: (context, state) => Provider<CertificatesViewModel>(

@@ -1480,4 +1480,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get booksDownloadHintOptions => 'Tap for options';
+
+  @override
+  String get libraryTitle => 'Library';
+
+  @override
+  String get libraryComingSoonTitle => 'Coming soon';
+
+  @override
+  String get libraryComingSoonBody => 'Your library is coming soon.';
 }

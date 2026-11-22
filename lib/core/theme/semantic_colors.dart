@@ -36,6 +36,9 @@ extension SemanticThemeColors on ThemeData {
   /// In-progress state.
   Color get infoColor => _palette.cyan;
 
+  /// Selected-state pill behind a navigation item (`color/primary-15`).
+  Color get selectedSubtleColor => _palette.primary15;
+
   /// De-emphasised icons and captions (`color/text-secondary`).
   Color get mutedColor => _palette.textSecondary;
 

@@ -17,6 +17,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/users/presentation/views/me_screen.dart`, components under `lib/features/users/presentation/components/{molecules,templates}`. Redirects to `/auth/signin` when unauthenticated.
 
+Shell (#172): the profile edit screen is `settings/profile` under each tab root (for example `/home/settings/profile`), keeping the opener's tab selected; signing out returns to the settings screen of the same tab.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

@@ -23,6 +23,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 No code exists for `/library`. The closest code surface is `/books` (`lib/features/books/books_router.dart`), which lists all books, not the user's saved ones.
 
+Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features/library/`, route `/library`, empty state from frame `1112:8281`, same for guests and signed-in users) until #130 replaces the view.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`
