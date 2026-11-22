@@ -10,7 +10,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `922:1714` /books — mobile · grade
 - `922:1888` /books — mobile · filtros avançados
 - `922:2215` /books — mobile · lista
-- `1112:8121` /books — mobile · barra recolhida (the Root bar state after scrolling down)
+- `1112:8121` /books — mobile · barra recolhida (the Root bar with the search row scrolled away; since #266 the bar is the same 64 dp row as every Root)
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Root with search (one 64 dp row with the title, the shuffle and random-book actions and the avatar, then the search field on its own row; 120 dp) and `App/Organism/Shell/Barra inferior` with Livros selected (#169, #170; code in #251 and #172)

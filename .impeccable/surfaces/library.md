@@ -9,7 +9,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Core/Molecule/Livro/Card` list items)
 - `953:2492` /library — mobile · vazio
-- `1112:8220` /library — mobile · barra recolhida (Root bar state)
+- `1112:8220` /library — mobile · barra recolhida (since #266 the same Root bar as the default frame, kept as a scrolled-content frame)
 - `1112:8281` /library — mobile · em breve (antes do #130): the placeholder tab the app ships until #130 builds the screen
 - `1112:8305` /library — mobile · visitante: sign-in prompt
 

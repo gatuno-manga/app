@@ -8,7 +8,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma frames
 - `913:1380` /home — mobile
-- `1112:8067` /home — mobile · visitante (the second action is the user icon, not the avatar)
+- `1112:8067` /home — mobile · visitante (the second action is `Core/Atom/Avatar/Perfil` State=Guest: a user icon with no circle)
 - `1114:9063` /home — mobile · offline (#260; the call-to-action card `1114:9166` disabled, with its offline note)
 - The drawer variant `913:1538` was removed in #169. Frames carry `App/Organism/Shell/Barra superior` Type=Root with Show logo=True and `App/Organism/Shell/Barra inferior` since #170.
 

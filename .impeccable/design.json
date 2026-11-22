@@ -1560,7 +1560,7 @@
     },
     "App/Organism/Shell/Barra superior": {
       "figmaNode": "1096:1580",
-      "variants": "Type=Root (64 dp; Show logo=True swaps the title for the logo), Stacked (64), Root with search (120: the Root row plus a 56 dp search row); one 64 dp row on every tab root since #266; properties Title, Show action 2, Show action 3, Show back (Stacked only, #265); code today is one AppBar per screen, the shared top bar comes in #251",
+      "variants": "Type=Root (64 dp; Show logo=True swaps the title for the logo), Stacked (64), Root with search (120: the Root row plus a 56 dp search row); every bar is one 64 dp row since #266, plus the 56 dp search row on Root with search; properties Title, Show action 2, Show action 3, Show back (Stacked only, #265); code today is one AppBar per screen, the shared top bar comes in #251",
       "code": [
         "lib/features/home/presentation/components/organisms/home_app_bar.dart"
       ],
