@@ -13,10 +13,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `954:2688` /auth/signup — mobile
 
 ## Figma components used
-- `Marca/Logo`
-- `Campo/Texto` (new local component, `951:869`; Estado=Padrão / Foco / Erro) → `lib/shared/components/atoms/app_text_field.dart`
-- `Botão` (Primário, Texto) → `lib/shared/components/atoms/app_button.dart`
-- `Ícone/loader` → loading action
+- `Core/Atom/Marca/Logo`
+- `App/Atom/Campo/Texto` (new local component, `951:869`; State=Default / Focus / Error) → `lib/shared/components/atoms/app_text_field.dart`
+- `Core/Atom/Botão` (Primary, Text) → `lib/shared/components/atoms/app_button.dart`
+- `Core/Atom/Ícone/loader` → loading action
 
 ## Code
 `lib/features/authentication/presentation/views/{signin_screen,signup_screen}.dart`, templates and organisms under `presentation/components`; shared `app_text_field.dart`, `app_button.dart`. Welcome: see `welcome.md`.
@@ -41,7 +41,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## States in Figma
 - Hints: sign-in password shows "Informe a senha da sua conta."; sign-up shows the full rule. The loading frame dims the action but leaves fields looking active.
-- Default, error and loading for sign-in; default for sign-up. The `Foco` field state exists in the component but no frame shows it.
+- Default, error and loading for sign-in; default for sign-up. The `Focus` field state exists in the component but no frame shows it.
 - Titles, labels, button text and error messages follow `lib/l10n/app_pt.arb` (`authSignInTitle`, `authEmailLabel`, `authPasswordError`, and so on). Helper hints ("Use o email da sua conta.", "Informe a senha da sua conta.", the sign-up rule hint) and the subtitle are placeholder copy with no l10n key.
 
 ## Accessibility
@@ -50,7 +50,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Error text uses `color/danger` (about 4.9:1 on `color/app-background`) and also a red field border and message copy, so color is not the only cue.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the ENTRAR and CRIAR CONTA buttons.
 - Placeholder and helper text (`color/text-muted`, 12 dp) is about 4.4:1, just below the AA 4.5:1 minimum for normal text. In sign-up the helper line is the only place the password rule is stated.
-- Field outline (`color/border`, translucent) is about 1.3:1 against the background, below the 3:1 guideline for input boundaries; it is a shared token and `Campo/Texto` inherits it.
+- Field outline (`color/border`, translucent) is about 1.3:1 against the background, below the 3:1 guideline for input boundaries; it is a shared token and `App/Atom/Campo/Texto` inherits it.
 
 ## Tablet frames (issue #171)
 
@@ -58,7 +58,7 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 
 - Sign in: `1109:10267` medium, `1109:10308` expanded. Sign up: `1109:10345` medium, `1109:10387` expanded.
 - Layout: no rail (auth hides the shell); a centered form 480 dp wide at most with left-aligned title and subtitle; fields and buttons fill the form width.
-- Components: `Marca/Logo`, `Campo/Texto`, `Botão` (Primário and Texto).
+- Components: `Core/Atom/Marca/Logo`, `App/Atom/Campo/Texto`, `Core/Atom/Botão` (Primary and Text).
 - Code: #256 (today `AuthTemplate` caps at 400 dp).
 - Not drawn: the error and loading states (they follow the phone frames inside the same 480 dp form).
 

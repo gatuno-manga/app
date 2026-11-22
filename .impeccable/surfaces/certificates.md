@@ -4,27 +4,27 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Route
 - Figma: none in the original file; the code-only route is drawn in section "Certificados — /settings/certificates" (`1060:8393`)
-- Code: `/settings/certificates` (`lib/features/certificates`), a child route of `/settings`. The Settings frame `997:5052` already has the "Certificados" `Lista/Item` row that opens it.
+- Code: `/settings/certificates` (`lib/features/certificates`), a child route of `/settings`. The Settings frame `997:5052` already has the "Certificados" `App/Molecule/Lista/Item` row that opens it.
 
 ## Figma frames
 - `1060:8394` /settings/certificates — mobile (Confiáveis tab, three certificates: two with a fingerprint, one without)
 - `1060:8453` /settings/certificates — mobile · ignorados vazio (Ignorados tab, `certEmptyIgnored`)
 - `1060:8478` /settings/certificates — mobile · adicionar certificado (add dialog over a `color/overlay` scrim, name field empty so Selecionar Arquivo PEM is disabled)
-- `1060:8553` /settings/certificates — mobile · remover certificado (`Diálogo/Confirmação` Destrutivo over the scrim)
-- `1060:8623` /settings/certificates — mobile · erro ao adicionar (`Aviso/Snackbar` in `color/danger`, `certErrorInvalidFormat`; the FAB sits above it)
+- `1060:8553` /settings/certificates — mobile · remover certificado (`App/Organism/Diálogo/Confirmação` Destructive over the scrim)
+- `1060:8623` /settings/certificates — mobile · erro ao adicionar (`App/Molecule/Aviso/Snackbar` in `color/danger`, `certErrorInvalidFormat`; the FAB sits above it)
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Certificados") and `Shell/Barra inferior` with Início selected, drawn in #170 (code in #251 and #172); the other pushed Settings frames (`/settings/download`, `/settings/app-lock`, `/settings/mfa`) got the same bars in #260.
-- `Abas` (new in #62, `1052:39159`; Selecionada=Primeira/Segunda) → Material `TabBar` in `certificates_template.dart`
-- `Certificado/Item` (new in #62, `1052:39702`; Impressão digital=Sim/Não) → `certificate_item_tile.dart`; its delete action is `Leitor/Botão ícone` Fantasma with `Ícone/trash` in `color/danger`
-- `Botão de ação flutuante` (new in #62, `1052:39160`) → `FloatingActionButton` in `certificates_template.dart`
-- `Diálogo/Confiar em certificado` (#126) → reused for the add dialog: message hidden, title "Adicionar Certificado", `Campo/Texto` Nome with the hint `api.exemplo.com`, actions Cancelar and Selecionar Arquivo PEM (disabled at 38%)
-- `Diálogo/Confirmação` Destrutivo (#165) → delete confirmation
-- `Aviso/Snackbar` (#165) with its fill overridden to `color/danger` → error feedback
-- `Campo/Texto` → add dialog name field
+- `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned "Certificados") and `App/Organism/Shell/Barra inferior` with Início selected, drawn in #170 (code in #251 and #172); the other pushed Settings frames (`/settings/download`, `/settings/app-lock`, `/settings/mfa`) got the same bars in #260.
+- `App/Molecule/Abas` (new in #62, `1052:39159`; Selected=First/Second) → Material `TabBar` in `certificates_template.dart`
+- `App/Molecule/Certificado/Item` (new in #62, `1052:39702`; Fingerprint=Yes/No) → `certificate_item_tile.dart`; its delete action is `Core/Atom/Leitor/Botão ícone` Ghost with `Core/Atom/Ícone/trash` in `color/danger`
+- `App/Atom/Botão de ação flutuante` (new in #62, `1052:39160`) → `FloatingActionButton` in `certificates_template.dart`
+- `App/Organism/Diálogo/Confiar em certificado` (#126) → reused for the add dialog: message hidden, title "Adicionar Certificado", `App/Atom/Campo/Texto` Nome with the hint `api.exemplo.com`, actions Cancelar and Selecionar Arquivo PEM (disabled at 38%)
+- `App/Organism/Diálogo/Confirmação` Destructive (#165) → delete confirmation
+- `App/Molecule/Aviso/Snackbar` (#165) with its fill overridden to `color/danger` → error feedback
+- `App/Atom/Campo/Texto` → add dialog name field
 
 ## Code
-`lib/features/certificates/presentation/views/certificates_screen.dart` (`CertificatesPage`), `components/templates/certificates_template.dart`, `components/organisms/certificate_list.dart`, `components/molecules/{certificate_item_tile,certificate_add_dialog}.dart`, `components/atoms/certificate_empty_state.dart`; domain in `domain/`. Untrusted-certificate prompts elsewhere use `shared/components/organisms/certificate_trust_dialog.dart` (Figma `Diálogo/Confiar em certificado`).
+`lib/features/certificates/presentation/views/certificates_screen.dart` (`CertificatesPage`), `components/templates/certificates_template.dart`, `components/organisms/certificate_list.dart`, `components/molecules/{certificate_item_tile,certificate_add_dialog}.dart`, `components/atoms/certificate_empty_state.dart`; domain in `domain/`. Untrusted-certificate prompts elsewhere use `shared/components/organisms/certificate_trust_dialog.dart` (Figma `App/Organism/Diálogo/Confiar em certificado`).
 
 Shell (#172): `certificates` sits below the settings route under each tab root (`/home/settings/certificates`, ...), so the bar stays.
 
@@ -71,14 +71,14 @@ Shell (#172): `certificates` sits below the settings route under each tab root (
 
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
-- Not drawn. On expanded, `/settings/certificates` opens in the settings detail pane (see surface `settings`, 720 dp content at most); on medium it is pushed with `Shell/Barra superior` Empilhada.
+- Not drawn. On expanded, `/settings/certificates` opens in the settings detail pane (see surface `settings`, 720 dp content at most); on medium it is pushed with `App/Organism/Shell/Barra superior` Stacked.
 
 ## Gaps (Figma vs code)
-- The code builds the screen from raw Material parts: `AppBar` with a `TabBar`, `FloatingActionButton`, `ListTile` rows with `IconButton`, `AlertDialog` for the add dialog (raw `TextField` and `ElevatedButton`) and `AlertDialog` for the delete confirmation. Figma draws them through `Abas`, `Botão de ação flutuante`, `Certificado/Item`, `Diálogo/Confiar em certificado` and `Diálogo/Confirmação`. Code follow-ups: extract the tab bar and FAB, and build the row from atoms (`AppIconButton`, `AppTextButton`), use `AppConfirmDialog` (#147) for the delete confirmation and `AppTextField`, `AppButton` and `AppTextButton` in the add dialog.
+- The code builds the screen from raw Material parts: `AppBar` with a `TabBar`, `FloatingActionButton`, `ListTile` rows with `IconButton`, `AlertDialog` for the add dialog (raw `TextField` and `ElevatedButton`) and `AlertDialog` for the delete confirmation. Figma draws them through `App/Molecule/Abas`, `App/Atom/Botão de ação flutuante`, `App/Molecule/Certificado/Item`, `App/Organism/Diálogo/Confiar em certificado` and `App/Organism/Diálogo/Confirmação`. Code follow-ups: extract the tab bar and FAB, and build the row from atoms (`AppIconButton`, `AppTextButton`), use `AppConfirmDialog` (#147) for the delete confirmation and `AppTextField`, `AppButton` and `AppTextButton` in the add dialog.
 - Colors that code takes from Material defaults and Figma binds to tokens: unselected tab label (`onSurfaceVariant`, drawn `color/text-secondary`), tab indicator and divider (drawn `color/primary` and `color/divider`), FAB fill and glyph (`primaryContainer` and `onPrimaryContainer` from the seed, drawn `color/primary` and `color/on-primary`). The row subject is `bodySmall` in `onSurface` (`color/text`) in code and drawn `color/text-secondary`.
 - The row title uses `titleMedium`, which `AppTypography.textTheme` does not define (`fallback-text-roles`); Figma uses `Corpo/Padrão`.
 - The empty message is italic in code; Figma has no italic text style, so it is drawn upright in `color/border`.
 - The error snackbar is `colorScheme.error` in code, unlike the lilac snackbar of the theme; the snackbar's action is hidden (code has none).
 - The add dialog's actions are drawn in a row; with a long Selecionar Arquivo PEM label code stacks them (`AlertDialog` overflow). The `certAddPemLabel` string is not used by the dialog.
-- The Figma app bar is the left-aligned `Shell/Barra superior` Tipo=Empilhada at 64 dp (#170); code centres the title (`AppBarTheme(centerTitle: true)`) at 56 dp.
+- The Figma app bar is the left-aligned `App/Organism/Shell/Barra superior` Type=Stacked at 64 dp (#170); code centres the title (`AppBarTheme(centerTitle: true)`) at 56 dp.
 - No web frame exists.

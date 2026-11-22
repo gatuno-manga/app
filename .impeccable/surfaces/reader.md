@@ -18,15 +18,15 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `983:3725` section Leitor · Documento (PDF e EPUB) · Ajustes (#72): six frames, see "Document reader settings (issue #72)"
 
 ## Figma components used
-- `Leitor/Barra superior` → `.../molecules/reading_top_bar.dart`
-- `Leitor/Barra inferior` → `.../molecules/reading_bottom_bar.dart`
-- `Leitor/Progresso por página`
-- `Leitor/Indicador de página`
-- `Leitor/Item de ajuste` → `.../molecules/reader_setting_row.dart` (settings sheet row)
-- `Leitor/Tema de leitura` → `.../atoms/reader_theme_swatch.dart` (reader theme swatch, 4)
-- `Leitor/Predefinição · Modo dislexia`
-- `Leitor/Régua de leitura` → reading ruler
-- `Menu de contexto/Leitor · página de imagem` → long-press menu
+- `Core/Organism/Leitor/Barra superior` → `.../molecules/reading_top_bar.dart`
+- `App/Organism/Leitor/Barra inferior` → `.../molecules/reading_bottom_bar.dart`
+- `Core/Organism/Leitor/Progresso por página`
+- `Core/Atom/Leitor/Indicador de página`
+- `Core/Molecule/Leitor/Item de ajuste` → `.../molecules/reader_setting_row.dart` (settings sheet row)
+- `Core/Atom/Leitor/Tema de leitura` → `.../atoms/reader_theme_swatch.dart` (reader theme swatch, 4)
+- `Core/Molecule/Leitor/Predefinição · Modo dislexia`
+- `Core/Atom/Leitor/Régua de leitura` → reading ruler
+- `Core/Organism/Menu de contexto/Leitor · página de imagem` → long-press menu
 
 ## Code
 `lib/features/reading/presentation/views/reading_screen.dart`; organisms `image_reader.dart`, `text_reader.dart`, `document_reader.dart`, `reader_settings_sheet.dart`, `text_reader_settings_section.dart`; templates `reading_template.dart`. Reader themes: `lib/core/theme/reader_palette.dart`; preferences: `features/reading/domain/entities/reader_preferences.dart`.
@@ -74,10 +74,10 @@ Frames live in the Figma section `Leitor · Imagem · Ajustes (#70)` (id `979:31
 - `979:3602` Leitor · Imagem · Espaço entre páginas 8 dp (Sépia): the reader without the sheet, showing the gap on the `leitura/fundo` of Sépia
 - `979:3612` Leitor · Imagem · Ajustes (Alto contraste): theme Alto contraste, gap 4 dp
 
-Decisions: the background is the shared theme picker (`Leitor/Tema de leitura`, no new control or token). Rows below it: page gap stepper (`Leitor/Item de ajuste` Controle=Passos; default 0, range 0-16 dp, step 4), "Mostrar indicador de página" (Switch, default on) and "Manter a tela ligada" (Switch, default off). Components reused: `Leitor/Item de ajuste` (Passos), `Interruptor/Item` (switches; the reader's Controle=Switch variants moved there in #126), `Leitor/Tema de leitura`, `Leitor/Botão ícone`.
+Decisions: the background is the shared theme picker (`Core/Atom/Leitor/Tema de leitura`, no new control or token). Rows below it: page gap stepper (`Core/Molecule/Leitor/Item de ajuste` Control=Steps; default 0, range 0-16 dp, step 4), "Mostrar indicador de página" (Switch, default on) and "Manter a tela ligada" (Switch, default off). Components reused: `Core/Molecule/Leitor/Item de ajuste` (Steps), `Core/Molecule/Interruptor/Item` (switches; the reader's Control=Switch variants moved there in #126), `Core/Atom/Leitor/Tema de leitura`, `Core/Atom/Leitor/Botão ícone`.
 
 Gaps:
-- A disabled stepper button is drawn with 38% opacity on the `Leitor/Botão ícone` instance; the component has no disabled variant.
+- A disabled stepper button is drawn with 38% opacity on the `Core/Atom/Leitor/Botão ícone` instance; the component has no disabled variant.
 - Paged mode, reading direction (LTR/RTL) and fit width/height (fit height needs paged mode) are not designed; a follow-up issue is pending.
 - "Manter a tela ligada" needs a wakelock dependency in code; the image reader does not apply the reader theme yet (`ReaderThemeScope`).
 
@@ -97,7 +97,7 @@ Decisions:
 - PDF options: page layout (Contínuo, Página única, Duas páginas; the last only at 600 dp or wider, hidden on phones), scroll direction (Vertical, Horizontal; in Contínuo it is the scroll axis, in Página única the page-turn axis; right-to-left is not designed), zoom fit (Largura, Página, Personalizado), and a zoom stepper (50% to 300%, step 25%) shown only for Personalizado, starting at the zoom the current fit produced (the stepper appears when the fit changes, growing the sheet from 423 to 513 dp; no frame shows that transition). The reader theme is a colour filter over the rendered page (Padrão = no filter, so the page stays white even though the Padrão swatch is dark navy, as on the EPUB).
 - EPUB options: reader theme, typography (font from the text reader list: Serifa, Sem serifa, Lexend, Atkinson, OpenDyslexic; size 14-28 dp; line spacing 120-220%; alignment), margins (Estreitas, Médias, Largas) and pagination (Paginado, Contínuo).
 - Document preferences are separate from the text reader preferences: PDF and EPUB share one document theme (the PDF applies it as a filter, the EPUB as a real theme), and the EPUB has its own typography values, so the implementation (#73) must not reuse `TextReaderPreferences` state as is.
-- Components reused (the notes list above omits `Leitor/Botão ícone`, also used by #70): `Leitor/Item de ajuste` (Passos, Seletor), `Leitor/Tema de leitura`, `Leitor/Botão ícone`. No new tokens; the theme comes from the `leitura/*` tokens.
+- Components reused (the notes list above omits `Core/Atom/Leitor/Botão ícone`, also used by #70): `Core/Molecule/Leitor/Item de ajuste` (Steps, Selector), `Core/Atom/Leitor/Tema de leitura`, `Core/Atom/Leitor/Botão ícone`. No new tokens; the theme comes from the `leitura/*` tokens.
 - Non-goals: PDF crop margins and an EPUB publisher-styles toggle.
 
 Dependencies on #19 (the PDF and EPUB reader; `document_reader.dart` is still a placeholder): every option here acts on the reader, so none can be applied before #19 exists. The sheet, its preferences model and persistence can be built first.

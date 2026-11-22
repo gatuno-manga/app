@@ -7,18 +7,18 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Code: no code route
 
 ## Figma frames
-- `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Livro/Card` list items)
+- `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Core/Molecule/Livro/Card` list items)
 - `953:2492` /library — mobile · vazio
-- `1112:8220` /library — mobile · barra recolhida (`Raiz recolhida` state)
+- `1112:8220` /library — mobile · barra recolhida (`Collapsed root` state)
 - `1112:8281` /library — mobile · em breve (antes do #130): the placeholder tab the app ships until #130 builds the screen
 - `1112:8305` /library — mobile · visitante: sign-in prompt
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Raiz expandida (search, avatar or user icon) and `Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
-- `Livro/Aba` → tabs (Ativa / Inativa)
-- `Livro/Card` (Tipo=Lista) → `features/books/presentation/components/molecules/`
-- `Botão` (Primário) → empty-state action
-- `Ícone/bookmark` → empty-state icon
+- `App/Organism/Shell/Barra superior` Type=Expanded root (search, avatar or user icon) and `App/Organism/Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
+- `Core/Atom/Livro/Aba` → tabs (Ativa / Inativa)
+- `Core/Molecule/Livro/Card` (Type=List) → `features/books/presentation/components/molecules/`
+- `Core/Atom/Botão` (Primary) → empty-state action
+- `Core/Atom/Ícone/bookmark` → empty-state icon
 
 ## Code
 No code exists for `/library`. The closest code surface is `/books` (`lib/features/books/books_router.dart`), which lists all books, not the user's saved ones.
@@ -45,7 +45,7 @@ Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features
 
 ## Accessibility
 - Secondary text about 5.0:1 (little headroom) on `color/app-background` (Dark). Empty-state icon uses `color/text-muted`; check its contrast manually.
-- `Livro/Aba` tabs are 40 dp high and 43-77 dp wide, below the 44 dp tap target; the component is shared with the book page, so it is recorded here, not changed.
+- `Core/Atom/Livro/Aba` tabs are 40 dp high and 43-77 dp wide, below the 44 dp tap target; the component is shared with the book page, so it is recorded here, not changed.
 - `color/on-primary` on `color/primary` is about 2.5:1 (see `on-primary-dark` in DESIGN.md); it affects the `Explorar livros` button and the chapter badges.
 
 ## Tablet frames (issue #171)
@@ -53,7 +53,7 @@ Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Medium: `1107:9618` and `1107:9911` (vazio). Expanded: `1107:9781` and `1107:9976` (vazio).
-- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Biblioteca selected (the second of three destinations; until #130 ships the tab is a placeholder); `Shell/Barra superior` Raiz expandida with the profile avatar in the last action slot; `Livro/Aba` (Lendo, Salvos, Concluídos); `Livro/Card` Lista in 2 (medium) or 3 (expanded) columns; `Botão` and `Ícone/bookmark` in the empty state.
+- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Biblioteca selected (the second of three destinations; until #130 ships the tab is a placeholder); `App/Organism/Shell/Barra superior` Expanded root with the profile avatar in the last action slot; `Core/Atom/Livro/Aba` (Lendo, Salvos, Concluídos); `Core/Molecule/Livro/Card` List in 2 (medium) or 3 (expanded) columns; `Core/Atom/Botão` and `Core/Atom/Ícone/bookmark` in the empty state.
 - Reference for #130; no code task in #168 builds it. Guests see the tab with a sign-in prompt (#169 decision); not drawn.
 
 ## Gaps (Figma vs code)

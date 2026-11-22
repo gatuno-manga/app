@@ -10,17 +10,17 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `922:1714` /books — mobile · grade
 - `922:1888` /books — mobile · filtros avançados
 - `922:2215` /books — mobile · lista
-- `1112:8121` /books — mobile · barra recolhida (the `Raiz recolhida` state of the top bar after scrolling down)
+- `1112:8121` /books — mobile · barra recolhida (the `Collapsed root` state of the top bar after scrolling down)
 
 ## Figma components used
-- `Shell/Barra superior` Tipo=Raiz com busca (title, search field, shuffle and random-book actions, avatar) and `Shell/Barra inferior` with Livros selected (#169, #170; code in #251 and #172)
-- `Botão` → search/filter actions
-- `Seletor cíclico/Fonte` → source selector
-- `Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)
-- `Livros/Filtros avançados` → `features/books/presentation/components/`
-- `Filtro/Ativo` → active filter chip
-- `Livro/Card` → `molecules/book_card.dart` (grid, title below the cover), `molecules/book_cover_card.dart` (cover mode, title over the art), `molecules/book_list_item.dart` (list)
-- `Paginação/Página` → `shared/components/molecules/pagination.dart`
+- `App/Organism/Shell/Barra superior` Type=Root with search (title, search field, shuffle and random-book actions, avatar) and `App/Organism/Shell/Barra inferior` with Livros selected (#169, #170; code in #251 and #172)
+- `Core/Atom/Botão` → search/filter actions
+- `Core/Molecule/Seletor cíclico/Fonte` → source selector
+- `Core/Molecule/Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)
+- `Core/Organism/Livros/Filtros avançados` → `features/books/presentation/components/`
+- `Core/Atom/Filtro/Ativo` → active filter chip
+- `Core/Molecule/Livro/Card` → `molecules/book_card.dart` (grid, title below the cover), `molecules/book_cover_card.dart` (cover mode, title over the art), `molecules/book_list_item.dart` (list)
+- `Core/Atom/Paginação/Página` → `shared/components/molecules/pagination.dart`
 
 ## Code
 `lib/features/books/presentation/views/books_screen.dart`.
@@ -51,7 +51,7 @@ Shell (#172): `/books` is the third branch (Livros); re-tapping the active tab p
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Grid: `1103:680` medium, `1103:873` expanded. List: `1103:1035` medium, `1103:1210` expanded. Filters: `1103:1424` medium (bottom sheet, 640 dp at most, centered), `1103:1607` expanded (modal side sheet, 360 dp, from the right).
-- Components: `Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `Shell/Barra superior` Raiz com busca with the profile avatar in the third action slot; `Seletor cíclico/Visualização`, `Paginação/Página`, `Botão` Contorno "Filtros"; `Livro/Card` Grade (4 columns medium, 6 expanded, minimum 160 dp) or Lista (2 and 3 columns, minimum 320 dp); `Livros/Filtros avançados` Plataforma=Mobile inside the sheets.
+- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Livros selected; `App/Organism/Shell/Barra superior` Root with search with the profile avatar in the third action slot; `Core/Molecule/Seletor cíclico/Visualização`, `Core/Atom/Paginação/Página`, `Core/Atom/Botão` Outline "Filtros"; `Core/Molecule/Livro/Card` Grade (4 columns medium, 6 expanded, minimum 160 dp) or Lista (2 and 3 columns, minimum 320 dp); `Core/Organism/Livros/Filtros avançados` Platform=Mobile inside the sheets.
 - Code: #252.
 - Not drawn: the random-book actions row of the phone frame (the top bar keeps the two actions), loading and empty states.
 

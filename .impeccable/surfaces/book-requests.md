@@ -8,10 +8,10 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma frames
 - `1052:38263` /requests — mobile (three cards, one per status)
-- `1052:38389` /requests — mobile · carregando mais (cards plus the pagination `Indicador de carregamento`)
-- `1052:38518` /requests — mobile · primeira carga (four skeleton cards from `Esqueleto`, intended look)
-- `1052:38593` /requests — mobile · erro (`Vista de erro`, intended look)
-- `1052:38640` /requests — mobile · vazio (`Cartão de chamada` look, intended)
+- `1052:38389` /requests — mobile · carregando mais (cards plus the pagination `App/Atom/Indicador de carregamento`)
+- `1052:38518` /requests — mobile · primeira carga (four skeleton cards from `App/Atom/Esqueleto`, intended look)
+- `1052:38593` /requests — mobile · erro (`App/Molecule/Vista de erro`, intended look)
+- `1052:38640` /requests — mobile · vazio (`App/Molecule/Cartão de chamada` look, intended)
 - `1052:39703` /requests/create — mobile · vazio (submit disabled)
 - `1052:39757` /requests/create — mobile · preenchido
 - `1052:39811` /requests/create — mobile · erro de campo (invalid URL, submit disabled)
@@ -19,12 +19,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `1052:39920` /requests/create — mobile · erro do servidor (form-level message in `color/danger`)
 
 ## Figma components used
-- `Solicitação/Cartão` (new local component set, `1052:38038`; Status=Pendente/Aprovado/Rejeitado, text properties Título/URL/Motivo/Rejeição/Data, booleans Mostrar motivo/Mostrar rejeição) → `BookRequestCard`
-- `Tag` (extended in #129 with Tipo=Pendente/Aprovado/Rejeitado, `895:209`) → `AppStatusBadge`
-- `Campo/Texto` (Estado=Padrão/Erro) → `AppTextField`
-- `Botão` Primário → `AppButton`
-- `Esqueleto`, `Indicador de carregamento`, `Vista de erro`, `Cartão de chamada` (components from #126)
-- `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Solicitações", "+" action) and `Shell/Barra inferior` with Início selected on the five `/requests` frames, drawn in #170 (code in #251 and #172); the five `/requests/create` frames draw `Shell/Barra superior` Tipo=Empilhada (back, left-aligned "Novo Pedido", no actions) and `Shell/Barra inferior` with Início selected, redrawn in #260 (code in #251 and #172)
+- `App/Molecule/Solicitação/Cartão` (new local component set, `1052:38038`; Status=Pending/Approved/Rejected, text properties Title/URL/Reason/Rejection/Date, booleans Show reason/Show rejection) → `BookRequestCard`
+- `Core/Atom/Tag` (extended in #129 with Type=Pending/Approved/Rejected, `895:209`) → `AppStatusBadge`
+- `App/Atom/Campo/Texto` (State=Default/Error) → `AppTextField`
+- `Core/Atom/Botão` Primary → `AppButton`
+- `App/Atom/Esqueleto`, `App/Atom/Indicador de carregamento`, `App/Molecule/Vista de erro`, `App/Molecule/Cartão de chamada` (components from #126)
+- `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned "Solicitações", "+" action) and `App/Organism/Shell/Barra inferior` with Início selected on the five `/requests` frames, drawn in #170 (code in #251 and #172); the five `/requests/create` frames draw `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned "Novo Pedido", no actions) and `App/Organism/Shell/Barra inferior` with Início selected, redrawn in #260 (code in #251 and #172)
 
 ## Code
 `lib/features/book_requests/presentation/views/{book_requests_list_page,create_book_request_page}.dart`, `components/molecules/book_request_card.dart`, `components/organisms/create_book_request_form.dart`; `lib/shared/components/atoms/app_status_badge.dart`.
@@ -61,7 +61,7 @@ Shell (#172): `/requests` and `/requests/create` are mounted under every tab roo
 
 ## States in Figma
 - /requests: default, loading more, first load (skeleton), error, empty. /requests/create: empty, filled, field error, submitting, server error.
-- The disabled submit button is drawn as 38% opacity, the same approximation as `Seletor segmentado`.
+- The disabled submit button is drawn as 38% opacity, the same approximation as `App/Molecule/Seletor segmentado`.
 - Not drawn: pull-to-refresh, the success SnackBar after submitting (`bookRequestsSuccess`), the guest path through sign-in (only the home link redirects; the routes have none).
 
 ## Accessibility
@@ -72,12 +72,12 @@ Shell (#172): `/requests` and `/requests/create` are mounted under every tab roo
 
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
-- Not drawn. `/requests` and `/requests/create` are reached from the Home card and from a Settings row; they are pushed screens, so on tablets they keep the rail and use `Shell/Barra superior` Empilhada with text content 720 dp wide at most.
+- Not drawn. `/requests` and `/requests/create` are reached from the Home card and from a Settings row; they are pushed screens, so on tablets they keep the rail and use `App/Organism/Shell/Barra superior` Stacked with text content 720 dp wide at most.
 
 ## Gaps (Figma vs code)
 - First load, error and empty are drawn in the intended look; code uses a bare `CircularProgressIndicator`, an icon with red text and a raw `ElevatedButton.icon`, and a `Icons.inbox_outlined` empty state.
 - `BookRequestCard` is a Material `Card` (elevation 2); Figma uses the flat `color/secondary-60` card with a `color/border` outline.
-- Code status badge is `labelSmall` bold on a 20% tint with a 50% border; Figma `Tag` uses `Interface/Rótulo` on 15% and 40% tint tokens.
-- Figma has no info or calendar icon in the icon library: the reason row uses `Ícone/file-text` and the date `Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
-- Code `AppButton` is 48 dp high; Figma `Botão` is 44 dp.
-- The `/requests` frames draw the native `Shell/Barra superior` and `Shell/Barra inferior` of #169 (#170); the `/requests/create` frames draw them too since #260. Entry points are the Home card and a row in the merged profile and settings screen.
+- Code status badge is `labelSmall` bold on a 20% tint with a 50% border; Figma `Core/Atom/Tag` uses `Interface/Rótulo` on 15% and 40% tint tokens.
+- Figma has no info or calendar icon in the icon library: the reason row uses `Core/Atom/Ícone/file-text` and the date `Core/Atom/Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
+- Code `AppButton` is 48 dp high; Figma `Core/Atom/Botão` is 44 dp.
+- The `/requests` frames draw the native `App/Organism/Shell/Barra superior` and `App/Organism/Shell/Barra inferior` of #169 (#170); the `/requests/create` frames draw them too since #260. Entry points are the Home card and a row in the merged profile and settings screen.
