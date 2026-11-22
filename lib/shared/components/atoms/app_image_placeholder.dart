@@ -96,7 +96,9 @@ class _AppImagePlaceholderState extends State<AppImagePlaceholder> {
     return SizedBox(
       width: widget.width,
       height: widget.height,
-      child: widget.placeholder ?? AppSkeleton(width: widget.width, height: widget.height),
+      child:
+          widget.placeholder ??
+          AppSkeleton(width: widget.width, height: widget.height),
     );
   }
 }

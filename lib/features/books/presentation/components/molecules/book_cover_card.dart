@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../domain/entities/book.dart';
 import '../atoms/book_cover.dart';
 import '../atoms/book_title_scrim.dart';
 import '../atoms/book_type_badge.dart';
+import '../../../../../core/router/shell_navigation.dart';
 
 /// Cover-only card: the title sits over the art (Figma `/books — capa`).
 class BookCoverCard extends StatelessWidget {
@@ -21,7 +21,7 @@ class BookCoverCard extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => context.push('/books/${book.id}'),
+        onTap: () => context.pushInTab('/books/${book.id}'),
         child: Stack(
           fit: StackFit.expand,
           children: [

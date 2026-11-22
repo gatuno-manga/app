@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../atoms/app_nav_bar_item.dart';
 
+/// The phone bottom bar: Início, Biblioteca and Livros, in the order of the
+/// shell's branches. 80 dp tall (Figma `Shell/Barra inferior`), plus the
+/// system gesture inset below it.
 class AppBottomNavBar extends StatelessWidget {
+  static const double height = 80;
+
   final int currentIndex;
   final ValueChanged<int> onTap;
 
@@ -15,47 +20,48 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: theme.scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
-            color:
-                Theme.of(context).dividerTheme.color ??
-                Theme.of(context).dividerColor,
+            color: theme.dividerTheme.color ?? theme.dividerColor,
             width: 1,
           ),
         ),
       ),
-      child: BottomAppBar(
-        color: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        height: 48,
-        padding: EdgeInsets.zero,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            AppNavBarItem(
-              icon: const Icon(Icons.home),
-              tooltip: l10n.homeTitle,
-              isSelected: currentIndex == 0,
-              onTap: () => onTap(0),
-            ),
-            AppNavBarItem(
-              icon: const Icon(Icons.book),
-              tooltip: l10n.booksTitle,
-              isSelected: currentIndex == 1,
-              onTap: () => onTap(1),
-            ),
-            AppNavBarItem(
-              icon: const Icon(Icons.settings),
-              tooltip: l10n.settingsTitle,
-              isSelected: currentIndex == 2,
-              onTap: () => onTap(2),
-            ),
-          ],
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: height,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AppNavBarItem(
+                icon: Icons.home_outlined,
+                selectedIcon: Icons.home,
+                label: l10n.homeTitle,
+                isSelected: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              AppNavBarItem(
+                icon: Icons.bookmark_border,
+                selectedIcon: Icons.bookmark,
+                label: l10n.libraryTitle,
+                isSelected: currentIndex == 1,
+                onTap: () => onTap(1),
+              ),
+              AppNavBarItem(
+                icon: Icons.book_outlined,
+                selectedIcon: Icons.book,
+                label: l10n.booksTitle,
+                isSelected: currentIndex == 2,
+                onTap: () => onTap(2),
+              ),
+            ],
+          ),
         ),
       ),
     );

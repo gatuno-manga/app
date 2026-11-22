@@ -38,11 +38,17 @@ void main() {
       () => mockAuthService.isAuthenticated(),
     ).thenAnswer((_) async => false);
 
-    when(() => mockHomeViewModel.stateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockHomeViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockHomeViewModel.state).thenReturn(HomeState.initial());
 
-    when(() => mockNavigationViewModel.stateStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockNavigationViewModel.state).thenReturn(NavigationState.initial());
+    when(
+      () => mockNavigationViewModel.stateStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockNavigationViewModel.state,
+    ).thenReturn(NavigationState.initial());
   });
 
   tearDown(() async {
@@ -71,5 +77,31 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ErrorScreen), findsOneWidget);
+  });
+
+  test('legacy settings and requests paths land on the Home tab copy', () {
+    expect(redirectLegacyShellPath(Uri.parse('/settings')), '/home/settings');
+    expect(
+      redirectLegacyShellPath(Uri.parse('/settings/profile')),
+      '/home/settings/profile',
+    );
+    expect(redirectLegacyShellPath(Uri.parse('/requests')), '/home/requests');
+    expect(
+      redirectLegacyShellPath(Uri.parse('/requests/create?x=1')),
+      '/home/requests/create?x=1',
+    );
+  });
+
+  test('tab-scoped and unrelated paths are left alone', () {
+    for (final path in [
+      '/home/settings',
+      '/books/settings',
+      '/books/abc',
+      '/library',
+      '/settingsfoo',
+      '/auth/signin',
+    ]) {
+      expect(redirectLegacyShellPath(Uri.parse(path)), isNull, reason: path);
+    }
   });
 }

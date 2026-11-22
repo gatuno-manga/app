@@ -25,6 +25,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/books/presentation/views/books_screen.dart`.
 
+Shell (#172): `/books` is the third branch (Livros); re-tapping the active tab pops to the root, then scrolls the list to the top (`TabRootScrollScope` in `books_router.dart`).
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

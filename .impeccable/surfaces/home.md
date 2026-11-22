@@ -23,6 +23,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/home/presentation/views/home_screen.dart`, template `home_template.dart`.
 
+Shell (#172): `/home` is the first branch of the `StatefulShellRoute` (`home_router.dart`); the bottom bar is `AppBottomNavBar` (Início, Biblioteca, Livros, 80 dp with labels). The profile button pushes the merged profile and settings screen under the Home tab (`/home/settings`); the avatar action itself is #251.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

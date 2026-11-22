@@ -60,16 +60,16 @@ void main() {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/books',
-                  builder: (context, state) => const Text('Books Content'),
+                  path: '/library',
+                  builder: (context, state) => const Text('Library Content'),
                 ),
               ],
             ),
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/settings',
-                  builder: (context, state) => const Text('Settings Content'),
+                  path: '/books',
+                  builder: (context, state) => const Text('Books Content'),
                 ),
               ],
             ),
@@ -106,9 +106,9 @@ void main() {
     ).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
-    expect(find.byIcon(Icons.home), findsOneWidget);
-    expect(find.byIcon(Icons.book), findsOneWidget);
-    expect(find.byIcon(Icons.settings), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Library'), findsOneWidget);
+    expect(find.text('Books'), findsOneWidget);
     expect(find.text('Home Content'), findsOneWidget);
   });
 
@@ -123,18 +123,15 @@ void main() {
     ).thenReturn(NavigationState.initial());
     await pumpNavigationShell(tester);
 
-    // Tap Books
-    await tester.tap(find.byIcon(Icons.book));
+    await tester.tap(find.text('Books'));
     await tester.pumpAndSettle();
     expect(find.text('Books Content'), findsOneWidget);
 
-    // Tap Settings
-    await tester.tap(find.byIcon(Icons.settings));
+    await tester.tap(find.text('Library'));
     await tester.pumpAndSettle();
-    expect(find.text('Settings Content'), findsOneWidget);
+    expect(find.text('Library Content'), findsOneWidget);
 
-    // Tap Home
-    await tester.tap(find.byIcon(Icons.home));
+    await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
     expect(find.text('Home Content'), findsOneWidget);
   });

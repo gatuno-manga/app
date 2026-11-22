@@ -1491,4 +1491,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get booksDownloadHintOptions => 'Toque para ver opções';
+
+  @override
+  String get libraryTitle => 'Biblioteca';
+
+  @override
+  String get libraryComingSoonTitle => 'Em breve';
+
+  @override
+  String get libraryComingSoonBody => 'A sua biblioteca chega em breve.';
 }

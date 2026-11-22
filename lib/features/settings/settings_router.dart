@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -18,69 +17,65 @@ import '../app_lock/presentation/views/app_lock_settings_screen.dart';
 import '../../../core/di/injection.dart';
 import '../downloads/domain/repositories/download_service.dart';
 
-final GlobalKey<NavigatorState> settingsNavigatorKey =
-    GlobalKey<NavigatorState>();
-
-final StatefulShellBranch settingsBranch = StatefulShellBranch(
-  navigatorKey: settingsNavigatorKey,
-  routes: [
-    GoRoute(
-      path: '/settings',
-      builder: (context, state) => MultiProvider(
-        providers: [
-          Provider<SettingsViewModel>(
-            create: (_) => SettingsViewModel(
-              settingsService: sl<SettingsService>(),
-              authService: sl<AuthService>(),
-              userService: sl<UserService>(),
-              downloadService: sl<DownloadService>(),
-            ),
-          ),
-          // Shared singleton owned by DI: provided, never disposed here.
-          Provider<ReaderPreferencesService>.value(
-            value: sl<ReaderPreferencesService>(),
-          ),
-        ],
-        child: const SettingsPage(),
-      ),
-      routes: [
-        ...certificatesRoutes,
-        GoRoute(
-          // No guard: downloads outlive a sign-out, so their rules must stay
-          // reachable for guests too.
-          path: 'download',
-          builder: (context, state) => Provider<DownloadSettingsViewModel>(
-            create: (_) => sl<DownloadSettingsViewModel>(),
-            dispose: (_, viewModel) => viewModel.dispose(),
-            child: const DownloadSettingsPage(),
+/// The merged profile and settings screen, pushed from any tab root. Relative
+/// to the tab root (see `shellPushedRoutes`); `/settings` redirects to the
+/// Home copy. Until the merged content lands (#251) it renders [SettingsPage].
+List<RouteBase> settingsRoutes() => [
+  GoRoute(
+    path: 'settings',
+    builder: (context, state) => MultiProvider(
+      providers: [
+        Provider<SettingsViewModel>(
+          create: (_) => SettingsViewModel(
+            settingsService: sl<SettingsService>(),
+            authService: sl<AuthService>(),
+            userService: sl<UserService>(),
+            downloadService: sl<DownloadService>(),
           ),
         ),
-        GoRoute(
-          path: 'app-lock',
-          builder: (context, state) => const AppLockSettingsPage(),
-        ),
-        GoRoute(
-          path: 'mfa',
-          redirect: (context, state) =>
-              sl<AuthService>().authenticated ? null : '/auth/signin',
-          builder: (context, state) => const MfaSettingsPage(),
-        ),
-        GoRoute(
-          path:
-              'profile', // Full path will be /settings/profile or use /users/me
-          redirect: (context, state) {
-            final authService = sl<AuthService>();
-            if (!authService.authenticated) {
-              return '/auth/signin';
-            }
-            return null;
-          },
-          builder: (context, state) => Provider<MeViewModel>(
-            create: (_) => sl<MeViewModel>(),
-            child: const MePage(),
-          ),
+        // Shared singleton owned by DI: provided, never disposed here.
+        Provider<ReaderPreferencesService>.value(
+          value: sl<ReaderPreferencesService>(),
         ),
       ],
+      child: const SettingsPage(),
     ),
-  ],
-);
+    routes: [
+      ...certificatesRoutes,
+      GoRoute(
+        // No guard: downloads outlive a sign-out, so their rules must stay
+        // reachable for guests too.
+        path: 'download',
+        builder: (context, state) => Provider<DownloadSettingsViewModel>(
+          create: (_) => sl<DownloadSettingsViewModel>(),
+          dispose: (_, viewModel) => viewModel.dispose(),
+          child: const DownloadSettingsPage(),
+        ),
+      ),
+      GoRoute(
+        path: 'app-lock',
+        builder: (context, state) => const AppLockSettingsPage(),
+      ),
+      GoRoute(
+        path: 'mfa',
+        redirect: (context, state) =>
+            sl<AuthService>().authenticated ? null : '/auth/signin',
+        builder: (context, state) => const MfaSettingsPage(),
+      ),
+      GoRoute(
+        path: 'profile', // Full path will be /settings/profile or use /users/me
+        redirect: (context, state) {
+          final authService = sl<AuthService>();
+          if (!authService.authenticated) {
+            return '/auth/signin';
+          }
+          return null;
+        },
+        builder: (context, state) => Provider<MeViewModel>(
+          create: (_) => sl<MeViewModel>(),
+          child: const MePage(),
+        ),
+      ),
+    ],
+  ),
+];

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 
 import 'app_palette.dart';
 import 'app_typography.dart';
@@ -161,6 +162,13 @@ class AppTheme {
         foregroundColor: palette.text,
         elevation: 0,
         centerTitle: true,
+      ),
+      // Android 14+ previews the destination while the back gesture is held.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
       ),
       dividerTheme: DividerThemeData(color: palette.divider, thickness: 1),
       scrollbarTheme: ScrollbarThemeData(

@@ -76,9 +76,7 @@ void main() {
       await tester.pumpAndSettle(); // Wait for compute and setState
 
       expect(
-        find.byWidgetPredicate(
-          (w) => w is Image && w.image is MemoryImage,
-        ),
+        find.byWidgetPredicate((w) => w is Image && w.image is MemoryImage),
         findsOneWidget,
       );
       await tester.pumpAndSettle();

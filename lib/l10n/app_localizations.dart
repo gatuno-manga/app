@@ -2581,6 +2581,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap for options'**
   String get booksDownloadHintOptions;
+
+  /// No description provided for @libraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get libraryTitle;
+
+  /// No description provided for @libraryComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get libraryComingSoonTitle;
+
+  /// No description provided for @libraryComingSoonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your library is coming soon.'**
+  String get libraryComingSoonBody;
 }
 
 class _AppLocalizationsDelegate

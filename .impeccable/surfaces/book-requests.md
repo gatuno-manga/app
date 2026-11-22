@@ -29,6 +29,8 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Code
 `lib/features/book_requests/presentation/views/{book_requests_list_page,create_book_request_page}.dart`, `components/molecules/book_request_card.dart`, `components/organisms/create_book_request_form.dart`; `lib/shared/components/atoms/app_status_badge.dart`.
 
+Shell (#172): `/requests` and `/requests/create` are mounted under every tab root (`/home/requests`, `/library/requests`, `/books/requests`), keep the bar and the opener's tab; the old top-level paths redirect to the Home copy.
+
 ## Tokens used
 - `color/app-background`
 - `color/text`

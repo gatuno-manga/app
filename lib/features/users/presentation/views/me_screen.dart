@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import '../../../../core/logging/logger.dart';
 import '../../domain/value_objects/profile_image_failure.dart';
@@ -12,6 +11,7 @@ import '../view_models/me_view_model.dart';
 import '../components/molecules/user_profile_header.dart';
 import 'package:gatuno/features/settings/presentation/components/organisms/me_settings_list.dart';
 import '../components/templates/profile_template.dart';
+import '../../../../core/router/shell_navigation.dart';
 
 class MePage extends StatefulWidget {
   const MePage({super.key});
@@ -147,7 +147,7 @@ class _MePageState extends State<MePage> {
                 onPressed: () async {
                   await viewModel.logout();
                   if (!context.mounted) return;
-                  context.go('/settings');
+                  context.goInTab('/settings');
                 },
                 icon: const Icon(Icons.logout),
                 label: Text(l10n.commonLogout),

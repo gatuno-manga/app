@@ -4,54 +4,81 @@ import 'package:gatuno/shared/components/molecules/app_bottom_nav_bar.dart';
 import '../../../helpers/pump_app.dart';
 
 void main() {
+  Future<void> pumpBar(
+    WidgetTester tester, {
+    int currentIndex = 0,
+    ValueChanged<int>? onTap,
+    Locale? locale,
+  }) => tester.pumpApp(
+    Scaffold(
+      bottomNavigationBar: AppBottomNavBar(
+        currentIndex: currentIndex,
+        onTap: onTap ?? (_) {},
+      ),
+    ),
+    locale: locale,
+  );
+
   group('AppBottomNavBar', () {
-    testWidgets('renders correctly with given parameters', (tester) async {
-      int tappedIndex = -1;
+    testWidgets('shows Home, Library and Books labels in order', (
+      tester,
+    ) async {
+      await pumpBar(tester);
 
-      await tester.pumpApp(
-        Scaffold(
-          bottomNavigationBar: AppBottomNavBar(
-            currentIndex: 0,
-            onTap: (index) => tappedIndex = index,
-          ),
-        ),
-      );
-
-      // Verify background color and border
-      final containerFinder = find.ancestor(
-        of: find.byType(BottomAppBar),
-        matching: find.byType(Container),
-      );
-      final container = tester.widget<Container>(containerFinder);
-      final decoration = container.decoration as BoxDecoration;
-
-      final BuildContext context = tester.element(find.byType(AppBottomNavBar));
-      expect(decoration.color, Theme.of(context).scaffoldBackgroundColor);
-      expect(decoration.border, isNotNull);
-      expect(decoration.border!.top.width, 1.0);
-      expect(
-        decoration.border!.top.color,
-        Theme.of(context).dividerTheme.color ?? Theme.of(context).dividerColor,
-      );
-
-      // Verify icons
-      expect(find.byIcon(Icons.home), findsOneWidget);
-      expect(find.byIcon(Icons.book), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
-
-      // Verify tap
-      await tester.tap(find.byIcon(Icons.book));
-      expect(tappedIndex, 1);
+      final labels = ['Home', 'Library', 'Books'];
+      final dx = [for (final l in labels) tester.getCenter(find.text(l)).dx];
+      expect(dx, orderedEquals([...dx]..sort()));
+      expect(find.text('Settings'), findsNothing);
     });
 
-    testWidgets('renders settings icon regardless of auth', (tester) async {
-      await tester.pumpApp(
-        Scaffold(
-          bottomNavigationBar: AppBottomNavBar(currentIndex: 2, onTap: (_) {}),
+    testWidgets('uses the Portuguese labels', (tester) async {
+      await pumpBar(tester, locale: const Locale('pt'));
+
+      expect(find.text('Início'), findsOneWidget);
+      expect(find.text('Biblioteca'), findsOneWidget);
+      expect(find.text('Livros'), findsOneWidget);
+    });
+
+    testWidgets('is 80 dp tall', (tester) async {
+      await pumpBar(tester);
+
+      final row = find.descendant(
+        of: find.byType(AppBottomNavBar),
+        matching: find.byType(SizedBox),
+      );
+      expect(tester.getSize(row.first).height, AppBottomNavBar.height);
+    });
+
+    testWidgets('marks only the current item as selected', (tester) async {
+      await pumpBar(tester, currentIndex: 1);
+
+      expect(
+        tester.getSemantics(find.text('Library')),
+        matchesSemantics(
+          label: 'Library',
+          isSelected: true,
+          hasSelectedState: true,
+          isButton: true,
+          hasTapAction: true,
+          hasEnabledState: false,
         ),
       );
+      final home = tester.getSemantics(find.text('Home'));
+      // ignore: deprecated_member_use
+      expect(
+        home.flagsCollection.isSelected.toString(),
+        isNot(contains('true')),
+      );
+    });
 
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+    testWidgets('reports the tapped index', (tester) async {
+      int tapped = -1;
+      await pumpBar(tester, onTap: (i) => tapped = i);
+
+      await tester.tap(find.text('Books'));
+      expect(tapped, 2);
+      await tester.tap(find.text('Library'));
+      expect(tapped, 1);
     });
   });
 }
