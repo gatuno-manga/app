@@ -42,7 +42,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Expanded list-detail with the profile in the detail pane: `1105:9489` (surface `settings`). Medium: the profile page is pushed as on the phone; no separate tablet frame.
-- Components in the detail pane: `Avatar/Perfil`, `Campo/Texto`, `Botão`. The profile is part of the merged profile and settings screen; the avatar in the tab-root top bars opens it and the tab it was opened from stays selected. `/settings/profile` (edit) is a second pushed screen.
+- Components in the detail pane: `Avatar/Perfil`, `Campo/Texto`, `Botão`. The profile is part of the merged "Perfil e configurações" screen, which the avatar in the tab-root top bars opens (the opener's tab stays selected). On medium `/settings/profile` is pushed above the merged screen; on expanded it opens in the detail pane.
 - Code: #254.
 
 ## Gaps (Figma vs code)
