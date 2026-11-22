@@ -1,6 +1,6 @@
 # Surface: Settings
 
-Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only). Token keys refer to `.impeccable/design.json`.
+Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only); issue #127 added the `Rádio/Item` component and the `Ícone/lock` icon for the app lock frames. Token keys refer to `.impeccable/design.json`.
 
 ## Route
 - Figma: /user (mobile section `859:38`, "Configurações — /user"); app lock frames in the section "Bloqueio do app (/settings/app-lock)" (`1052:38698`)
@@ -36,7 +36,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Botão` Primário and `Marca/Logo` (96 dp) → lock cover; `Aviso/Snackbar` → refused prompt or failed save
 
 ## Code
-`lib/features/settings/presentation/views/settings_screen.dart`, app lock in `lib/features/app_lock/presentation/{views/app_lock_settings_screen.dart,views/app_lock_screen.dart,components/molecules/app_lock_settings_tile.dart}`, components under `presentation/components/{molecules,organisms,templates}`; certificates in `lib/features/certificates`.
+`lib/features/settings/presentation/views/settings_screen.dart`, settings components under `presentation/components/{molecules,organisms,templates}`; certificates in `lib/features/certificates`.; app lock in `lib/features/app_lock/presentation/{views/app_lock_settings_screen.dart,views/app_lock_screen.dart,components/molecules/app_lock_settings_tile.dart}`
 
 ## Tokens used
 - `color/app-background`
@@ -66,6 +66,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Título/3`
 - `Corpo/Padrão`
 - `Corpo/Pequeno`
+- `Corpo/Grande`
 - `Interface/Botão`
 - `Interface/Rótulo`
 - `Interface/Legenda`
@@ -79,7 +80,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - Measured in Figma against `color/app-background` (Dark): secondary text about 5.0:1 (AA, little headroom). `Lista/Item` rows are about 69 dp high and `Interruptor/Item` is 64 dp, both above the 44 dp minimum tap target.
 - `Interruptor/Item` and `Lista/Item` use no primary-colored control besides the switch track; the `color/on-primary` contrast gap (see `on-primary-dark` in DESIGN.md) does not apply to this frame.
 - /settings/download: `Seletor segmentado` segments are 48 dp high (meets the target); color/text on the selected `color/primary-40` fill is 6.3-8.2:1 across the five themes; the `color/border` outline and divider are 1.2-1.6:1 (see `figma-contrast`).
-- App lock: `Interruptor/Item` is 64 dp (the longer fallback description wraps to a taller row) and `Rádio/Item` is 56 dp with a 40 dp radio target, both above the 44 dp tap target. The grace header in `color/primary` is 3.5:1 in Light, the cover error in `color/danger` is 3.4:1 in Light, and the cancelled message and unselected radio ring in `color/text-secondary` are 3.0:1 in Dracula and 3.6:1 in True-dark (see `figma-contrast`). The code marks the cover title and error as live regions and the unsupported text as a live region; Figma cannot show it.
+- App lock: `Interruptor/Item` is 64 dp (the longer fallback description wraps to a taller row) and `Rádio/Item` is 56 dp with a 40 dp radio target, both above the 44 dp tap target. The grace header in `color/primary` is 3.5:1 in Light, the cover error in `color/danger` is 3.4:1 in Light, and the cancelled message and unselected radio ring in `color/text-secondary` are 3.0:1 in Dracula, 3.6:1 in True-dark and 4.3:1 in Light (see `figma-contrast`). The code marks the cover title and error as live regions and the unsupported text as a live region; Figma cannot show it.
 
 ## Gaps (Figma vs code)
 - Figma `997:5052` has no Leitura section; code orders Geral, Leitura, Downloads, API, Certificados, Diagnósticos.
