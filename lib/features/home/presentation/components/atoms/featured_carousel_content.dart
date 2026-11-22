@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../books/domain/entities/book.dart';
 import '../../../../../shared/components/atoms/app_image.dart';
 import '../../../../../shared/components/atoms/app_button.dart';
@@ -7,6 +6,7 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/image/image_loading_strategy.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:gatuno/core/theme/semantic_colors.dart';
+import '../../../../../core/router/shell_navigation.dart';
 
 class FeaturedCarouselContent extends StatelessWidget {
   final Book book;
@@ -72,7 +72,7 @@ class FeaturedCarouselContent extends StatelessWidget {
                 const SizedBox(height: 16),
                 AppButton(
                   text: l10n.homeFeaturedReadNow,
-                  onPressed: () => context.push('/books/${book.id.value}'),
+                  onPressed: () => context.pushInTab('/books/${book.id.value}'),
                 ),
                 const SizedBox(height: 16), // space for dots
               ],

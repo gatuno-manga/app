@@ -63,11 +63,16 @@ void main() {
           hasEnabledState: false,
         ),
       );
-      final home = tester.getSemantics(find.text('Home'));
-      // ignore: deprecated_member_use
       expect(
-        home.flagsCollection.isSelected.toString(),
-        isNot(contains('true')),
+        tester.getSemantics(find.text('Home')),
+        matchesSemantics(
+          label: 'Home',
+          isSelected: false,
+          hasSelectedState: true,
+          isButton: true,
+          hasTapAction: true,
+          hasEnabledState: false,
+        ),
       );
     });
 

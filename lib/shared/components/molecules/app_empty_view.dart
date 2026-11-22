@@ -8,6 +8,9 @@ class AppEmptyView extends StatelessWidget {
   final String title;
   final String message;
 
+  /// Optional action under the message (a retry button, for example).
+  final Widget? action;
+
   /// Keeps the message to a readable line length on tablets.
   static const double maxContentWidth = 480;
 
@@ -16,6 +19,7 @@ class AppEmptyView extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.action,
   });
 
   @override
@@ -48,6 +52,7 @@ class AppEmptyView extends StatelessWidget {
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
+              if (action != null) ...[const SizedBox(height: 24), action!],
             ],
           ),
         ),

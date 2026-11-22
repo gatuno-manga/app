@@ -41,7 +41,7 @@ List<RouteBase> settingsRoutes() => [
       child: const SettingsPage(),
     ),
     routes: [
-      ...certificatesRoutes,
+      ...certificatesRoutes(),
       GoRoute(
         // No guard: downloads outlive a sign-out, so their rules must stay
         // reachable for guests too.

@@ -168,26 +168,27 @@ void main() {
     expect(tester.state<ScrollableState>(list).position.pixels, 0);
   });
 
-  testWidgets('each tab keeps its own scroll position', (tester) async {
+  testWidgets('re-tapping another tab does not scroll the Home list', (
+    tester,
+  ) async {
     await pumpShell(tester);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -800));
     await tester.pumpAndSettle();
+    final before = tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position
+        .pixels;
 
     await tester.tap(find.text('Books'));
     await tester.pumpAndSettle();
-    // The Books list was never scrolled, so re-tapping it changes nothing
-    // and the Home list keeps its offset.
     await tester.tap(find.text('Books'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
-    expect(
-      tester
-          .state<ScrollableState>(find.byType(Scrollable).first)
-          .position
-          .pixels,
-      greaterThan(0),
-    );
+
+    final home = find.byType(Scrollable).first;
+    expect(before, greaterThan(0));
+    expect(tester.state<ScrollableState>(home).position.pixels, before);
   });
 
   testWidgets('shellNavigation prefixes the current tab', (tester) async {

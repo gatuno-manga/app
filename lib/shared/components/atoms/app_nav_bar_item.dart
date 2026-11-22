@@ -37,9 +37,10 @@ class AppNavBarItem extends StatelessWidget {
         label: label,
         excludeSemantics: true,
         onTap: onTap,
-        child: GestureDetector(
+        child: InkResponse(
           onTap: onTap,
-          behavior: HitTestBehavior.opaque,
+          highlightShape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

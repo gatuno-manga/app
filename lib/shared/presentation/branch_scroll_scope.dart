@@ -11,11 +11,11 @@ class BranchScrollRegistry {
   ScrollController controllerFor(int branchIndex) =>
       _controllers.putIfAbsent(branchIndex, ScrollController.new);
 
-  /// Animates the branch's root list to offset 0. Returns false when no list
+  /// Animates the branch's root list to offset 0. Does nothing when no list
   /// is attached (an empty state, or a root that does not opt in).
-  bool scrollToTop(int branchIndex) {
+  void scrollToTop(int branchIndex) {
     final controller = _controllers[branchIndex];
-    if (controller == null || !controller.hasClients) return false;
+    if (controller == null || !controller.hasClients) return;
     for (final position in controller.positions) {
       position.animateTo(
         0,
@@ -23,7 +23,6 @@ class BranchScrollRegistry {
         curve: Curves.easeOut,
       );
     }
-    return true;
   }
 
   void dispose() {
