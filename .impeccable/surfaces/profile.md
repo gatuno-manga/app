@@ -11,7 +11,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, "Perfil", no actions) and `App/Organism/Shell/Barra inferior` with Início selected: the screen is pushed above the merged profile and settings screen, from whichever tab opened it (#169, #170; code in #251 and #172)
-- `App/Atom/Avatar/Perfil` (new local component, `951:870`) → `lib/shared/components/atoms/app_avatar.dart`
+- `Core/Atom/Avatar/Perfil` (`1128:12503`, replaced `App/Atom/Avatar/Perfil` in #266; State=Image, Fallback, Guest; sizes 24, 48, 56, 96) → `lib/shared/components/atoms/app_avatar.dart`
 - `Core/Atom/Botão` (Outline) → logout
 
 ## Code
@@ -44,7 +44,7 @@ Shell (#172): the profile edit screen is `settings/profile` under each tab root 
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Expanded list-detail with the profile in the detail pane: `1105:9489` (surface `settings`). Medium: the profile page is pushed as on the phone; no separate tablet frame.
-- Components in the detail pane: `App/Atom/Avatar/Perfil`, `App/Atom/Campo/Texto`, `Core/Atom/Botão`. The profile is part of the merged "Perfil e configurações" screen, which the avatar in the tab-root top bars opens (the opener's tab stays selected). On medium `/settings/profile` is pushed above the merged screen; on expanded it opens in the detail pane.
+- Components in the detail pane: `Core/Atom/Avatar/Perfil`, `App/Atom/Campo/Texto`, `Core/Atom/Botão`. The profile is part of the merged "Perfil e configurações" screen, which the avatar in the tab-root top bars opens (the opener's tab stays selected). On medium `/settings/profile` is pushed above the merged screen; on expanded it opens in the detail pane.
 - Code: #254.
 
 ## Gaps (Figma vs code)

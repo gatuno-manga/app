@@ -3,7 +3,7 @@
 Anchors a single app surface for `/impeccable critique` and related commands. Facts come from the Gatuno Figma file (page "04 · Telas Mobile (App)", file key `QlUrvomONqwfefHCwTg0Hh`) and the repo; frames were drawn in issue #52 from the existing mobile frames, using only existing components and tokens (Dark theme only); issue #127 added the `App/Molecule/Rádio/Item` component and the `Core/Atom/Ícone/lock` icon for the app lock frames. Token keys refer to `.impeccable/design.json`.
 
 ## Route
-- Figma: /user (mobile section `859:38`, "Configurações — /user"); app lock frames in the section "Bloqueio do app (/settings/app-lock)" (`1052:38698`)
+- Figma: /user (mobile section `859:38`, "Configurações — /user", grown in #266 so the 1058 dp `/settings` frames fit; the guest frame `1112:8331` is inside it); app lock frames in the section "Bloqueio do app (/settings/app-lock)" (`1052:38698`)
 - Code: `/settings` (`lib/features/settings`), certificates under `/settings/certificates`, download network rules under `/settings/download` (issue #95, `download_settings_screen.dart`), app lock under `/settings/app-lock` plus the lock cover (issue #127, `lib/features/app_lock`)
 
 ## Figma frames
@@ -26,7 +26,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Stacked (back, left-aligned title, actions hidden) and `App/Organism/Shell/Barra inferior` (#169, #170; code in #251 and #172). Settings is no longer a tab: the screen opens from the avatar action in each tab root's top bar. The `/settings/download` (`997:5174`, `997:5230`) and `/settings/app-lock` (`1052:38699`, `1052:38771`, `1052:38818`) frames draw both bars too since #260 (titles "Downloads" and "Bloqueio do app", no actions, Início selected); the content area is 700 dp and the snackbar of `997:5230` sits above the bottom bar.
 - `App/Molecule/Perfil/Cartão` (#265, `1124:9549`): the profile entry at the top of `/settings`; `App/Molecule/Configurações/Linha de tipo` (#265, `1124:9624`): the five type rows of `/settings/download`
-- `App/Atom/Avatar/Perfil` (new local component, `951:870`) → profile card
+- `Core/Atom/Avatar/Perfil` (`1128:12503`, State=Image, 56 dp in the profile card) → profile card
 - `Core/Molecule/Interruptor/Item` → sensitive-content switch (`app_switch`; Figma component added in #126, replacing the reuse of the reader's `Core/Molecule/Leitor/Item de ajuste`)
 - `App/Atom/Campo/Texto` (new local component, `951:869`) → API base URL
 - `App/Molecule/Lista/Item` (new local component, `951:872`) → downloads, certificates, export logs, open logs

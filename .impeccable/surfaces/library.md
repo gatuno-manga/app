@@ -9,12 +9,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## Figma frames
 - `953:2419` /library — mobile (saved books, tabs Lendo / Salvos / Concluídos, three `Core/Molecule/Livro/Card` list items)
 - `953:2492` /library — mobile · vazio
-- `1112:8220` /library — mobile · barra recolhida (`Collapsed root` state)
+- `1112:8220` /library — mobile · barra recolhida (since #266 the same Root bar as the default frame, kept as a scrolled-content frame)
 - `1112:8281` /library — mobile · em breve (antes do #130): the placeholder tab the app ships until #130 builds the screen
 - `1112:8305` /library — mobile · visitante: sign-in prompt
 
 ## Figma components used
-- `App/Organism/Shell/Barra superior` Type=Expanded root (search, avatar or user icon) and `App/Organism/Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
+- `App/Organism/Shell/Barra superior` Type=Root (title, search, avatar or Guest avatar) and `App/Organism/Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
 - `App/Molecule/Página/Cabeçalho` (#265, `1125:8991`): the "Seus livros salvos" subtitle; `App/Molecule/Vista vazia` (#265, `1124:9491`): the empty library and the "em breve" and guest states
 - `Core/Atom/Livro/Aba` → tabs (Ativa / Inativa)
 - `Core/Molecule/Livro/Card` (Type=List) → `features/books/presentation/components/molecules/`
@@ -41,7 +41,7 @@ Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features
 ## States in Figma
 - Loaded: tabs plus list of saved books.
 - Empty: icon, message and a primary action to explore books. The tabs are hidden in this state (a choice, not a code fact).
-- Collapsed top bar (`1112:8220`), the placeholder shipped before #130 (`1112:8281`, "A sua biblioteca chega em breve.") and the guest sign-in prompt (`1112:8305`).
+- Scrolled-content frame with the Root bar (`1112:8220`), the placeholder shipped before #130 (`1112:8281`, "A sua biblioteca chega em breve.") and the guest sign-in prompt (`1112:8305`).
 - No loading or error frame.
 
 ## Accessibility
@@ -54,7 +54,7 @@ Shell (#172): the Biblioteca tab is the placeholder `LibraryPage` (`lib/features
 Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md (Layout).
 
 - Medium: `1107:9618` and `1107:9911` (vazio). Expanded: `1107:9781` and `1107:9976` (vazio).
-- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Biblioteca selected (the second of three destinations; until #130 ships the tab is a placeholder); `App/Organism/Shell/Barra superior` Expanded root with the profile avatar in the last action slot; `Core/Atom/Livro/Aba` (Lendo, Salvos, Concluídos); `Core/Molecule/Livro/Card` List in 2 (medium) or 3 (expanded) columns; `Core/Atom/Botão` and `Core/Atom/Ícone/bookmark` in the empty state.
+- Components: `App/Organism/Shell/Trilho de navegação` (`1112:9248`, 80 dp, three destinations, replaces the bottom bar from 600 dp up) with Biblioteca selected (the second of three destinations; until #130 ships the tab is a placeholder); `App/Organism/Shell/Barra superior` Root with the profile avatar in the last action slot; `Core/Atom/Livro/Aba` (Lendo, Salvos, Concluídos); `Core/Molecule/Livro/Card` List in 2 (medium) or 3 (expanded) columns; `Core/Atom/Botão` and `Core/Atom/Ícone/bookmark` in the empty state.
 - Reference for #130; no code task in #168 builds it. Guests see the tab with a sign-in prompt (#169 decision); not drawn.
 
 ## Gaps (Figma vs code)
