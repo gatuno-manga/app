@@ -21,6 +21,7 @@ SURFACES = ROOT / ".impeccable" / "surfaces"
 REQUIRED_SURFACES = [
     "home", "latest-reads", "books-list", "book-detail",
     "reader", "library", "profile", "settings", "auth",
+    "mfa",
 ]
 HEX = re.compile(r"^#[0-9a-f]{6}([0-9a-f]{2})?$")
 STATUSES = {"match", "differs", "missing"}
