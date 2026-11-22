@@ -82,3 +82,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - The add dialog's actions are drawn in a row; with a long Selecionar Arquivo PEM label code stacks them (`AlertDialog` overflow). The `certAddPemLabel` string is not used by the dialog.
 - The Figma app bar is the left-aligned `App/Organism/Shell/Barra superior` Type=Stacked at 64 dp (#170); code centres the title (`AppBarTheme(centerTitle: true)`) at 56 dp.
 - No web frame exists.
+
+## Implementation status (#251)
+- #251: certificates use `AppTopBar` (Stacked).

@@ -68,7 +68,10 @@ void main() {
         final result = await viewModel.addManualCertificate('name', 'pem');
 
         expect(result, isFalse);
-        expect(viewModel.state.error, isA<CertificateEmptyFingerprintException>());
+        expect(
+          viewModel.state.error,
+          isA<CertificateEmptyFingerprintException>(),
+        );
         verify(() => mockService.addManualCertificate('name', 'pem')).called(1);
       },
     );

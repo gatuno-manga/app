@@ -15,9 +15,11 @@ import 'package:gatuno/shared/components/atoms/app_load_more_footer.dart';
 import 'package:gatuno/shared/components/molecules/app_offline_empty_view.dart';
 import 'package:gatuno/shared/components/molecules/pagination.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/books_offline_notice.dart';
+import 'package:gatuno/features/books/books_launch_intent.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../helpers/pump_app.dart';
+import '../../../../helpers/test_injection.dart';
 
 class MockBooksViewModel extends Mock implements BooksViewModel {}
 
@@ -27,11 +29,13 @@ void main() {
   setUpAll(() {
     registerFallbackValue(BookId('dummy'));
     registerFallbackValue(const BookPageOptions());
+    registerFallbackValue(SortOrder.asc);
   });
 
   late StreamController<BooksState> stateController;
 
-  setUp(() {
+  setUp(() async {
+    await initTestDI();
     mockViewModel = MockBooksViewModel();
 
     // Default mock behavior
@@ -462,6 +466,142 @@ void main() {
       expect(find.byType(AppOfflineEmptyView), findsOneWidget);
       await tester.tap(find.text('Retry'));
       verify(() => mockViewModel.refresh()).called(1);
+    });
+  });
+
+  group('launch intent', () {
+    late ValueNotifier<BooksLaunchIntent?> intent;
+
+    setUp(() {
+      intent = ValueNotifier(null);
+      when(() => mockViewModel.setSort(any(), any())).thenReturn(null);
+    });
+
+    tearDown(() => intent.dispose());
+
+    Widget host() => Provider<BooksViewModel>.value(
+      value: mockViewModel,
+      child: ValueListenableBuilder<BooksLaunchIntent?>(
+        valueListenable: intent,
+        builder: (_, value, _) => BooksPage(intent: value),
+      ),
+    );
+
+    bool searchHasFocus(WidgetTester tester) =>
+        tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus;
+
+    void unfocus() => FocusManager.instance.primaryFocus?.unfocus();
+
+    BooksLaunchIntent focus(int nonce) =>
+        BooksLaunchIntent(nonce: nonce, focusSearch: true);
+
+    BooksLaunchIntent sort(int nonce, [String by = 'updatedAt']) =>
+        BooksLaunchIntent(nonce: nonce, orderBy: by, order: SortOrder.desc);
+
+    testWidgets('a cold open with focus focuses the search field', (
+      tester,
+    ) async {
+      intent.value = focus(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('a cold open with a sort sorts without focusing', (
+      tester,
+    ) async {
+      intent.value = sort(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('updatedAt', SortOrder.desc),
+      ).called(1);
+      expect(searchHasFocus(tester), isFalse);
+    });
+
+    testWidgets('an open page applies a focus request that arrives later', (
+      tester,
+    ) async {
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      expect(searchHasFocus(tester), isFalse);
+
+      intent.value = focus(1);
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('an open page applies a sort request that arrives later', (
+      tester,
+    ) async {
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      verifyNever(() => mockViewModel.setSort(any(), any()));
+
+      intent.value = sort(1, 'createdAt');
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('createdAt', SortOrder.desc),
+      ).called(1);
+    });
+
+    testWidgets('the same link tapped again (new nonce) refocuses', (
+      tester,
+    ) async {
+      intent.value = focus(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      unfocus();
+      await tester.pump();
+      expect(searchHasFocus(tester), isFalse);
+
+      intent.value = focus(2);
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('the same sort link tapped again sorts again', (tester) async {
+      intent.value = sort(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      intent.value = sort(2);
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('updatedAt', SortOrder.desc),
+      ).called(2);
+    });
+
+    testWidgets('a rebuild with the same nonce does not apply it again', (
+      tester,
+    ) async {
+      intent.value = BooksLaunchIntent(
+        nonce: 1,
+        focusSearch: true,
+        orderBy: 'updatedAt',
+        order: SortOrder.desc,
+      );
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      unfocus();
+      await tester.pump();
+
+      intent.value = BooksLaunchIntent(
+        nonce: 1,
+        focusSearch: true,
+        orderBy: 'updatedAt',
+        order: SortOrder.desc,
+      );
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isFalse);
+      verify(() => mockViewModel.setSort(any(), any())).called(1);
     });
   });
 }

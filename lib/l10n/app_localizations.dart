@@ -1760,6 +1760,18 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get mfaErrorUnknown;
 
+  /// No description provided for @settingsBookRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a book'**
+  String get settingsBookRequests;
+
+  /// No description provided for @settingsBookRequestsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a book that is not in the library'**
+  String get settingsBookRequestsDesc;
+
   /// No description provided for @settingsMfaDesc.
   ///
   /// In en, this message translates to:

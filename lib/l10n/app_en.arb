@@ -359,6 +359,8 @@
   "mfaErrorChallengeExpired": "Verification expired. Please sign in again.",
   "mfaErrorNetwork": "Could not reach the server. Check your connection.",
   "mfaErrorUnknown": "Something went wrong. Please try again.",
+  "settingsBookRequests": "Request a book",
+  "settingsBookRequestsDesc": "Ask for a book that is not in the library",
   "settingsMfaDesc": "Protect your account with an authenticator app",
   "mfaNoAuthenticatorApp": "Could not open an authenticator app. Copy the secret and add it manually.",
   "mfaSaveCodesFirst": "Save your backup codes before leaving this screen.",

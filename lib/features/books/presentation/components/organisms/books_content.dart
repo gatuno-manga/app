@@ -13,93 +13,120 @@ import 'books_collection.dart';
 import 'books_view_options_sheet.dart';
 import 'books_view_toolbar.dart';
 
-class BooksContent extends StatelessWidget {
+/// The body of Livros as slivers for the top bar's scroll view, plus the
+/// wrapper that adds pull to refresh and infinite loading around it.
+class BooksContent {
   final BooksViewModel viewModel;
 
-  const BooksContent({super.key, required this.viewModel});
+  const BooksContent({required this.viewModel});
 
   bool get _infinite =>
       viewModel.preferences.navigation == BooksNavigationMode.infinite;
 
   bool get _hasBooks => viewModel.bookList?.data.isNotEmpty ?? false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        BooksViewToolbar(
-          layout: viewModel.preferences.layout,
-          onLayoutChanged: viewModel.setLayoutMode,
-          onOptionsPressed: () =>
-              BooksViewOptionsSheet.show(context, viewModel),
-        ),
-        if (viewModel.isCacheList) const BooksOfflineNotice(),
-        Expanded(child: _body(context)),
-        if (!_infinite && _hasBooks)
-          viewModel.isPagingPaused
-              ? _pausedNote(AppLocalizations.of(context)!, announce: true)
-              : Pagination(
-                  currentPage: viewModel.options.page.value,
-                  totalPages: viewModel.bookList?.totalPages.value ?? 1,
-                  isLoading: viewModel.isLoading,
-                  onPageChanged: viewModel.setPage,
-                ),
-      ],
-    );
-  }
+  bool get _isPlaceholder =>
+      (viewModel.isOfflineMiss && !_hasBooks) ||
+      (viewModel.isLoading && !_hasBooks) ||
+      (viewModel.error != null && !_hasBooks);
 
-  Widget _body(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    if (viewModel.isOfflineMiss && !_hasBooks) {
-      return AppOfflineEmptyView(
-        onRetry: viewModel.refresh,
-        isRetrying: viewModel.isRefreshing || viewModel.isLoading,
-      );
-    }
-
-    if (viewModel.isLoading && !_hasBooks) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (viewModel.error != null && !_hasBooks) {
-      return Center(child: Text(viewModel.error!));
-    }
-
-    if (!_hasBooks) {
-      return RefreshIndicator(
-        onRefresh: viewModel.refresh,
-        child: ListView(
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.8,
-              child: BooksListNote(
-                message: viewModel.isCacheList
-                    ? l10n.booksOfflineNoMatch
-                    : l10n.booksNoBooksFound,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
+  /// Pull to refresh and load more around the scroll view. The placeholders
+  /// (loading, error, offline miss) have their own retry and do not pull.
+  Widget wrap(BuildContext context, Widget scrollView) {
+    if (_isPlaceholder) return scrollView;
     return LoadMoreListener(
       enabled:
+          _hasBooks &&
           _infinite &&
           viewModel.hasMore &&
           !viewModel.isLoading &&
           !viewModel.isPagingPaused,
       onLoadMore: viewModel.loadMore,
-      child: RefreshIndicator(
-        onRefresh: viewModel.refresh,
-        child: BooksCollection(
-          books: viewModel.bookList!.data,
-          preferences: viewModel.preferences,
-          footer: _footer(l10n),
+      child: RefreshIndicator(onRefresh: viewModel.refresh, child: scrollView),
+    );
+  }
+
+  /// The page controls, fixed under the list in pages mode.
+  Widget? bottomBar(BuildContext context) {
+    if (_infinite || !_hasBooks) return null;
+    return viewModel.isPagingPaused
+        ? _pausedNote(AppLocalizations.of(context)!, announce: true)
+        : Pagination(
+            currentPage: viewModel.options.page.value,
+            totalPages: viewModel.bookList?.totalPages.value ?? 1,
+            isLoading: viewModel.isLoading,
+            onPageChanged: viewModel.setPage,
+          );
+  }
+
+  List<Widget> slivers(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      SliverToBoxAdapter(
+        child: BooksViewToolbar(
+          layout: viewModel.preferences.layout,
+          onLayoutChanged: viewModel.setLayoutMode,
+          onOptionsPressed: () =>
+              BooksViewOptionsSheet.show(context, viewModel),
         ),
       ),
-    );
+      if (viewModel.isCacheList)
+        const SliverToBoxAdapter(child: BooksOfflineNotice()),
+      ..._body(context, l10n),
+    ];
+  }
+
+  List<Widget> _body(BuildContext context, AppLocalizations l10n) {
+    if (viewModel.isOfflineMiss && !_hasBooks) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: AppOfflineEmptyView(
+            onRetry: viewModel.refresh,
+            isRetrying: viewModel.isRefreshing || viewModel.isLoading,
+          ),
+        ),
+      ];
+    }
+
+    if (viewModel.isLoading && !_hasBooks) {
+      return const [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
+    }
+
+    if (viewModel.error != null && !_hasBooks) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(child: Text(viewModel.error!)),
+        ),
+      ];
+    }
+
+    if (!_hasBooks) {
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: BooksListNote(
+            message: viewModel.isCacheList
+                ? l10n.booksOfflineNoMatch
+                : l10n.booksNoBooksFound,
+          ),
+        ),
+      ];
+    }
+
+    return [
+      BooksCollection(
+        books: viewModel.bookList!.data,
+        preferences: viewModel.preferences,
+        footer: _footer(l10n),
+      ),
+    ];
   }
 
   /// Pull to refresh has no accessibility action, so the note offers the

@@ -323,6 +323,37 @@ void main() {
     );
   });
 
+  testWidgets('signed-in users get a book requests row that opens /requests', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    when(() => mockAuthService.authenticated).thenReturn(true);
+    viewModel = SettingsViewModel(
+      settingsService: mockSettingsService,
+      authService: mockAuthService,
+      userService: mockUserService,
+      downloadService: mockDownloadService,
+    );
+
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+    await tester.pump();
+    await tester.tap(find.text('Request a book'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Book Requests Page'), findsOneWidget);
+  });
+
+  testWidgets('guests have no book requests row', (tester) async {
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpApp(settingsPage(), theme: AppTheme.lightTheme);
+
+    expect(find.text('Request a book'), findsNothing);
+  });
+
   testWidgets('SettingsPage shows the guest card while the profile loads', (
     tester,
   ) async {

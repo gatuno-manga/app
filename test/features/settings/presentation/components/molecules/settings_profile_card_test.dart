@@ -42,10 +42,10 @@ void main() {
 
       expect(find.text('Guest'), findsOneWidget);
       expect(find.text('john@example.com'), findsNothing);
-      expect(find.byType(AppAvatar), findsOneWidget);
+      expect(tester.widget<AppAvatar>(find.byType(AppAvatar)).guest, isTrue);
     });
 
-    testWidgets('shows the profile image over the initials', (tester) async {
+    testWidgets('passes the profile image to the avatar', (tester) async {
       await tester.pumpApp(
         Scaffold(
           body: SettingsProfileCard(
@@ -61,10 +61,9 @@ void main() {
         tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl,
         'http://x/a.webp',
       );
-      expect(find.text('J'), findsOneWidget);
     });
 
-    testWidgets('shows only the initials without an image', (tester) async {
+    testWidgets('shows the user icon without an image', (tester) async {
       await tester.pumpApp(
         Scaffold(
           body: SettingsProfileCard(
@@ -77,7 +76,7 @@ void main() {
       );
 
       expect(tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl, isNull);
-      expect(find.text('J'), findsOneWidget);
+      expect(find.byIcon(Icons.person), findsOneWidget);
     });
 
     testWidgets('calls onTap when pressed', (tester) async {

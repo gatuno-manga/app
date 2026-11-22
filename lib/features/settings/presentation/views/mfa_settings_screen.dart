@@ -9,6 +9,8 @@ import '../../../authentication/presentation/views/mfa_challenge_screen.dart'
     show mfaErrorText;
 import '../../../../core/di/injection.dart';
 import '../../../authentication/domain/repositories/mfa_repository.dart';
+import '../../../../shared/components/organisms/app_top_bar.dart';
+import '../../../../shared/components/templates/app_top_bar_scaffold.dart';
 import '../view_models/mfa_settings_view_model.dart';
 
 class MfaSettingsPage extends StatefulWidget {
@@ -118,17 +120,21 @@ class _MfaSettingsPageState extends State<MfaSettingsPage> {
               ).showSnackBar(SnackBar(content: Text(l10n.mfaSaveCodesFirst)));
             }
           },
-          child: Scaffold(
-            appBar: AppBar(
-              title: Text(l10n.mfaTitle),
-              automaticallyImplyLeading: !blockBack,
-            ),
-            body: SafeArea(
-              child: ListView(
-                padding: const EdgeInsets.all(24),
-                children: _body(context, l10n, state),
+          child: AppTopBarScaffold(
+            topBar: AppTopBar(title: l10n.mfaTitle, showBack: !blockBack),
+            slivers: [
+              SliverSafeArea(
+                top: false,
+                sliver: SliverPadding(
+                  padding: const EdgeInsets.all(24),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate(
+                      _body(context, l10n, state),
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         );
       },

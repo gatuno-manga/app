@@ -56,6 +56,16 @@ extension PumpApp on WidgetTester {
               const Scaffold(body: Text('Profile Page')),
         ),
         GoRoute(
+          path: '/home/requests',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Book Requests Page')),
+        ),
+        GoRoute(
+          path: '/books',
+          builder: (context, state) =>
+              Scaffold(body: Text('Books Page ${state.uri.query}')),
+        ),
+        GoRoute(
           path: '/auth/signin',
           builder: (context, state) =>
               const Scaffold(body: Text('Signin Page')),

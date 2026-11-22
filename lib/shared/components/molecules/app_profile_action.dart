@@ -29,8 +29,10 @@ class AppProfileAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+    // Fixed: the action sits in an unbounded Row, where Center would expand.
+    return SizedBox(
+      width: 48,
+      height: 48,
       child: AppClickableAction(
         tooltip: tooltip,
         onPressed: onPressed,

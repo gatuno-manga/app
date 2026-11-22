@@ -50,12 +50,13 @@ class BookRequestsListState extends Equatable {
   List<Object?> get props => [isLoading, error, requests, currentPage, hasMore];
 }
 
-class BookRequestsListViewModel extends BaseStreamViewModel<BookRequestsListState> {
+class BookRequestsListViewModel
+    extends BaseStreamViewModel<BookRequestsListState> {
   final BookRequestsRepository _repository;
 
   BookRequestsListViewModel({required BookRequestsRepository repository})
-      : _repository = repository,
-        super(BookRequestsListState.initial());
+    : _repository = repository,
+      super(BookRequestsListState.initial());
 
   bool get isLoading => state.isLoading;
   String? get error => state.error;
@@ -64,7 +65,7 @@ class BookRequestsListViewModel extends BaseStreamViewModel<BookRequestsListStat
 
   Future<void> fetchRequests({bool refresh = false}) async {
     if (state.isLoading) return;
-    
+
     var currentState = state;
     if (refresh) {
       currentState = BookRequestsListState.initial();
@@ -77,26 +78,40 @@ class BookRequestsListViewModel extends BaseStreamViewModel<BookRequestsListStat
 
     try {
       final newRequests = await _repository.getBookRequests(
-        page: currentState.currentPage, 
-        limit: 20
+        page: currentState.currentPage,
+        limit: 20,
       );
-      
+
       final hasMore = newRequests.isNotEmpty && newRequests.length >= 20;
-      final updatedRequests = List<BookRequestEntity>.from(currentState.requests)..addAll(newRequests);
-      
-      emit(currentState.copyWith(
-        isLoading: false,
-        requests: updatedRequests,
-        currentPage: currentState.currentPage + 1,
-        hasMore: hasMore,
-        error: () => null,
-      ));
+      final updatedRequests = List<BookRequestEntity>.from(
+        currentState.requests,
+      )..addAll(newRequests);
+
+      emit(
+        currentState.copyWith(
+          isLoading: false,
+          requests: updatedRequests,
+          currentPage: currentState.currentPage + 1,
+          hasMore: hasMore,
+          error: () => null,
+        ),
+      );
     } on AppExceptions catch (e) {
       AppLogger.e('Failed to fetch book requests', e, null, 'BOOK_REQUESTS');
       emit(currentState.copyWith(isLoading: false, error: () => e.message));
     } catch (e) {
-      AppLogger.e('Unexpected error fetching requests', e, null, 'BOOK_REQUESTS');
-      emit(currentState.copyWith(isLoading: false, error: () => 'An unexpected error occurred'));
+      AppLogger.e(
+        'Unexpected error fetching requests',
+        e,
+        null,
+        'BOOK_REQUESTS',
+      );
+      emit(
+        currentState.copyWith(
+          isLoading: false,
+          error: () => 'An unexpected error occurred',
+        ),
+      );
     }
   }
 }

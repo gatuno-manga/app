@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gatuno/features/users/presentation/components/templates/profile_template.dart';
+import 'package:gatuno/shared/components/organisms/app_top_bar.dart';
 import 'package:gatuno/features/home/presentation/components/templates/home_template.dart';
 
 void main() {
@@ -22,12 +23,14 @@ void main() {
       expect(find.text('SETTINGS'), findsOneWidget);
     });
 
-    testWidgets('HomeTemplate renders appBar and body', (tester) async {
+    testWidgets('HomeTemplate renders the top bar and sections', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: HomeTemplate(
-            appBar: AppBar(title: const Text('APPBAR')),
-            body: const Text('BODY'),
+            topBar: const AppTopBar(title: 'APPBAR'),
+            slivers: [SliverToBoxAdapter(child: Text('BODY'))],
           ),
         ),
       );

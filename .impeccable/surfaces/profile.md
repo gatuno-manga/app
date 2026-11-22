@@ -52,3 +52,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - Figma route `/users/:userId` (any user) differs from code `/settings/profile` (current user only); the frame shows the current user.
 - The sensitive-content switch is not on the profile screen: code puts it on settings (`settings_screen.dart`), so the profile frame omits it.
 - Avatar has no image, loading or error state drawn (code has a grey placeholder circle when the name is null, and uses `colorScheme.onPrimary`, which differs from Figma `color/on-primary`, see `on-primary-dark`); there is no logout-confirmation frame.
+
+## Implementation status (#251)
+- #251: the profile screen uses `AppTopBar` (Stacked) and the new `AppAvatar`.

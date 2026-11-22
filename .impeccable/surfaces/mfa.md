@@ -78,3 +78,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - The screen builds raw `OutlinedButton`, `TextButton`, `CheckboxListTile` and `AlertDialog` (`raw_widget_outside_atoms`); the frames use `Core/Atom/Botão`, `App/Atom/Caixa de seleção` and `App/Organism/Diálogo/Confirmação`.
 - Flutter's `AppBar` shows the title on one line and ellipsizes it, so "Autenticação em dois fatores" may be cut on narrow phones or large text scales; the frames draw it one line with an ellipsis, and the overflow treatment (wrap or shorter title) is left to #251, which builds the shared top bar.
 - No web (1440 dp) frames, and no Light, True-dark, Dracula or Slate frames: those themes are a mode switch of the same frames.
+
+## Implementation status (#251)
+- #251: `/settings/mfa` uses `AppTopBar` with `showBack: !blockBack`.

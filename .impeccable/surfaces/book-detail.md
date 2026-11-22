@@ -103,3 +103,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - The book sheet's switch row is `AppSwitchRow` (`Core/Molecule/Interruptor/Item`; it was the reader's `Core/Molecule/Leitor/Item de ajuste` before #126) and "Excluir download" is `AppButton` with `AppButtonVariant.outlinedDanger` at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.
 - Mobile frames cover only the chapters tab; other tabs (art, info, related, ratings) are web-only.
 - Admin tools and batch selection are web-only in Figma.
+
+## Implementation status (#251)
+- #251: book detail uses a pinned, transparent `AppTopBar` (Stacked); selection mode swaps in the selection bar through `AppPinnedBarSliver`.

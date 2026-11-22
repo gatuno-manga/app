@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/shared/components/atoms/app_loading_indicator.dart';
+import 'package:gatuno/shared/components/organisms/app_top_bar.dart';
+import 'package:gatuno/shared/components/templates/app_top_bar_scaffold.dart';
 
 class ProfileTemplate extends StatelessWidget {
   final String title;
@@ -17,12 +19,18 @@ class ProfileTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: isLoading
-          ? const Center(child: AppLoadingIndicator(size: 40))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+    return AppTopBarScaffold(
+      topBar: AppTopBar(title: title, showBack: true),
+      slivers: [
+        if (isLoading)
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: AppLoadingIndicator(size: 40)),
+          )
+        else
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -33,6 +41,8 @@ class ProfileTemplate extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+      ],
     );
   }
 }

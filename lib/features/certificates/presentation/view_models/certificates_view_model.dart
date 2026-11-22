@@ -44,27 +44,29 @@ class CertificatesState extends Equatable {
 
   @override
   List<Object?> get props => [
-        isLoading,
-        error,
-        trustedCertificates,
-        ignoredCertificates,
-      ];
+    isLoading,
+    error,
+    trustedCertificates,
+    ignoredCertificates,
+  ];
 }
 
 class CertificatesViewModel extends BaseStreamViewModel<CertificatesState> {
   final CertificatesService _certificatesService;
 
   CertificatesViewModel(this._certificatesService)
-      : super(CertificatesState.initial()) {
+    : super(CertificatesState.initial()) {
     _certificatesService.addListener(_syncState);
     _syncState();
   }
 
   void _syncState() {
-    emit(state.copyWith(
-      trustedCertificates: _certificatesService.trustedCertificates,
-      ignoredCertificates: _certificatesService.ignoredCertificates,
-    ));
+    emit(
+      state.copyWith(
+        trustedCertificates: _certificatesService.trustedCertificates,
+        ignoredCertificates: _certificatesService.ignoredCertificates,
+      ),
+    );
   }
 
   @override
@@ -107,7 +109,12 @@ class CertificatesViewModel extends BaseStreamViewModel<CertificatesState> {
       emit(state.copyWith(isLoading: false, error: () => e));
       return false;
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: () => CertificateDecodingException()));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: () => CertificateDecodingException(),
+        ),
+      );
       return false;
     }
   }
@@ -123,7 +130,12 @@ class CertificatesViewModel extends BaseStreamViewModel<CertificatesState> {
       emit(state.copyWith(isLoading: false, error: () => e));
       return false;
     } catch (e) {
-      emit(state.copyWith(isLoading: false, error: () => CertificateDecodingException()));
+      emit(
+        state.copyWith(
+          isLoading: false,
+          error: () => CertificateDecodingException(),
+        ),
+      );
       return false;
     }
   }

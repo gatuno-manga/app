@@ -63,7 +63,11 @@ void main() {
   testWidgets('BookListView renders all items with fixed extent', (
     tester,
   ) async {
-    await tester.pumpApp(Scaffold(body: BookListView(books: testBooks)));
+    await tester.pumpApp(
+      Scaffold(
+        body: CustomScrollView(slivers: [BookListView(books: testBooks)]),
+      ),
+    );
 
     // Verify all books are present
     for (int i = 0; i < testBooks.length; i++) {
@@ -76,9 +80,13 @@ void main() {
   ) async {
     await tester.pumpApp(
       Scaffold(
-        body: BookListView(
-          books: testBooks.take(2).toList(),
-          footer: const Text('footer'),
+        body: CustomScrollView(
+          slivers: [
+            BookListView(
+              books: testBooks.take(2).toList(),
+              footer: const Text('footer'),
+            ),
+          ],
         ),
       ),
     );

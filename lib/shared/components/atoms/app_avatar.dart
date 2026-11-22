@@ -99,7 +99,10 @@ class AppAvatar extends StatelessWidget {
     );
 
     final avatar = ring
-        ? DecoratedBox(
+        ? Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(color: theme.colorScheme.primary, width: 2),

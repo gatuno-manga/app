@@ -13,6 +13,11 @@ class AppTopBarScaffold extends StatelessWidget {
   final Widget topBar;
   final List<Widget> slivers;
   final Widget? bottomBar;
+  final Widget? floatingActionButton;
+
+  /// For screens that load more near the end of the list. Leave null on tab
+  /// roots so the primary controller keeps scrolling to the top on re-tap.
+  final ScrollController? controller;
 
   /// Wraps the scroll view, for a `RefreshIndicator`.
   final Widget Function(Widget scrollView)? wrap;
@@ -22,15 +27,23 @@ class AppTopBarScaffold extends StatelessWidget {
     required this.topBar,
     required this.slivers,
     this.bottomBar,
+    this.floatingActionButton,
+    this.controller,
     this.wrap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final scrollView = CustomScrollView(slivers: [topBar, ...slivers]);
+    final scrollView = CustomScrollView(
+      controller: controller,
+      // Pull to refresh needs a drag even when the content is short.
+      physics: wrap == null ? null : const AlwaysScrollableScrollPhysics(),
+      slivers: [topBar, ...slivers],
+    );
     return Scaffold(
       body: wrap == null ? scrollView : wrap!(scrollView),
       bottomNavigationBar: bottomBar,
+      floatingActionButton: floatingActionButton,
     );
   }
 }

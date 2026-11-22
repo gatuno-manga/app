@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import '../../../../../shared/components/atoms/app_icon_button.dart';
+import '../../../../../shared/components/organisms/app_top_bar.dart';
 import '../../../domain/entities/book.dart';
 import '../../models/download_display.dart';
 import '../../view_models/book_details_view_model.dart';
@@ -55,22 +55,9 @@ class BookDetailsContent extends StatelessWidget {
 
     return BookDetailsTemplate(
       scrollController: scrollController,
-      appBar:
-          selectionBar ??
-          AppBar(
-            backgroundColor: Colors.transparent,
-            leading: AppIconButton(
-              icon: Icons.arrow_back,
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: () {
-                if (context.canPop()) {
-                  context.pop();
-                } else {
-                  context.go('/home');
-                }
-              },
-            ),
-          ),
+      topBar: selectionBar == null
+          ? const AppTopBar(showBack: true, transparent: true, pinned: true)
+          : AppPinnedBarSliver(bar: selectionBar!),
       cover: BookCoverLarge(coverUrl: book.cover?.value),
       header: BookDetailsHeader(
         title: book.title.value,

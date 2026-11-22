@@ -16,38 +16,25 @@ ImageProvider? _foregroundImage(WidgetTester tester) =>
 
 void main() {
   group('AppAvatar', () {
-    testWidgets('shows initials without an image', (tester) async {
-      await tester.pumpWidget(
-        _wrap(const AppAvatar(name: 'maria', strategy: _strategy)),
-      );
-      expect(find.text('M'), findsOneWidget);
-      expect(
-        tester.widget<CircleAvatar>(find.byType(CircleAvatar)).foregroundImage,
-        isNull,
-      );
+    testWidgets('shows the user icon without an image', (tester) async {
+      await tester.pumpWidget(_wrap(const AppAvatar(strategy: _strategy)));
+      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(_foregroundImage(tester), isNull);
     });
 
-    testWidgets('empty image url falls back to initials', (tester) async {
+    testWidgets('empty image url falls back to the icon', (tester) async {
       await tester.pumpWidget(
-        _wrap(
-          const AppAvatar(name: 'maria', imageUrl: '', strategy: _strategy),
-        ),
+        _wrap(const AppAvatar(imageUrl: '', strategy: _strategy)),
       );
-      expect(
-        tester.widget<CircleAvatar>(find.byType(CircleAvatar)).foregroundImage,
-        isNull,
-      );
+      expect(_foregroundImage(tester), isNull);
+      expect(find.byIcon(Icons.person), findsOneWidget);
     });
 
     testWidgets('loads the image through the given strategy', (tester) async {
       final strategy = FailingImageLoadingStrategy();
       await tester.pumpWidget(
         _wrap(
-          AppAvatar(
-            name: 'maria',
-            imageUrl: 'http://localhost/a.png',
-            strategy: strategy,
-          ),
+          AppAvatar(imageUrl: 'http://localhost/a.png', strategy: strategy),
         ),
       );
       expect(
@@ -56,16 +43,12 @@ void main() {
             .having((p) => p.url, 'url', 'http://localhost/a.png')
             .having((p) => p.strategy, 'strategy', same(strategy)),
       );
-      expect(find.text('M'), findsOneWidget);
     });
 
-    testWidgets('keeps the initials when the image fails to load', (
-      tester,
-    ) async {
+    testWidgets('keeps the icon when the image fails to load', (tester) async {
       await tester.pumpWidget(
         _wrap(
           AppAvatar(
-            name: 'maria',
             imageUrl: 'http://localhost/a.png',
             strategy: FailingImageLoadingStrategy(),
           ),
@@ -73,26 +56,59 @@ void main() {
       );
       await tester.pump();
       await tester.pump();
-      expect(find.text('M'), findsOneWidget);
+      expect(find.byIcon(Icons.person), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('initials are not announced to screen readers', (tester) async {
+    testWidgets('the icon is not announced to screen readers', (tester) async {
       final semantics = tester.ensureSemantics();
-      await tester.pumpWidget(
-        _wrap(const AppAvatar(name: 'maria', strategy: _strategy)),
-      );
+      await tester.pumpWidget(_wrap(const AppAvatar(strategy: _strategy)));
 
-      expect(find.text('M'), findsOneWidget);
-      expect(find.bySemanticsLabel('M'), findsNothing);
+      expect(find.bySemanticsLabel(RegExp('person')), findsNothing);
       semantics.dispose();
     });
 
-    testWidgets('uses the whole first character of the name', (tester) async {
+    testWidgets('a guest is a bare icon with no circle', (tester) async {
       await tester.pumpWidget(
-        _wrap(const AppAvatar(name: '\u{1F431}gato', strategy: _strategy)),
+        _wrap(const AppAvatar(guest: true, radius: 12, strategy: _strategy)),
       );
-      expect(find.text('\u{1F431}'), findsOneWidget);
+      expect(find.byType(CircleAvatar), findsNothing);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
+      expect(tester.getSize(find.byType(AppAvatar)), const Size(24, 24));
+    });
+
+    testWidgets('loading draws a neutral circle', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          const AppAvatar(isLoading: true, radius: 12, strategy: _strategy),
+        ),
+      );
+      expect(find.byType(CircleAvatar), findsNothing);
+      expect(find.byIcon(Icons.person), findsNothing);
+      expect(tester.getSize(find.byType(AppAvatar)), const Size(24, 24));
+    });
+
+    testWidgets('the 2 dp ring starts at 48 dp', (tester) async {
+      Finder ring() => find.descendant(
+        of: find.byType(AppAvatar),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is DecoratedBox &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).border != null,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _wrap(const AppAvatar(radius: 12, strategy: _strategy)),
+      );
+      expect(ring(), findsNothing);
+
+      await tester.pumpWidget(
+        _wrap(const AppAvatar(radius: 24, strategy: _strategy)),
+      );
+      expect(ring(), findsOneWidget);
+      expect(tester.getSize(find.byType(AppAvatar)), const Size(48, 48));
     });
 
     testWidgets('edit badge appears and taps call onEdit', (tester) async {
@@ -101,7 +117,6 @@ void main() {
       await tester.pumpWidget(
         _wrap(
           AppAvatar(
-            name: 'maria',
             strategy: _strategy,
             editLabel: 'Change',
             onEdit: () => taps++,
@@ -116,9 +131,7 @@ void main() {
     });
 
     testWidgets('no edit affordance without onEdit', (tester) async {
-      await tester.pumpWidget(
-        _wrap(const AppAvatar(name: 'maria', strategy: _strategy)),
-      );
+      await tester.pumpWidget(_wrap(const AppAvatar(strategy: _strategy)));
       expect(find.byIcon(Icons.edit), findsNothing);
       expect(find.byType(InkWell), findsNothing);
     });
@@ -127,12 +140,7 @@ void main() {
       var taps = 0;
       await tester.pumpWidget(
         _wrap(
-          AppAvatar(
-            name: 'maria',
-            strategy: _strategy,
-            isBusy: true,
-            onEdit: () => taps++,
-          ),
+          AppAvatar(strategy: _strategy, isBusy: true, onEdit: () => taps++),
         ),
       );
       expect(find.byType(CircularProgressIndicator), findsOneWidget);

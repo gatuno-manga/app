@@ -930,6 +930,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get mfaErrorUnknown => 'Algo deu errado. Tente novamente.';
 
   @override
+  String get settingsBookRequests => 'Solicitar livro';
+
+  @override
+  String get settingsBookRequestsDesc =>
+      'Peça um livro que não está na biblioteca';
+
+  @override
   String get settingsMfaDesc =>
       'Proteja sua conta com um aplicativo autenticador';
 

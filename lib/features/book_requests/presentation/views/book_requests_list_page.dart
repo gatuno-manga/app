@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
+import '../../../../shared/components/atoms/app_icon_button.dart';
+import '../../../../shared/components/organisms/app_top_bar.dart';
+import '../../../../shared/components/templates/app_top_bar_scaffold.dart';
 import '../view_models/book_requests_list_view_model.dart';
 import '../components/molecules/book_request_card.dart';
 import '../../../../core/router/shell_navigation.dart';
@@ -42,112 +45,132 @@ class _BookRequestsListPageState extends State<BookRequestsListPage> {
     final l10n = AppLocalizations.of(context)!;
     final viewModel = context.read<BookRequestsListViewModel>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.bookRequestsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.pushInTab('/requests/create'),
+    return StreamBuilder<BookRequestsListState>(
+      stream: viewModel.stateStream,
+      initialData: viewModel.state,
+      builder: (context, snapshot) {
+        final state = snapshot.data!;
+        return AppTopBarScaffold(
+          controller: _scrollController,
+          topBar: AppTopBar(
+            title: l10n.bookRequestsTitle,
+            showBack: true,
+            actions: [
+              AppIconButton(
+                icon: Icons.add,
+                tooltip: l10n.bookRequestsCreateTitle,
+                onPressed: () => context.pushInTab('/requests/create'),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: StreamBuilder<BookRequestsListState>(
-        stream: viewModel.stateStream,
-        initialData: viewModel.state,
-        builder: (context, snapshot) {
-          final state = snapshot.data!;
-          return RefreshIndicator(
+          wrap: (scrollView) => RefreshIndicator(
             onRefresh: () => viewModel.fetchRequests(refresh: true),
-            child: _buildBody(viewModel, state, l10n),
-          );
-        },
-      ),
+            child: scrollView,
+          ),
+          slivers: _buildBody(viewModel, state, l10n),
+        );
+      },
     );
   }
 
-  Widget _buildBody(
+  List<Widget> _buildBody(
     BookRequestsListViewModel viewModel,
     BookRequestsListState state,
     AppLocalizations l10n,
   ) {
     if (state.isLoading && state.requests.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ];
     }
 
     if (state.error != null && state.requests.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  state.error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () => viewModel.fetchRequests(refresh: true),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l10n.errorRetry),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              state.error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => viewModel.fetchRequests(refresh: true),
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.errorRetry),
-            ),
-          ],
+          ),
         ),
-      );
+      ];
     }
 
     if (state.requests.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.5),
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.inbox_outlined,
+                  size: 64,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.bookRequestsEmpty,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () => context.pushInTab('/requests/create'),
+                  icon: const Icon(Icons.add),
+                  label: Text(l10n.bookRequestsCreateTitle),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.bookRequestsEmpty,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => context.pushInTab('/requests/create'),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.bookRequestsCreateTitle),
-            ),
-          ],
+          ),
         ),
-      );
+      ];
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: state.requests.length + (state.hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == state.requests.length) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
+    return [
+      SliverList.builder(
+        itemCount: state.requests.length + (state.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == state.requests.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-        final request = state.requests[index];
-        return BookRequestCard(request: request);
-      },
-    );
+          final request = state.requests[index];
+          return BookRequestCard(request: request);
+        },
+      ),
+    ];
   }
 }

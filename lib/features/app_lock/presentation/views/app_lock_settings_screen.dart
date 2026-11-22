@@ -3,6 +3,8 @@ import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../../shared/components/organisms/app_top_bar.dart';
+import '../../../../shared/components/templates/app_top_bar_scaffold.dart';
 // Shared on purpose with the settings feature: this page is a settings
 // sub-page and must look like its siblings (MFA, certificates).
 import '../../../settings/presentation/components/molecules/settings_section_header.dart';
@@ -111,31 +113,36 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
       initialData: _service.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        return Scaffold(
-          appBar: AppBar(title: Text(l10n.appLockTitle)),
-          body: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                // A lock enabled before the screen lock was removed must
-                // still be switchable off.
-                if (!state.isSupported) ...[
-                  // Support is re-probed on every resume, so this can swap
-                  // while the page is open.
-                  Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      state.enabled
-                          ? l10n.appLockUnsupportedEnabledDesc
-                          : l10n.appLockUnsupportedDesc,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                if (state.isManageable) ..._controls(l10n, state),
-              ],
+        return AppTopBarScaffold(
+          topBar: AppTopBar(title: l10n.appLockTitle, showBack: true),
+          slivers: [
+            SliverSafeArea(
+              top: false,
+              sliver: SliverPadding(
+                padding: const EdgeInsets.all(24),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // A lock enabled before the screen lock was removed must
+                    // still be switchable off.
+                    if (!state.isSupported) ...[
+                      // Support is re-probed on every resume, so this can swap
+                      // while the page is open.
+                      Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          state.enabled
+                              ? l10n.appLockUnsupportedEnabledDesc
+                              : l10n.appLockUnsupportedDesc,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    if (state.isManageable) ..._controls(l10n, state),
+                  ]),
+                ),
+              ),
             ),
-          ),
+          ],
         );
       },
     );

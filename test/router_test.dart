@@ -8,7 +8,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 
+import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:provider/provider.dart';
+
+import 'helpers/test_injection.dart' show FailingImageLoadingStrategy;
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 
 class MockAuthService extends Mock implements AuthService {}
@@ -30,6 +33,9 @@ void main() {
 
     di.sl.registerSingleton<AuthService>(mockAuthService);
     di.sl.registerSingleton<HomeViewModel>(mockHomeViewModel);
+    di.sl.registerSingleton<ImageLoadingStrategy>(
+      const FailingImageLoadingStrategy(),
+    );
     di.sl.registerFactory<NavigationViewModel>(() => mockNavigationViewModel);
 
     when(() => mockAuthService.authenticated).thenReturn(false);

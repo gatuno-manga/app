@@ -20,7 +20,9 @@ void main() {
   Future<void> pump(WidgetTester tester, BooksViewPreferences prefs) {
     return tester.pumpApp(
       Scaffold(
-        body: BooksCollection(books: books, preferences: prefs),
+        body: CustomScrollView(
+          slivers: [BooksCollection(books: books, preferences: prefs)],
+        ),
       ),
     );
   }
@@ -68,10 +70,14 @@ void main() {
   testWidgets('renders the footer after the items', (tester) async {
     await tester.pumpApp(
       Scaffold(
-        body: BooksCollection(
-          books: books.take(2).toList(),
-          preferences: const BooksViewPreferences(columns: 4),
-          footer: const Text('footer'),
+        body: CustomScrollView(
+          slivers: [
+            BooksCollection(
+              books: books.take(2).toList(),
+              preferences: const BooksViewPreferences(columns: 4),
+              footer: const Text('footer'),
+            ),
+          ],
         ),
       ),
     );

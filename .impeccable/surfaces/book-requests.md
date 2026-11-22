@@ -82,3 +82,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - Figma has no info or calendar icon in the icon library: the reason row uses `Core/Atom/Ícone/file-text` and the date `Core/Atom/Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
 - Code `AppButton` is 48 dp high; Figma `Core/Atom/Botão` is 44 dp.
 - The `/requests` frames draw the native `App/Organism/Shell/Barra superior` and `App/Organism/Shell/Barra inferior` of #169 (#170); the `/requests/create` frames draw them too since #260. Entry points are the Home card and a row in the merged profile and settings screen.
+
+## Implementation status (#251)
+- #251: the list and create screens use `AppTopBar` (Stacked); the entries are the Home card and the row on `/settings`.
