@@ -87,6 +87,6 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Gaps (Figma vs code)
 - `903:928` still shows the earlier floating ⋮ menu proposal; the app's ⋮ opens the "Opções do livro" sheet (`1025:5929`).
-- The download controls (#165) have no code yet (issue #93). The book sheet's switch row is `Interruptor/Item` (it was the reader's `Leitor/Item de ajuste` before #126): #93 promotes a switch row to `shared/components/molecules/` instead of importing `reader_switch_row.dart`; "Excluir download" needs a new outlined danger `AppButton` variant or `app_outlined_button` atom at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.
+- The book sheet's switch row is `AppSwitchRow` (`Interruptor/Item`; it was the reader's `Leitor/Item de ajuste` before #126) and "Excluir download" is `AppButton` with `AppButtonVariant.outlinedDanger` at 48 dp; the shell's `AppOfflineBanner` is not drawn in the offline frame.
 - Mobile frames cover only the chapters tab; other tabs (art, info, related, ratings) are web-only.
 - Admin tools and batch selection are web-only in Figma.
