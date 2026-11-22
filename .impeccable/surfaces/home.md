@@ -41,13 +41,12 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 ## States in Figma
 - Default: featured carousel (`Home/Destaque`, 620 dp) then three sections, the first being continue-reading with a horizontal list of `Livro/Card` (140×295).
 - Signed-in and guest variants (`913:1380`, `1112:8067`); no drawer (removed in #169). Book detail opened from here keeps the Início tab selected.
-
 - No loading, empty or error frame.
 
 ## Accessibility
 - Figma has no annotations; check tap target size of header icons and carousel contrast over cover art manually.
 
 ## Gaps (Figma vs code)
-- Frame `913:1380` draws `Shell/Barra superior` (logo, search, avatar; 64 dp, hides on scroll) and `Shell/Barra inferior` (80 dp, labels, three tabs); code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`). "Ver tudo" on "Continue a sua leitura" is on (`Seção/Cabeçalho`, opens `/latest-reads`).
+- Frame `913:1380` draws `Shell/Barra superior` (logo, search, avatar; 64 dp, hides on scroll) and `Shell/Barra inferior` (80 dp, labels, three tabs); code has a 48 dp icons-only bar with Home, Books and Settings and builds its own `AppBar` (gap `navigation-shell-code-differences`). `Seção/Cabeçalho` shows "Ver tudo" on "Continue a sua leitura", opening `/latest-reads`.
 - Book requests: the call-to-action card stays on Home and the merged profile and settings screen gets a row for `/requests`; the card is not drawn on Home yet, and code has only the card.
-- Header shows login/profile icon in code (guest vs authenticated); Figma header content not audited.
+- Code shows a login or profile icon in the header (guest vs authenticated); Figma shows the avatar (signed in) or a user icon (guest) that opens the merged profile and settings screen.
