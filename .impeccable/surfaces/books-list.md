@@ -14,6 +14,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Root with search (title, search field, shuffle and random-book actions, avatar) and `App/Organism/Shell/Barra inferior` with Livros selected (#169, #170; code in #251 and #172)
+- `App/Molecule/Ordenação/Seletor` (#265, `1124:9594`): the "Ordenar por:" row on the grid, list and filter frames
 - `Core/Atom/Botão` → search/filter actions
 - `Core/Molecule/Seletor cíclico/Fonte` → source selector
 - `Core/Molecule/Seletor cíclico/Visualização` → `features/books/presentation/components/molecules/books_view_mode_selector.dart` (grid / list / covers, in the body above the list via `organisms/books_view_toolbar.dart`; built on `shared/components/molecules/app_icon_segmented_control.dart`)

@@ -1370,7 +1370,7 @@
     },
     {
       "id": "components-code-differences",
-      "summary": "The #126 components are drawn in the intended Figma look, so code differs and each item is a code follow-up. Core/Molecule/Interruptor/Item: one row with an optional icon replaces AppSwitch (plain SwitchListTile, used in Settings and App lock), AppSwitchRow and ReaderSwitchRow. App/Atom/Esqueleto: code fills with onSurfaceVariant at 30% alpha (AppSkeleton, AppTextSkeleton), Figma uses color/text-10; the two skeleton widgets merge. App/Atom/Indicador de carregamento: code defaults to the Material indeterminate indicator with strokeWidth 2 and takes the size from the caller (20 in AppButton, 24 in the load-more footer, 40 in the profile page, none elsewhere); Figma names the 20/24/40 dp sizes as variants. App/Molecule/Vista de erro: code builds a raw ElevatedButton and TextButton with a message in the default text style; Figma uses the `Core/Atom/Botão` Variant=Primary and Text and Corpo/Padrão text (AppButton and AppTextButton in code). App/Molecule/Cartão de chamada: code is a Material Card with elevation 2, a bold titleLarge title, a bodySmall note in onSurface instead of color/text-secondary, a 20 dp gap before the button instead of space/sm, and a FilledButton.icon; Figma is a flat card with a color/border outline, Título/3 and the `Core/Atom/Botão` Variant=Primary. App/Organism/Diálogo/Confiar em certificado: code uses an AlertDialog with a raw TextField and an ElevatedButton for Confiar; Figma uses the App/Organism/Diálogo/Confirmação shape, App/Atom/Campo/Texto and text buttons. The disabled card button has no Figma treatment beyond 38% opacity. MFA screens (issue #128): mfa_settings_screen.dart builds raw OutlinedButton (with icons), TextButton, CheckboxListTile and AlertDialog; Figma uses `Core/Atom/Botão` Variant=Outline and Text (AppOutlinedButton of #101, AppTextButton), App/Atom/Caixa de seleção (new AppCheckbox atom) and App/Organism/Diálogo/Confirmação, with the disable dialog's code field between message and actions (a detached copy; App/Organism/Diálogo/Confirmação has no field slot). The MFA code field has a leading shield icon that App/Atom/Campo/Texto lacks (an icon slot on AppTextField/App/Atom/Campo/Texto), the secret and backup codes use a monospace titleMedium with no Figma text style, the settings loading phase builds a raw CircularProgressIndicator where Figma uses App/Atom/Indicador de carregamento (AppLoadingIndicator), and both screens build a Material AppBar (until #251). Outlined-button icons (copy, open_in_new, share) cannot be swapped on the Figma instances."
+      "summary": "The #126 components are drawn in the intended Figma look, so code differs and each item is a code follow-up. Core/Molecule/Interruptor/Item: one row with an optional icon replaces AppSwitch (plain SwitchListTile, used in Settings and App lock), AppSwitchRow and ReaderSwitchRow. App/Atom/Esqueleto: code fills with onSurfaceVariant at 30% alpha (AppSkeleton, AppTextSkeleton), Figma uses color/text-10; the two skeleton widgets merge. App/Atom/Indicador de carregamento: code defaults to the Material indeterminate indicator with strokeWidth 2 and takes the size from the caller (20 in AppButton, 24 in the load-more footer, 40 in the profile page, none elsewhere); Figma names the 20/24/40 dp sizes as variants. App/Molecule/Vista de erro: code builds a raw ElevatedButton and TextButton with a message in the default text style; Figma uses the `Core/Atom/Botão` Variant=Primary and Text and Corpo/Padrão text (AppButton and AppTextButton in code). App/Molecule/Cartão de chamada: code is a Material Card with elevation 2, a bold titleLarge title, a bodySmall note in onSurface instead of color/text-secondary, a 20 dp gap before the button instead of space/sm, and a FilledButton.icon; Figma is a flat card with a color/border outline, Título/3 and the `Core/Atom/Botão` Variant=Primary. App/Organism/Diálogo/Confiar em certificado: code uses an AlertDialog with a raw TextField and an ElevatedButton for Confiar; Figma uses the App/Organism/Diálogo/Confirmação shape, App/Atom/Campo/Texto and text buttons. The disabled card button has no Figma treatment beyond 38% opacity. MFA screens (issue #128): mfa_settings_screen.dart builds raw OutlinedButton (with icons), TextButton, CheckboxListTile and AlertDialog; Figma uses `Core/Atom/Botão` Variant=Outline and Text (AppOutlinedButton of #101, AppTextButton), App/Atom/Caixa de seleção (new AppCheckbox atom) and App/Organism/Diálogo/Confirmação, with the disable dialog's code field between message and actions (the `Show field` property of App/Organism/Diálogo/Confirmação, #265). The MFA code field has a leading shield icon that App/Atom/Campo/Texto lacks (an icon slot on AppTextField/App/Atom/Campo/Texto), the secret and backup codes use a monospace titleMedium with no Figma text style, the settings loading phase builds a raw CircularProgressIndicator where Figma uses App/Atom/Indicador de carregamento (AppLoadingIndicator), and both screens build a Material AppBar (until #251). Outlined-button icons (copy, open_in_new, share) cannot be swapped on the Figma instances."
     },
     {
       "id": "certificates-welcome-code-differences",
@@ -1560,7 +1560,7 @@
     },
     "App/Organism/Shell/Barra superior": {
       "figmaNode": "1096:1580",
-      "variants": "Type=Expanded root (128 dp), Collapsed root (64), Root with logo (64), Stacked (64), Root with search (184); properties Title, Show action 2, Show action 3; code today is one AppBar per screen, the shared top bar comes in #251",
+      "variants": "Type=Expanded root (128 dp), Collapsed root (64), Root with logo (64), Stacked (64), Root with search (184); properties Title, Show action 2, Show action 3, Show back (Stacked only, #265); code today is one AppBar per screen, the shared top bar comes in #251",
       "code": [
         "lib/features/home/presentation/components/organisms/home_app_bar.dart"
       ],
@@ -1579,6 +1579,62 @@
         "lib/features/home/presentation/components/organisms/featured_carousel.dart"
       ],
       "issue": 171
+    },
+    "App/Molecule/Solicitação/Cartão de esqueleto": {
+      "figmaNode": "1124:9446",
+      "variants": "no properties; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/features/book_requests/presentation/views"
+      ],
+      "issue": 265
+    },
+    "App/Molecule/Vista vazia": {
+      "figmaNode": "1124:9491",
+      "variants": "text property Message; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/shared/components/molecules"
+      ],
+      "issue": 265
+    },
+    "App/Molecule/Perfil/Cartão": {
+      "figmaNode": "1124:9549",
+      "variants": "text properties Name, Email; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/features/settings/presentation/views"
+      ],
+      "issue": 265
+    },
+    "App/Molecule/Ordenação/Seletor": {
+      "figmaNode": "1124:9594",
+      "variants": "text properties Label, Value; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/features/books/presentation/components"
+      ],
+      "issue": 265
+    },
+    "App/Molecule/Configurações/Linha de tipo": {
+      "figmaNode": "1124:9624",
+      "variants": "text property Label; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/shared/components/molecules/app_labeled_segmented_button.dart"
+      ],
+      "issue": 265
+    },
+    "App/Molecule/Página/Cabeçalho": {
+      "figmaNode": "1125:8991",
+      "variants": "text property Title, boolean Show action; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/features/books/presentation/views"
+      ],
+      "issue": 265
+    },
+    "App/Organism/Livro/Cabeçalho": {
+      "figmaNode": "1125:9063",
+      "variants": "text properties Title, Authors, Chapters, Release; added in #265 to replace hand-drawn copies in the frames, no shared widget yet",
+      "code": [
+        "lib/features/books/presentation/views"
+      ],
+      "issue": 265
     }
   },
   "fixedColors": [

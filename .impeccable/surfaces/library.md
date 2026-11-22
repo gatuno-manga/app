@@ -15,6 +15,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Organism/Shell/Barra superior` Type=Expanded root (search, avatar or user icon) and `App/Organism/Shell/Barra inferior` with Biblioteca selected (#169, #170; code in #251 and #172)
+- `App/Molecule/Página/Cabeçalho` (#265, `1125:8991`): the "Seus livros salvos" subtitle; `App/Molecule/Vista vazia` (#265, `1124:9491`): the empty library and the "em breve" and guest states
 - `Core/Atom/Livro/Aba` → tabs (Ativa / Inativa)
 - `Core/Molecule/Livro/Card` (Type=List) → `features/books/presentation/components/molecules/`
 - `Core/Atom/Botão` (Primary) → empty-state action
