@@ -26,6 +26,9 @@ Run `just` to list every task. The ones you need most:
 | `just design-tokens` | You touched `DESIGN.md`, `PRODUCT.md`, anything under `.impeccable/`, or `lib/core/theme/` |
 | `just check` | Before pushing: analyze, tests, lint-rule tests and design tokens |
 
+Claude Code permissions and the Figma plugin are preconfigured in
+`.claude/settings.json`; see "Claude Code setup" in `CONTRIBUTING.md`.
+
 Git hooks (`lefthook.yml`): pre-commit runs `just fmt` and `just fix` on staged
 `lib/` and `test/` Dart files, then `just analyze`; pre-push runs
 `issues-check`.

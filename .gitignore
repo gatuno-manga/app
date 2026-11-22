@@ -52,3 +52,6 @@ app.*.map.json
 !.impeccable/design.json
 !.impeccable/surfaces/
 !.impeccable/critique/
+
+# Claude Code personal overrides
+.claude/settings.local.json

@@ -19,6 +19,39 @@ unverified on macOS), so it pins `flutter-version` literally. When a flake bump
 changes Flutter (check `flutter --version` in `nix develop`), update the pin in
 `release.yml` too.
 
+## Claude Code setup
+
+The repo ships `.claude/settings.json` for [Claude Code](https://claude.com/claude-code).
+It is read after you trust the folder, and it sets:
+
+- **Allowed without a prompt**: the `just` recipes (without arguments),
+  `dart format .`, `dart analyze`, `dart fix --apply|--dry-run`,
+  `flutter pub get`, `flutter test`, a fixed set of `git diff|log|show|branch`
+  forms, `git status`, `git fetch [origin]` and read-only `gh`
+  (`issue view|list`, `pr view|list|checks`). Push, merge, `gh pr create`, `gh issue edit`,
+  `gh api` and other git, `just`, `dart` or `flutter test` forms still ask.
+  Test and analyze run Dart code, so approving an edit to a test file is
+  approving code that runs.
+- **Denied**: reading or editing secrets (`.env` and `*.env` files, keystores,
+  `key.properties`, `*.p12`, `*.p8`, `*.mobileprovision`, `*.cer`, `*.pem`,
+  `*.key`, `google-services.json`, `GoogleService-Info.plist`). This is not a
+  sandbox: it covers the file tools and the shell readers Claude Code
+  recognises (`cat`, `head`, ...), not `grep -r` or scripts.
+- **Figma plugin**: `figma@claude-plugins-official` is enabled for the project
+  (it bundles the Figma MCP server and skills such as `figma-use`). Enabling
+  does not install it: run this once per clone, then restart Claude Code or run
+  `/reload-plugins`, and sign in to Figma when asked:
+
+  ```sh
+  claude plugin install figma@claude-plugins-official --scope project
+  ```
+
+  The project setting overrides a user-level `false`. To opt out on your
+  machine, set the plugin to `false` in `.claude/settings.local.json`.
+
+Keep personal overrides in `.claude/settings.local.json`; it is gitignored.
+Never commit tokens or personal paths.
+
 ## Issues
 
 Open an issue with one of the forms in `.github/ISSUE_TEMPLATE/`. Each form
