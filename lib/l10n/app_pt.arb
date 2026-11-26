@@ -28,6 +28,7 @@
   "homeViewAll": "Ver tudo",
   "booksTitle": "Livros",
   "booksSearchHint": "Pesquisar livros...",
+  "booksSearchClear": "Limpar busca",
   "booksFilterTitle": "Filtros",
   "booksApplyFilters": "Aplicar Filtros",
   "booksClearFilters": "Limpar",

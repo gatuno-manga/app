@@ -44,7 +44,14 @@ class AppTopBarScaffold extends StatelessWidget {
       slivers: [topBar, ...slivers],
     );
     return Scaffold(
-      body: wrap == null ? scrollView : wrap!(scrollView),
+      // The floating bar is not pinned, so without this the viewport starts
+      // at y = 0: a focused search field scrolls up under the status bar and
+      // list content passes behind the system icons. SafeArea also strips
+      // the inset from the MediaQuery, so the sliver does not pad twice.
+      body: SafeArea(
+        bottom: false,
+        child: wrap == null ? scrollView : wrap!(scrollView),
+      ),
       bottomNavigationBar: bottomBar,
       floatingActionButton: floatingActionButton,
     );

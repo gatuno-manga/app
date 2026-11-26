@@ -64,3 +64,4 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 
 ## Implementation status (#251)
 - #251: Livros uses `AppTopBar` with the search row (hides with the bar) and `TabRootProfileAction`; the list is a sliver. `BooksPage` applies a `BooksLaunchIntent` (`focus`, `orderBy`, `order`, `n`) on open and whenever the nonce changes.
+- #251 device fixes: the search field follows the `campo de busca` frame (48 dp, `color/secondary-60` fill, 1 dp `color/border`, radius 12, a 20 dp search icon, Corpo/Pequeno), and `AppTopBarScaffold` keeps the scroll view below the status bar (`SafeArea`), so a focused field never scrolls under the system icons.

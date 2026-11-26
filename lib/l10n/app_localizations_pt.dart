@@ -96,6 +96,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get booksSearchHint => 'Pesquisar livros...';
 
   @override
+  String get booksSearchClear => 'Limpar busca';
+
+  @override
   String get booksFilterTitle => 'Filtros';
 
   @override

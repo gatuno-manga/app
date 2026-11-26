@@ -266,6 +266,12 @@ abstract class AppLocalizations {
   /// **'Search books...'**
   String get booksSearchHint;
 
+  /// No description provided for @booksSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get booksSearchClear;
+
   /// No description provided for @booksFilterTitle.
   ///
   /// In en, this message translates to:

@@ -98,6 +98,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksSearchHint => 'Search books...';
 
   @override
+  String get booksSearchClear => 'Clear search';
+
+  @override
   String get booksFilterTitle => 'Filters';
 
   @override

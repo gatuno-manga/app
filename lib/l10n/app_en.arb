@@ -28,6 +28,7 @@
   "homeViewAll": "View all",
   "booksTitle": "Books",
   "booksSearchHint": "Search books...",
+  "booksSearchClear": "Clear search",
   "booksFilterTitle": "Filters",
   "booksApplyFilters": "Apply Filters",
   "booksClearFilters": "Clear",
