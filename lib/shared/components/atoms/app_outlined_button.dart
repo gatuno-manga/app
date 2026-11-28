@@ -50,11 +50,10 @@ class AppOutlinedButton extends StatelessWidget {
       side: BorderSide(color: colorScheme.outline),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
-    final onPressed = isLoading ? null : this.onPressed;
 
     if (isLoading) {
       return OutlinedButton(
-        onPressed: onPressed,
+        onPressed: null,
         style: style,
         child: AppLoadingIndicator(size: 20, color: color),
       );

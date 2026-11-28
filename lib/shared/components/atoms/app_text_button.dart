@@ -53,10 +53,9 @@ class AppTextButton extends StatelessWidget {
       // Height keeps the 48dp tap target; width follows the label.
       minimumSize: const Size(0, 48),
     );
-    final onPressed = isLoading ? null : this.onPressed;
     if (isLoading) {
       return TextButton(
-        onPressed: onPressed,
+        onPressed: null,
         style: style,
         child: AppLoadingIndicator(size: 20, color: color),
       );
