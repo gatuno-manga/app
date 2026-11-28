@@ -90,7 +90,7 @@ class _AppImagePlaceholderState extends State<AppImagePlaceholder> {
       }
 
       // Show skeleton while decoding
-      return AppSkeleton(width: widget.width, height: widget.height);
+      return AppSkeleton.block(width: widget.width, height: widget.height);
     }
 
     return SizedBox(
@@ -98,7 +98,7 @@ class _AppImagePlaceholderState extends State<AppImagePlaceholder> {
       height: widget.height,
       child:
           widget.placeholder ??
-          AppSkeleton(width: widget.width, height: widget.height),
+          AppSkeleton.block(width: widget.width, height: widget.height),
     );
   }
 }

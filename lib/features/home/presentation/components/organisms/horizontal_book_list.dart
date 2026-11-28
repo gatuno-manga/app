@@ -29,11 +29,7 @@ class HorizontalBookList extends StatelessWidget {
           itemCount: 5,
           separatorBuilder: (context, index) => const SizedBox(width: 12),
           itemBuilder: (context, index) {
-            return AppSkeleton(
-              width: cardWidth,
-              height: cardHeight,
-              borderRadius: BorderRadius.circular(8),
-            );
+            return AppSkeleton.block(width: cardWidth, height: cardHeight);
           },
         ),
       );

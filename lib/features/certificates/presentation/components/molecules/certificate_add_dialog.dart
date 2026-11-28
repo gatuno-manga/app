@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import 'package:gatuno/shared/components/atoms/app_text_skeleton.dart';
+import 'package:gatuno/shared/components/atoms/app_skeleton.dart';
 
 class CertificateAddDialog extends StatefulWidget {
   final Future<bool> Function(String name) onAddFromFile;
@@ -72,11 +72,9 @@ class _CertificateAddDialogState extends State<CertificateAddDialog> {
                   }
                 }
               : null,
-          child: AppTextSkeleton(
-            text: _isLoading ? null : l10n.certAddFileButton,
-            width: 120,
-            height: 16,
-          ),
+          child: _isLoading
+              ? const AppSkeleton.textLine(width: 120)
+              : Text(l10n.certAddFileButton),
         ),
       ],
     );

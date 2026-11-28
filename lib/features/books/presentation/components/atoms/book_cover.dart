@@ -48,7 +48,7 @@ class BookCover extends StatelessWidget {
         child: Center(child: Icon(Icons.book, size: iconSize)),
       );
     } else {
-      content = AppSkeleton(width: width, height: height);
+      content = AppSkeleton.block(width: width, height: height);
     }
 
     if (borderRadius <= 0) return content;
