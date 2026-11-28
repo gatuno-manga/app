@@ -22,6 +22,9 @@ class ReaderThemeSwatch extends StatelessWidget {
   /// `radius/md`
   static const BorderRadius _radius = BorderRadius.all(Radius.circular(8));
 
+  static const double _dotSize = 4;
+  static const double _dotGap = 6;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -69,8 +72,9 @@ class ReaderThemeSwatch extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            // Weight carries the selected state (Figma): `color/primary`
-            // fails contrast for 12 dp text in the Light and Dracula themes.
+            // The label keeps `color/text` (`onSurface`) in both states:
+            // `color/primary` on the sheet is 3.5-3.7:1 in some app themes
+            // (issue #114). Selection shows as weight plus the primary dot.
             AnimatedDefaultTextStyle(
               duration: duration,
               curve: Curves.easeOut,
@@ -80,6 +84,20 @@ class ReaderThemeSwatch extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
               child: Text(label),
+            ),
+            const SizedBox(height: _dotGap),
+            // Always laid out so selecting does not shift the row; only the
+            // fill changes. Non-text, so `color/primary` needs 3:1.
+            AnimatedContainer(
+              key: const ValueKey('reader-theme-swatch-dot'),
+              duration: duration,
+              curve: Curves.easeOut,
+              width: _dotSize,
+              height: _dotSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? scheme.primary : Colors.transparent,
+              ),
             ),
           ],
         ),

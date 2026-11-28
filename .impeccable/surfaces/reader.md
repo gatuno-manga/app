@@ -23,7 +23,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 - `Core/Organism/Leitor/Progresso por página`
 - `Core/Atom/Leitor/Indicador de página`
 - `Core/Molecule/Leitor/Item de ajuste` → `.../molecules/reader_setting_row.dart` (settings sheet row)
-- `Core/Atom/Leitor/Tema de leitura` → `.../atoms/reader_theme_swatch.dart` (reader theme swatch, 4)
+- `Core/Atom/Leitor/Tema de leitura` → `.../atoms/reader_theme_swatch.dart` (reader theme swatch, 4; label in `color/text` in both states, selected adds a 4 dp `color/primary` dot, #114)
 - `Core/Molecule/Leitor/Predefinição · Modo dislexia`
 - `Core/Atom/Leitor/Régua de leitura` → reading ruler
 - `Core/Organism/Menu de contexto/Leitor · página de imagem` → long-press menu
