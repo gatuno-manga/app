@@ -23,7 +23,7 @@ Anchors a single app surface for `/impeccable critique` and related commands. Fa
 
 ## Figma components used
 - `App/Atom/Campo/Texto` (`951:869`) → `lib/shared/components/atoms/app_text_field.dart`
-- `Core/Atom/Botão` Primary, Outline, Text (set `895:204`, Outline `895:194`) → `app_button.dart`; Outline stands for the raw `OutlinedButton` the screen uses today and the planned `AppOutlinedButton` (#101)
+- `Core/Atom/Botão` Primary, Outline, Text (set `895:204`, Outline `895:194`) → `app_button.dart`; Outline stands for the raw `OutlinedButton` the screen uses today and `AppOutlinedButton` (#101, not yet used here)
 - `App/Atom/Caixa de seleção` (new in #128, `1052:37844`) → Material `CheckboxListTile` (backup-codes confirmation)
 - `App/Atom/Indicador de carregamento` (`1048:1829`, Size=Default) → `app_loading_indicator.dart`; the settings loading phase builds a raw `CircularProgressIndicator` today (see Gaps)
 - `App/Organism/Diálogo/Confirmação` (`1010:1327`, Variant=Default for reconfigure, Destructive for disable) → the two `AlertDialog`s of the settings screen

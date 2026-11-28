@@ -3,6 +3,7 @@ import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../../shared/components/atoms/app_button.dart';
+import '../../../../../shared/components/atoms/app_outlined_button.dart';
 import '../../../../../shared/components/atoms/app_sheet_handle.dart';
 import '../../../../../shared/components/atoms/app_sheet_title.dart';
 
@@ -87,9 +88,9 @@ class ChapterDownloadSheet extends StatelessWidget {
             AppButton(text: l10n.booksChapterDownloadRetry, onPressed: onRetry),
             const SizedBox(height: 12),
           ],
-          AppButton(
+          AppOutlinedButton(
             text: l10n.booksChapterDownloadDelete,
-            variant: AppButtonVariant.outlinedDanger,
+            tone: AppOutlinedButtonTone.danger,
             onPressed: onDelete,
           ),
         ],

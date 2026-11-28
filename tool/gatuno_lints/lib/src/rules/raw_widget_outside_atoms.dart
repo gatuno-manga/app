@@ -20,9 +20,9 @@ class RawWidgetOutsideAtoms extends AnalysisRule {
     'Raw Material widget built outside an atom.',
     severity: DiagnosticSeverity.INFO,
     correctionMessage:
-        'Use AppButton, AppIconButton or AppTextField when they fit; otherwise '
-        'add the missing variant (for example a text button) as an atom under '
-        'components/atoms/.',
+        'Use AppButton, AppTextButton, AppOutlinedButton, AppIconButton or '
+        'AppTextField when they fit; otherwise add the missing variant as an '
+        'atom under components/atoms/.',
   );
 
   /// Flutter widgets that only atoms may build.

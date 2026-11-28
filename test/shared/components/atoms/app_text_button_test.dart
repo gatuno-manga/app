@@ -99,5 +99,22 @@ void main() {
       await tester.tap(find.text('Select'));
       expect(taps, 1);
     });
+
+    testWidgets('isLoading shows a spinner and ignores taps', (tester) async {
+      var pressed = false;
+      await pump(
+        tester,
+        AppTextButton(
+          text: 'Go',
+          onPressed: () => pressed = true,
+          isLoading: true,
+        ),
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Go'), findsNothing);
+      await tester.tap(find.byType(TextButton));
+      expect(pressed, isFalse);
+    });
   });
 }
