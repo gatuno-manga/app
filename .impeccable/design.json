@@ -1495,7 +1495,7 @@
       "figmaNode": "895:194",
       "variants": "Core/Atom/Botão Variant=Outline (existing variant)",
       "code": [
-        "AppOutlinedButton (planned, #101); raw OutlinedButton in lib/features/settings/presentation/views/mfa_settings_screen.dart; AppButtonVariant.outlinedDanger in lib/shared/components/atoms/app_button.dart"
+        "AppOutlinedButton in lib/shared/components/atoms/app_outlined_button.dart (#101); raw OutlinedButton in lib/features/settings/presentation/views/mfa_settings_screen.dart"
       ],
       "issue": 128
     },

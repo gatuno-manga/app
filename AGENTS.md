@@ -270,10 +270,10 @@ a template (`BooksPage` → `BooksTemplate`); the rest build it directly.
 - A molecule, organism, template or page that builds `ElevatedButton`,
   `TextButton`, `OutlinedButton`, `FilledButton`, `IconButton`, `TextField` or
   `TextFormField` directly (`signin_form.dart` still does; do not copy it).
-  Use `AppButton`, `AppIconButton` or `AppTextField` when they fit. When none
-  does (`AppButton` is only a primary, filled-style button, so there is no text
-  or outlined variant yet), add the variant as an atom under `components/atoms/` instead of
-  building the raw widget inline. `gatuno_lints` flags this as
+  Use `AppButton` (filled), `AppTextButton`, `AppOutlinedButton`,
+  `AppIconButton` or `AppTextField` when they fit. When none does, add the
+  variant as an atom under `components/atoms/` instead of building the raw
+  widget inline. `gatuno_lints` flags this as
   `raw_widget_outside_atoms`; it only checks those widgets built directly.
 - A field, row, badge or card written inline and repeated, instead of an atom or
   molecule.

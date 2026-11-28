@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/features/books/presentation/components/organisms/chapter_download_sheet.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
-import 'package:gatuno/shared/components/atoms/app_button.dart';
+import 'package:gatuno/shared/components/atoms/app_outlined_button.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, Widget sheet) => tester.pumpWidget(
@@ -32,9 +32,11 @@ void main() {
     expect(find.text('Not enough space.'), findsOneWidget);
     expect(
       tester
-          .widget<AppButton>(find.widgetWithText(AppButton, 'Delete download'))
-          .variant,
-      AppButtonVariant.outlinedDanger,
+          .widget<AppOutlinedButton>(
+            find.widgetWithText(AppOutlinedButton, 'Delete download'),
+          )
+          .tone,
+      AppOutlinedButtonTone.danger,
     );
 
     await tester.tap(find.text('Try again'));
