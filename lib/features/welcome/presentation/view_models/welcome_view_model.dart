@@ -7,22 +7,13 @@ class WelcomeState extends Equatable {
   final bool isLoading;
   final String? error;
 
-  const WelcomeState({
-    required this.isLoading,
-    this.error,
-  });
+  const WelcomeState({required this.isLoading, this.error});
 
   factory WelcomeState.initial() {
-    return const WelcomeState(
-      isLoading: false,
-      error: null,
-    );
+    return const WelcomeState(isLoading: false, error: null);
   }
 
-  WelcomeState copyWith({
-    bool? isLoading,
-    String? Function()? error,
-  }) {
+  WelcomeState copyWith({bool? isLoading, String? Function()? error}) {
     return WelcomeState(
       isLoading: isLoading ?? this.isLoading,
       error: error != null ? error() : this.error,
@@ -56,7 +47,12 @@ class WelcomeViewModel extends BaseStreamViewModel<WelcomeState> {
         await _settingsService.setApiUrl(formattedUrl);
         return true;
       } else {
-        emit(state.copyWith(error: () => 'Could not connect to the server. Please check the URL and certificate.'));
+        emit(
+          state.copyWith(
+            error: () =>
+                'Could not connect to the server. Please check the URL and certificate.',
+          ),
+        );
         return false;
       }
     } catch (e, stackTrace) {
@@ -66,7 +62,11 @@ class WelcomeViewModel extends BaseStreamViewModel<WelcomeState> {
         stackTrace,
         'WelcomeViewModel',
       );
-      emit(state.copyWith(error: () => 'An unexpected error occurred while saving the URL.'));
+      emit(
+        state.copyWith(
+          error: () => 'An unexpected error occurred while saving the URL.',
+        ),
+      );
       return false;
     } finally {
       emit(state.copyWith(isLoading: false));

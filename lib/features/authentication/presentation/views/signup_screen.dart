@@ -71,7 +71,7 @@ class _SignUpPageState extends State<SignUpPage> {
       initialData: _viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return AuthTemplate(
           onBack: () {
             if (context.canPop()) {

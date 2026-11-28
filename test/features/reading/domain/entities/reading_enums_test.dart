@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 
-
 import 'package:gatuno/core/exceptions/mapping_exception.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 

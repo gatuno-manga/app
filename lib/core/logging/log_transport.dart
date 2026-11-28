@@ -6,13 +6,25 @@ import 'package:path_provider/path_provider.dart';
 
 /// Base interface for all log transports.
 abstract class LogTransport {
-  void log(String level, String message, Object? error, StackTrace? stackTrace, String? name);
+  void log(
+    String level,
+    String message,
+    Object? error,
+    StackTrace? stackTrace,
+    String? name,
+  );
 }
 
 /// Standard Dart/Flutter developer log transport.
 class DevLogTransport implements LogTransport {
   @override
-  void log(String level, String message, Object? error, StackTrace? stackTrace, String? name) {
+  void log(
+    String level,
+    String message,
+    Object? error,
+    StackTrace? stackTrace,
+    String? name,
+  ) {
     dev.log(message, name: name ?? level, error: error, stackTrace: stackTrace);
   }
 }
@@ -20,10 +32,17 @@ class DevLogTransport implements LogTransport {
 /// Console transport that uses [debugPrint] in debug mode only.
 class ConsoleTransport implements LogTransport {
   @override
-  void log(String level, String message, Object? error, StackTrace? stackTrace, String? name) {
+  void log(
+    String level,
+    String message,
+    Object? error,
+    StackTrace? stackTrace,
+    String? name,
+  ) {
     if (kDebugMode) {
       final formattedMessage = '[${name ?? 'APP'}] $message';
-      final consoleMsg = '$level: $formattedMessage${error != null ? '\nError: $error' : ''}';
+      final consoleMsg =
+          '$level: $formattedMessage${error != null ? '\nError: $error' : ''}';
       debugPrint(consoleMsg);
     }
   }
@@ -49,8 +68,8 @@ class _LogMessage {
 }
 
 /// A transport that writes logs to a local file using a background Isolate.
-/// 
-/// This ensures that file I/O, string formatting, and rotation logic 
+///
+/// This ensures that file I/O, string formatting, and rotation logic
 /// do not burden the main UI thread.
 class FileTransport implements LogTransport {
   final int maxFileSize;
@@ -69,7 +88,7 @@ class FileTransport implements LogTransport {
   Future<void> init() async {
     try {
       final logFilePath = await getLogFilePath();
-      
+
       final receivePort = ReceivePort();
       _isolate = await Isolate.spawn(
         _loggingIsolate,
@@ -87,16 +106,24 @@ class FileTransport implements LogTransport {
   }
 
   @override
-  void log(String level, String message, Object? error, StackTrace? stackTrace, String? name) {
+  void log(
+    String level,
+    String message,
+    Object? error,
+    StackTrace? stackTrace,
+    String? name,
+  ) {
     // Objects must be converted to primitives (String) to cross isolate boundaries safely.
-    _sendPort?.send(_LogMessage(
-      level: level,
-      message: message,
-      error: error?.toString(),
-      stackTrace: stackTrace?.toString(),
-      name: name,
-      timestamp: DateTime.now(),
-    ));
+    _sendPort?.send(
+      _LogMessage(
+        level: level,
+        message: message,
+        error: error?.toString(),
+        stackTrace: stackTrace?.toString(),
+        name: name,
+        timestamp: DateTime.now(),
+      ),
+    );
   }
 
   /// Kills the background isolate.
@@ -112,7 +139,7 @@ class FileTransport implements LogTransport {
     config.sendPort.send(receivePort.sendPort);
 
     final logFile = File(config.logFilePath);
-    
+
     await for (final dynamic msg in receivePort) {
       if (msg is _LogMessage) {
         await _handleLog(msg, logFile, config.maxFileSize);
@@ -121,12 +148,17 @@ class FileTransport implements LogTransport {
   }
 
   /// Formats and writes the message to the log file.
-  static Future<void> _handleLog(_LogMessage msg, File file, int maxSize) async {
+  static Future<void> _handleLog(
+    _LogMessage msg,
+    File file,
+    int maxSize,
+  ) async {
     try {
       await _rotateIfNecessary(file, maxSize);
-      
+
       final formattedMessage = '[${msg.name ?? 'APP'}] ${msg.message}';
-      var fileMsg = '${msg.timestamp.toIso8601String()} | ${msg.level} | $formattedMessage\n';
+      var fileMsg =
+          '${msg.timestamp.toIso8601String()} | ${msg.level} | $formattedMessage\n';
       if (msg.error != null) fileMsg += 'Error: ${msg.error}\n';
       if (msg.stackTrace != null) fileMsg += 'Stack:\n${msg.stackTrace}\n';
 

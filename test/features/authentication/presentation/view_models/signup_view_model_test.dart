@@ -11,7 +11,6 @@ void main() {
   late SignUpViewModel viewModel;
   late MockAuthService mockAuthService;
 
-  
   setUpAll(() {
     registerFallbackValue(EmailAddress('test@example.com'));
     registerFallbackValue(Password('password'));
@@ -30,7 +29,10 @@ void main() {
 
     test('signUp success updates state correctly', () async {
       when(
-        () => mockAuthService.signUp(EmailAddress('test@example.com'), Password('Password123!')),
+        () => mockAuthService.signUp(
+          EmailAddress('test@example.com'),
+          Password('Password123!'),
+        ),
       ).thenAnswer((_) async => true);
 
       final success = await viewModel.signUp(

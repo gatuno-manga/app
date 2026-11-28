@@ -27,9 +27,9 @@ class BookRequestModel extends BookRequestEntity {
     required super.updatedAt,
   });
 
-  factory BookRequestModel.fromJson(Map<String, dynamic> json) => 
+  factory BookRequestModel.fromJson(Map<String, dynamic> json) =>
       _$BookRequestModelFromJson(json);
-      
+
   Map<String, dynamic> toJson() => _$BookRequestModelToJson(this);
 
   BookRequestEntity toEntity() => this;

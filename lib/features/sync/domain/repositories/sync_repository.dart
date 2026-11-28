@@ -5,6 +5,6 @@ import '../../../../shared/domain/value_objects/timestamp.dart';
 
 abstract class SyncRepository {
   Future<PullSyncResponse> pullData({Timestamp? lastSyncAt});
-  
+
   Future<void> pushData(Map<SyncFeatureKey, List<SyncableEntity>> payload);
 }

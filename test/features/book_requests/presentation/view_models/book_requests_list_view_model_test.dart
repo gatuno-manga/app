@@ -12,19 +12,20 @@ import 'package:gatuno/features/book_requests/domain/repositories/book_requests_
 import 'package:gatuno/features/book_requests/presentation/view_models/book_requests_list_view_model.dart';
 import 'package:gatuno/features/book_requests/domain/entities/book_request_entity.dart';
 
-class MockBookRequestsRepository extends Mock implements BookRequestsRepository {}
+class MockBookRequestsRepository extends Mock
+    implements BookRequestsRepository {}
 
 void main() {
   late BookRequestsListViewModel viewModel;
   late MockBookRequestsRepository mockRepository;
 
-    setUpAll(() {
+  setUpAll(() {
     registerFallbackValue(RequestTitle('dummy'));
     registerFallbackValue(RequestUrl('https://dummy.com'));
     registerFallbackValue(const RequestReason('dummy'));
   });
 
-setUp(() {
+  setUp(() {
     mockRepository = MockBookRequestsRepository();
     viewModel = BookRequestsListViewModel(repository: mockRepository);
   });
@@ -44,8 +45,12 @@ setUp(() {
         updatedAt: Timestamp.now(),
       );
 
-      when(() => mockRepository.getBookRequests(page: any(named: 'page'), limit: any(named: 'limit')))
-          .thenAnswer((_) async => [request]);
+      when(
+        () => mockRepository.getBookRequests(
+          page: any(named: 'page'),
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer((_) async => [request]);
 
       await viewModel.fetchRequests();
 

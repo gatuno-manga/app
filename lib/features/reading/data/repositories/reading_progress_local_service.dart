@@ -32,7 +32,9 @@ class ReadingProgressLocalService {
   ) async {
     try {
       return await (_database.select(_database.readingProgress)..where(
-            (t) => t.userId.equals(userId.value) & t.chapterId.equals(chapterId.value),
+            (t) =>
+                t.userId.equals(userId.value) &
+                t.chapterId.equals(chapterId.value),
           ))
           .getSingleOrNull();
     } catch (e, stackTrace) {
@@ -46,9 +48,11 @@ class ReadingProgressLocalService {
     BookId bookId,
   ) async {
     try {
-      return await (_database.select(
-        _database.readingProgress,
-      )..where((t) => t.userId.equals(userId.value) & t.bookId.equals(bookId.value))).get();
+      return await (_database.select(_database.readingProgress)..where(
+            (t) =>
+                t.userId.equals(userId.value) & t.bookId.equals(bookId.value),
+          ))
+          .get();
     } catch (e, stackTrace) {
       AppLogger.e(
         'Error getting all progress for book locally',
@@ -72,7 +76,9 @@ class ReadingProgressLocalService {
       final result =
           await (_database.select(_database.readingProgress)
                 ..where(
-                  (t) => t.userId.equals(userId.value) & t.bookId.equals(bookId.value),
+                  (t) =>
+                      t.userId.equals(userId.value) &
+                      t.bookId.equals(bookId.value),
                 )
                 ..orderBy([
                   (t) => OrderingTerm(
@@ -116,12 +122,15 @@ class ReadingProgressLocalService {
   }
 
   Future<void> updateProgressUserId(String oldUserId, UserId newUserId) async {
-    AppLogger.i('Migrating progress from $oldUserId to ${newUserId.value}', _logTag);
+    AppLogger.i(
+      'Migrating progress from $oldUserId to ${newUserId.value}',
+      _logTag,
+    );
     try {
       await _database.transaction(() async {
-        final items = await (_database.select(_database.readingProgress)
-              ..where((t) => t.userId.equals(oldUserId)))
-            .get();
+        final items = await (_database.select(
+          _database.readingProgress,
+        )..where((t) => t.userId.equals(oldUserId))).get();
 
         for (final item in items) {
           await _database
@@ -139,9 +148,9 @@ class ReadingProgressLocalService {
               );
         }
 
-        await (_database.delete(_database.readingProgress)
-              ..where((t) => t.userId.equals(oldUserId)))
-            .go();
+        await (_database.delete(
+          _database.readingProgress,
+        )..where((t) => t.userId.equals(oldUserId))).go();
       });
     } catch (e, stackTrace) {
       AppLogger.e('Error migrating progress userId', e, stackTrace, _logTag);
@@ -149,10 +158,16 @@ class ReadingProgressLocalService {
     }
   }
 
-  Future<List<BookId>> getRecentUniqueBookIds(UserId userId, {int limit = 10}) async {
+  Future<List<BookId>> getRecentUniqueBookIds(
+    UserId userId, {
+    int limit = 10,
+  }) async {
     try {
       final query = _database.selectOnly(_database.readingProgress)
-        ..addColumns([_database.readingProgress.bookId, _database.readingProgress.timestamp.max()])
+        ..addColumns([
+          _database.readingProgress.bookId,
+          _database.readingProgress.timestamp.max(),
+        ])
         ..where(_database.readingProgress.userId.equals(userId.value))
         ..groupBy([_database.readingProgress.bookId])
         ..orderBy([
@@ -168,15 +183,26 @@ class ReadingProgressLocalService {
           .map((row) => BookId(row.read(_database.readingProgress.bookId)!))
           .toList();
     } catch (e, stackTrace) {
-      AppLogger.e('Error getting recent unique book ids', e, stackTrace, _logTag);
+      AppLogger.e(
+        'Error getting recent unique book ids',
+        e,
+        stackTrace,
+        _logTag,
+      );
       rethrow;
     }
   }
 
-  Future<List<ReadingProgressData>> getModifiedSince(UserId userId, DateTime since) async {
+  Future<List<ReadingProgressData>> getModifiedSince(
+    UserId userId,
+    DateTime since,
+  ) async {
     try {
-      return await (_database.select(_database.readingProgress)
-            ..where((t) => t.userId.equals(userId.value) & t.timestamp.isBiggerThanValue(since)))
+      return await (_database.select(_database.readingProgress)..where(
+            (t) =>
+                t.userId.equals(userId.value) &
+                t.timestamp.isBiggerThanValue(since),
+          ))
           .get();
     } catch (e, stackTrace) {
       AppLogger.e('Error getting modified progress', e, stackTrace, _logTag);
@@ -186,9 +212,9 @@ class ReadingProgressLocalService {
 
   Future<List<ReadingProgressData>> getAllProgress(UserId userId) async {
     try {
-      return await (_database.select(_database.readingProgress)
-            ..where((t) => t.userId.equals(userId.value)))
-          .get();
+      return await (_database.select(
+        _database.readingProgress,
+      )..where((t) => t.userId.equals(userId.value))).get();
     } catch (e, stackTrace) {
       AppLogger.e('Error getting all progress', e, stackTrace, _logTag);
       rethrow;

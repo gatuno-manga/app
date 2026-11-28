@@ -27,9 +27,7 @@ class AuthResponse {
   @JsonKey(name: 'access_token', readValue: _readToken)
   final AuthToken token;
 
-  AuthResponse({
-    required this.token,
-  });
+  AuthResponse({required this.token});
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);

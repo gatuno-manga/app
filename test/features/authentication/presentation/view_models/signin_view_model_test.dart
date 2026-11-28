@@ -24,7 +24,10 @@ void main() {
 
     test('signIn success updates state correctly', () async {
       when(
-        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('password')),
+        () => mockAuthService.signIn(
+          EmailAddress('test@example.com'),
+          Password('password'),
+        ),
       ).thenAnswer((_) async => true);
 
       final success = await viewModel.signIn('test@example.com', 'password');
@@ -36,7 +39,10 @@ void main() {
 
     test('signIn failure updates state correctly', () async {
       when(
-        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
+        () => mockAuthService.signIn(
+          EmailAddress('test@example.com'),
+          Password('wrong'),
+        ),
       ).thenThrow(Exception('Invalid credentials'));
 
       final success = await viewModel.signIn('test@example.com', 'wrong');
@@ -48,7 +54,10 @@ void main() {
 
     test('clearError resets error message', () async {
       when(
-        () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
+        () => mockAuthService.signIn(
+          EmailAddress('test@example.com'),
+          Password('wrong'),
+        ),
       ).thenThrow(Exception('Error'));
 
       await viewModel.signIn('test@example.com', 'wrong');

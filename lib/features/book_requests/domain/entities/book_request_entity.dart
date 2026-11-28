@@ -35,5 +35,16 @@ class BookRequestEntity extends Equatable {
   });
 
   @override
-  List<Object?> get props => [id, userId, title, url, reason, status, adminId, rejectionMessage, createdAt, updatedAt];
+  List<Object?> get props => [
+    id,
+    userId,
+    title,
+    url,
+    reason,
+    status,
+    adminId,
+    rejectionMessage,
+    createdAt,
+    updatedAt,
+  ];
 }
