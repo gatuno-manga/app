@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/core/image/image_loading_strategy.dart';
 import 'package:gatuno/shared/components/atoms/app_avatar.dart';
-import 'package:gatuno/shared/components/atoms/app_text_skeleton.dart';
+import 'package:gatuno/shared/components/atoms/app_skeleton.dart';
 import 'user_banner.dart';
 import 'package:gatuno/core/theme/semantic_colors.dart';
 
@@ -87,21 +87,23 @@ class UserProfileHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        AppTextSkeleton(
-          text: displayName,
-          width: 150,
-          height: 24,
-          style: theme.textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
+        if (displayName == null || displayName!.trim().isEmpty)
+          const AppSkeleton.textLine(width: 150, height: 24)
+        else
+          Text(
+            displayName!,
+            style: theme.textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
         const SizedBox(height: 8),
-        AppTextSkeleton(
-          text: email,
-          width: 200,
-          height: 16,
-          style: theme.textTheme.bodyLarge?.copyWith(color: theme.mutedColor),
-          textAlign: TextAlign.center,
-        ),
+        if (email == null || email!.trim().isEmpty)
+          const AppSkeleton.textLine(width: 200)
+        else
+          Text(
+            email!,
+            style: theme.textTheme.bodyLarge?.copyWith(color: theme.mutedColor),
+            textAlign: TextAlign.center,
+          ),
       ],
     );
   }
