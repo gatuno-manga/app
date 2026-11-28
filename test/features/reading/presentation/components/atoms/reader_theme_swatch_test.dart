@@ -120,11 +120,21 @@ void main() {
       for (final entry in themes.entries) {
         final (theme, palette) = entry.value;
         final text = theme.colorScheme.onSurface;
-        for (final surface in [palette.appBackground, palette.secondary]) {
+        for (final surface in [
+          palette.appBackground,
+          palette.secondary,
+          theme.colorScheme.surfaceContainerLow,
+        ]) {
           expect(
             _contrast(text, surface),
             greaterThanOrEqualTo(4.5),
             reason: '${entry.key} on $surface',
+          );
+          // The selected dot is non-text: 3:1.
+          expect(
+            _contrast(theme.colorScheme.primary, surface),
+            greaterThanOrEqualTo(3),
+            reason: '${entry.key} dot on $surface',
           );
         }
       }
