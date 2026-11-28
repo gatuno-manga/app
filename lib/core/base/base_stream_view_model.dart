@@ -7,7 +7,7 @@ abstract class BaseStreamViewModel<T> {
   final BehaviorSubject<T> _stateSubject;
 
   BaseStreamViewModel(T initialState)
-      : _stateSubject = BehaviorSubject<T>.seeded(initialState);
+    : _stateSubject = BehaviorSubject<T>.seeded(initialState);
 
   /// The stream of state changes. UI components should listen to this.
   Stream<T> get stateStream => _stateSubject.stream;

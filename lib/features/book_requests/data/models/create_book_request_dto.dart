@@ -11,14 +11,10 @@ class CreateBookRequestDto {
   final RequestUrl url;
   final RequestReason? reason;
 
-  CreateBookRequestDto({
-    required this.title,
-    required this.url,
-    this.reason,
-  });
+  CreateBookRequestDto({required this.title, required this.url, this.reason});
 
-  factory CreateBookRequestDto.fromJson(Map<String, dynamic> json) => 
+  factory CreateBookRequestDto.fromJson(Map<String, dynamic> json) =>
       _$CreateBookRequestDtoFromJson(json);
-      
+
   Map<String, dynamic> toJson() => _$CreateBookRequestDtoToJson(this);
 }

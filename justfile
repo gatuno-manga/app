@@ -35,6 +35,10 @@ coverage:
 fmt *files='.':
     dart format {{ files }}
 
+# Fail when lib/ or test/ Dart files are not formatted (CI runs the same command)
+fmt-check:
+    dart format --output=none --set-exit-if-changed lib test
+
 # Unit tests of the gatuno_lints analyzer plugin (tool/gatuno_lints)
 test-lints:
     cd tool/gatuno_lints && dart pub get && dart test
@@ -43,8 +47,8 @@ test-lints:
 design-tokens:
     python3 tool/check_design_tokens.py
 
-# Full local gate: analysis, tests, lint-rule tests and design tokens
-check: analyze test test-lints design-tokens
+# Full local gate: format check, analysis, tests, lint-rule tests and design tokens
+check: fmt-check analyze test test-lints design-tokens
 
 # Apply automated Dart fixes (defaults to the whole project)
 # `dart fix` accepts a single path, so run it once per argument.

@@ -5,7 +5,7 @@ class AppLogger {
   static final List<LogTransport> _transports = [];
 
   /// Initializes the logger with default or custom transports.
-  /// 
+  ///
   /// In typical usage, this should be called once at app startup.
   static Future<void> init({List<LogTransport>? transports}) async {
     _transports.clear();
@@ -15,7 +15,7 @@ class AppLogger {
       // Default setup: DevTools + Console + background File Isolate
       _transports.add(DevLogTransport());
       _transports.add(ConsoleTransport());
-      
+
       final fileTransport = FileTransport();
       await fileTransport.init();
       _transports.add(fileTransport);

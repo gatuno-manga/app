@@ -32,7 +32,10 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signUp(EmailAddress('test@example.com'), Password('Password123!')),
+      () => mockAuthService.signUp(
+        EmailAddress('test@example.com'),
+        Password('Password123!'),
+      ),
     ).thenAnswer((_) async => true);
 
     await tester.pumpApp(const SignUpPage());

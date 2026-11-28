@@ -15,14 +15,14 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
   BookRequestsRepositoryImpl(this._dioClient);
 
   @override
-  Future<List<BookRequestEntity>> getBookRequests({int page = 1, int limit = 20}) async {
+  Future<List<BookRequestEntity>> getBookRequests({
+    int page = 1,
+    int limit = 20,
+  }) async {
     try {
       final response = await _dioClient.dio.get<dynamic>(
         '/book-requests/me',
-        queryParameters: {
-          'page': page,
-          'limit': limit,
-        },
+        queryParameters: {'page': page, 'limit': limit},
       );
 
       List<dynamic> itemsList;
@@ -37,7 +37,11 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
       }
 
       return itemsList
-          .map((json) => BookRequestModel.fromJson(json as Map<String, dynamic>).toEntity())
+          .map(
+            (json) => BookRequestModel.fromJson(
+              json as Map<String, dynamic>,
+            ).toEntity(),
+          )
           .toList();
     } on DioException catch (e) {
       throw ApiExceptionHandler.handle(e);
@@ -53,11 +57,7 @@ class BookRequestsRepositoryImpl implements BookRequestsRepository {
     RequestReason? reason,
   }) async {
     try {
-      final dto = CreateBookRequestDto(
-        title: title,
-        url: url,
-        reason: reason,
-      );
+      final dto = CreateBookRequestDto(title: title, url: url, reason: reason);
 
       await _dioClient.dio.post<Map<String, dynamic>>(
         '/book-requests',

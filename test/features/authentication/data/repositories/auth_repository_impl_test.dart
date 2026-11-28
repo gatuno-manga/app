@@ -35,7 +35,10 @@ void main() {
           ),
         );
 
-        final result = await repository.signIn(EmailAddress('test@example.com'), Password('password'));
+        final result = await repository.signIn(
+          EmailAddress('test@example.com'),
+          Password('password'),
+        );
 
         expect(result.value, 'access');
         expect(result, isA<AuthToken>());
@@ -56,7 +59,10 @@ void main() {
         );
 
         expect(
-          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signIn(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<ServerException>()),
         );
       });
@@ -75,7 +81,10 @@ void main() {
         );
 
         expect(
-          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signIn(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<NetworkException>()),
         );
       });
@@ -89,7 +98,10 @@ void main() {
         ).thenThrow(ValidationException(message: 'validation error'));
 
         expect(
-          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signIn(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<ValidationException>()),
         );
       });
@@ -103,7 +115,10 @@ void main() {
         ).thenThrow(Exception('unexpected'));
 
         expect(
-          () => repository.signIn(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signIn(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<AuthException>()),
         );
       });
@@ -123,7 +138,10 @@ void main() {
           ),
         );
 
-        await repository.signUp(EmailAddress('test@example.com'), Password('password'));
+        await repository.signUp(
+          EmailAddress('test@example.com'),
+          Password('password'),
+        );
 
         verify(
           () => mockDio.post<Map<String, dynamic>>(
@@ -148,7 +166,10 @@ void main() {
         );
 
         expect(
-          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signUp(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<ServerException>()),
         );
       });
@@ -171,7 +192,10 @@ void main() {
         );
 
         expect(
-          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signUp(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<AuthException>()),
         );
       });
@@ -185,7 +209,10 @@ void main() {
         ).thenThrow(Exception('unexpected'));
 
         expect(
-          () => repository.signUp(EmailAddress('test@example.com'), Password('password')),
+          () => repository.signUp(
+            EmailAddress('test@example.com'),
+            Password('password'),
+          ),
           throwsA(isA<AuthException>()),
         );
       });

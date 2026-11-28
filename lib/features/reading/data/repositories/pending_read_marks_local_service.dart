@@ -13,6 +13,7 @@ class PendingReadMarksLocalService implements PendingReadMarksRepository {
 
   PendingReadMarksLocalService(this._database);
 
+  @override
   Future<void> enqueue(UserId userId, ChapterId chapterId) async {
     AppLogger.d(
       'Queueing offline read mark: userId=${userId.value}, chapterId=${chapterId.value}',
@@ -29,6 +30,7 @@ class PendingReadMarksLocalService implements PendingReadMarksRepository {
         );
   }
 
+  @override
   Future<List<ChapterId>> getPendingChapterIds(UserId userId) async {
     final rows =
         await (_database.select(_database.pendingReadMarks)
@@ -38,6 +40,7 @@ class PendingReadMarksLocalService implements PendingReadMarksRepository {
     return [for (final row in rows) ChapterId(row.chapterId)];
   }
 
+  @override
   Future<void> remove(UserId userId, List<ChapterId> chapterIds) async {
     if (chapterIds.isEmpty) return;
     final ids = chapterIds.map((id) => id.value).toList();

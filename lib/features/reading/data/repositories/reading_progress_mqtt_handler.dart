@@ -8,7 +8,7 @@ class ReadingProgressMqttHandler {
   final AppMqttService _mqttService;
   final AuthService _authService;
   final LocalSyncFeatureProvider<ReadingProgress> _syncProvider;
-  
+
   static const String _logTag = 'ReadingProgressMqttHandler';
 
   ReadingProgressMqttHandler(
@@ -21,12 +21,15 @@ class ReadingProgressMqttHandler {
 
   void _setupListener() {
     _mqttService.progressSyncedStream.listen((remote) async {
-      AppLogger.i('Received reading progress sync via MQTT for chapter ${remote.chapterId.value}', _logTag);
-      
+      AppLogger.i(
+        'Received reading progress sync via MQTT for chapter ${remote.chapterId.value}',
+        _logTag,
+      );
+
       try {
         final user = _authService.currentUser;
         if (user.isGuest) return;
-        
+
         // The provider expects a List<dynamic> of the raw JSON or parsed JSON.
         // Since we already have the DTO, we can convert it to JSON to reuse the provider's logic.
         await _syncProvider.processPulledData([remote.toJson()], user.id);

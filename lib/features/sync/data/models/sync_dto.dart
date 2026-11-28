@@ -40,11 +40,7 @@ class PushSyncRequestDto {
   final List<Map<String, dynamic>>? savedPages;
   final List<SyncCommentDto>? comments;
 
-  PushSyncRequestDto({
-    this.readingProgress,
-    this.savedPages,
-    this.comments,
-  });
+  PushSyncRequestDto({this.readingProgress, this.savedPages, this.comments});
 
   factory PushSyncRequestDto.fromJson(Map<String, dynamic> json) =>
       _$PushSyncRequestDtoFromJson(json);
@@ -56,10 +52,7 @@ class PullSyncResponseDto {
   final Timestamp syncedAt;
   final Map<String, dynamic> data;
 
-  PullSyncResponseDto({
-    required this.syncedAt,
-    required this.data,
-  });
+  PullSyncResponseDto({required this.syncedAt, required this.data});
 
   factory PullSyncResponseDto.fromJson(Map<String, dynamic> json) =>
       _$PullSyncResponseDtoFromJson(json);

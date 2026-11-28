@@ -27,7 +27,10 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('password')),
+      () => mockAuthService.signIn(
+        EmailAddress('test@example.com'),
+        Password('password'),
+      ),
     ).thenAnswer((_) async => true);
 
     await tester.pumpApp(const SignInPage());
@@ -51,7 +54,10 @@ void main() {
     WidgetTester tester,
   ) async {
     when(
-      () => mockAuthService.signIn(EmailAddress('test@example.com'), Password('wrong')),
+      () => mockAuthService.signIn(
+        EmailAddress('test@example.com'),
+        Password('wrong'),
+      ),
     ).thenThrow(Exception('Invalid credentials'));
 
     await tester.pumpApp(const SignInPage());

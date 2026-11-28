@@ -3,7 +3,6 @@ import 'package:gatuno/shared/domain/value_objects/timestamp.dart';
 import 'package:gatuno/features/reading/domain/value_objects/document_path.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
 
-
 import 'package:gatuno/features/reading/data/models/reading_chapter_model.dart';
 import 'package:gatuno/features/reading/domain/entities/reading_enums.dart';
 import 'package:gatuno/features/books/domain/entities/chapter.dart';

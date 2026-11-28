@@ -114,7 +114,12 @@ class ReadingRepositoryImpl implements ReadingRepository {
     } on AppExceptions {
       rethrow;
     } on DioException catch (e) {
-      AppLogger.e('DioException $action: ${e.message}', e, e.stackTrace, _logTag);
+      AppLogger.e(
+        'DioException $action: ${e.message}',
+        e,
+        e.stackTrace,
+        _logTag,
+      );
       throw ApiExceptionHandler.handle(e);
     } catch (e, stackTrace) {
       AppLogger.e('Unexpected error $action', e, stackTrace, _logTag);

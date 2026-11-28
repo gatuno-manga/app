@@ -9,22 +9,13 @@ class SignUpState extends Equatable {
   final bool isLoading;
   final String? errorMessage;
 
-  const SignUpState({
-    required this.isLoading,
-    this.errorMessage,
-  });
+  const SignUpState({required this.isLoading, this.errorMessage});
 
   factory SignUpState.initial() {
-    return const SignUpState(
-      isLoading: false,
-      errorMessage: null,
-    );
+    return const SignUpState(isLoading: false, errorMessage: null);
   }
 
-  SignUpState copyWith({
-    bool? isLoading,
-    String? Function()? errorMessage,
-  }) {
+  SignUpState copyWith({bool? isLoading, String? Function()? errorMessage}) {
     return SignUpState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
@@ -47,7 +38,10 @@ class SignUpViewModel extends BaseStreamViewModel<SignUpState> {
     emit(state.copyWith(isLoading: true, errorMessage: () => null));
 
     try {
-      final success = await _authService.signUp(EmailAddress(email), Password(password));
+      final success = await _authService.signUp(
+        EmailAddress(email),
+        Password(password),
+      );
       AppLogger.i('SignUp result for $redactedEmail: $success', _logTag);
       emit(state.copyWith(isLoading: false));
       return success;

@@ -10,9 +10,11 @@ import '../../../../shared/domain/value_objects/positive_int.dart';
 import '../../domain/entities/reading_progress.dart';
 import '../models/reading_progress_dto.dart';
 import 'reading_progress_local_service.dart';
-import '../database/reading_database.dart' show ReadingProgressCompanion, ReadingProgressData;
+import '../database/reading_database.dart'
+    show ReadingProgressCompanion, ReadingProgressData;
 
-class ReadingProgressSyncProviderImpl implements LocalSyncFeatureProvider<ReadingProgress> {
+class ReadingProgressSyncProviderImpl
+    implements LocalSyncFeatureProvider<ReadingProgress> {
   final ReadingProgressLocalService _readingLocal;
   static const String _logTag = 'ReadingProgressSyncProvider';
 
@@ -22,16 +24,23 @@ class ReadingProgressSyncProviderImpl implements LocalSyncFeatureProvider<Readin
   SyncFeatureKey get syncKey => SyncFeatureKey.readingProgress;
 
   @override
-  Future<void> processPulledData(List<dynamic> remoteData, UserId currentUserId) async {
+  Future<void> processPulledData(
+    List<dynamic> remoteData,
+    UserId currentUserId,
+  ) async {
     final syncedProgress = remoteData
         .map((e) => RemoteReadingProgress.fromJson(e as Map<String, dynamic>))
         .toList();
 
     for (final remote in syncedProgress) {
       final effectiveUserId = remote.userId ?? currentUserId;
-      final current = await _readingLocal.getProgress(effectiveUserId, remote.chapterId);
-      final remoteTime = remote.updatedAt ?? remote.timestamp ?? Timestamp(DateTime.now());
-      
+      final current = await _readingLocal.getProgress(
+        effectiveUserId,
+        remote.chapterId,
+      );
+      final remoteTime =
+          remote.updatedAt ?? remote.timestamp ?? Timestamp(DateTime.now());
+
       bool shouldUpdateLocal = false;
       if (current == null) {
         shouldUpdateLocal = true;
@@ -57,21 +66,33 @@ class ReadingProgressSyncProviderImpl implements LocalSyncFeatureProvider<Readin
   }
 
   @override
-  Future<List<ReadingProgress>> getLocalChanges(UserId currentUserId, DateTime? lastSyncAt) async {
+  Future<List<ReadingProgress>> getLocalChanges(
+    UserId currentUserId,
+    DateTime? lastSyncAt,
+  ) async {
     List<ReadingProgressData> localProgress;
     if (lastSyncAt != null) {
-      localProgress = await _readingLocal.getModifiedSince(currentUserId, lastSyncAt);
+      localProgress = await _readingLocal.getModifiedSince(
+        currentUserId,
+        lastSyncAt,
+      );
     } else {
       localProgress = await _readingLocal.getAllProgress(currentUserId);
     }
 
-    return localProgress.map((p) => ReadingProgress(
-      chapterId: ChapterId(p.chapterId),
-      bookId: BookId(p.bookId),
-      pageIndex: PositiveInt(p.pageIndex),
-      timestamp: Timestamp(p.timestamp),
-      totalPages: p.totalPages != null ? PositiveInt(p.totalPages!) : null,
-      completed: p.completed,
-    )).toList();
+    return localProgress
+        .map(
+          (p) => ReadingProgress(
+            chapterId: ChapterId(p.chapterId),
+            bookId: BookId(p.bookId),
+            pageIndex: PositiveInt(p.pageIndex),
+            timestamp: Timestamp(p.timestamp),
+            totalPages: p.totalPages != null
+                ? PositiveInt(p.totalPages!)
+                : null,
+            completed: p.completed,
+          ),
+        )
+        .toList();
   }
 }

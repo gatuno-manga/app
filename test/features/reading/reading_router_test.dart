@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 
-
 import 'package:gatuno/core/di/injection.dart';
 import 'package:gatuno/features/reading/presentation/view_models/reading_view_model.dart';
 import 'package:gatuno/features/reading/presentation/views/reading_screen.dart';
@@ -11,7 +10,6 @@ import 'package:gatuno/features/reading/reading_router.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
-
 
 import '../../helpers/test_injection.dart';
 
@@ -36,7 +34,9 @@ void main() {
     stateController = StreamController<ReadingState>.broadcast();
     stateController.add(mockState);
     when(() => mockViewModel.state).thenReturn(mockState);
-    when(() => mockViewModel.stateStream).thenAnswer((_) => stateController.stream);
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => stateController.stream);
     when(() => mockViewModel.isLoading).thenReturn(false);
     when(() => mockViewModel.error).thenReturn(null);
     when(() => mockViewModel.chapter).thenReturn(null);
