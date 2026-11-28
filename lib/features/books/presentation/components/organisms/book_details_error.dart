@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../shared/components/molecules/app_error_view.dart';
 import '../../../../../shared/components/organisms/app_top_bar.dart';
 import '../../../../../shared/components/templates/app_top_bar_scaffold.dart';
-import '../molecules/book_error_view.dart';
 
 class BookDetailsError extends StatelessWidget {
   final String error;
@@ -20,7 +21,7 @@ class BookDetailsError extends StatelessWidget {
       slivers: [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: BookErrorView(error: error, onRetry: onRetry),
+          child: AppErrorView(error: error, onRetry: onRetry),
         ),
       ],
     );
