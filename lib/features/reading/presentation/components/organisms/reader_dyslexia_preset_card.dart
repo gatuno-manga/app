@@ -4,7 +4,6 @@ import '../../../../../core/theme/app_typography.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../domain/entities/reader_preferences.dart';
 import '../atoms/reader_summary_chip.dart';
-import '../atoms/reader_switch.dart';
 import '../molecules/reader_alignment_row.dart';
 import '../molecules/reader_font_family_row.dart';
 import '../molecules/reader_theme_picker.dart';
@@ -103,10 +102,12 @@ class ReaderDyslexiaPresetCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                ReaderSwitch(
-                  value: preferences.dyslexiaMode,
-                  onChanged: onChanged,
+                Semantics(
                   label: l10n.readingDyslexiaTitle,
+                  child: Switch(
+                    value: preferences.dyslexiaMode,
+                    onChanged: onChanged,
+                  ),
                 ),
               ],
             ),

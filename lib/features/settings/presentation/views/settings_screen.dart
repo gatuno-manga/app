@@ -10,7 +10,7 @@ import '../view_models/settings_view_model.dart';
 import '../../../reading/domain/use_cases/reader_preferences_service.dart';
 import '../../../reading/presentation/components/organisms/reader_preferences_controls.dart';
 import '../../../reading/presentation/components/organisms/text_reader_settings_section.dart';
-import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../../shared/components/molecules/app_switch_row.dart';
 import '../../../../shared/components/organisms/app_confirm_dialog.dart';
 import '../../../../shared/utils/format_bytes.dart';
 import '../../../app_lock/presentation/components/molecules/app_lock_settings_tile.dart';
@@ -117,11 +117,15 @@ class SettingsPage extends StatelessWidget {
             selected: state.themeChoice,
             onSelected: viewModel.setThemeChoice,
           ),
-          sensitiveContentToggle: AppSwitch(
-            title: l10n.userMeSensitiveContent,
-            subtitle: l10n.userMeSensitiveContentDesc,
-            value: state.sensitiveContentEnabled,
-            onChanged: (value) => viewModel.setSensitiveContentEnabled(value),
+          sensitiveContentToggle: Padding(
+            // Lines the row up with the 16 dp inset of the list tiles.
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: AppSwitchRow(
+              title: l10n.userMeSensitiveContent,
+              subtitle: l10n.userMeSensitiveContentDesc,
+              value: state.sensitiveContentEnabled,
+              onChanged: (value) => viewModel.setSensitiveContentEnabled(value),
+            ),
           ),
           appLockTile: AppLockSettingsTile(
             onTap: () => context.pushInTab('/settings/app-lock'),

@@ -71,4 +71,20 @@ void main() {
     expect(changes, isEmpty);
     expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
   });
+
+  testWidgets('without icon and subtitle it shows only the title', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AppSwitchRow(title: 'Lock', value: false, onChanged: (_) {}),
+        ),
+      ),
+    );
+
+    expect(find.text('Lock'), findsOneWidget);
+    expect(find.byType(Icon), findsNothing);
+    expect(find.byType(Switch), findsOneWidget);
+  });
 }
