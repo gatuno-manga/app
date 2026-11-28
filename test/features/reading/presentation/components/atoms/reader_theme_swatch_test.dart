@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/core/theme/app_palette.dart';
 import 'package:gatuno/core/theme/reader_palette.dart';
+import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/presentation/components/atoms/reader_theme_swatch.dart';
 
 import '../../../../../helpers/pump_app.dart';
@@ -76,5 +78,64 @@ void main() {
       );
       handle.dispose();
     });
+
+    testWidgets('only the selected swatch fills its dot, same size', (
+      tester,
+    ) async {
+      Future<(Color?, Size)> dot(bool selected) async {
+        await tester.pumpApp(
+          Scaffold(
+            body: ReaderThemeSwatch(
+              palette: ReaderPalette.cream,
+              label: 'Cream',
+              isSelected: selected,
+              onTap: () {},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final finder = find.byKey(const ValueKey('reader-theme-swatch-dot'));
+        final box = tester.widget<AnimatedContainer>(finder);
+        return (
+          (box.decoration as BoxDecoration).color,
+          tester.getSize(finder),
+        );
+      }
+
+      final off = await dot(false);
+      final on = await dot(true);
+      expect(off.$1, Colors.transparent);
+      expect(on.$1, isNot(Colors.transparent));
+      expect(on.$2, off.$2);
+    });
+
+    test('label colour reaches 4.5:1 on the sheet in every app theme', () {
+      final themes = {
+        'light': (AppTheme.lightTheme, lightPalette),
+        'dark': (AppTheme.darkTheme, darkPalette),
+        'true-dark': (AppTheme.trueDarkTheme, trueDarkPalette),
+        'dracula': (AppTheme.draculaTheme, draculaPalette),
+        'slate': (AppTheme.slateTheme, slatePalette),
+      };
+      for (final entry in themes.entries) {
+        final (theme, palette) = entry.value;
+        final text = theme.colorScheme.onSurface;
+        for (final surface in [palette.appBackground, palette.secondary]) {
+          expect(
+            _contrast(text, surface),
+            greaterThanOrEqualTo(4.5),
+            reason: '${entry.key} on $surface',
+          );
+        }
+      }
+    });
   });
+}
+
+double _contrast(Color a, Color b) {
+  final la = a.computeLuminance();
+  final lb = b.computeLuminance();
+  final hi = la > lb ? la : lb;
+  final lo = la > lb ? lb : la;
+  return (hi + 0.05) / (lo + 0.05);
 }
