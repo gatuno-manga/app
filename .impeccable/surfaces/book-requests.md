@@ -79,8 +79,8 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - First load, error and empty are drawn in the intended look; code uses a bare `CircularProgressIndicator`, an icon with red text and a raw `ElevatedButton.icon`, and a `Icons.inbox_outlined` empty state.
 - `BookRequestCard` is a Material `Card` (elevation 2); Figma uses the flat `color/secondary-60` card with a `color/border` outline.
 - Code status badge is `labelSmall` bold on a 20% tint with a 50% border; Figma `Core/Atom/Tag` uses `Interface/Rótulo` on 15% and 40% tint tokens.
-- Figma has no info or calendar icon in the icon library: the reason row uses `Core/Atom/Ícone/file-text` and the date `Core/Atom/Ícone/clock` where code uses `Icons.info_outline` and `Icons.calendar_today`.
-- Code `AppButton` is 48 dp high; Figma `Core/Atom/Botão` is 44 dp.
+- The reason row uses `Core/Atom/Ícone/info` and the date `Core/Atom/Ícone/calendar` (added in #248, Lucide style) where code uses `Icons.info_outline` and `Icons.calendar_today`.
+- Code `AppButton` and Figma `Core/Atom/Botão` are both 48 dp high (#275).
 - The `/requests` frames draw the native `App/Organism/Shell/Barra superior` and `App/Organism/Shell/Barra inferior` of #169 (#170); the `/requests/create` frames draw them too since #260. Entry points are the Home card and a row in the merged profile and settings screen.
 
 ## Implementation status (#251)
