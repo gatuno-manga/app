@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_palette.dart';
 import '../../../../../core/theme/semantic_colors.dart';
 import '../../../../../core/theme/theme.dart';
+import '../../../../../shared/components/atoms/app_surface_card.dart';
 import '../../../../../shared/components/atoms/app_text_button.dart';
 
 /// The book's download summary (Figma `Livro/Resumo de downloads`), between
@@ -49,13 +50,8 @@ class BookDownloadsSummary extends StatelessWidget {
     final actionLabel = this.actionLabel;
     final progress = this.progress;
 
-    return Container(
+    return AppSurfaceCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: palette.secondary60,
-        border: Border.all(color: palette.border),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

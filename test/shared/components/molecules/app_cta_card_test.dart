@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/shared/components/molecules/app_cta_card.dart';
 
+import 'package:gatuno/core/theme/app_palette.dart';
+
 import '../../../helpers/pump_app.dart';
 
 void main() {
@@ -54,12 +56,18 @@ void main() {
       expect(find.byIcon(Icons.login), findsOneWidget);
       expect(find.byType(Card), findsNothing);
       final box = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(AppCtaCard),
-          matching: find.byType(Container),
-        ),
+        find
+            .descendant(
+              of: find.byType(AppCtaCard),
+              matching: find.byType(Container),
+            )
+            .first,
       );
-      expect((box.decoration! as BoxDecoration).border, isNotNull);
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.color, lightPalette.secondary60);
+      expect((decoration.border! as Border).top.color, lightPalette.border);
+      expect(decoration.borderRadius, BorderRadius.circular(12));
+      expect(box.padding, const EdgeInsets.all(20));
     });
   });
 }

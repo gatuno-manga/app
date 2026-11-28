@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_palette.dart';
 import '../../../core/theme/semantic_colors.dart';
-import '../../../core/theme/theme.dart';
 import '../atoms/app_button.dart';
+import '../atoms/app_surface_card.dart';
 
 /// Figma `App/Molecule/Cartão de chamada`: a flat outlined card with a title,
 /// a description, an optional note and one primary action.
@@ -33,15 +32,9 @@ class AppCtaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = theme.extension<GatunoColors>()?.palette ?? lightPalette;
 
-    return Container(
+    return AppSurfaceCard(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: palette.secondary60,
-        border: Border.all(color: palette.border),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
