@@ -8,16 +8,21 @@ class AppButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
 
+  /// Drawn before the label; hidden while [isLoading].
+  final IconData? icon;
+
   const AppButton({
     super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final icon = this.icon;
 
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
@@ -29,7 +34,16 @@ class AppButton extends StatelessWidget {
       ),
       child: isLoading
           ? AppLoadingIndicator.small(color: colorScheme.onPrimary)
-          : Text(text),
+          : icon == null
+          ? Text(text)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18),
+                const SizedBox(width: 8),
+                Flexible(child: Text(text)),
+              ],
+            ),
     );
   }
 }

@@ -30,10 +30,10 @@ void main() {
     ) async {
       await tester.pumpApp(card(note: 'Back soon'));
 
-      final button = tester.widget<ButtonStyleButton>(
+      final button = tester.widget<ElevatedButton>(
         find.ancestor(
           of: find.text('Go'),
-          matching: find.bySubtype<ButtonStyleButton>(),
+          matching: find.byType(ElevatedButton),
         ),
       );
       expect(button.enabled, isFalse);
@@ -44,6 +44,22 @@ void main() {
       await tester.pumpApp(card(onPressed: () {}));
 
       expect(find.text('Back soon'), findsNothing);
+    });
+
+    testWidgets('draws the button icon and a flat outlined card', (
+      tester,
+    ) async {
+      await tester.pumpApp(card(onPressed: () {}));
+
+      expect(find.byIcon(Icons.login), findsOneWidget);
+      expect(find.byType(Card), findsNothing);
+      final box = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(AppCtaCard),
+          matching: find.byType(Container),
+        ),
+      );
+      expect((box.decoration! as BoxDecoration).border, isNotNull);
     });
   });
 }
