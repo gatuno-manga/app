@@ -55,6 +55,10 @@ jobs:
       - name: Install dependencies
         run: nix develop .#ci --command flutter pub get
 
+      # Keeps formatter drift out of branches; same command as `just fmt-check`.
+      - name: Check formatting
+        run: nix develop .#ci --command dart format --output=none --set-exit-if-changed lib test
+
       # `dart analyze` is the repo gate (AGENTS.md): it fails on warnings, not infos,
       # and reports gatuno_lints diagnostics that `flutter analyze` drops.
       - name: Run static analysis
