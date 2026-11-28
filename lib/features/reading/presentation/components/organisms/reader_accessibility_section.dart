@@ -6,7 +6,7 @@ import '../../../domain/use_cases/reader_preferences_service.dart';
 import '../molecules/reader_alignment_row.dart';
 import '../molecules/reader_font_family_row.dart';
 import '../molecules/reader_stepper_row.dart';
-import '../molecules/reader_switch_row.dart';
+import '../../../../../shared/components/molecules/app_switch_row.dart';
 import 'reader_dyslexia_preset_card.dart';
 import 'reader_preferences_controls.dart';
 
@@ -106,7 +106,7 @@ class ReaderAccessibilitySection extends StatelessWidget {
           onChanged: (alignment) =>
               onChanged((t) => t.copyWith(alignment: alignment)),
         ),
-        ReaderSwitchRow(
+        AppSwitchRow(
           icon: Icons.format_italic,
           title: l10n.readingSuppressItalics,
           subtitle: l10n.readingSuppressItalicsDesc,
@@ -114,7 +114,7 @@ class ReaderAccessibilitySection extends StatelessWidget {
           onChanged: (value) =>
               onChanged((t) => t.copyWith(suppressItalics: value)),
         ),
-        ReaderSwitchRow(
+        AppSwitchRow(
           icon: Icons.layers_outlined,
           title: l10n.readingRulerTitle,
           subtitle: l10n.readingRulerDesc,

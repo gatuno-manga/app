@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gatuno/l10n/app_localizations.dart';
 
 import '../../../../core/di/injection.dart';
-import '../../../../shared/components/atoms/app_switch.dart';
+import '../../../../shared/components/molecules/app_switch_row.dart';
 import '../../../../shared/components/organisms/app_top_bar.dart';
 import '../../../../shared/components/templates/app_top_bar_scaffold.dart';
 // Shared on purpose with the settings feature: this page is a settings
@@ -148,25 +148,33 @@ class _AppLockSettingsPageState extends State<AppLockSettingsPage> {
     );
   }
 
+  // The row has no horizontal padding; 16 dp lines it up with the radio tiles.
+  Widget _padded(Widget row) =>
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: row);
+
   List<Widget> _controls(AppLocalizations l10n, AppLockState state) {
     return [
-      AppSwitch(
-        title: l10n.appLockSwitchTitle,
-        subtitle: state.deviceCredentialAllowed
-            ? l10n.appLockSwitchDesc
-            : l10n.appLockSwitchDescBiometricOnly,
-        value: state.enabled,
-        onChanged: _toggleLock,
+      _padded(
+        AppSwitchRow(
+          title: l10n.appLockSwitchTitle,
+          subtitle: state.deviceCredentialAllowed
+              ? l10n.appLockSwitchDesc
+              : l10n.appLockSwitchDescBiometricOnly,
+          value: state.enabled,
+          onChanged: _toggleLock,
+        ),
       ),
       // The fallback stays reachable while the lock is off: a biometric-only
       // refusal when enabling must have a way out.
-      AppSwitch(
-        title: l10n.appLockFallbackTitle,
-        subtitle: state.deviceCredentialAllowed
-            ? l10n.appLockFallbackOnDesc
-            : l10n.appLockFallbackOffDesc,
-        value: state.deviceCredentialAllowed,
-        onChanged: _toggleFallback,
+      _padded(
+        AppSwitchRow(
+          title: l10n.appLockFallbackTitle,
+          subtitle: state.deviceCredentialAllowed
+              ? l10n.appLockFallbackOnDesc
+              : l10n.appLockFallbackOffDesc,
+          value: state.deviceCredentialAllowed,
+          onChanged: _toggleFallback,
+        ),
       ),
       if (state.enabled) ...[
         const Divider(height: 32),

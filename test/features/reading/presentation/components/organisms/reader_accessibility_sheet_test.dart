@@ -4,7 +4,7 @@ import 'package:gatuno/core/theme/theme.dart';
 import 'package:gatuno/features/reading/data/data_sources/reader_preferences_storage.dart';
 import 'package:gatuno/features/reading/domain/entities/reader_preferences.dart';
 import 'package:gatuno/features/reading/domain/use_cases/reader_preferences_service.dart';
-import 'package:gatuno/features/reading/presentation/components/molecules/reader_switch_row.dart';
+import 'package:gatuno/shared/components/molecules/app_switch_row.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_accessibility_sheet.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/reader_settings_sheet.dart';
 import 'package:gatuno/features/reading/presentation/components/organisms/text_reader_settings_section.dart';
@@ -44,7 +44,7 @@ void main() {
 
   final dyslexiaSwitch = find.byType(Switch).first;
   Finder rowSwitch(String title) => find.descendant(
-    of: find.widgetWithText(ReaderSwitchRow, title),
+    of: find.widgetWithText(AppSwitchRow, title),
     matching: find.byType(Switch),
   );
 

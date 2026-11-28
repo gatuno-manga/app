@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/shared/components/molecules/app_switch_row.dart';
 import 'package:gatuno/features/app_lock/domain/device_authenticator.dart';
 import 'package:gatuno/features/app_lock/domain/use_cases/app_lock_service.dart';
 import 'package:gatuno/features/app_lock/domain/value_objects/app_lock_grace.dart';
@@ -30,7 +31,7 @@ void main() {
   Finder switchWithTitle(String title) => find.descendant(
     of: find.ancestor(
       of: find.text(title),
-      matching: find.byType(SwitchListTile),
+      matching: find.byType(AppSwitchRow),
     ),
     matching: find.byType(Switch),
   );
