@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gatuno/shared/components/molecules/app_cta_card.dart';
 
+import 'package:gatuno/core/theme/app_palette.dart';
+
 import '../../../helpers/pump_app.dart';
 
 void main() {
@@ -30,10 +32,10 @@ void main() {
     ) async {
       await tester.pumpApp(card(note: 'Back soon'));
 
-      final button = tester.widget<ButtonStyleButton>(
+      final button = tester.widget<ElevatedButton>(
         find.ancestor(
           of: find.text('Go'),
-          matching: find.bySubtype<ButtonStyleButton>(),
+          matching: find.byType(ElevatedButton),
         ),
       );
       expect(button.enabled, isFalse);
@@ -44,6 +46,28 @@ void main() {
       await tester.pumpApp(card(onPressed: () {}));
 
       expect(find.text('Back soon'), findsNothing);
+    });
+
+    testWidgets('draws the button icon and a flat outlined card', (
+      tester,
+    ) async {
+      await tester.pumpApp(card(onPressed: () {}));
+
+      expect(find.byIcon(Icons.login), findsOneWidget);
+      expect(find.byType(Card), findsNothing);
+      final box = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(AppCtaCard),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.color, lightPalette.secondary60);
+      expect((decoration.border! as Border).top.color, lightPalette.border);
+      expect(decoration.borderRadius, BorderRadius.circular(12));
+      expect(box.padding, const EdgeInsets.all(20));
     });
   });
 }

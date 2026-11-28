@@ -55,5 +55,35 @@ void main() {
         expect(pressed, false);
       },
     );
+
+    testWidgets('shows the icon before the label', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppButton(text: 'Go', icon: Icons.login, onPressed: () {}),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.login), findsOneWidget);
+      expect(find.text('Go'), findsOneWidget);
+    });
+
+    testWidgets('hides the icon while loading', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppButton(
+              text: 'Go',
+              icon: Icons.login,
+              isLoading: true,
+              onPressed: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.login), findsNothing);
+    });
   });
 }
