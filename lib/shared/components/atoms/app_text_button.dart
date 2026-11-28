@@ -57,7 +57,7 @@ class AppTextButton extends StatelessWidget {
       return TextButton(
         onPressed: null,
         style: style,
-        child: AppLoadingIndicator(size: 20, color: color),
+        child: AppLoadingIndicator.small(color: color),
       );
     }
     final icon = this.icon;

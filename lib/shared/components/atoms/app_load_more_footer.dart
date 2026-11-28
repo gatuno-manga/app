@@ -10,7 +10,7 @@ class AppLoadMoreFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Padding(
       padding: EdgeInsets.all(16),
-      child: Center(child: AppLoadingIndicator(size: 24)),
+      child: Center(child: AppLoadingIndicator.medium()),
     );
   }
 }

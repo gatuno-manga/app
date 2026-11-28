@@ -109,7 +109,7 @@ class _BooksOptionPickerSheetState extends State<BooksOptionPickerSheet> {
                   if (snapshot.connectionState != ConnectionState.done) {
                     return const Padding(
                       padding: EdgeInsets.all(24),
-                      child: Center(child: AppLoadingIndicator()),
+                      child: Center(child: AppLoadingIndicator.medium()),
                     );
                   }
                   if (snapshot.hasError) {

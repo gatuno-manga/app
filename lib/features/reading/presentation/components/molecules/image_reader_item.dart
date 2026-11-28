@@ -77,7 +77,7 @@ class _ImageReaderItemState extends State<ImageReaderItem> {
         fit: BoxFit.fill,
         width: double.infinity,
         onImageLoaded: _onImageLoaded,
-        placeholder: const Center(child: AppLoadingIndicator()),
+        placeholder: const Center(child: AppLoadingIndicator.medium()),
       ),
     );
   }

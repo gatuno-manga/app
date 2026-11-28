@@ -28,7 +28,7 @@ class AppButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: isLoading
-          ? AppLoadingIndicator(size: 20, color: colorScheme.onPrimary)
+          ? AppLoadingIndicator.small(color: colorScheme.onPrimary)
           : Text(text),
     );
   }

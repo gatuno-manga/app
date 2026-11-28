@@ -25,7 +25,7 @@ class ProfileTemplate extends StatelessWidget {
         if (isLoading)
           const SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(child: AppLoadingIndicator(size: 40)),
+            child: Center(child: AppLoadingIndicator.large()),
           )
         else
           SliverPadding(
