@@ -55,7 +55,7 @@ class AppOutlinedButton extends StatelessWidget {
       return OutlinedButton(
         onPressed: null,
         style: style,
-        child: AppLoadingIndicator(size: 20, color: color),
+        child: AppLoadingIndicator.small(color: color),
       );
     }
     final icon = this.icon;

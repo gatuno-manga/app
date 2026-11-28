@@ -8,30 +8,35 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: AppLoadingIndicator())),
+        const MaterialApp(home: Scaffold(body: AppLoadingIndicator.medium())),
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('respects custom size', (WidgetTester tester) async {
-      const double customSize = 42.0;
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: AppLoadingIndicator(size: customSize)),
-        ),
-      );
+    for (final (name, widget, dp) in [
+      ('small', const AppLoadingIndicator.small(), 20.0),
+      ('medium', const AppLoadingIndicator.medium(), 24.0),
+      ('large', const AppLoadingIndicator.large(), 40.0),
+    ]) {
+      testWidgets('$name is $dp dp with a 2 dp stroke', (tester) async {
+        await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
 
-      final SizedBox sizedBox = tester.widget(find.byType(SizedBox));
-      expect(sizedBox.height, customSize);
-      expect(sizedBox.width, customSize);
-    });
+        final SizedBox sizedBox = tester.widget(find.byType(SizedBox));
+        expect(sizedBox.height, dp);
+        expect(sizedBox.width, dp);
+        final CircularProgressIndicator indicator = tester.widget(
+          find.byType(CircularProgressIndicator),
+        );
+        expect(indicator.strokeWidth, 2);
+      });
+    }
 
     testWidgets('respects custom color', (WidgetTester tester) async {
       const Color customColor = Colors.red;
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: AppLoadingIndicator(color: customColor)),
+          home: Scaffold(body: AppLoadingIndicator.medium(color: customColor)),
         ),
       );
 
@@ -50,7 +55,7 @@ void main() {
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           ),
-          home: const Scaffold(body: AppLoadingIndicator()),
+          home: const Scaffold(body: AppLoadingIndicator.medium()),
         ),
       );
 
