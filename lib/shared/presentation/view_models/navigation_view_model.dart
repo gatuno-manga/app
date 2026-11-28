@@ -1,10 +1,13 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
 import '../../../../core/base/base_stream_view_model.dart';
 import '../../../../core/connectivity/connectivity_service.dart';
 import '../../../../features/users/domain/use_cases/user_service.dart';
 import '../../../../features/users/data/models/user_model.dart';
 import '../../../../features/authentication/domain/use_cases/auth_service.dart';
+
 import 'package:equatable/equatable.dart';
 
 class NavigationState extends Equatable {
@@ -45,6 +48,7 @@ class NavigationViewModel extends BaseStreamViewModel<NavigationState> {
   final AuthService _authService;
   late final StreamSubscription<AuthState> _authSubscription;
   late final StreamSubscription<ConnectivityStatus> _connectivitySubscription;
+  late final StreamSubscription<UserModel> _profileSubscription;
 
   NavigationViewModel(
     this._userService,
@@ -57,6 +61,10 @@ class NavigationViewModel extends BaseStreamViewModel<NavigationState> {
     _connectivitySubscription = connectivity.statusStream.listen(
       (status) =>
           emit(state.copyWith(isOffline: status == ConnectivityStatus.offline)),
+    );
+    // A new photo or name from the profile screen shows in the bar at once.
+    _profileSubscription = _userService.profileStream.listen(
+      (user) => emit(state.copyWith(user: user)),
     );
     _onAuthStateChanged();
   }
@@ -82,6 +90,7 @@ class NavigationViewModel extends BaseStreamViewModel<NavigationState> {
   void dispose() {
     _authSubscription.cancel();
     _connectivitySubscription.cancel();
+    _profileSubscription.cancel();
     super.dispose();
   }
 }

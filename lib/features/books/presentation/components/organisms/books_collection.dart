@@ -7,7 +7,7 @@ import '../molecules/book_cover_card.dart';
 import 'book_grid.dart';
 import 'book_list.dart';
 
-/// The scrollable book list in whichever layout the preferences ask for.
+/// The sliver book list in whichever layout the preferences ask for.
 class BooksCollection extends StatelessWidget {
   final List<Book> books;
   final BooksViewPreferences preferences;

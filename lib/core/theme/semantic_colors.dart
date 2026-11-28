@@ -39,6 +39,9 @@ extension SemanticThemeColors on ThemeData {
   /// Selected-state pill behind a navigation item (`color/primary-15`).
   Color get selectedSubtleColor => _palette.primary15;
 
+  /// Fill of text fields laid over the page (`color/secondary-60`).
+  Color get fieldFillColor => _palette.secondary60;
+
   /// De-emphasised icons and captions (`color/text-secondary`).
   Color get mutedColor => _palette.textSecondary;
 

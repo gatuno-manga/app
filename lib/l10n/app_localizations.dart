@@ -266,6 +266,12 @@ abstract class AppLocalizations {
   /// **'Search books...'**
   String get booksSearchHint;
 
+  /// No description provided for @booksSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get booksSearchClear;
+
   /// No description provided for @booksFilterTitle.
   ///
   /// In en, this message translates to:
@@ -1759,6 +1765,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get mfaErrorUnknown;
+
+  /// No description provided for @settingsBookRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a book'**
+  String get settingsBookRequests;
+
+  /// No description provided for @settingsBookRequestsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a book that is not in the library'**
+  String get settingsBookRequestsDesc;
 
   /// No description provided for @settingsMfaDesc.
   ///

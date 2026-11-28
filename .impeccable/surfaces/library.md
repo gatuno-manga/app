@@ -63,3 +63,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - No code route or screen for `/library`; the frames are a design proposal, except the placeholder `1112:8281`, which is the screen planned to ship before #130. The placeholder and guest copy have no l10n keys yet.
 - Tab labels (Lendo, Salvos, Concluídos), titles, subtitle and empty message are placeholder copy; no l10n keys exist.
 - No web frame exists for `/library` (web section 1 names the route only).
+
+## Implementation status (#251)
+- #251: the Biblioteca placeholder uses `AppTopBar` with `TabRootProfileAction`.

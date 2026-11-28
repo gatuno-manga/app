@@ -9,6 +9,7 @@ import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dar
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/users/presentation/view_models/me_view_model.dart';
 import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 
 extension PumpApp on WidgetTester {
   /// [theme] applies to the whole app, as `AppTheme` does in production.
@@ -56,6 +57,16 @@ extension PumpApp on WidgetTester {
               const Scaffold(body: Text('Profile Page')),
         ),
         GoRoute(
+          path: '/home/requests',
+          builder: (context, state) =>
+              const Scaffold(body: Text('Book Requests Page')),
+        ),
+        GoRoute(
+          path: '/books',
+          builder: (context, state) =>
+              Scaffold(body: Text('Books Page ${state.uri.query}')),
+        ),
+        GoRoute(
           path: '/auth/signin',
           builder: (context, state) =>
               const Scaffold(body: Text('Signin Page')),
@@ -68,6 +79,8 @@ extension PumpApp on WidgetTester {
         Provider.value(value: sl<AuthService>()),
       if (sl.isRegistered<HomeViewModel>())
         Provider.value(value: sl<HomeViewModel>()),
+      if (sl.isRegistered<NavigationViewModel>())
+        Provider.value(value: sl<NavigationViewModel>()),
       if (sl.isRegistered<MeViewModel>())
         Provider.value(value: sl<MeViewModel>()),
     ];

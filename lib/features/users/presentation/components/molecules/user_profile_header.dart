@@ -73,7 +73,7 @@ class UserProfileHeader extends StatelessWidget {
                     ),
                   ),
                   child: AppAvatar(
-                    name: displayName,
+                    isLoading: displayName == null,
                     radius: _avatarRadius,
                     imageUrl: avatarUrl,
                     strategy: sl<ImageLoadingStrategy>(),

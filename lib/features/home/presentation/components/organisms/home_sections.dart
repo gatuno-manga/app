@@ -6,7 +6,7 @@ import '../molecules/home_section_header.dart';
 import 'featured_carousel.dart';
 import 'horizontal_book_list.dart';
 
-/// The scrollable home content: featured carousel, the book rows and the
+/// The home content as a sliver: featured carousel, the book rows and the
 /// request call to action.
 ///
 /// A row (header included) is left out when it has nothing to show and is
@@ -53,7 +53,7 @@ class HomeSections extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return SingleChildScrollView(
+    return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

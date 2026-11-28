@@ -108,3 +108,6 @@ Page "05 · Telas Tablet (App)" (`1100:8297`), window size classes in DESIGN.md 
 - No web frame exists (web section `859:28` is empty).
 - Allowed-URLs list from `settingsAllowedUrlsSection` is not drawn on this screen.
 - Book requests: the decision (#169, changed in #170) is a row on this screen as well as the card on Home; it is drawn on `997:5052` and the two #147 dialog frames. Code has no such row and still has Settings as the third tab (#172, #251). The profile edit screen (`/settings/profile`) is pushed above this one and keeps whichever tab was selected.
+
+## Implementation status (#251)
+- #251: `/settings` is the merged "Perfil e configurações" screen: `AppTopBar` (Stacked, back), profile card with `AppAvatar`, settings, and a "Solicitar livro" row for signed-in users. Sub-pages use the same bar.

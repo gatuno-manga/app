@@ -128,6 +128,45 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
   });
 
+  testWidgets('the error screen has a back button that goes home', (
+    tester,
+  ) async {
+    final failed = BookDetailsState.initial().copyWith(error: () => 'Failed');
+    when(() => mockViewModel.state).thenReturn(failed);
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => Stream.value(failed));
+    when(() => mockViewModel.error).thenReturn('Failed');
+
+    await tester.pumpApp(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+    // Nothing to pop in the test router, so back goes Home.
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Page'), findsOneWidget);
+  });
+
+  testWidgets('the book bar shows back and goes home when it cannot pop', (
+    tester,
+  ) async {
+    final book = Book(id: const BookId('1'), title: const BookTitle('Book'));
+    final loaded = BookDetailsState.initial().copyWith(book: () => book);
+    when(() => mockViewModel.state).thenReturn(loaded);
+    when(
+      () => mockViewModel.stateStream,
+    ).thenAnswer((_) => Stream.value(loaded));
+    when(() => mockViewModel.book).thenReturn(book);
+
+    await tester.pumpApp(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home Page'), findsOneWidget);
+  });
+
   testWidgets('renders book details and chapters', (tester) async {
     final book = Book(
       id: const BookId('1'),

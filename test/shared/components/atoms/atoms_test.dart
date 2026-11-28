@@ -1,51 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:gatuno/shared/components/atoms/app_avatar.dart';
 import 'package:gatuno/shared/components/atoms/app_clickable_action.dart';
 import 'package:gatuno/shared/components/atoms/app_switch.dart';
 
-import '../../../helpers/test_injection.dart';
-
-const _strategy = FailingImageLoadingStrategy();
 
 void main() {
   group('Atoms', () {
-    testWidgets('AppAvatar renders initials correctly', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AppAvatar(name: 'John Doe', strategy: _strategy),
-          ),
-        ),
-      );
-
-      expect(find.text('J'), findsOneWidget);
-    });
-
-    testWidgets('AppAvatar renders ? for empty name', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: AppAvatar(name: '', strategy: _strategy),
-          ),
-        ),
-      );
-
-      expect(find.text('?'), findsOneWidget);
-    });
-
-    testWidgets('AppAvatar renders skeleton for null name', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: AppAvatar(name: null, strategy: _strategy)),
-        ),
-      );
-
-      expect(find.byType(Container), findsOneWidget);
-      expect(find.text('?'), findsNothing);
-    });
-
     testWidgets('AppClickableAction triggers onPressed', (tester) async {
       var pressed = false;
       await tester.pumpWidget(

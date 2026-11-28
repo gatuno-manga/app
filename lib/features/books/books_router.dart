@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'books_launch_intent.dart';
 import 'presentation/views/books_screen.dart';
 import 'presentation/view_models/books_view_model.dart';
 import '../../../core/di/injection.dart';
@@ -18,7 +19,7 @@ final StatefulShellBranch booksBranch = StatefulShellBranch(
         child: Provider<BooksViewModel>(
           create: (_) => sl<BooksViewModel>(),
           dispose: (_, vm) => vm.dispose(),
-          child: const BooksPage(),
+          child: BooksPage(intent: BooksLaunchIntent.fromUri(state.uri)),
         ),
       ),
       routes: shellPushedRoutes(bookPath: ':bookId'),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:gatuno/features/home/presentation/components/molecules/login_icon.dart';
 import 'package:gatuno/features/home/presentation/components/organisms/featured_carousel.dart';
-import 'package:gatuno/features/home/presentation/components/molecules/user_profile_icon.dart';
+import 'package:gatuno/shared/components/molecules/app_profile_action.dart';
 import 'package:gatuno/features/home/presentation/view_models/home_view_model.dart';
 import 'package:gatuno/features/home/presentation/views/home_screen.dart';
 import 'package:gatuno/features/books/domain/entities/book.dart';
@@ -58,31 +57,32 @@ void main() {
       ),
     );
 
-    expect(find.byType(UserProfileIcon), findsOneWidget);
-    expect(find.byType(LoginIcon), findsNothing);
-    expect(
-      tester.widget<AppAvatar>(find.byType(AppAvatar)).imageUrl,
-      'http://x/a.webp',
-    );
+    expect(find.byType(AppProfileAction), findsOneWidget);
+    final avatar = tester.widget<AppAvatar>(find.byType(AppAvatar));
+    expect(avatar.guest, isFalse);
+    expect(avatar.imageUrl, 'http://x/a.webp');
   });
 
-  testWidgets('shows the login icon for guests', (tester) async {
+  testWidgets('shows the guest avatar icon for guests', (tester) async {
     await pumpHome(tester, HomeState.initial().copyWith(isInitialized: true));
 
-    expect(find.byType(LoginIcon), findsOneWidget);
-    expect(find.byType(UserProfileIcon), findsNothing);
+    expect(find.byType(AppProfileAction), findsOneWidget);
+    expect(tester.widget<AppAvatar>(find.byType(AppAvatar)).guest, isTrue);
   });
 
-  testWidgets('shows no header action until auth is initialized', (
+  testWidgets('keeps the avatar skeleton until auth is initialized', (
     tester,
   ) async {
     await pumpHome(tester, HomeState.initial());
 
-    expect(find.byType(LoginIcon), findsNothing);
-    expect(find.byType(UserProfileIcon), findsNothing);
+    final avatar = tester.widget<AppAvatar>(find.byType(AppAvatar));
+    expect(avatar.isLoading, isTrue);
+    expect(avatar.guest, isFalse);
   });
 
-  testWidgets('tapping the avatar opens the profile and settings screen', (tester) async {
+  testWidgets('tapping the avatar opens the profile and settings screen', (
+    tester,
+  ) async {
     await pumpHome(
       tester,
       HomeState.initial().copyWith(
@@ -92,19 +92,66 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(UserProfileIcon));
+    await tester.tap(find.byType(AppProfileAction));
     await tester.pumpAndSettle();
 
     expect(find.text('Settings Page'), findsOneWidget);
   });
 
-  testWidgets('tapping the login icon opens sign in', (tester) async {
+  testWidgets('tapping the guest icon opens the profile and settings screen', (
+    tester,
+  ) async {
     await pumpHome(tester, HomeState.initial().copyWith(isInitialized: true));
 
-    await tester.tap(find.byType(LoginIcon));
+    await tester.tap(find.byType(AppProfileAction));
     await tester.pumpAndSettle();
 
-    expect(find.text('Signin Page'), findsOneWidget);
+    expect(find.text('Settings Page'), findsOneWidget);
+  });
+
+  group('links to Books', () {
+    final withBooks = HomeState.initial().copyWith(
+      isInitialized: true,
+      latestUpdated: HomeBookSection(
+        books: [Book(id: const BookId('a'), title: BookTitle('A'))],
+      ),
+    );
+
+    testWidgets('View all on Latest Updates opens Books sorted', (
+      tester,
+    ) async {
+      await pumpHome(tester, withBooks);
+      await tester.tap(find.text('View all').first);
+      await tester.pumpAndSettle();
+
+      final text = tester.widget<Text>(find.textContaining('Books Page'));
+      final query = Uri.splitQueryString(text.data!.substring(11));
+      expect(query['orderBy'], 'updatedAt');
+      expect(query['order'], 'desc');
+      expect(int.tryParse(query['n'] ?? ''), isNotNull);
+    });
+
+    testWidgets('View all on Recently Added opens Books sorted by creation', (
+      tester,
+    ) async {
+      await pumpHome(
+        tester,
+        withBooks.copyWith(
+          recentlyAdded: HomeBookSection(
+            books: [Book(id: const BookId('b'), title: BookTitle('B'))],
+          ),
+        ),
+      );
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('View all').last);
+      await tester.pumpAndSettle();
+
+      final text = tester.widget<Text>(find.textContaining('Books Page'));
+      final query = Uri.splitQueryString(text.data!.substring(11));
+      expect(query['orderBy'], 'createdAt');
+      expect(query['order'], 'desc');
+    });
   });
 
   group('offline', () {
@@ -123,7 +170,7 @@ void main() {
 
       expect(find.byType(AppOfflineEmptyView), findsOneWidget);
       expect(find.byType(AppCtaCard), findsNothing);
-      expect(find.byType(LoginIcon), findsOneWidget);
+      expect(find.byType(AppProfileAction), findsOneWidget);
 
       await tester.tap(find.byType(AppButton));
       verify(() => viewModel.retry()).called(1);

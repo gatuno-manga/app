@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/entities/book.dart';
 import '../molecules/book_list_item.dart';
 
+/// A sliver list of books; place it in a [CustomScrollView].
 class BookListView extends StatelessWidget {
   final List<Book> books;
   final Widget? footer;
@@ -10,8 +11,7 @@ class BookListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
+    return SliverMainAxisGroup(
       slivers: [
         SliverFixedExtentList(
           itemExtent: 116.0,

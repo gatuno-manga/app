@@ -98,6 +98,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get booksSearchHint => 'Search books...';
 
   @override
+  String get booksSearchClear => 'Clear search';
+
+  @override
   String get booksFilterTitle => 'Filters';
 
   @override
@@ -923,6 +926,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mfaErrorUnknown => 'Something went wrong. Please try again.';
+
+  @override
+  String get settingsBookRequests => 'Request a book';
+
+  @override
+  String get settingsBookRequestsDesc =>
+      'Ask for a book that is not in the library';
 
   @override
   String get settingsMfaDesc =>

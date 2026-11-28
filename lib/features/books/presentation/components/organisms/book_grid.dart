@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../domain/entities/book.dart';
 
+/// A sliver grid of books; place it in a [CustomScrollView].
 class BookGrid extends StatelessWidget {
   final List<Book> books;
   final int columns;
@@ -19,8 +20,7 @@ class BookGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
+    return SliverMainAxisGroup(
       slivers: [
         SliverPadding(
           // Same side inset as the toolbar and the list rows.

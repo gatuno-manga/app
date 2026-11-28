@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../../presentation/branch_scroll_scope.dart';
 import '../../presentation/view_models/navigation_view_model.dart';
 import '../../../core/di/injection.dart';

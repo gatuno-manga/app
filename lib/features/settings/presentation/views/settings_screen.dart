@@ -88,7 +88,7 @@ class SettingsPage extends StatelessWidget {
         final user = state.user.isGuest ? null : state.user;
 
         return SettingsTemplate(
-          appBarTitle: Text(l10n.settingsTitle),
+          title: l10n.settingsTitle,
           profileCard: SettingsProfileCard(
             name: user?.displayName ?? l10n.commonGuest,
             email: user?.email.value,
@@ -101,6 +101,15 @@ class SettingsPage extends StatelessWidget {
               }
             },
           ),
+          bookRequestsTile: state.isAuthenticated
+              ? ListTile(
+                  title: Text(l10n.settingsBookRequests),
+                  subtitle: Text(l10n.settingsBookRequestsDesc),
+                  leading: const Icon(Icons.library_add_outlined),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.pushInTab('/requests'),
+                )
+              : null,
           generalSectionHeader: SettingsSectionHeader(
             title: l10n.settingsGeneralSection,
           ),

@@ -69,9 +69,9 @@ class _CertificatesPageState extends State<CertificatesPage> {
       initialData: _viewModel.state,
       builder: (context, snapshot) {
         final state = snapshot.data!;
-        
+
         return CertificatesTemplate(
-          title: Text(l10n.settingsCertificatesSection),
+          title: l10n.settingsCertificatesSection,
           tabs: [
             Tab(text: l10n.certTrustedTab),
             Tab(text: l10n.certIgnoredTab),
@@ -80,12 +80,14 @@ class _CertificatesPageState extends State<CertificatesPage> {
             CertificateList(
               certificates: state.trustedCertificates,
               emptyMessage: l10n.certEmptyTrusted,
-              onDelete: (fingerprint) => _viewModel.deleteCertificate(fingerprint),
+              onDelete: (fingerprint) =>
+                  _viewModel.deleteCertificate(fingerprint),
             ),
             CertificateList(
               certificates: state.ignoredCertificates,
               emptyMessage: l10n.certEmptyIgnored,
-              onDelete: (fingerprint) => _viewModel.deleteCertificate(fingerprint),
+              onDelete: (fingerprint) =>
+                  _viewModel.deleteCertificate(fingerprint),
             ),
           ],
           onAddPressed: () => CertificateAddDialog.show(

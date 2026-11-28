@@ -15,9 +15,22 @@ import 'package:gatuno/shared/components/atoms/app_load_more_footer.dart';
 import 'package:gatuno/shared/components/molecules/app_offline_empty_view.dart';
 import 'package:gatuno/shared/components/molecules/pagination.dart';
 import 'package:gatuno/features/books/presentation/components/molecules/books_offline_notice.dart';
+import 'package:gatuno/features/books/books_launch_intent.dart';
+import 'package:go_router/go_router.dart';
+import 'package:gatuno/core/di/injection.dart';
+import 'package:gatuno/l10n/app_localizations.dart';
+import 'package:gatuno/shared/components/atoms/app_avatar.dart';
+import 'package:gatuno/shared/components/molecules/app_profile_action.dart';
+import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
+import 'package:gatuno/features/users/data/models/user_model.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import '../../../../helpers/pump_app.dart';
+import '../../../../helpers/test_injection.dart';
 
 class MockBooksViewModel extends Mock implements BooksViewModel {}
 
@@ -27,11 +40,13 @@ void main() {
   setUpAll(() {
     registerFallbackValue(BookId('dummy'));
     registerFallbackValue(const BookPageOptions());
+    registerFallbackValue(SortOrder.asc);
   });
 
   late StreamController<BooksState> stateController;
 
-  setUp(() {
+  setUp(() async {
+    await initTestDI();
     mockViewModel = MockBooksViewModel();
 
     // Default mock behavior
@@ -464,4 +479,229 @@ void main() {
       verify(() => mockViewModel.refresh()).called(1);
     });
   });
+
+  group('launch intent', () {
+    late ValueNotifier<BooksLaunchIntent?> intent;
+
+    setUp(() {
+      intent = ValueNotifier(null);
+      when(() => mockViewModel.setSort(any(), any())).thenReturn(null);
+    });
+
+    tearDown(() => intent.dispose());
+
+    Widget host() => Provider<BooksViewModel>.value(
+      value: mockViewModel,
+      child: ValueListenableBuilder<BooksLaunchIntent?>(
+        valueListenable: intent,
+        builder: (_, value, _) => BooksPage(intent: value),
+      ),
+    );
+
+    bool searchHasFocus(WidgetTester tester) =>
+        tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus;
+
+    void unfocus() => FocusManager.instance.primaryFocus?.unfocus();
+
+    BooksLaunchIntent focus(int nonce) =>
+        BooksLaunchIntent(nonce: nonce, focusSearch: true);
+
+    BooksLaunchIntent sort(int nonce, [String by = 'updatedAt']) =>
+        BooksLaunchIntent(nonce: nonce, orderBy: by, order: SortOrder.desc);
+
+    testWidgets('a cold open with focus focuses the search field', (
+      tester,
+    ) async {
+      intent.value = focus(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('a cold open with a sort sorts without focusing', (
+      tester,
+    ) async {
+      intent.value = sort(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('updatedAt', SortOrder.desc),
+      ).called(1);
+      expect(searchHasFocus(tester), isFalse);
+    });
+
+    testWidgets('an open page applies a focus request that arrives later', (
+      tester,
+    ) async {
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      expect(searchHasFocus(tester), isFalse);
+
+      intent.value = focus(1);
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('an open page applies a sort request that arrives later', (
+      tester,
+    ) async {
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      verifyNever(() => mockViewModel.setSort(any(), any()));
+
+      intent.value = sort(1, 'createdAt');
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('createdAt', SortOrder.desc),
+      ).called(1);
+    });
+
+    testWidgets('the same link tapped again (new nonce) refocuses', (
+      tester,
+    ) async {
+      intent.value = focus(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      unfocus();
+      await tester.pump();
+      expect(searchHasFocus(tester), isFalse);
+
+      intent.value = focus(2);
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isTrue);
+    });
+
+    testWidgets('the same sort link tapped again sorts again', (tester) async {
+      intent.value = sort(1);
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+
+      intent.value = sort(2);
+      await tester.pumpAndSettle();
+
+      verify(
+        () => mockViewModel.setSort('updatedAt', SortOrder.desc),
+      ).called(2);
+    });
+
+    testWidgets('a rebuild with the same nonce does not apply it again', (
+      tester,
+    ) async {
+      intent.value = BooksLaunchIntent(
+        nonce: 1,
+        focusSearch: true,
+        orderBy: 'updatedAt',
+        order: SortOrder.desc,
+      );
+      await tester.pumpApp(host());
+      await tester.pumpAndSettle();
+      unfocus();
+      await tester.pump();
+
+      intent.value = BooksLaunchIntent(
+        nonce: 1,
+        focusSearch: true,
+        orderBy: 'updatedAt',
+        order: SortOrder.desc,
+      );
+      await tester.pumpAndSettle();
+
+      expect(searchHasFocus(tester), isFalse);
+      verify(() => mockViewModel.setSort(any(), any())).called(1);
+    });
+  });
+
+  group('profile action', () {
+    testWidgets('shows the guest icon and opens settings for a guest', (
+      tester,
+    ) async {
+      await tester.pumpApp(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<AppAvatar>(find.byType(AppAvatar)).guest, isTrue);
+      await tester.tap(find.byType(AppProfileAction));
+      await tester.pumpAndSettle();
+      expect(find.text('Settings Page'), findsOneWidget);
+    });
+
+    testWidgets('shows the photo and opens settings when signed in', (
+      tester,
+    ) async {
+      final navigation = MockNavigationViewModel();
+      await initTestDI(navigationViewModel: navigation);
+      when(
+        () => navigation.stateStream,
+      ).thenAnswer((_) => const Stream.empty());
+      when(() => navigation.state).thenReturn(
+        NavigationState(
+          user: UserModel(
+            id: const UserId('1'),
+            email: const UserEmail('maria@example.com'),
+            roles: const UserRoles(['user']),
+            maxWeightSensitiveContent: const SensitiveContentWeight(0),
+            profilePictureUrl: 'http://x/a.webp',
+          ),
+          isAuthenticated: true,
+        ),
+      );
+      await tester.pumpApp(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      final avatar = tester.widget<AppAvatar>(find.byType(AppAvatar));
+      expect(avatar.guest, isFalse);
+      expect(avatar.imageUrl, 'http://x/a.webp');
+      await tester.tap(find.byType(AppProfileAction));
+      await tester.pumpAndSettle();
+      expect(find.text('Settings Page'), findsOneWidget);
+    });
+  });
+
+  testWidgets(
+    'the router passes a repeated link to the open page, so it refocuses',
+    (tester) async {
+      when(() => mockViewModel.setSort(any(), any())).thenReturn(null);
+      final router = GoRouter(
+        initialLocation: '/books?focus=search&n=1',
+        routes: [
+          GoRoute(
+            path: '/books',
+            builder: (context, state) => Provider<BooksViewModel>.value(
+              value: mockViewModel,
+              child: BooksPage(intent: BooksLaunchIntent.fromUri(state.uri)),
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        Provider<NavigationViewModel>.value(
+          value: sl<NavigationViewModel>(),
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      bool focused() =>
+          tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus;
+      expect(focused(), isTrue);
+
+      for (var i = 0; i < 2; i++) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
+        expect(focused(), isFalse);
+        // Same link, new nonce: the page stays mounted and is told again.
+        tester.element(find.byType(BooksPage)).goToBooks(focusSearch: true);
+        await tester.pumpAndSettle();
+        expect(focused(), isTrue);
+        await tester.pump(const Duration(milliseconds: 2));
+      }
+    },
+  );
 }

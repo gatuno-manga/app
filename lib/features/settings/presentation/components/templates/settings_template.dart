@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/components/organisms/app_top_bar.dart';
+import '../../../../../shared/components/templates/app_top_bar_scaffold.dart';
+
 class SettingsTemplate extends StatelessWidget {
-  final Widget appBarTitle;
+  final String title;
   final Widget profileCard;
+
+  /// The 'Solicitar livro' row; null for guests.
+  final Widget? bookRequestsTile;
   final Widget generalSectionHeader;
   final Widget themePicker;
   final Widget sensitiveContentToggle;
@@ -22,8 +28,9 @@ class SettingsTemplate extends StatelessWidget {
 
   const SettingsTemplate({
     super.key,
-    required this.appBarTitle,
+    required this.title,
     required this.profileCard,
+    this.bookRequestsTile,
     required this.generalSectionHeader,
     required this.themePicker,
     required this.sensitiveContentToggle,
@@ -44,41 +51,46 @@ class SettingsTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: appBarTitle),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          profileCard,
-          const Divider(height: 32),
-          generalSectionHeader,
-          themePicker,
-          const SizedBox(height: 16),
-          sensitiveContentToggle,
-          appLockTile,
-          ?securityTile,
-          const Divider(height: 32),
-          readingSectionHeader,
-          readingControls,
-          const Divider(height: 32),
-          downloadsSectionHeader,
-          const SizedBox(height: 8),
-          downloadNetworkTile,
-          const Divider(height: 32),
-          apiSectionHeader,
-          const SizedBox(height: 8),
-          apiForm,
-          const Divider(height: 32),
-          certificatesSectionHeader,
-          const SizedBox(height: 8),
-          certificatesTile,
-          const Divider(height: 32),
-          diagnosticsSectionHeader,
-          const SizedBox(height: 8),
-          exportLogsTile,
-          openLogsTile,
-        ],
-      ),
+    return AppTopBarScaffold(
+      topBar: AppTopBar(title: title, showBack: true),
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              profileCard,
+              ?bookRequestsTile,
+              const Divider(height: 32),
+              generalSectionHeader,
+              themePicker,
+              const SizedBox(height: 16),
+              sensitiveContentToggle,
+              appLockTile,
+              ?securityTile,
+              const Divider(height: 32),
+              readingSectionHeader,
+              readingControls,
+              const Divider(height: 32),
+              downloadsSectionHeader,
+              const SizedBox(height: 8),
+              downloadNetworkTile,
+              const Divider(height: 32),
+              apiSectionHeader,
+              const SizedBox(height: 8),
+              apiForm,
+              const Divider(height: 32),
+              certificatesSectionHeader,
+              const SizedBox(height: 8),
+              certificatesTile,
+              const Divider(height: 32),
+              diagnosticsSectionHeader,
+              const SizedBox(height: 8),
+              exportLogsTile,
+              openLogsTile,
+            ]),
+          ),
+        ),
+      ],
     );
   }
 }

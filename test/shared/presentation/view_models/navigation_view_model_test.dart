@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
+import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
 import 'package:gatuno/shared/presentation/view_models/navigation_view_model.dart';
 import 'package:gatuno/features/users/domain/use_cases/user_service.dart';
 import 'package:gatuno/features/authentication/domain/use_cases/auth_service.dart';
 import 'package:gatuno/features/users/data/models/user_model.dart';
-import 'package:gatuno/features/users/domain/value_objects/user_id.dart';
-import 'package:gatuno/features/users/domain/value_objects/user_email.dart';
-import 'package:gatuno/features/users/domain/value_objects/user_roles.dart';
-import 'package:gatuno/features/users/domain/value_objects/sensitive_content_weight.dart';
 import 'package:gatuno/features/users/domain/value_objects/user_display_name.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:gatuno/core/connectivity/connectivity_service.dart';
@@ -24,6 +24,7 @@ void main() {
   late MockAuthService mockAuthService;
   late MockConnectivityService connectivity;
   late StreamController<ConnectivityStatus> statuses;
+  late StreamController<UserModel> profiles;
 
   setUp(() {
     connectivity = MockConnectivityService();
@@ -41,6 +42,10 @@ void main() {
     when(
       () => mockUserService.getCurrentUser(),
     ).thenAnswer((_) async => UserModel.guest);
+    profiles = StreamController<UserModel>.broadcast();
+    when(
+      () => mockUserService.profileStream,
+    ).thenAnswer((_) => profiles.stream);
 
     viewModel = NavigationViewModel(
       mockUserService,
@@ -49,9 +54,29 @@ void main() {
     );
   });
 
-  tearDown(() => statuses.close());
+  tearDown(() {
+    statuses.close();
+    profiles.close();
+  });
 
   group('NavigationViewModel', () {
+    test(
+      'follows profile changes (a new photo) from the user service',
+      () async {
+        final maria = UserModel(
+          id: const UserId('1'),
+          email: const UserEmail('maria@example.com'),
+          roles: const UserRoles(['user']),
+          maxWeightSensitiveContent: const SensitiveContentWeight(0),
+          profilePictureUrl: 'http://x/a',
+        );
+        profiles.add(maria);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(viewModel.state.user.profilePictureUrl, 'http://x/a');
+      },
+    );
+
     test('mirrors the connectivity status as isOffline', () async {
       expect(viewModel.state.isOffline, isFalse);
 
